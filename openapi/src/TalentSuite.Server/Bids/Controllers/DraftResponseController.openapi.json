@@ -1,0 +1,431 @@
+{
+  "components": {
+    "schemas": {
+      "AddDraftCommentRequest": {
+        "properties": {
+          "AuthorName": {
+            "type": "string"
+          },
+          "Comment": {
+            "type": "string"
+          },
+          "EndIndex": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "MentionedUserIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "SelectedText": {
+            "type": "string"
+          },
+          "StartIndex": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "UserId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Comment"
+        ],
+        "type": "object"
+      },
+      "DraftRequest": {
+        "properties": {
+          "Response": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Response"
+        ],
+        "type": "object"
+      },
+      "SetCommentCompletionRequest": {
+        "properties": {
+          "IsComplete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "IsComplete"
+        ],
+        "type": "object"
+      },
+      "UpdateDraftRequest": {
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Response": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Id",
+          "Response"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Draft Response API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/bids/{bidId}/questions/{questionId}/drafts": {
+      "delete": {
+        "operationId": "RemoveResponse",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "responseId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Draft response removed successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or model state"
+          }
+        },
+        "summary": "Remove a draft response"
+      },
+      "get": {
+        "operationId": "GetAllResponses",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "List of draft responses"
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or model state"
+          }
+        },
+        "summary": "Get all draft responses"
+      },
+      "post": {
+        "operationId": "AddResponse",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Draft response added successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or model state"
+          }
+        },
+        "summary": "Add a new draft response"
+      }
+    },
+    "/api/bids/{bidId}/questions/{questionId}/drafts/{draftId}": {
+      "put": {
+        "operationId": "UpdateResponse",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "draftId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Draft response updated successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or model state"
+          }
+        },
+        "summary": "Update a draft response"
+      }
+    },
+    "/api/bids/{bidId}/questions/{questionId}/drafts/{draftId}/comments": {
+      "get": {
+        "operationId": "GetComments",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "draftId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "object"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "List of comments on the draft"
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or model state"
+          }
+        },
+        "summary": "Get all comments on a draft"
+      },
+      "post": {
+        "operationId": "AddComment",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "draftId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDraftCommentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Comment added successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or model state"
+          }
+        },
+        "summary": "Add a comment to a draft"
+      }
+    },
+    "/api/bids/{bidId}/questions/{questionId}/drafts/{draftId}/comments/{commentId}": {
+      "patch": {
+        "operationId": "SetCommentCompletion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "draftId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "commentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCommentCompletionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "description": "Comment completion status updated successfully"
+          },
+          "400": {
+            "description": "Bad Request - Invalid input or model state"
+          }
+        },
+        "summary": "Set comment completion status"
+      }
+    }
+  }
+}

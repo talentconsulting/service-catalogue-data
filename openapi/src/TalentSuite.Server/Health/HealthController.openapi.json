@@ -1,0 +1,86 @@
+{
+  "components": {
+    "schemas": {
+      "HealthCheckResult": {
+        "properties": {
+          "Description": {
+            "description": "Description providing additional details about the health check.",
+            "type": "string"
+          },
+          "Name": {
+            "description": "The name of the health check.",
+            "type": "string"
+          },
+          "Success": {
+            "description": "Indicates whether the health check was successful.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Name",
+          "Success",
+          "Description"
+        ],
+        "type": "object"
+      },
+      "HealthResponse": {
+        "properties": {
+          "Checks": {
+            "description": "Collection of individual health check results.",
+            "items": {
+              "$ref": "#/components/schemas/HealthCheckResult"
+            },
+            "type": "array"
+          },
+          "Success": {
+            "description": "Indicates whether the application is healthy.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Success",
+          "Checks"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Health API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Health check results. Application is healthy."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Health check results. Application is unhealthy."
+          }
+        },
+        "summary": "Retrieve the health check results of the application.",
+        "tags": [
+          "Health"
+        ]
+      }
+    }
+  }
+}

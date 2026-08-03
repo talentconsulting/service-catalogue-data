@@ -1,0 +1,402 @@
+{
+  "components": {
+    "schemas": {
+      "AddDraftCommentRequest": {
+        "properties": {
+          "AuthorName": {
+            "type": "string"
+          },
+          "Comment": {
+            "type": "string"
+          },
+          "EndIndex": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "MentionedUserIds": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "SelectedText": {
+            "type": "string"
+          },
+          "StartIndex": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "UserId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Comment",
+          "UserId",
+          "AuthorName"
+        ],
+        "type": "object"
+      },
+      "DraftCommentResponse": {
+        "properties": {
+          "AuthorName": {
+            "type": "string"
+          },
+          "Comment": {
+            "type": "string"
+          },
+          "CreatedAtUtc": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "EndIndex": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "Id": {
+            "type": "string"
+          },
+          "IsComplete": {
+            "type": "boolean"
+          },
+          "SelectedText": {
+            "type": "string"
+          },
+          "StartIndex": {
+            "nullable": true,
+            "type": "integer"
+          },
+          "UserId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Id",
+          "Comment",
+          "IsComplete",
+          "UserId",
+          "AuthorName",
+          "CreatedAtUtc"
+        ],
+        "type": "object"
+      },
+      "RedReviewResponse": {
+        "properties": {
+          "Comments": {
+            "items": {
+              "$ref": "#/components/schemas/DraftCommentResponse"
+            },
+            "type": "array"
+          },
+          "QuestionId": {
+            "type": "string"
+          },
+          "ResultText": {
+            "type": "string"
+          },
+          "Reviewers": {
+            "items": {
+              "$ref": "#/components/schemas/RedReviewReviewerResponse"
+            },
+            "type": "array"
+          },
+          "State": {
+            "$ref": "#/components/schemas/RedReviewState"
+          }
+        },
+        "required": [
+          "QuestionId",
+          "ResultText",
+          "State",
+          "Reviewers",
+          "Comments"
+        ],
+        "type": "object"
+      },
+      "RedReviewReviewerResponse": {
+        "properties": {
+          "State": {
+            "$ref": "#/components/schemas/RedReviewState"
+          },
+          "UserId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "UserId",
+          "State"
+        ],
+        "type": "object"
+      },
+      "RedReviewState": {
+        "enum": [
+          "Pending",
+          "ChangesRequested",
+          "Complete"
+        ],
+        "type": "string"
+      },
+      "SetCommentCompletionRequest": {
+        "properties": {
+          "IsComplete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "IsComplete"
+        ],
+        "type": "object"
+      },
+      "UpdateRedReviewRequest": {
+        "properties": {
+          "ResultText": {
+            "type": "string"
+          },
+          "Reviewers": {
+            "items": {
+              "$ref": "#/components/schemas/RedReviewReviewerResponse"
+            },
+            "type": "array"
+          },
+          "State": {
+            "$ref": "#/components/schemas/RedReviewState"
+          }
+        },
+        "required": [
+          "ResultText",
+          "State",
+          "Reviewers"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "RequireBidAccess": {
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "Red Review API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/bids/{bidId}/questions/{questionId}/red-review": {
+      "get": {
+        "operationId": "GetRedReview",
+        "parameters": [
+          {
+            "description": "The ID of the bid.",
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the question.",
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RedReviewResponse"
+                }
+              }
+            },
+            "description": "The red review details."
+          },
+          "404": {
+            "description": "Red review not found."
+          }
+        },
+        "security": [
+          {
+            "RequireBidAccess": []
+          }
+        ],
+        "summary": "Get red review"
+      },
+      "put": {
+        "operationId": "UpdateRedReview",
+        "parameters": [
+          {
+            "description": "The ID of the bid.",
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the question.",
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRedReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "The red review was successfully updated."
+          },
+          "400": {
+            "description": "Invalid request body."
+          }
+        },
+        "security": [
+          {
+            "RequireBidAccess": []
+          }
+        ],
+        "summary": "Update red review"
+      }
+    },
+    "/api/bids/{bidId}/questions/{questionId}/red-review/comments": {
+      "post": {
+        "operationId": "AddRedReviewComment",
+        "parameters": [
+          {
+            "description": "The ID of the bid.",
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the question.",
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDraftCommentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftCommentResponse"
+                }
+              }
+            },
+            "description": "Operation successful. Returns the created comment."
+          },
+          "400": {
+            "description": "Invalid request body or comment is empty."
+          }
+        },
+        "security": [
+          {
+            "RequireBidAccess": []
+          }
+        ],
+        "summary": "Add a red review comment"
+      }
+    },
+    "/api/bids/{bidId}/questions/{questionId}/red-review/comments/{commentId}": {
+      "patch": {
+        "operationId": "SetCommentCompletion",
+        "parameters": [
+          {
+            "description": "The ID of the bid.",
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the question.",
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The ID of the comment.",
+            "in": "path",
+            "name": "commentId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCommentCompletionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftCommentResponse"
+                }
+              }
+            },
+            "description": "The comment's completion status has been successfully updated."
+          },
+          "400": {
+            "description": "Invalid input or commentId is missing."
+          }
+        },
+        "security": [
+          {
+            "RequireBidAccess": []
+          }
+        ],
+        "summary": "Set comment completion"
+      }
+    }
+  }
+}

@@ -1,0 +1,366 @@
+{
+  "components": {
+    "schemas": {
+      "BidStage": {
+        "description": "The stage of the bid document.",
+        "enum": [
+          "Stage1",
+          "Stage2"
+        ],
+        "type": "string"
+      },
+      "DocumentIngestionJobCreatedResponse": {
+        "properties": {
+          "JobId": {
+            "description": "The ID of the ingestion job.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "JobId"
+        ],
+        "type": "object"
+      },
+      "DocumentIngestionJobStatusResponse": {
+        "properties": {
+          "CompletedAtUtc": {
+            "description": "Timestamp when the job was completed (if applicable).",
+            "format": "date-time",
+            "type": "string"
+          },
+          "CreatedAtUtc": {
+            "description": "Timestamp when the job was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "FileName": {
+            "description": "The name of the uploaded file.",
+            "type": "string"
+          },
+          "IsComplete": {
+            "description": "Indicates if the job is complete.",
+            "type": "boolean"
+          },
+          "IsError": {
+            "description": "Indicates if there was an error.",
+            "type": "boolean"
+          },
+          "JobId": {
+            "description": "The ID of the ingestion job.",
+            "type": "string"
+          },
+          "Message": {
+            "description": "Any additional message or details about the job.",
+            "type": "string"
+          },
+          "Result": {
+            "$ref": "#/components/schemas/ParsedDocumentResponse"
+          },
+          "Stage": {
+            "$ref": "#/components/schemas/BidStage"
+          },
+          "Status": {
+            "description": "The status of the ingestion job.",
+            "type": "string"
+          },
+          "UpdatedAtUtc": {
+            "description": "Timestamp when the job was last updated.",
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "JobId",
+          "FileName",
+          "Stage",
+          "Status",
+          "IsComplete",
+          "IsError",
+          "CreatedAtUtc",
+          "UpdatedAtUtc"
+        ],
+        "type": "object"
+      },
+      "ParsedDocumentResponse": {
+        "properties": {
+          "Budget": {
+            "type": "string"
+          },
+          "Company": {
+            "type": "string"
+          },
+          "DeadlineForQualifying": {
+            "type": "string"
+          },
+          "DeadlineForSubmission": {
+            "type": "string"
+          },
+          "KeyInformation": {
+            "type": "string"
+          },
+          "LengthOfContract": {
+            "type": "string"
+          },
+          "Questions": {
+            "items": {
+              "$ref": "#/components/schemas/ParsedQuestionResponse"
+            },
+            "type": "array"
+          },
+          "Summary": {
+            "type": "string"
+          },
+          "UniqueReference": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Questions"
+        ],
+        "type": "object"
+      },
+      "ParsedQuestionResponse": {
+        "properties": {
+          "Category": {
+            "type": "string"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "Length": {
+            "type": "string"
+          },
+          "NiceToHave": {
+            "type": "boolean"
+          },
+          "Number": {
+            "type": "string"
+          },
+          "QuestionOrderIndex": {
+            "type": "integer"
+          },
+          "Required": {
+            "type": "boolean"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Weighting": {
+            "description": "The weight of this question (0-100).",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "QuestionOrderIndex",
+          "Category",
+          "Number",
+          "Title",
+          "Description",
+          "Length",
+          "Weighting",
+          "Required",
+          "NiceToHave"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Bid Document Management API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/document": {
+      "post": {
+        "description": "Uploads and parses a bid document.",
+        "operationId": "ingestBidDocument",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "description": "The bid document file to upload.",
+                    "format": "binary",
+                    "type": "string"
+                  },
+                  "stage": {
+                    "$ref": "#/components/schemas/BidStage"
+                  }
+                },
+                "required": [
+                  "file",
+                  "stage"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParsedDocumentResponse"
+                }
+              }
+            },
+            "description": "Bid document successfully parsed."
+          },
+          "400": {
+            "description": "Bad request. Missing or invalid file."
+          }
+        },
+        "summary": "Ingest a bid document",
+        "x-codegen-requestBodyName": "file"
+      }
+    },
+    "/api/document/jobs": {
+      "get": {
+        "description": "Retrieves a list of document ingestion jobs.",
+        "operationId": "listDocumentIngestionJobs",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentIngestionJobStatusResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "List of ingestion jobs."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "summary": "List ingestion jobs"
+      },
+      "post": {
+        "description": "Initiates an asynchronous job to ingest and process a bid document.",
+        "operationId": "startDocumentIngestionJob",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "description": "The bid document file to upload.",
+                    "format": "binary",
+                    "type": "string"
+                  },
+                  "stage": {
+                    "$ref": "#/components/schemas/BidStage"
+                  }
+                },
+                "required": [
+                  "file",
+                  "stage"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentIngestionJobCreatedResponse"
+                }
+              }
+            },
+            "description": "Document ingestion job accepted."
+          },
+          "400": {
+            "description": "Bad request. Missing or invalid file."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "summary": "Start a document ingestion job",
+        "x-codegen-requestBodyName": "file"
+      }
+    },
+    "/api/document/jobs/{jobId}": {
+      "get": {
+        "description": "Retrieves the details of a specific document ingestion job.",
+        "operationId": "getDocumentIngestionJob",
+        "parameters": [
+          {
+            "description": "The ID of the ingestion job.",
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentIngestionJobStatusResponse"
+                }
+              }
+            },
+            "description": "Details of the ingestion job."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Ingestion job not found."
+          }
+        },
+        "summary": "Get ingestion job details"
+      }
+    },
+    "/api/document/jobs/{jobId}/stream": {
+      "get": {
+        "description": "Streams updates for a specific ingestion job.",
+        "operationId": "streamDocumentIngestionJobUpdates",
+        "parameters": [
+          {
+            "description": "The ID of the ingestion job.",
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Streaming job updates."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Ingestion job not found."
+          }
+        },
+        "summary": "Stream ingestion job updates"
+      }
+    }
+  }
+}

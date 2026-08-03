@@ -1,0 +1,166 @@
+{
+  "components": {
+    "schemas": {
+      "BidUserResponse": {
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Id",
+          "Name"
+        ],
+        "type": "object"
+      },
+      "UserAssignmentRequest": {
+        "properties": {
+          "UserId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "UserId"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "RequireBidAccess": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "RequireBidManagementRole": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Bid User Management API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/bids/{bidId}/users": {
+      "delete": {
+        "operationId": "RemoveBidUser",
+        "parameters": [
+          {
+            "description": "Unique identifier of the bid.",
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignmentRequest"
+              }
+            }
+          },
+          "description": "Details of the user to be removed from the bid.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully removed from the bid."
+          },
+          "400": {
+            "description": "Invalid request body or parameters."
+          }
+        },
+        "security": [
+          {
+            "RequireBidManagementRole": []
+          }
+        ],
+        "summary": "Remove Bid User"
+      },
+      "get": {
+        "operationId": "GetBidUsers",
+        "parameters": [
+          {
+            "description": "Unique identifier of the bid.",
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BidUserResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "A list of users assigned to the bid."
+          }
+        },
+        "security": [
+          {
+            "RequireBidAccess": []
+          }
+        ],
+        "summary": "Get Bid Users"
+      },
+      "post": {
+        "operationId": "AddBidUser",
+        "parameters": [
+          {
+            "description": "Unique identifier of the bid.",
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignmentRequest"
+              }
+            }
+          },
+          "description": "Details of the user to be assigned to the bid.",
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully assigned to the bid."
+          },
+          "400": {
+            "description": "Invalid request body or parameters."
+          }
+        },
+        "security": [
+          {
+            "RequireBidManagementRole": []
+          }
+        ],
+        "summary": "Add Bid User"
+      }
+    }
+  }
+}
