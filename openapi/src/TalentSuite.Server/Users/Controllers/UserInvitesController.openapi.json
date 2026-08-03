@@ -1,0 +1,287 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "UserInvitesController API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/users/me": {
+      "get": {
+        "summary": "Get current user profile",
+        "tags": [
+          "UserInvites"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with current user profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserProfileResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Current user is not linked to an internal user profile"
+          }
+        }
+      }
+    },
+    "/api/users/me-identity-debug": {
+      "get": {
+        "summary": "Get current identity debug information",
+        "tags": [
+          "UserInvites"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with identity debug information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me-authorisation": {
+      "get": {
+        "summary": "Get current user authorization",
+        "tags": [
+          "UserInvites"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with authorization details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/accept-invite": {
+      "post": {
+        "summary": "Accept a user invitation",
+        "tags": [
+          "UserInvites"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInviteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invite accepted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request or invite acceptance failed"
+          },
+          "401": {
+            "description": "Identity subject claim was not found"
+          }
+        }
+      }
+    },
+    "/api/users/accept-invite/validate": {
+      "get": {
+        "summary": "Validate invitation token",
+        "tags": [
+          "UserInvites"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token to validate"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation response for the invitation token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteValidationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/accept-invite/register": {
+      "post": {
+        "summary": "Register from an invitation",
+        "tags": [
+          "UserInvites"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterInviteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Registration successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request or registration failed"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "HasAcceptedRegistration": {
+            "type": "boolean"
+          },
+          "IdentityProvider": {
+            "type": "string"
+          },
+          "IdentitySubject": {
+            "type": "string"
+          },
+          "IdentityUsername": {
+            "type": "string"
+          },
+          "InvitationToken": {
+            "type": "string"
+          },
+          "InvitationExpiresAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AcceptInviteRequest": {
+        "type": "object",
+        "properties": {
+          "InvitationToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "InvitationToken"
+        ]
+      },
+      "RegisterInviteRequest": {
+        "type": "object",
+        "properties": {
+          "InvitationToken": {
+            "type": "string"
+          },
+          "Username": {
+            "type": "string"
+          },
+          "Password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "InvitationToken",
+          "Username",
+          "Password"
+        ]
+      },
+      "InviteValidationResponse": {
+        "type": "object",
+        "properties": {
+          "Status": {
+            "type": "string"
+          }
+        }
+      },
+      "CurrentUserProfileResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "HasAcceptedRegistration": {
+            "type": "boolean"
+          },
+          "IdentityProvider": {
+            "type": "string"
+          },
+          "IdentitySubject": {
+            "type": "string"
+          },
+          "IdentityUsername": {
+            "type": "string"
+          }
+        }
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "Admin",
+          "BidManager",
+          "User"
+        ]
+      }
+    }
+  }
+}

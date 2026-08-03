@@ -1,0 +1,167 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Bid User Management API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/bids/{bidId}/users": {
+      "get": {
+        "summary": "Get users assigned to a bid",
+        "description": "Retrieve a list of users assigned to the specified bid.",
+        "operationId": "getBidUsers",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the bid."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BidUserResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "RequireBidAccess": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Assign a user to a bid",
+        "description": "Assign a new user to the specified bid.",
+        "operationId": "addBidUser",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the bid."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User assigned successfully."
+          },
+          "400": {
+            "description": "Invalid request."
+          }
+        },
+        "security": [
+          {
+            "RequireBidManagementRole": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Remove a user from a bid",
+        "description": "Remove an assigned user from the specified bid.",
+        "operationId": "removeBidUser",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the bid."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User removed successfully."
+          },
+          "400": {
+            "description": "Invalid request."
+          }
+        },
+        "security": [
+          {
+            "RequireBidManagementRole": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserAssignmentRequest": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "UserId"
+        ]
+      },
+      "BidUserResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Id",
+          "Name"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "RequireBidAccess": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Access required to interact with bids."
+      },
+      "RequireBidManagementRole": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Role required for bid management."
+      }
+    }
+  }
+}

@@ -1,0 +1,625 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TalentSuite BidManager API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/runtime/auth": {
+      "get": {
+        "operationId": "GetRuntimeAuth",
+        "summary": "Retrieve runtime authentication information.",
+        "responses": {
+          "200": {
+            "description": "Successful response containing runtime authentication data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeAuthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/accept-invite/validate": {
+      "get": {
+        "operationId": "ValidateInviteToken",
+        "summary": "Validate an invitation token.",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteValidationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/accept-invite": {
+      "post": {
+        "operationId": "AcceptInvitation",
+        "summary": "Accept an invitation using a token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInviteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Invitation successfully accepted."
+          }
+        }
+      }
+    },
+    "/api/users/accept-invite/register": {
+      "post": {
+        "operationId": "RegisterInvite",
+        "summary": "Register user using invitation token.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterInviteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Registration successful."
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "operationId": "GetCurrentUserProfile",
+        "summary": "Retrieve the profile of the current user.",
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserProfileResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found."
+          }
+        }
+      }
+    },
+    "/api/users/me-identity-debug": {
+      "get": {
+        "operationId": "DebugIdentity",
+        "summary": "Debug user's identity.",
+        "responses": {
+          "200": {
+            "description": "Identity debug information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me-authorisation": {
+      "get": {
+        "operationId": "GetUserAuthorization",
+        "summary": "Retrieve authorization of the current user.",
+        "responses": {
+          "200": {
+            "description": "User authorization retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserAuthorisationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/bids/{bidId}": {
+      "get": {
+        "operationId": "GetBid",
+        "summary": "Retrieve bid details.",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bid details retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BidManageModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RuntimeAuthResponse": {
+        "type": "object",
+        "properties": {
+          "KeycloakAuthority": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "InviteValidationResponse": {
+        "type": "object",
+        "properties": {
+          "Status": {
+            "type": "string"
+          }
+        }
+      },
+      "AcceptInviteRequest": {
+        "type": "object",
+        "properties": {
+          "InvitationToken": {
+            "type": "string"
+          }
+        }
+      },
+      "RegisterInviteRequest": {
+        "type": "object",
+        "properties": {
+          "InvitationToken": {
+            "type": "string"
+          },
+          "Username": {
+            "type": "string"
+          },
+          "Password": {
+            "type": "string"
+          }
+        }
+      },
+      "CurrentUserProfileResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "HasAcceptedRegistration": {
+            "type": "boolean"
+          },
+          "IdentityProvider": {
+            "type": "string"
+          },
+          "IdentitySubject": {
+            "type": "string"
+          },
+          "IdentityUsername": {
+            "type": "string"
+          }
+        }
+      },
+      "CurrentUserAuthorisationResponse": {
+        "type": "object",
+        "properties": {
+          "IsAdmin": {
+            "type": "boolean"
+          },
+          "IsBidManager": {
+            "type": "boolean"
+          },
+          "CanManageAssignedBids": {
+            "type": "boolean"
+          },
+          "Roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BidManageModel": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "UniqueReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "Company": {
+            "type": "string"
+          },
+          "Summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "KeyInformation": {
+            "type": "string",
+            "nullable": true
+          },
+          "Budget": {
+            "type": "string",
+            "nullable": true
+          },
+          "DeadlineForSubmission": {
+            "type": "string",
+            "nullable": true
+          },
+          "DeadlineForQualifying": {
+            "type": "string",
+            "nullable": true
+          },
+          "LengthOfContract": {
+            "type": "string",
+            "nullable": true
+          },
+          "Stage": {
+            "$ref": "#/components/schemas/BidStage"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/BidStatus"
+          },
+          "BidLibraryPush": {
+            "$ref": "#/components/schemas/BidLibraryPushResponse",
+            "nullable": true
+          },
+          "Questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BidQuestionModel"
+            }
+          }
+        }
+      },
+      "BidStage": {
+        "type": "string",
+        "enum": [
+          "Stage1",
+          "Stage2"
+        ]
+      },
+      "BidStatus": {
+        "type": "string",
+        "enum": [
+          "Underway",
+          "Cancelled",
+          "Submitted",
+          "Won",
+          "Lost"
+        ]
+      },
+      "BidLibraryPushResponse": {
+        "type": "object",
+        "properties": {
+          "BidId": {
+            "type": "string"
+          },
+          "PerformedByUserId": {
+            "type": "string"
+          },
+          "PerformedByName": {
+            "type": "string"
+          },
+          "PushedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BidQuestionModel": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "QuestionOrderIndex": {
+            "type": "integer"
+          },
+          "Number": {
+            "type": "string"
+          },
+          "Category": {
+            "type": "string",
+            "nullable": true
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "Length": {
+            "type": "string"
+          },
+          "Weighting": {
+            "type": "integer"
+          },
+          "Required": {
+            "type": "boolean"
+          },
+          "NiceToHave": {
+            "type": "boolean"
+          },
+          "QuestionAssignments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionAssignmentResponse"
+            }
+          },
+          "ChatResponse": {
+            "type": "string"
+          },
+          "ChatThreadId": {
+            "type": "string",
+            "nullable": true
+          },
+          "ChatMessages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatMessageResponse"
+            }
+          },
+          "IsChatHistoryLoaded": {
+            "type": "boolean"
+          },
+          "IsChatStreaming": {
+            "type": "boolean"
+          },
+          "FinalAnswer": {
+            "type": "string",
+            "nullable": true
+          },
+          "ReadyForSubmission": {
+            "type": "boolean"
+          },
+          "FinalAnswerComments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DraftCommentResponse"
+            }
+          },
+          "RedReviewAnswer": {
+            "type": "string",
+            "nullable": true
+          },
+          "RedReviewState": {
+            "$ref": "#/components/schemas/RedReviewState"
+          },
+          "RedReviewReviewers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RedReviewReviewerResponse"
+            }
+          },
+          "RedReviewComments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DraftCommentResponse"
+            }
+          },
+          "IsRedReviewLoaded": {
+            "type": "boolean"
+          },
+          "DraftResponses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DraftResponse"
+            }
+          }
+        }
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "Admin",
+          "BidManager",
+          "User"
+        ]
+      },
+      "ChatMessageResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Role": {
+            "type": "string"
+          },
+          "Content": {
+            "type": "string"
+          },
+          "CreatedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatSourceReferenceResponse"
+            }
+          },
+          "UsedSourcesOutsideBidLibrary": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ChatSourceReferenceResponse": {
+        "type": "object",
+        "properties": {
+          "Kind": {
+            "type": "string"
+          },
+          "FileId": {
+            "type": "string",
+            "nullable": true
+          },
+          "FileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true
+          },
+          "Title": {
+            "type": "string",
+            "nullable": true
+          },
+          "Quote": {
+            "type": "string",
+            "nullable": true
+          },
+          "IsFromBidLibrary": {
+            "type": "boolean"
+          }
+        }
+      },
+      "QuestionAssignmentResponse": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/QuestionUserRole"
+          }
+        }
+      },
+      "QuestionUserRole": {
+        "type": "string",
+        "enum": [
+          "Owner",
+          "Reviewer",
+          "Support"
+        ]
+      },
+      "DraftCommentResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Comment": {
+            "type": "string"
+          },
+          "IsComplete": {
+            "type": "boolean"
+          },
+          "UserId": {
+            "type": "string"
+          },
+          "AuthorName": {
+            "type": "string"
+          },
+          "CreatedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "StartIndex": {
+            "type": "integer",
+            "nullable": true
+          },
+          "EndIndex": {
+            "type": "integer",
+            "nullable": true
+          },
+          "SelectedText": {
+            "type": "string"
+          }
+        }
+      },
+      "RedReviewState": {
+        "type": "string",
+        "enum": [
+          "Pending",
+          "ChangesRequested",
+          "Complete"
+        ]
+      },
+      "RedReviewReviewerResponse": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          },
+          "State": {
+            "$ref": "#/components/schemas/RedReviewState"
+          }
+        }
+      },
+      "DraftResponse": {
+        "type": "object",
+        "properties": {
+          "Response": {
+            "type": "string"
+          },
+          "Id": {
+            "type": "string"
+          },
+          "Comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DraftCommentResponse"
+            }
+          }
+        }
+      }
+    }
+  }
+}

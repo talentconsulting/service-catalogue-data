@@ -1,0 +1,271 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Chat Question API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/ai/questions/{questionId}": {
+      "post": {
+        "summary": "Ask a question to the AI",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatQuestionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with AI-generated answer and metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatQuestionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to missing or invalid parameters."
+          },
+          "403": {
+            "description": "Forbidden due to insufficient authorization."
+          },
+          "500": {
+            "description": "Unexpected server error."
+          }
+        }
+      }
+    },
+    "/api/ai/questions/{questionId}/messages": {
+      "get": {
+        "summary": "Retrieve chat messages for a question",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bidId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the bid to retrieve messages for."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of chat messages.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatMessageResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to missing or invalid parameters."
+          },
+          "403": {
+            "description": "Forbidden due to insufficient authorization."
+          }
+        }
+      }
+    },
+    "/api/ai/questions/{questionId}/stream": {
+      "post": {
+        "summary": "Stream responses to a chat question",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatQuestionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stream chat responses via newline-delimited JSON (NDJSON)."
+          },
+          "400": {
+            "description": "Bad request due to missing or invalid parameters."
+          },
+          "403": {
+            "description": "Forbidden due to insufficient authorization."
+          },
+          "401": {
+            "description": "Unauthorized due to missing user identity."
+          },
+          "500": {
+            "description": "Unexpected server error."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChatQuestionRequest": {
+        "type": "object",
+        "properties": {
+          "BidId": {
+            "type": "string"
+          },
+          "QuestionId": {
+            "type": "string"
+          },
+          "FreeTextQuestion": {
+            "type": "string"
+          },
+          "ThreadId": {
+            "type": "string",
+            "nullable": true
+          },
+          "BidFileIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "BidId",
+          "QuestionId",
+          "FreeTextQuestion"
+        ]
+      },
+      "ChatMessageResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Role": {
+            "type": "string"
+          },
+          "Content": {
+            "type": "string"
+          },
+          "CreatedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatSourceReferenceResponse"
+            }
+          },
+          "UsedSourcesOutsideBidLibrary": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Id",
+          "Role",
+          "Content",
+          "CreatedAtUtc",
+          "Sources",
+          "UsedSourcesOutsideBidLibrary"
+        ]
+      },
+      "ChatSourceReferenceResponse": {
+        "type": "object",
+        "properties": {
+          "Kind": {
+            "type": "string"
+          },
+          "FileId": {
+            "type": "string",
+            "nullable": true
+          },
+          "FileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true
+          },
+          "Title": {
+            "type": "string",
+            "nullable": true
+          },
+          "Quote": {
+            "type": "string",
+            "nullable": true
+          },
+          "IsFromBidLibrary": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Kind",
+          "IsFromBidLibrary"
+        ]
+      },
+      "ChatQuestionResponse": {
+        "type": "object",
+        "properties": {
+          "Response": {
+            "type": "string"
+          },
+          "ThreadId": {
+            "type": "string"
+          },
+          "Sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatSourceReferenceResponse"
+            }
+          },
+          "UsedSourcesOutsideBidLibrary": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Response",
+          "ThreadId",
+          "Sources",
+          "UsedSourcesOutsideBidLibrary"
+        ]
+      }
+    }
+  }
+}

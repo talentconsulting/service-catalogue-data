@@ -1,0 +1,362 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TalentSuite Bid Manager API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/bids/{bidId}/questions/{questionId}/final-answer": {
+      "get": {
+        "summary": "Get the final answer for a question in a bid",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Final answer retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinalAnswerResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Final answer not found"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update the final answer for a question in a bid",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFinalAnswerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Final answer updated successfully"
+          },
+          "400": {
+            "description": "Invalid request body"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/api/bids/{bidId}/questions/{questionId}/final-answer/comments": {
+      "post": {
+        "summary": "Add a new comment to the final answer for a question in a bid",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDraftCommentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Comment added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftCommentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    },
+    "/api/bids/{bidId}/questions/{questionId}/final-answer/comments/{commentId}": {
+      "patch": {
+        "summary": "Update the completion status of a comment for the final answer",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "commentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCommentCompletionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Comment completion status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DraftCommentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body or missing comment id"
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "FinalAnswerResponse": {
+        "type": "object",
+        "properties": {
+          "QuestionId": {
+            "type": "string"
+          },
+          "AnswerText": {
+            "type": "string"
+          },
+          "ReadyForSubmission": {
+            "type": "boolean"
+          },
+          "Comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DraftCommentResponse"
+            }
+          }
+        },
+        "required": [
+          "QuestionId",
+          "AnswerText",
+          "ReadyForSubmission",
+          "Comments"
+        ]
+      },
+      "UpdateFinalAnswerRequest": {
+        "type": "object",
+        "properties": {
+          "AnswerText": {
+            "type": "string"
+          },
+          "ReadyForSubmission": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "AnswerText",
+          "ReadyForSubmission"
+        ]
+      },
+      "AddDraftCommentRequest": {
+        "type": "object",
+        "properties": {
+          "Comment": {
+            "type": "string"
+          },
+          "UserId": {
+            "type": "string"
+          },
+          "AuthorName": {
+            "type": "string"
+          },
+          "MentionedUserIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "StartIndex": {
+            "type": "integer",
+            "nullable": true
+          },
+          "EndIndex": {
+            "type": "integer",
+            "nullable": true
+          },
+          "SelectedText": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Comment",
+          "UserId",
+          "AuthorName",
+          "MentionedUserIds",
+          "SelectedText"
+        ]
+      },
+      "DraftCommentResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Comment": {
+            "type": "string"
+          },
+          "IsComplete": {
+            "type": "boolean"
+          },
+          "UserId": {
+            "type": "string"
+          },
+          "AuthorName": {
+            "type": "string"
+          },
+          "CreatedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "StartIndex": {
+            "type": "integer",
+            "nullable": true
+          },
+          "EndIndex": {
+            "type": "integer",
+            "nullable": true
+          },
+          "SelectedText": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Id",
+          "Comment",
+          "IsComplete",
+          "UserId",
+          "AuthorName",
+          "CreatedAtUtc",
+          "SelectedText"
+        ]
+      },
+      "SetCommentCompletionRequest": {
+        "type": "object",
+        "properties": {
+          "IsComplete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "IsComplete"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "tokenUrl": "https://example.com/oauth/token",
+            "scopes": {
+              "RequireBidAccess": "Access to bid-related endpoints"
+            }
+          }
+        }
+      }
+    }
+  }
+}

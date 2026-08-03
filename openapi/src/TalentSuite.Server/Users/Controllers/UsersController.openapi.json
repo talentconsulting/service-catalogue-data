@@ -1,0 +1,337 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TalentSuite BidManager Users API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/users": {
+      "get": {
+        "summary": "Get all users",
+        "operationId": "GetUsers",
+        "security": [
+          {
+            "Authorize": [
+              "RequireBidManagerOrAdminRole"
+            ]
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new user",
+        "operationId": "AddUser",
+        "security": [
+          {
+            "Authorize": [
+              "RequireAdminRole"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successfully created user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request data"
+          }
+        }
+      }
+    },
+    "/api/users/{userId}": {
+      "get": {
+        "summary": "Get user by ID",
+        "operationId": "GetUser",
+        "security": [
+          {
+            "Authorize": [
+              "RequireAdminRole"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update user by ID",
+        "operationId": "UpdateUser",
+        "security": [
+          {
+            "Authorize": [
+              "RequireAdminRole"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successfully updated user"
+          },
+          "400": {
+            "description": "Invalid request data"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete user by ID",
+        "operationId": "DeleteUser",
+        "security": [
+          {
+            "Authorize": [
+              "RequireAdminRole"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successfully deleted user"
+          },
+          "400": {
+            "description": "User could not be deleted"
+          }
+        }
+      }
+    },
+    "/api/users/{userId}/resend-invite": {
+      "post": {
+        "summary": "Resend user invitation",
+        "operationId": "ResendInvite",
+        "security": [
+          {
+            "Authorize": [
+              "RequireAdminRole"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully resent invite",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResendInviteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invite could not be resent"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "HasAcceptedRegistration": {
+            "type": "boolean"
+          },
+          "IdentityProvider": {
+            "type": "string"
+          },
+          "IdentitySubject": {
+            "type": "string"
+          },
+          "IdentityUsername": {
+            "type": "string"
+          },
+          "InvitationToken": {
+            "type": "string"
+          },
+          "InvitationExpiresAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "Id",
+          "Name",
+          "Email",
+          "Role",
+          "HasAcceptedRegistration"
+        ]
+      },
+      "CreateUserRequest": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "HasAcceptedRegistration": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Name",
+          "Email",
+          "Role",
+          "HasAcceptedRegistration"
+        ]
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "HasAcceptedRegistration": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Name",
+          "Email",
+          "Role",
+          "HasAcceptedRegistration"
+        ]
+      },
+      "ResendInviteResponse": {
+        "type": "object",
+        "properties": {
+          "InvitationToken": {
+            "type": "string"
+          },
+          "InvitationExpiresAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "InvitationToken"
+        ]
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "Admin",
+          "BidManager",
+          "User"
+        ]
+      }
+    }
+  }
+}
