@@ -1,0 +1,159 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Bid User API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/bids/{bidId}/users": {
+      "get": {
+        "summary": "Get bid users",
+        "description": "Retrieve the list of users associated with a specific bid.",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of bid users.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BidUserResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "RequireBidAccess": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Add a user to a bid",
+        "description": "Assign a user to a specific bid.",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully assigned to the bid."
+          },
+          "400": {
+            "description": "Invalid request body or parameters."
+          }
+        },
+        "security": [
+          {
+            "RequireBidManagementRole": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Remove a user from a bid",
+        "description": "Unassign a user from a specific bid.",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully unassigned from the bid."
+          },
+          "400": {
+            "description": "Invalid request body or parameters."
+          }
+        },
+        "security": [
+          {
+            "RequireBidManagementRole": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserAssignmentRequest": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "UserId"
+        ]
+      },
+      "BidUserResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Id",
+          "Name"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "RequireBidAccess": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "RequireBidManagementRole": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

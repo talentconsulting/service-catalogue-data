@@ -1,0 +1,284 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Bid Manager API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/bids/{bidId}/questions/{questionId}/users": {
+      "get": {
+        "summary": "Get users assigned to a question",
+        "description": "Retrieve users assigned to a specific question within a bid.",
+        "tags": [
+          "Bid Question Users"
+        ],
+        "operationId": "getQuestionUsers",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users assigned to the question",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BidUserResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "RequireBidAccess"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Add a user to a question",
+        "description": "Assign a user to a specific question within a bid with a specific role.",
+        "tags": [
+          "Bid Question Users"
+        ],
+        "operationId": "addBidUser",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestionUserAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully assigned to the question"
+          },
+          "400": {
+            "description": "Invalid request"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "RequireBidManagementRole"
+            ]
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update user role for a question",
+        "description": "Change the role of an existing user assigned to a specific question within a bid.",
+        "tags": [
+          "Bid Question Users"
+        ],
+        "operationId": "updateBidUserRole",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestionUserAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User role successfully updated"
+          },
+          "400": {
+            "description": "Invalid request"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "RequireBidManagementRole"
+            ]
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Remove a user from a question",
+        "description": "Remove a user assignment from a specific question within a bid.",
+        "tags": [
+          "Bid Question Users"
+        ],
+        "operationId": "removeBidUser",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully removed from the question"
+          },
+          "400": {
+            "description": "Invalid request"
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "RequireBidManagementRole"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "QuestionUserAssignmentRequest": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string",
+            "example": "user123"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/QuestionUserRole"
+          }
+        },
+        "required": [
+          "UserId",
+          "Role"
+        ]
+      },
+      "UserAssignmentRequest": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string",
+            "example": "user123"
+          }
+        },
+        "required": [
+          "UserId"
+        ]
+      },
+      "BidUserResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "example": "user123"
+          },
+          "Name": {
+            "type": "string",
+            "example": "John Doe"
+          }
+        },
+        "required": [
+          "Id",
+          "Name"
+        ]
+      },
+      "QuestionUserRole": {
+        "type": "string",
+        "enum": [
+          "Owner",
+          "Reviewer",
+          "Support"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "tokenUrl": "https://example.com/oauth/token",
+            "scopes": {
+              "RequireBidAccess": "Access assigned bids",
+              "RequireBidManagementRole": "Manage bid-related data"
+            }
+          }
+        }
+      }
+    }
+  }
+}

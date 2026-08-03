@@ -1,0 +1,321 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Chat Question API",
+    "description": "API for managing bid-related AI chat questions and messages.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/ai/questions/{questionId}": {
+      "post": {
+        "operationId": "askQuestions",
+        "summary": "Ask AI a question related to a bid.",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the question."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatQuestionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with AI's answer.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatQuestionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request error."
+          },
+          "403": {
+            "description": "Forbidden. User is not authorized to manage the bid."
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/api/ai/questions/{questionId}/messages": {
+      "get": {
+        "operationId": "getMessages",
+        "summary": "Retrieve chat messages for a specific question.",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the question."
+          },
+          {
+            "name": "bidId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the bid."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of messages related to the question.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatMessageResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request error. bidId is required."
+          },
+          "403": {
+            "description": "Forbidden. User is not authorized to manage the bid."
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    },
+    "/api/ai/questions/{questionId}/stream": {
+      "post": {
+        "operationId": "streamQuestion",
+        "summary": "Stream AI's response to a question in real-time.",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the question."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatQuestionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Streaming response in NDJSON format.",
+            "content": {
+              "application/x-ndjson": {}
+            }
+          },
+          "400": {
+            "description": "Bad request error."
+          },
+          "401": {
+            "description": "Unauthorized. User ID could not be resolved."
+          },
+          "403": {
+            "description": "Forbidden. User is not authorized to manage the bid."
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChatQuestionRequest": {
+        "type": "object",
+        "properties": {
+          "BidId": {
+            "type": "string",
+            "description": "ID of the bid."
+          },
+          "QuestionId": {
+            "type": "string",
+            "description": "ID of the question."
+          },
+          "FreeTextQuestion": {
+            "type": "string",
+            "description": "User's free-text question."
+          },
+          "ThreadId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Existing thread ID, if any."
+          },
+          "BidFileIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "IDs of bid files to include in context."
+          }
+        },
+        "required": [
+          "BidId",
+          "QuestionId",
+          "FreeTextQuestion",
+          "BidFileIds"
+        ]
+      },
+      "ChatQuestionResponse": {
+        "type": "object",
+        "properties": {
+          "Response": {
+            "type": "string",
+            "description": "AI's response."
+          },
+          "ThreadId": {
+            "type": "string",
+            "description": "ID of the thread created or used."
+          },
+          "Sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatSourceReferenceResponse"
+            },
+            "description": "List of sources referenced in the response."
+          },
+          "UsedSourcesOutsideBidLibrary": {
+            "type": "boolean",
+            "description": "Flag indicating whether sources outside the bid library were used."
+          }
+        },
+        "required": [
+          "Response",
+          "ThreadId",
+          "Sources",
+          "UsedSourcesOutsideBidLibrary"
+        ]
+      },
+      "ChatMessageResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "description": "Message ID."
+          },
+          "Role": {
+            "type": "string",
+            "description": "Role of the message sender (e.g., user, assistant)."
+          },
+          "Content": {
+            "type": "string",
+            "description": "Content of the message."
+          },
+          "CreatedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the message was created."
+          },
+          "Sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatSourceReferenceResponse"
+            },
+            "description": "List of sources referenced in the message."
+          },
+          "UsedSourcesOutsideBidLibrary": {
+            "type": "boolean",
+            "description": "Flag indicating whether sources outside the bid library were used."
+          }
+        },
+        "required": [
+          "Id",
+          "Role",
+          "Content",
+          "CreatedAtUtc",
+          "Sources",
+          "UsedSourcesOutsideBidLibrary"
+        ]
+      },
+      "ChatSourceReferenceResponse": {
+        "type": "object",
+        "properties": {
+          "Kind": {
+            "type": "string",
+            "description": "Type or kind of the source reference."
+          },
+          "FileId": {
+            "type": "string",
+            "nullable": true,
+            "description": "ID of the file referenced."
+          },
+          "FileName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Name of the file referenced."
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true,
+            "description": "URI of the source."
+          },
+          "Title": {
+            "type": "string",
+            "nullable": true,
+            "description": "Title of the source."
+          },
+          "Quote": {
+            "type": "string",
+            "nullable": true,
+            "description": "Quoted text from the source."
+          },
+          "IsFromBidLibrary": {
+            "type": "boolean",
+            "description": "Whether the source is from the bid library."
+          }
+        },
+        "required": [
+          "Kind",
+          "IsFromBidLibrary"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT authorization token."
+      }
+    }
+  }
+}

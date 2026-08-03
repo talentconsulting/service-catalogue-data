@@ -1,0 +1,86 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TalentSuite Health API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "operationId": "Health_GetHealthStatus",
+        "summary": "Get Health Status",
+        "description": "Returns the health status of the application.",
+        "tags": [
+          "Health"
+        ],
+        "responses": {
+          "200": {
+            "description": "Health status is OK.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable. One or more health checks failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HealthResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Indicates whether all health checks passed."
+          },
+          "checks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HealthCheckResult"
+            }
+          }
+        },
+        "required": [
+          "success",
+          "checks"
+        ]
+      },
+      "HealthCheckResult": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the health check probe."
+          },
+          "success": {
+            "type": "boolean",
+            "description": "Indicates whether the health check was successful."
+          },
+          "description": {
+            "type": "string",
+            "description": "Additional details about the health check result."
+          }
+        },
+        "required": [
+          "name",
+          "success",
+          "description"
+        ]
+      }
+    }
+  }
+}

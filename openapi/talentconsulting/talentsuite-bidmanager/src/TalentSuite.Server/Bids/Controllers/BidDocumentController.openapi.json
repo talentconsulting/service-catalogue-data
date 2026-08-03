@@ -1,0 +1,387 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TalentSuite Bid Document API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/document": {
+      "post": {
+        "summary": "Ingest a bid document",
+        "description": "Upload a bid document to parse and process.",
+        "operationId": "IngestBidDocument",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "The bid document to upload."
+                  },
+                  "stage": {
+                    "$ref": "#/components/schemas/BidStage",
+                    "description": "The stage of the bid process."
+                  }
+                },
+                "required": [
+                  "file",
+                  "stage"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully parsed the bid document.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParsedDocumentResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request when the file is missing or invalid."
+          }
+        },
+        "security": [
+          {
+            "RequireAdminRole": []
+          }
+        ]
+      }
+    },
+    "/api/document/jobs": {
+      "post": {
+        "summary": "Start a document ingestion job",
+        "description": "Start a new job to process a bid document asynchronously.",
+        "operationId": "StartDocumentIngestionJob",
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "The bid document to upload for ingestion."
+                  },
+                  "stage": {
+                    "$ref": "#/components/schemas/BidStage",
+                    "description": "The stage of the bid process."
+                  }
+                },
+                "required": [
+                  "file",
+                  "stage"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted and job created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentIngestionJobCreatedResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request when the file is missing or invalid."
+          },
+          "401": {
+            "description": "Unauthorized when the current user cannot be resolved."
+          }
+        },
+        "security": [
+          {
+            "RequireAdminRole": []
+          }
+        ]
+      },
+      "get": {
+        "summary": "List ingestion jobs",
+        "description": "Retrieve a list of ingestion jobs for the current user.",
+        "operationId": "ListDocumentIngestionJobs",
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the list of jobs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentIngestionJobStatusResponse"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized when the current user cannot be resolved."
+          }
+        },
+        "security": [
+          {
+            "RequireAdminRole": []
+          }
+        ]
+      }
+    },
+    "/api/document/jobs/{jobId}": {
+      "get": {
+        "summary": "Get job details",
+        "description": "Retrieve the status and details of a specific ingestion job.",
+        "operationId": "GetDocumentIngestionJob",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the ingestion job."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved job details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentIngestionJobStatusResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found when the job ID does not exist for the current user."
+          },
+          "401": {
+            "description": "Unauthorized when the current user cannot be resolved."
+          }
+        },
+        "security": [
+          {
+            "RequireAdminRole": []
+          }
+        ]
+      }
+    },
+    "/api/document/jobs/{jobId}/stream": {
+      "get": {
+        "summary": "Stream job updates",
+        "description": "Stream updates for a specific ingestion job.",
+        "operationId": "StreamDocumentIngestionJobUpdates",
+        "parameters": [
+          {
+            "name": "jobId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the ingestion job."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stream updates are successfully provided.",
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found when the job ID does not exist for the current user."
+          },
+          "401": {
+            "description": "Unauthorized when the current user cannot be resolved."
+          }
+        },
+        "security": [
+          {
+            "RequireAdminRole": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BidStage": {
+        "type": "string",
+        "enum": [
+          "Stage1",
+          "Stage2"
+        ]
+      },
+      "DocumentIngestionJobCreatedResponse": {
+        "type": "object",
+        "properties": {
+          "JobId": {
+            "type": "string",
+            "description": "The ID of the created ingestion job."
+          }
+        }
+      },
+      "DocumentIngestionJobStatusResponse": {
+        "type": "object",
+        "properties": {
+          "JobId": {
+            "type": "string",
+            "description": "The ID of the ingestion job."
+          },
+          "FileName": {
+            "type": "string",
+            "description": "The name of the uploaded file."
+          },
+          "Stage": {
+            "$ref": "#/components/schemas/BidStage",
+            "description": "The stage of the bid process."
+          },
+          "Status": {
+            "type": "string",
+            "description": "The status of the ingestion job."
+          },
+          "Message": {
+            "type": "string",
+            "description": "Additional status message."
+          },
+          "IsComplete": {
+            "type": "boolean",
+            "description": "Indicates if the job is complete."
+          },
+          "IsError": {
+            "type": "boolean",
+            "description": "Indicates if there was an error processing the job."
+          },
+          "CreatedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of job creation."
+          },
+          "UpdatedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of the last update to the job."
+          },
+          "CompletedAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of job completion."
+          },
+          "Result": {
+            "$ref": "#/components/schemas/ParsedDocumentResponse",
+            "description": "The parsed document result."
+          }
+        }
+      },
+      "ParsedDocumentResponse": {
+        "type": "object",
+        "properties": {
+          "UniqueReference": {
+            "type": "string",
+            "description": "The unique reference for the document."
+          },
+          "Company": {
+            "type": "string",
+            "description": "The company associated with the document."
+          },
+          "Summary": {
+            "type": "string",
+            "description": "The summary of the document."
+          },
+          "KeyInformation": {
+            "type": "string",
+            "description": "Key information extracted from the document."
+          },
+          "Budget": {
+            "type": "string",
+            "description": "Budget details from the document."
+          },
+          "DeadlineForQualifying": {
+            "type": "string",
+            "description": "The deadline for qualifying bids."
+          },
+          "DeadlineForSubmission": {
+            "type": "string",
+            "description": "The deadline for submission."
+          },
+          "LengthOfContract": {
+            "type": "string",
+            "description": "The length of the contract."
+          },
+          "Questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParsedQuestionResponse"
+            }
+          }
+        }
+      },
+      "ParsedQuestionResponse": {
+        "type": "object",
+        "properties": {
+          "QuestionOrderIndex": {
+            "type": "integer",
+            "description": "Index order of the question."
+          },
+          "Category": {
+            "type": "string",
+            "description": "Category of the question."
+          },
+          "Number": {
+            "type": "string",
+            "description": "Number identifier for the question."
+          },
+          "Title": {
+            "type": "string",
+            "description": "Title of the question."
+          },
+          "Description": {
+            "type": "string",
+            "description": "Detailed description of the question."
+          },
+          "Length": {
+            "type": "string",
+            "description": "Length requirement for the response."
+          },
+          "Weighting": {
+            "type": "integer",
+            "description": "Weighting of the question (0-100)."
+          },
+          "Required": {
+            "type": "boolean",
+            "description": "Indicates if the question is required."
+          },
+          "NiceToHave": {
+            "type": "boolean",
+            "description": "Indicates if the question is nice-to-have."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "RequireAdminRole": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization required for admin access."
+      }
+    }
+  }
+}
