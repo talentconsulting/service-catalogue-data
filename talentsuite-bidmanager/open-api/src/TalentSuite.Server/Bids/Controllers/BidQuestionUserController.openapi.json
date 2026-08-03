@@ -1,0 +1,251 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TalentSuite Bid Manager API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/bids/{bidId}/questions/{questionId}/users": {
+      "get": {
+        "summary": "Retrieve users associated with a bid question",
+        "operationId": "getQuestionUsers",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BidUserResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "RequireBidAccess": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Add a user to a bid question",
+        "operationId": "addBidUser",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestionUserAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully added."
+          },
+          "400": {
+            "description": "Invalid request body."
+          }
+        },
+        "security": [
+          {
+            "RequireBidManagementRole": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update bid user role for a question",
+        "operationId": "updateBidUserRole",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestionUserAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User role successfully updated."
+          },
+          "400": {
+            "description": "Invalid request body."
+          }
+        },
+        "security": [
+          {
+            "RequireBidManagementRole": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Remove a user from a bid question",
+        "operationId": "removeBidUser",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully removed."
+          },
+          "400": {
+            "description": "Invalid request body."
+          }
+        },
+        "security": [
+          {
+            "RequireBidManagementRole": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "QuestionUserRole": {
+        "type": "string",
+        "enum": [
+          "Owner",
+          "Reviewer",
+          "Support"
+        ]
+      },
+      "QuestionUserAssignmentRequest": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/QuestionUserRole"
+          }
+        },
+        "required": [
+          "UserId",
+          "Role"
+        ]
+      },
+      "UserAssignmentRequest": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "UserId"
+        ]
+      },
+      "BidUserResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Id",
+          "Name"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "RequireBidAccess": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "RequireBidManagementRole": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

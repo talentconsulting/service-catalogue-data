@@ -1,0 +1,339 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Chat Question API",
+    "description": "API for managing and answering chat questions related to bids.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/ai/questions/{questionId}": {
+      "post": {
+        "summary": "Ask a question related to a bid.",
+        "operationId": "askQuestions",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatQuestionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Question answered successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatQuestionResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request."
+          },
+          "403": {
+            "description": "Forbidden access."
+          },
+          "500": {
+            "description": "Unexpected error occurred."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/ai/questions/{questionId}/messages": {
+      "get": {
+        "summary": "Retrieve chat messages related to a specific question in a bid.",
+        "operationId": "getMessages",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "bidId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chat messages successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChatMessageResponse"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid bidId provided."
+          },
+          "403": {
+            "description": "Forbidden access."
+          },
+          "500": {
+            "description": "Unexpected error occurred."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/ai/questions/{questionId}/stream": {
+      "post": {
+        "summary": "Stream responses for a chat question related to a bid.",
+        "operationId": "streamQuestion",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatQuestionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Streaming started successfully.",
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatStreamUpdate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request."
+          },
+          "403": {
+            "description": "Forbidden access."
+          },
+          "401": {
+            "description": "Unauthorized access."
+          },
+          "500": {
+            "description": "Unexpected error occurred."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChatQuestionRequest": {
+        "type": "object",
+        "properties": {
+          "BidId": {
+            "type": "string"
+          },
+          "QuestionId": {
+            "type": "string"
+          },
+          "FreeTextQuestion": {
+            "type": "string"
+          },
+          "ThreadId": {
+            "type": "string",
+            "nullable": true
+          },
+          "BidFileIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "BidId",
+          "QuestionId",
+          "FreeTextQuestion"
+        ]
+      },
+      "ChatQuestionResponse": {
+        "type": "object",
+        "properties": {
+          "Response": {
+            "type": "string"
+          },
+          "ThreadId": {
+            "type": "string"
+          },
+          "Sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatSourceReferenceResponse"
+            }
+          },
+          "UsedSourcesOutsideBidLibrary": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Response",
+          "ThreadId",
+          "Sources",
+          "UsedSourcesOutsideBidLibrary"
+        ]
+      },
+      "ChatMessageResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Role": {
+            "type": "string"
+          },
+          "Content": {
+            "type": "string"
+          },
+          "CreatedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatSourceReferenceResponse"
+            }
+          },
+          "UsedSourcesOutsideBidLibrary": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Id",
+          "Role",
+          "Content",
+          "CreatedAtUtc",
+          "Sources",
+          "UsedSourcesOutsideBidLibrary"
+        ]
+      },
+      "ChatSourceReferenceResponse": {
+        "type": "object",
+        "properties": {
+          "Kind": {
+            "type": "string"
+          },
+          "FileId": {
+            "type": "string",
+            "nullable": true
+          },
+          "FileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Uri": {
+            "type": "string",
+            "nullable": true
+          },
+          "Title": {
+            "type": "string",
+            "nullable": true
+          },
+          "Quote": {
+            "type": "string",
+            "nullable": true
+          },
+          "IsFromBidLibrary": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Kind",
+          "IsFromBidLibrary"
+        ]
+      },
+      "ChatStreamUpdate": {
+        "type": "object",
+        "properties": {
+          "Type": {
+            "type": "string"
+          },
+          "ThreadId": {
+            "type": "string",
+            "nullable": true
+          },
+          "Content": {
+            "type": "string",
+            "nullable": true
+          },
+          "Error": {
+            "type": "string",
+            "nullable": true
+          },
+          "Sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatSourceReferenceResponse"
+            },
+            "nullable": true
+          },
+          "UsedSourcesOutsideBidLibrary": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "required": [
+          "Type"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

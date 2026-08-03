@@ -1,0 +1,168 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Bid User API",
+    "version": "1.0.0",
+    "description": "API for managing users related to bids in the TalentSuite application."
+  },
+  "paths": {
+    "/api/bids/{bidId}/users": {
+      "get": {
+        "summary": "Get users assigned to a specific bid",
+        "operationId": "GetBidUsers",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the bid."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of users assigned to the bid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BidUserResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "RequireBidAccess": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Assign a user to a specific bid",
+        "operationId": "AddBidUser",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the bid."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User was successfully assigned to the bid."
+          },
+          "400": {
+            "description": "Invalid request body or model state."
+          }
+        },
+        "security": [
+          {
+            "RequireBidManagementRole": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Remove a user from a specific bid",
+        "operationId": "RemoveBidUser",
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The unique identifier of the bid."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignmentRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User was successfully removed from the bid."
+          },
+          "400": {
+            "description": "Invalid request body or model state."
+          }
+        },
+        "security": [
+          {
+            "RequireBidManagementRole": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserAssignmentRequest": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string",
+            "description": "The unique identifier of the user."
+          }
+        },
+        "required": [
+          "UserId"
+        ]
+      },
+      "BidUserResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "description": "The unique identifier of the user."
+          },
+          "Name": {
+            "type": "string",
+            "description": "The name of the user."
+          }
+        },
+        "required": [
+          "Id",
+          "Name"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "RequireBidAccess": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Policy required for accessing bid data."
+      },
+      "RequireBidManagementRole": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Policy required for managing bid users."
+      }
+    }
+  }
+}

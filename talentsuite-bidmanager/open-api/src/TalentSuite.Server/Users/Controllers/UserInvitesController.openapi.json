@@ -1,0 +1,349 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "User Invites API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/users/me": {
+      "get": {
+        "summary": "Get Current User Profile",
+        "operationId": "getCurrentUserProfile",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current user profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserProfileResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Current user not linked to an internal profile",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me-identity-debug": {
+      "get": {
+        "summary": "Get Current Identity Debug Information",
+        "operationId": "getCurrentIdentityDebug",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Identity debug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/me-authorisation": {
+      "get": {
+        "summary": "Get Current User Authorization",
+        "operationId": "getCurrentAuthorisation",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User authorization details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserAuthorisationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/accept-invite": {
+      "post": {
+        "summary": "Accept User Invite",
+        "operationId": "acceptInvite",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInviteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invitation accepted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., invalid or missing invitation token)",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/accept-invite/validate": {
+      "get": {
+        "summary": "Validate Invite Token",
+        "operationId": "validateInviteToken",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteValidationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/accept-invite/register": {
+      "post": {
+        "summary": "Register User from Invite",
+        "operationId": "registerFromInvite",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterInviteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (e.g., failed registration)",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "HasAcceptedRegistration": {
+            "type": "boolean"
+          },
+          "IdentityProvider": {
+            "type": "string"
+          },
+          "IdentitySubject": {
+            "type": "string"
+          },
+          "IdentityUsername": {
+            "type": "string"
+          },
+          "InvitationToken": {
+            "type": "string"
+          },
+          "InvitationExpiresAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "AcceptInviteRequest": {
+        "type": "object",
+        "properties": {
+          "InvitationToken": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "InvitationToken"
+        ]
+      },
+      "RegisterInviteRequest": {
+        "type": "object",
+        "properties": {
+          "InvitationToken": {
+            "type": "string"
+          },
+          "Username": {
+            "type": "string"
+          },
+          "Password": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "InvitationToken",
+          "Username",
+          "Password"
+        ]
+      },
+      "CurrentUserProfileResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/UserRole"
+          },
+          "HasAcceptedRegistration": {
+            "type": "boolean"
+          },
+          "IdentityProvider": {
+            "type": "string"
+          },
+          "IdentitySubject": {
+            "type": "string"
+          },
+          "IdentityUsername": {
+            "type": "string"
+          }
+        }
+      },
+      "InviteValidationResponse": {
+        "type": "object",
+        "properties": {
+          "Status": {
+            "type": "string"
+          }
+        }
+      },
+      "CurrentUserAuthorisationResponse": {
+        "type": "object",
+        "properties": {
+          "IsAdmin": {
+            "type": "boolean"
+          },
+          "IsBidManager": {
+            "type": "boolean"
+          },
+          "CanManageAssignedBids": {
+            "type": "boolean"
+          },
+          "Roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "UserRole": {
+        "type": "string",
+        "enum": [
+          "Admin",
+          "BidManager",
+          "User"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

@@ -1,0 +1,354 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TalentSuite BidManager API",
+    "version": "1.0.0",
+    "description": "APIs for managing bid processes and user functionalities in the TalentSuite platform."
+  },
+  "paths": {
+    "/api/runtime/auth": {
+      "get": {
+        "summary": "Retrieve runtime authentication configuration",
+        "operationId": "getRuntimeAuthConfig",
+        "responses": {
+          "200": {
+            "description": "Runtime authentication configuration fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RuntimeAuthResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Runtime"
+        ],
+        "security": []
+      }
+    },
+    "/api/users": {
+      "get": {
+        "summary": "Fetch all users",
+        "operationId": "getUsers",
+        "responses": {
+          "200": {
+            "description": "List of users fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponse"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "summary": "Fetch profile of the current user",
+        "operationId": "getMyProfile",
+        "responses": {
+          "200": {
+            "description": "Current user profile fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserProfileResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Current user profile not found."
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/me-authorisation": {
+      "get": {
+        "summary": "Fetch authorisation details of the current user",
+        "operationId": "getMyAuthorisation",
+        "responses": {
+          "200": {
+            "description": "Current user authorisation details fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserAuthorisationResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/me-identity-debug": {
+      "get": {
+        "summary": "Fetch debug information about user's identity",
+        "operationId": "getMyIdentityDebug",
+        "responses": {
+          "200": {
+            "description": "Debug information fetched successfully.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/accept-invite": {
+      "post": {
+        "summary": "Accept an invitation",
+        "operationId": "acceptInvite",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptInviteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Invitation accepted successfully."
+          },
+          "400": {
+            "description": "Invalid or expired invitation token."
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/accept-invite/validate": {
+      "get": {
+        "summary": "Validate an invitation token",
+        "operationId": "validateInviteToken",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invitation token validation status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InviteValidationResponse"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/users/accept-invite/register": {
+      "post": {
+        "summary": "Register an invite",
+        "operationId": "registerInvite",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterInviteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Invite registered successfully."
+          },
+          "400": {
+            "description": "Invalid request data or token."
+          }
+        },
+        "tags": [
+          "Users"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RuntimeAuthResponse": {
+        "type": "object",
+        "properties": {
+          "KeycloakAuthority": {
+            "type": "string",
+            "nullable": true,
+            "description": "OIDC authority URL for Keycloak."
+          }
+        }
+      },
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Role": {
+            "type": "string",
+            "enum": [
+              "Admin",
+              "BidManager",
+              "User"
+            ]
+          },
+          "HasAcceptedRegistration": {
+            "type": "boolean"
+          },
+          "IdentityProvider": {
+            "type": "string"
+          },
+          "IdentitySubject": {
+            "type": "string"
+          },
+          "IdentityUsername": {
+            "type": "string"
+          },
+          "InvitationToken": {
+            "type": "string"
+          },
+          "InvitationExpiresAtUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "CurrentUserProfileResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Role": {
+            "type": "string",
+            "enum": [
+              "Admin",
+              "BidManager",
+              "User"
+            ]
+          },
+          "HasAcceptedRegistration": {
+            "type": "boolean"
+          },
+          "IdentityProvider": {
+            "type": "string"
+          },
+          "IdentitySubject": {
+            "type": "string"
+          },
+          "IdentityUsername": {
+            "type": "string"
+          }
+        }
+      },
+      "CurrentUserAuthorisationResponse": {
+        "type": "object",
+        "properties": {
+          "IsAdmin": {
+            "type": "boolean"
+          },
+          "IsBidManager": {
+            "type": "boolean"
+          },
+          "CanManageAssignedBids": {
+            "type": "boolean"
+          },
+          "Roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AcceptInviteRequest": {
+        "type": "object",
+        "properties": {
+          "InvitationToken": {
+            "type": "string",
+            "description": "Invitation token needed to accept the invite."
+          }
+        }
+      },
+      "InviteValidationResponse": {
+        "type": "object",
+        "properties": {
+          "Status": {
+            "type": "string",
+            "description": "Validation status of the invitation token.",
+            "enum": [
+              "valid",
+              "already_accepted",
+              "invalid_or_expired"
+            ]
+          }
+        }
+      },
+      "RegisterInviteRequest": {
+        "type": "object",
+        "properties": {
+          "InvitationToken": {
+            "type": "string"
+          },
+          "Username": {
+            "type": "string"
+          },
+          "Password": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

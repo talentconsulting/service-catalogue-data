@@ -1,0 +1,726 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TalentSuite Bid Manager API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/bids": {
+      "post": {
+        "summary": "Create a new bid",
+        "operationId": "CreateBid",
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBidRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bid successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BidResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      },
+      "get": {
+        "summary": "Retrieve a paginated list of bids",
+        "operationId": "GetBids",
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of bids",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedBidListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "403": {
+            "description": "Forbidden access"
+          }
+        }
+      }
+    },
+    "/api/bids/{bidId}": {
+      "get": {
+        "summary": "Retrieve a specific bid",
+        "operationId": "GetBid",
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of bid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BidResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Bid not found"
+          }
+        }
+      }
+    },
+    "/api/bids/{bidId}/status": {
+      "patch": {
+        "summary": "Update the status of a bid",
+        "operationId": "SetBidStatus",
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBidStatusRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful update of bid status"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        }
+      }
+    },
+    "/api/bids/{bidId}/overview": {
+      "patch": {
+        "summary": "Update bid overview",
+        "operationId": "UpdateBidOverview",
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBidOverviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful update of bid overview"
+          },
+          "403": {
+            "description": "Forbidden access"
+          }
+        }
+      }
+    },
+    "/api/bids/{bidId}/files": {
+      "get": {
+        "summary": "Retrieve all files associated with a bid",
+        "operationId": "GetBidFiles",
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of bid files",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BidFileResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Upload a file associated with a bid",
+        "operationId": "UploadBidFile",
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "File successfully uploaded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BidFileResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "No file provided"
+          }
+        }
+      }
+    },
+    "/api/bids/{bidId}/files/{fileId}": {
+      "get": {
+        "summary": "Download a specific bid file",
+        "operationId": "DownloadBidFile",
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File successfully downloaded",
+            "content": {
+              "application/octet-stream": {}
+            }
+          },
+          "404": {
+            "description": "File not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a specific bid file",
+        "operationId": "DeleteBidFile",
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "File successfully deleted"
+          },
+          "404": {
+            "description": "File not found"
+          }
+        }
+      }
+    },
+    "/api/bids/{bidId}/library-push": {
+      "post": {
+        "summary": "Push bid to library",
+        "operationId": "PushBidToLibrary",
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bidId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Bid successfully pushed to library",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BidLibraryPushResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BidResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "nullable": true
+          },
+          "UniqueReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "Company": {
+            "type": "string",
+            "nullable": true
+          },
+          "Summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "KeyInformation": {
+            "type": "string",
+            "nullable": true
+          },
+          "Budget": {
+            "type": "string",
+            "nullable": true
+          },
+          "DeadlineForQualifying": {
+            "type": "string",
+            "nullable": true
+          },
+          "DeadlineForSubmission": {
+            "type": "string",
+            "nullable": true
+          },
+          "LengthOfContract": {
+            "type": "string",
+            "nullable": true
+          },
+          "Stage": {
+            "$ref": "#/components/schemas/BidStage"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/BidStatus"
+          },
+          "BidLibraryPush": {
+            "$ref": "#/components/schemas/BidLibraryPushResponse"
+          },
+          "Questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionResponse"
+            }
+          }
+        }
+      },
+      "BidLibraryPushResponse": {
+        "type": "object",
+        "properties": {
+          "BidId": {
+            "type": "string"
+          },
+          "PerformedByUserId": {
+            "type": "string"
+          },
+          "PerformedByName": {
+            "type": "string"
+          },
+          "PushedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BidFileResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "BidId": {
+            "type": "string"
+          },
+          "FileName": {
+            "type": "string"
+          },
+          "ContentType": {
+            "type": "string"
+          },
+          "SizeBytes": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "UploadedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateBidRequest": {
+        "type": "object",
+        "properties": {
+          "UniqueReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "Company": {
+            "type": "string",
+            "nullable": true
+          },
+          "Summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "KeyInformation": {
+            "type": "string",
+            "nullable": true
+          },
+          "Budget": {
+            "type": "string",
+            "nullable": true
+          },
+          "DeadlineForQualifying": {
+            "type": "string",
+            "nullable": true
+          },
+          "DeadlineForSubmission": {
+            "type": "string",
+            "nullable": true
+          },
+          "LengthOfContract": {
+            "type": "string",
+            "nullable": true
+          },
+          "Stage": {
+            "$ref": "#/components/schemas/BidStage"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/BidStatus"
+          },
+          "Questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateQuestionRequest"
+            }
+          }
+        }
+      },
+      "UpdateBidStatusRequest": {
+        "type": "object",
+        "properties": {
+          "Status": {
+            "$ref": "#/components/schemas/BidStatus"
+          }
+        }
+      },
+      "UpdateBidOverviewRequest": {
+        "type": "object",
+        "properties": {
+          "UniqueReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "Summary": {
+            "type": "string",
+            "nullable": true
+          },
+          "KeyInformation": {
+            "type": "string",
+            "nullable": true
+          },
+          "Budget": {
+            "type": "string",
+            "nullable": true
+          },
+          "DeadlineForQualifying": {
+            "type": "string",
+            "nullable": true
+          },
+          "DeadlineForSubmission": {
+            "type": "string",
+            "nullable": true
+          },
+          "LengthOfContract": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "QuestionResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "QuestionOrderIndex": {
+            "type": "integer"
+          },
+          "Category": {
+            "type": "string"
+          },
+          "Number": {
+            "type": "string"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "Length": {
+            "type": "string"
+          },
+          "Weighting": {
+            "type": "integer"
+          },
+          "Required": {
+            "type": "boolean"
+          },
+          "NiceToHave": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateQuestionRequest": {
+        "type": "object",
+        "properties": {
+          "QuestionOrderIndex": {
+            "type": "integer"
+          },
+          "Category": {
+            "type": "string"
+          },
+          "Number": {
+            "type": "string"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "Length": {
+            "type": "string"
+          },
+          "Weighting": {
+            "type": "integer"
+          },
+          "Required": {
+            "type": "boolean"
+          },
+          "NiceToHave": {
+            "type": "boolean"
+          }
+        }
+      },
+      "BidStage": {
+        "type": "string",
+        "enum": [
+          "Stage1",
+          "Stage2"
+        ]
+      },
+      "BidStatus": {
+        "type": "string",
+        "enum": [
+          "Underway",
+          "Cancelled",
+          "Submitted",
+          "Won",
+          "Lost"
+        ]
+      },
+      "PagedBidListResponse": {
+        "type": "object",
+        "properties": {
+          "Items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BidListItemResponse"
+            }
+          },
+          "CurrentPage": {
+            "type": "integer"
+          },
+          "PageSize": {
+            "type": "integer"
+          },
+          "TotalCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "BidListItemResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Company": {
+            "type": "string"
+          },
+          "Summary": {
+            "type": "string"
+          },
+          "QuestionCount": {
+            "type": "integer"
+          },
+          "OwnerId": {
+            "type": "string"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/BidStatus"
+          }
+        }
+      }
+    }
+  }
+}
