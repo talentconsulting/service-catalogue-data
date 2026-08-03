@@ -1,0 +1,163 @@
+{
+  "components": {
+    "schemas": {
+      "BidUserResponse": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
+      "UserAssignmentRequest": {
+        "properties": {
+          "userId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "RequireBidAccess": {
+        "description": "Requires a policy to ensure access to the specified bid.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      },
+      "RequireBidManagementRole": {
+        "description": "Requires a policy to ensure the user has a bid management role.",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "Bid Management API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/bids/{bidId}/users": {
+      "delete": {
+        "operationId": "RemoveBidUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully removed from the bid"
+          },
+          "400": {
+            "description": "Invalid request payload"
+          }
+        },
+        "security": [
+          {
+            "RequireBidManagementRole": []
+          }
+        ],
+        "summary": "Remove a user from a specific bid"
+      },
+      "get": {
+        "operationId": "GetBidUsers",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BidUserResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successfully retrieved bid users"
+          }
+        },
+        "security": [
+          {
+            "RequireBidAccess": []
+          }
+        ],
+        "summary": "Retrieve users assigned to a specific bid"
+      },
+      "post": {
+        "operationId": "AddBidUser",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserAssignmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "User successfully added to the bid"
+          },
+          "400": {
+            "description": "Invalid request payload"
+          }
+        },
+        "security": [
+          {
+            "RequireBidManagementRole": []
+          }
+        ],
+        "summary": "Assign a user to a specific bid"
+      }
+    }
+  }
+}

@@ -1,0 +1,327 @@
+{
+  "components": {
+    "schemas": {
+      "ChatMessageResponse": {
+        "properties": {
+          "Content": {
+            "description": "Content of the message.",
+            "type": "string"
+          },
+          "CreatedAtUtc": {
+            "description": "Timestamp when the message was created.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "Id": {
+            "description": "ID of the chat message.",
+            "type": "string"
+          },
+          "Role": {
+            "description": "Role of the sender.",
+            "type": "string"
+          },
+          "Sources": {
+            "description": "Sources referenced in the message.",
+            "items": {
+              "$ref": "#/components/schemas/ChatSourceReferenceResponse"
+            },
+            "type": "array"
+          },
+          "UsedSourcesOutsideBidLibrary": {
+            "description": "Indicates whether sources outside the bid library were used.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Id",
+          "Role",
+          "Content",
+          "CreatedAtUtc",
+          "Sources",
+          "UsedSourcesOutsideBidLibrary"
+        ],
+        "type": "object"
+      },
+      "ChatQuestionRequest": {
+        "properties": {
+          "BidFileIds": {
+            "description": "List of file IDs associated with the bid.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "BidId": {
+            "description": "ID of the bid.",
+            "type": "string"
+          },
+          "FreeTextQuestion": {
+            "description": "The free-text question being asked.",
+            "type": "string"
+          },
+          "QuestionId": {
+            "description": "Unique ID of the question.",
+            "type": "string"
+          },
+          "ThreadId": {
+            "description": "The thread ID associated with the question.",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "BidId",
+          "QuestionId",
+          "FreeTextQuestion"
+        ],
+        "type": "object"
+      },
+      "ChatQuestionResponse": {
+        "properties": {
+          "Response": {
+            "description": "The response to the question.",
+            "type": "string"
+          },
+          "Sources": {
+            "description": "Sources used to generate the response.",
+            "items": {
+              "$ref": "#/components/schemas/ChatSourceReferenceResponse"
+            },
+            "type": "array"
+          },
+          "ThreadId": {
+            "description": "ID of the chat thread.",
+            "type": "string"
+          },
+          "UsedSourcesOutsideBidLibrary": {
+            "description": "Indicates whether sources outside the bid library were used.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Response",
+          "ThreadId",
+          "Sources",
+          "UsedSourcesOutsideBidLibrary"
+        ],
+        "type": "object"
+      },
+      "ChatSourceReferenceResponse": {
+        "properties": {
+          "FileId": {
+            "description": "ID of the referenced file.",
+            "nullable": true,
+            "type": "string"
+          },
+          "FileName": {
+            "description": "Name of the referenced file.",
+            "nullable": true,
+            "type": "string"
+          },
+          "IsFromBidLibrary": {
+            "description": "Indicates if the source is from the bid library.",
+            "type": "boolean"
+          },
+          "Kind": {
+            "description": "Type of the source.",
+            "type": "string"
+          },
+          "Quote": {
+            "description": "Quoted text from the source.",
+            "nullable": true,
+            "type": "string"
+          },
+          "Title": {
+            "description": "Title of the source.",
+            "nullable": true,
+            "type": "string"
+          },
+          "Uri": {
+            "description": "URI of the source.",
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "Kind",
+          "IsFromBidLibrary"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "API for managing chat questions and their messages.",
+    "title": "Chat Question API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/ai/questions/{questionId}": {
+      "post": {
+        "operationId": "AskQuestions",
+        "parameters": [
+          {
+            "description": "Unique ID of the question.",
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatQuestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatQuestionResponse"
+                }
+              }
+            },
+            "description": "Question has been successfully processed."
+          },
+          "400": {
+            "description": "Invalid request parameters."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "You do not have permission to manage the bid."
+          },
+          "500": {
+            "description": "Unexpected error."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Ask a question."
+      }
+    },
+    "/api/ai/questions/{questionId}/messages": {
+      "get": {
+        "operationId": "GetMessages",
+        "parameters": [
+          {
+            "description": "Unique ID of the question.",
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "ID of the bid.",
+            "in": "query",
+            "name": "bidId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/ChatMessageResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "List of chat messages for the question."
+          },
+          "400": {
+            "description": "Invalid request parameters."
+          },
+          "403": {
+            "description": "You do not have permission to manage the bid."
+          },
+          "500": {
+            "description": "Unexpected error."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get chat messages for a question."
+      }
+    },
+    "/api/ai/questions/{questionId}/stream": {
+      "post": {
+        "operationId": "StreamQuestion",
+        "parameters": [
+          {
+            "description": "Unique ID of the question.",
+            "in": "path",
+            "name": "questionId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatQuestionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Stream initialized."
+          },
+          "400": {
+            "description": "Invalid request parameters."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "You do not have permission to manage the bid."
+          },
+          "500": {
+            "description": "Unexpected error."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Stream chat responses to a question."
+      }
+    }
+  }
+}

@@ -1,0 +1,165 @@
+{
+  "components": {
+    "schemas": {
+      "AssignedQuestionTaskResponse": {
+        "properties": {
+          "BidId": {
+            "type": "string"
+          },
+          "BidTitle": {
+            "type": "string"
+          },
+          "NiceToHave": {
+            "type": "boolean"
+          },
+          "QuestionId": {
+            "type": "string"
+          },
+          "QuestionNumber": {
+            "type": "string"
+          },
+          "QuestionTitle": {
+            "type": "string"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/QuestionUserRole"
+          }
+        },
+        "required": [
+          "BidId",
+          "BidTitle",
+          "QuestionId",
+          "QuestionNumber",
+          "QuestionTitle",
+          "Role",
+          "NiceToHave"
+        ],
+        "type": "object"
+      },
+      "MentionTaskResponse": {
+        "properties": {
+          "AssignedUserId": {
+            "type": "string"
+          },
+          "BidId": {
+            "type": "string"
+          },
+          "BidTitle": {
+            "type": "string"
+          },
+          "CommentId": {
+            "type": "string"
+          },
+          "CommentText": {
+            "type": "string"
+          },
+          "CreatedAtUtc": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "Id": {
+            "type": "string"
+          },
+          "QuestionId": {
+            "type": "string"
+          },
+          "QuestionTitle": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Id",
+          "BidId",
+          "BidTitle",
+          "QuestionId",
+          "QuestionTitle",
+          "CommentId",
+          "AssignedUserId",
+          "CommentText",
+          "CreatedAtUtc"
+        ],
+        "type": "object"
+      },
+      "QuestionUserRole": {
+        "enum": [
+          "Owner",
+          "Reviewer",
+          "Support"
+        ],
+        "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Tasks API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/tasks/my": {
+      "get": {
+        "operationId": "GetMyTasks",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/MentionTaskResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "List of user's mention tasks"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get My Tasks"
+      }
+    },
+    "/api/tasks/my-question-assignments": {
+      "get": {
+        "operationId": "GetMyQuestionAssignments",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AssignedQuestionTaskResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "List of question assignments for the user"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Get My Question Assignments"
+      }
+    }
+  }
+}

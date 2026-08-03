@@ -1,0 +1,379 @@
+{
+  "components": {
+    "schemas": {
+      "BidStage": {
+        "enum": [
+          "Stage1",
+          "Stage2"
+        ],
+        "type": "string"
+      },
+      "DocumentIngestionJobCreatedResponse": {
+        "properties": {
+          "JobId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "JobId"
+        ],
+        "type": "object"
+      },
+      "DocumentIngestionJobStatusResponse": {
+        "properties": {
+          "CompletedAtUtc": {
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "CreatedAtUtc": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "FileName": {
+            "type": "string"
+          },
+          "IsComplete": {
+            "type": "boolean"
+          },
+          "IsError": {
+            "type": "boolean"
+          },
+          "JobId": {
+            "type": "string"
+          },
+          "Message": {
+            "type": "string"
+          },
+          "Result": {
+            "$ref": "#/components/schemas/ParsedDocumentResponse"
+          },
+          "Stage": {
+            "$ref": "#/components/schemas/BidStage"
+          },
+          "Status": {
+            "type": "string"
+          },
+          "UpdatedAtUtc": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "JobId",
+          "FileName",
+          "Stage",
+          "Status",
+          "IsComplete",
+          "IsError",
+          "CreatedAtUtc",
+          "UpdatedAtUtc"
+        ],
+        "type": "object"
+      },
+      "ParsedDocumentResponse": {
+        "properties": {
+          "Budget": {
+            "nullable": true,
+            "type": "string"
+          },
+          "Company": {
+            "nullable": true,
+            "type": "string"
+          },
+          "DeadlineForQualifying": {
+            "nullable": true,
+            "type": "string"
+          },
+          "DeadlineForSubmission": {
+            "nullable": true,
+            "type": "string"
+          },
+          "KeyInformation": {
+            "nullable": true,
+            "type": "string"
+          },
+          "LengthOfContract": {
+            "nullable": true,
+            "type": "string"
+          },
+          "Questions": {
+            "items": {
+              "$ref": "#/components/schemas/ParsedQuestionResponse"
+            },
+            "type": "array"
+          },
+          "Summary": {
+            "nullable": true,
+            "type": "string"
+          },
+          "UniqueReference": {
+            "nullable": true,
+            "type": "string"
+          }
+        },
+        "required": [
+          "Questions"
+        ],
+        "type": "object"
+      },
+      "ParsedQuestionResponse": {
+        "properties": {
+          "Category": {
+            "type": "string"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "Length": {
+            "type": "string"
+          },
+          "NiceToHave": {
+            "type": "boolean"
+          },
+          "Number": {
+            "type": "string"
+          },
+          "QuestionOrderIndex": {
+            "type": "integer"
+          },
+          "Required": {
+            "type": "boolean"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Weighting": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "QuestionOrderIndex",
+          "Category",
+          "Number",
+          "Title",
+          "Description",
+          "Length",
+          "Weighting",
+          "Required",
+          "NiceToHave"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "RequireAdminRole": {
+        "bearerFormat": "JWT",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "title": "Bid Document API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/document": {
+      "post": {
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  },
+                  "stage": {
+                    "$ref": "#/components/schemas/BidStage"
+                  }
+                },
+                "required": [
+                  "file",
+                  "stage"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParsedDocumentResponse"
+                }
+              }
+            },
+            "description": "Document ingested successfully"
+          },
+          "400": {
+            "description": "Bad request (e.g., file is missing)"
+          }
+        },
+        "security": [
+          {
+            "RequireAdminRole": []
+          }
+        ],
+        "summary": "Ingest a bid document"
+      }
+    },
+    "/api/document/jobs": {
+      "get": {
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DocumentIngestionJobStatusResponse"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Jobs listed successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "RequireAdminRole": []
+          }
+        ],
+        "summary": "List document ingestion jobs"
+      },
+      "post": {
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  },
+                  "stage": {
+                    "$ref": "#/components/schemas/BidStage"
+                  }
+                },
+                "required": [
+                  "file",
+                  "stage"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentIngestionJobCreatedResponse"
+                }
+              }
+            },
+            "description": "Job created successfully"
+          },
+          "400": {
+            "description": "Bad request (e.g., file is missing)"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "RequireAdminRole": []
+          }
+        ],
+        "summary": "Start a document ingestion job"
+      }
+    },
+    "/api/document/jobs/{jobId}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DocumentIngestionJobStatusResponse"
+                }
+              }
+            },
+            "description": "Job details retrieved successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        },
+        "security": [
+          {
+            "RequireAdminRole": []
+          }
+        ],
+        "summary": "Get details of a document ingestion job"
+      }
+    },
+    "/api/document/jobs/{jobId}/stream": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "jobId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/x-ndjson": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Stream opened successfully"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Job not found"
+          }
+        },
+        "security": [
+          {
+            "RequireAdminRole": []
+          }
+        ],
+        "summary": "Stream updates from a document ingestion job"
+      }
+    }
+  }
+}

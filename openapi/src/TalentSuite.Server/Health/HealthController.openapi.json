@@ -1,0 +1,90 @@
+{
+  "components": {
+    "schemas": {
+      "HealthCheckResult": {
+        "additionalProperties": false,
+        "properties": {
+          "Description": {
+            "description": "A description of the health check result.",
+            "type": "string"
+          },
+          "Name": {
+            "description": "The name of the health check probe.",
+            "type": "string"
+          },
+          "Success": {
+            "description": "Indicates whether the health check probe was successful.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Name",
+          "Success",
+          "Description"
+        ],
+        "type": "object"
+      },
+      "HealthResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "Checks": {
+            "description": "The results of individual health check probes.",
+            "items": {
+              "$ref": "#/components/schemas/HealthCheckResult"
+            },
+            "type": "array"
+          },
+          "Success": {
+            "description": "Indicates whether the overall health check was successful.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Success",
+          "Checks"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "description": "API for performing health checks on the server.",
+    "title": "Health API",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "description": "Returns the overall health status of the server along with individual probe results.",
+        "operationId": "HealthController_Get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Health check passed."
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            },
+            "description": "Health check failed."
+          }
+        },
+        "summary": "Perform a health check.",
+        "tags": [
+          "Health"
+        ]
+      }
+    }
+  }
+}
