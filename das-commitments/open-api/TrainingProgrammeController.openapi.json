@@ -1,0 +1,411 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Training Programme API",
+    "version": "1.0.0",
+    "description": "API for managing training programmes and related operations."
+  },
+  "paths": {
+    "/api/TrainingProgramme/all": {
+      "get": {
+        "operationId": "GetAllTrainingProgrammes",
+        "summary": "Retrieve all training programmes.",
+        "responses": {
+          "200": {
+            "description": "A list of all training programmes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllTrainingProgrammesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        }
+      }
+    },
+    "/api/TrainingProgramme/standards": {
+      "get": {
+        "operationId": "GetAllTrainingProgrammeStandards",
+        "summary": "Retrieve all standards for training programmes.",
+        "responses": {
+          "200": {
+            "description": "A list of all training programme standards.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllTrainingProgrammeStandardsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        }
+      }
+    },
+    "/api/TrainingProgramme/{id}": {
+      "get": {
+        "operationId": "GetTrainingProgrammeById",
+        "summary": "Retrieve a training programme by ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique identifier of the training programme."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the training programme.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTrainingProgrammeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Training programme not found."
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        }
+      }
+    },
+    "/api/TrainingProgramme/{standardUId}/version": {
+      "get": {
+        "operationId": "GetTrainingProgrammeVersionByStandardUId",
+        "summary": "Retrieve the latest version of a training programme by StandardUId.",
+        "parameters": [
+          {
+            "name": "standardUId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique identifier of the standard."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the latest version of the training programme.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTrainingProgrammeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Training programme not found."
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        }
+      }
+    },
+    "/api/TrainingProgramme/{courseCode}/version/{version}": {
+      "get": {
+        "operationId": "GetTrainingProgrammeVersion",
+        "summary": "Retrieve a specific version of a training programme by course code and version.",
+        "parameters": [
+          {
+            "name": "courseCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Course code of the training programme."
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Version number of the training programme."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the specific version of the training programme.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTrainingProgrammeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Training programme or version not found."
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        }
+      }
+    },
+    "/api/TrainingProgramme/{id}/versions": {
+      "get": {
+        "operationId": "GetTrainingProgrammeVersionsById",
+        "summary": "Retrieve all versions of a specific training programme by ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique identifier of the training programme."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of all versions of the training programme.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTrainingProgrammeVersionsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Training programme not found."
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        }
+      }
+    },
+    "/api/TrainingProgramme/{standardUId}/newer-versions": {
+      "get": {
+        "operationId": "GetNewerTrainingProgrammeVersions",
+        "summary": "Retrieve newer versions of a training programme by StandardUId.",
+        "parameters": [
+          {
+            "name": "standardUId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Unique identifier of the standard."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Newer versions of the training programme.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNewerTrainingProgrammeVersionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        }
+      }
+    },
+    "/api/TrainingProgramme/calculate-version/{courseCode}": {
+      "get": {
+        "operationId": "GetCalculatedTrainingProgrammeVersion",
+        "summary": "Calculate a specific version of a training programme by course code based on start date.",
+        "parameters": [
+          {
+            "name": "courseCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Course code of the training programme."
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Start date for the version calculation."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the calculated version of the training programme.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTrainingProgrammeResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Training programme or version not found."
+          },
+          "400": {
+            "description": "Bad request."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetAllTrainingProgrammeStandardsResponse": {
+        "type": "object",
+        "properties": {
+          "trainingProgrammes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrainingProgramme"
+            }
+          }
+        }
+      },
+      "GetAllTrainingProgrammesResponse": {
+        "type": "object",
+        "properties": {
+          "trainingProgrammes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrainingProgramme"
+            }
+          }
+        }
+      },
+      "GetNewerTrainingProgrammeVersionsResponse": {
+        "type": "object",
+        "properties": {
+          "newerVersions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrainingProgramme"
+            }
+          }
+        }
+      },
+      "GetTrainingProgrammeResponse": {
+        "type": "object",
+        "properties": {
+          "trainingProgramme": {
+            "$ref": "#/components/schemas/TrainingProgramme"
+          }
+        }
+      },
+      "GetTrainingProgrammeVersionsResponse": {
+        "type": "object",
+        "properties": {
+          "trainingProgrammeVersions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrainingProgramme"
+            }
+          }
+        }
+      },
+      "TrainingProgramme": {
+        "type": "object",
+        "properties": {
+          "courseCode": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "standardUId": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer",
+            "nullable": true
+          },
+          "programmeType": {
+            "type": "integer"
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "standardPageUrl": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "fundingPeriods": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrainingProgrammeFundingPeriod"
+            }
+          },
+          "versionEarliestStartDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "versionLatestStartDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "TrainingProgrammeFundingPeriod": {
+        "type": "object",
+        "properties": {
+          "fundingCap": {
+            "type": "integer"
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

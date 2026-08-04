@@ -1,0 +1,175 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Authorization API",
+    "version": "1.0.0",
+    "description": "API for authorization access control and feature checks."
+  },
+  "paths": {
+    "/api/authorization/access-cohort": {
+      "get": {
+        "summary": "Check access to cohort",
+        "operationId": "canAccessCohort",
+        "parameters": [
+          {
+            "name": "CohortId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "Party",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Party"
+            }
+          },
+          {
+            "name": "PartyId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cohort access status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/authorization/access-apprenticeship": {
+      "get": {
+        "summary": "Check access to apprenticeship",
+        "operationId": "canAccessApprenticeship",
+        "parameters": [
+          {
+            "name": "ApprenticeshipId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "Party",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Party"
+            }
+          },
+          {
+            "name": "PartyId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The apprenticeship access status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/authorization/features/providers/{providerId}/apprentice-email-required": {
+      "get": {
+        "summary": "Check if apprentice email feature is required for a provider",
+        "operationId": "apprenticeEmailRequired",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feature is enabled."
+          },
+          "404": {
+            "description": "Feature is not enabled."
+          }
+        }
+      }
+    },
+    "/api/authorization/email-optional": {
+      "get": {
+        "summary": "Check if email is optional for employer and provider",
+        "operationId": "optionalEmail",
+        "parameters": [
+          {
+            "name": "employerid",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "providerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Email is optional."
+          },
+          "404": {
+            "description": "Email is not optional."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Party": {
+        "type": "string",
+        "enum": [
+          "None",
+          "Employer",
+          "Provider",
+          "TransferSender"
+        ],
+        "description": "Represents the party involved in the request."
+      }
+    }
+  }
+}
