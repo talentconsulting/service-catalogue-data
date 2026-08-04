@@ -1,0 +1,399 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DataLocks API",
+    "description": "API for managing datalocks in apprenticeships.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/apprenticeships/{apprenticeshipId}/datalocks": {
+      "get": {
+        "summary": "Get Data Locks",
+        "description": "Retrieve data locks for an apprenticeship.",
+        "parameters": [
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response containing data locks.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDataLocksResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/apprenticeships/{apprenticeshipId}/datalocksummaries": {
+      "get": {
+        "summary": "Get Data Lock Summaries",
+        "description": "Retrieve summaries of data locks for an apprenticeship.",
+        "parameters": [
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response containing data lock summaries.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDataLockSummariesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/apprenticeships/{apprenticeshipId}/datalocks/accept-changes": {
+      "post": {
+        "summary": "Accept Data Lock Changes",
+        "description": "Accept changes to data locks for an apprenticeship.",
+        "parameters": [
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptDataLocksRequestChangesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Changes successfully accepted."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/apprenticeships/{apprenticeshipId}/datalocks/reject-changes": {
+      "post": {
+        "summary": "Reject Data Lock Changes",
+        "description": "Reject changes to data locks for an apprenticeship.",
+        "parameters": [
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectDataLocksRequestChangesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Changes successfully rejected."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/apprenticeships/{apprenticeshipId}/datalocks/triage": {
+      "post": {
+        "summary": "Triage Data Locks",
+        "description": "Triage data locks for an apprenticeship.",
+        "parameters": [
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TriageDataLocksRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Triage operation successfully performed."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetDataLocksResponse": {
+        "type": "object",
+        "properties": {
+          "dataLocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataLockStatus"
+            }
+          }
+        }
+      },
+      "GetDataLockSummariesResponse": {
+        "type": "object",
+        "properties": {
+          "summaries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "DataLockStatus": {
+        "type": "object",
+        "properties": {
+          "dataLockEventId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dataLockEventDatetime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "priceEpisodeIdentifier": {
+            "type": "string"
+          },
+          "apprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ilrTrainingCourseCode": {
+            "type": "string"
+          },
+          "ilrTrainingType": {
+            "$ref": "#/components/schemas/TrainingType"
+          },
+          "ilrActualStartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ilrEffectiveFromDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ilrPriceEffectiveToDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ilrTotalCost": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "status": {
+            "$ref": "#/components/schemas/Status"
+          },
+          "triageStatus": {
+            "$ref": "#/components/schemas/TriageStatus"
+          },
+          "errorCode": {
+            "$ref": "#/components/schemas/DataLockErrorCode"
+          },
+          "apprenticeshipUpdateId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "isResolved": {
+            "type": "boolean"
+          },
+          "eventStatus": {
+            "$ref": "#/components/schemas/EventStatus"
+          },
+          "isExpired": {
+            "type": "boolean"
+          },
+          "expired": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AcceptDataLocksRequestChangesRequest": {
+        "type": "object",
+        "properties": {
+          "userInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        },
+        "required": [
+          "userInfo"
+        ]
+      },
+      "RejectDataLocksRequestChangesRequest": {
+        "type": "object",
+        "properties": {
+          "userInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        },
+        "required": [
+          "userInfo"
+        ]
+      },
+      "TriageDataLocksRequest": {
+        "type": "object",
+        "properties": {
+          "triageStatus": {
+            "$ref": "#/components/schemas/TriageStatus"
+          },
+          "userInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        },
+        "required": [
+          "triageStatus",
+          "userInfo"
+        ]
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "userDisplayName": {
+            "type": "string"
+          },
+          "userEmail": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "userId",
+          "userDisplayName",
+          "userEmail"
+        ]
+      },
+      "TrainingType": {
+        "type": "string",
+        "enum": [
+          "Standard",
+          "Framework"
+        ]
+      },
+      "Status": {
+        "type": "string",
+        "enum": [
+          "Unknown",
+          "Pass",
+          "Fail"
+        ]
+      },
+      "TriageStatus": {
+        "type": "string",
+        "enum": [
+          "Unknown",
+          "Change",
+          "Restart",
+          "FixIlr"
+        ]
+      },
+      "DataLockErrorCode": {
+        "type": "string",
+        "enum": [
+          "None",
+          "Dlock01",
+          "Dlock02",
+          "Dlock03",
+          "Dlock04",
+          "Dlock05",
+          "Dlock06",
+          "Dlock07",
+          "Dlock08",
+          "Dlock09",
+          "Dlock10",
+          "Dlock11",
+          "Dlock12"
+        ]
+      },
+      "EventStatus": {
+        "type": "string",
+        "enum": [
+          "None",
+          "New",
+          "Updated",
+          "Removed"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

@@ -1,0 +1,328 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprenticeship Update API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/apprenticeships/{ApprenticeshipId}/updates": {
+      "get": {
+        "summary": "Get Apprenticeship Updates",
+        "operationId": "getApprenticeshipUpdates",
+        "parameters": [
+          {
+            "name": "ApprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "Status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Pending",
+                "Approved",
+                "Rejected",
+                "Deleted",
+                "Superceded",
+                "Expired"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApprenticeshipUpdatesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apprenticeships/{ApprenticeshipId}/updates/accept-apprenticeship-update": {
+      "post": {
+        "summary": "Accept Apprenticeship Updates",
+        "operationId": "acceptApprenticeshipUpdates",
+        "parameters": [
+          {
+            "name": "ApprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptApprenticeshipUpdatesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/apprenticeships/{ApprenticeshipId}/updates/reject-apprenticeship-update": {
+      "post": {
+        "summary": "Reject Apprenticeship Updates",
+        "operationId": "rejectApprenticeshipUpdates",
+        "parameters": [
+          {
+            "name": "ApprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectApprenticeshipUpdatesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/api/apprenticeships/{ApprenticeshipId}/updates/undo-apprenticeship-update": {
+      "post": {
+        "summary": "Undo Apprenticeship Updates",
+        "operationId": "undoApprenticeshipUpdates",
+        "parameters": [
+          {
+            "name": "ApprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UndoApprenticeshipUpdatesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetApprenticeshipUpdatesResponse": {
+        "type": "object",
+        "properties": {
+          "ApprenticeshipUpdates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Id": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "ApprenticeshipId": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "OriginatingParty": {
+                  "type": "string"
+                },
+                "FirstName": {
+                  "type": "string"
+                },
+                "LastName": {
+                  "type": "string"
+                },
+                "Email": {
+                  "type": "string"
+                },
+                "DeliveryModel": {
+                  "type": "string",
+                  "nullable": true,
+                  "enum": [
+                    "Regular",
+                    "PortableFlexiJob",
+                    "FlexiJobAgency"
+                  ]
+                },
+                "EmploymentEndDate": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "EmploymentPrice": {
+                  "type": "integer",
+                  "format": "int32",
+                  "nullable": true
+                },
+                "TrainingType": {
+                  "type": "string",
+                  "nullable": true,
+                  "enum": [
+                    "Standard",
+                    "Framework"
+                  ]
+                },
+                "TrainingCode": {
+                  "type": "string"
+                },
+                "Version": {
+                  "type": "string"
+                },
+                "Option": {
+                  "type": "string"
+                },
+                "TrainingName": {
+                  "type": "string"
+                },
+                "Cost": {
+                  "type": "number",
+                  "format": "decimal",
+                  "nullable": true
+                },
+                "StartDate": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "EndDate": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                },
+                "DateOfBirth": {
+                  "type": "string",
+                  "format": "date",
+                  "nullable": true
+                }
+              }
+            }
+          }
+        }
+      },
+      "AcceptApprenticeshipUpdatesRequest": {
+        "type": "object",
+        "properties": {
+          "ProviderId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "UserInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        },
+        "required": [
+          "ProviderId",
+          "AccountId",
+          "UserInfo"
+        ]
+      },
+      "RejectApprenticeshipUpdatesRequest": {
+        "type": "object",
+        "properties": {
+          "ProviderId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "UserInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        },
+        "required": [
+          "ProviderId",
+          "AccountId",
+          "UserInfo"
+        ]
+      },
+      "UndoApprenticeshipUpdatesRequest": {
+        "type": "object",
+        "properties": {
+          "ProviderId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "UserInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        },
+        "required": [
+          "ProviderId",
+          "AccountId",
+          "UserInfo"
+        ]
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          },
+          "UserDisplayName": {
+            "type": "string"
+          },
+          "UserEmail": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "UserId",
+          "UserDisplayName",
+          "UserEmail"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,250 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Approvals API",
+    "version": "1.0.0",
+    "description": "API for managing approvals in the DAS Commitments system."
+  },
+  "paths": {
+    "/approvals/{learningKey}": {
+      "post": {
+        "operationId": "PostApprovals",
+        "summary": "Create a new approval",
+        "description": "Creates a new approval for a given learning key.",
+        "tags": [
+          "Approvals"
+        ],
+        "parameters": [
+          {
+            "name": "learningKey",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the learning key.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CocApprovalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Approval created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalFieldChange"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. LearningKey in route does not match LearningKey in body."
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      },
+      "delete": {
+        "operationId": "DeleteApprovals",
+        "summary": "Delete an approval",
+        "description": "Deletes an approval using the learning key.",
+        "tags": [
+          "Approvals"
+        ],
+        "parameters": [
+          {
+            "name": "learningKey",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the learning key.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Approval deleted successfully."
+          },
+          "404": {
+            "description": "Approval not found for the given learning key."
+          },
+          "400": {
+            "description": "Invalid request. Possible reasons include the approval not being in a pending state."
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      },
+      "put": {
+        "operationId": "PutApprovals",
+        "summary": "Update an approval",
+        "description": "Updates an existing approval for a given learning key.",
+        "tags": [
+          "Approvals"
+        ],
+        "parameters": [
+          {
+            "name": "learningKey",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the learning key.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CocApprovalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Approval updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprovalFieldChange"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Approval not found for the given learning key."
+          },
+          "400": {
+            "description": "Bad request. LearningKey in route does not match LearningKey in body."
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CocApprovalRequest": {
+        "type": "object",
+        "properties": {
+          "LearningKey": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ApprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "LearningType": {
+            "type": "string",
+            "enum": [
+              "Apprenticeship",
+              "FoundationApprenticeship",
+              "ApprenticeshipUnit"
+            ]
+          },
+          "UKPRN": {
+            "type": "string"
+          },
+          "ULN": {
+            "type": "string"
+          },
+          "ApprovedUri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "Changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CocApprovalFieldChange"
+            }
+          }
+        },
+        "required": [
+          "LearningKey",
+          "ApprenticeshipId",
+          "LearningType",
+          "UKPRN",
+          "ULN",
+          "ApprovedUri"
+        ]
+      },
+      "CocApprovalFieldChange": {
+        "type": "object",
+        "properties": {
+          "ChangeType": {
+            "type": "string"
+          },
+          "Data": {
+            "$ref": "#/components/schemas/CocData"
+          }
+        },
+        "required": [
+          "ChangeType"
+        ]
+      },
+      "CocData": {
+        "type": "object",
+        "properties": {
+          "Old": {
+            "type": "string"
+          },
+          "New": {
+            "type": "string"
+          },
+          "EffectiveFromDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApprovalFieldChange": {
+        "type": "object",
+        "properties": {
+          "ChangeType": {
+            "type": "string"
+          },
+          "ApprovalStatus": {
+            "type": "string"
+          },
+          "Reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

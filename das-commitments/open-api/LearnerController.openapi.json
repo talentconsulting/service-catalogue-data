@@ -1,0 +1,119 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Learner API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/learners": {
+      "get": {
+        "summary": "Retrieve all learners.",
+        "operationId": "getAllLearners",
+        "parameters": [
+          {
+            "name": "sinceTime",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Optional parameter to filter learners updated since this time."
+          },
+          {
+            "name": "batch_number",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1,
+              "minimum": 1
+            },
+            "description": "Batch number to retrieve."
+          },
+          {
+            "name": "batch_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1000,
+              "minimum": 1
+            },
+            "description": "Number of learners per batch."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of learners.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllLearnersResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. The request requires authentication."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        },
+        "security": [
+          {
+            "defaultAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetAllLearnersResponse": {
+        "type": "object",
+        "properties": {
+          "Learners": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            },
+            "description": "List of learners."
+          },
+          "BatchNumber": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The current batch number."
+          },
+          "BatchSize": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The number of learners in each batch."
+          },
+          "TotalNumberOfBatches": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The total number of batches available."
+          }
+        },
+        "required": [
+          "Learners",
+          "BatchNumber",
+          "BatchSize",
+          "TotalNumberOfBatches"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "defaultAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

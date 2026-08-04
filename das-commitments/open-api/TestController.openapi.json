@@ -1,0 +1,164 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Commitments V2 API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/Test/provider": {
+      "get": {
+        "summary": "Fetch secure provider endpoint",
+        "operationId": "GetProvider",
+        "security": [
+          {
+            "oauth2_provider": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Provider Secure Endpoint reached"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Test/employer": {
+      "get": {
+        "summary": "Fetch secure employer endpoint",
+        "operationId": "GetEmployer",
+        "security": [
+          {
+            "oauth2_employer": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Employer Secure Endpoint reached"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Test": {
+      "get": {
+        "summary": "Fetch secure endpoint by ID",
+        "operationId": "GetSecureEndpointById",
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Secure Endpoint reached"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetAllProvidersResponse": {
+        "type": "object",
+        "properties": {
+          "providers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Provider"
+            }
+          }
+        },
+        "required": [
+          "providers"
+        ]
+      },
+      "Provider": {
+        "type": "object",
+        "properties": {
+          "ukprn": {
+            "type": "integer",
+            "example": 12345678
+          },
+          "name": {
+            "type": "string",
+            "example": "Provider Name"
+          }
+        },
+        "required": [
+          "ukprn",
+          "name"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "oauth2_provider": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://example.com/auth",
+            "tokenUrl": "https://example.com/token",
+            "scopes": {
+              "provider": "Access provider API"
+            }
+          }
+        }
+      },
+      "oauth2_employer": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://example.com/auth",
+            "tokenUrl": "https://example.com/token",
+            "scopes": {
+              "employer": "Access employer API"
+            }
+          }
+        }
+      },
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://example.com/auth",
+            "tokenUrl": "https://example.com/token",
+            "scopes": {
+              "default": "Access generic API"
+            }
+          }
+        }
+      }
+    }
+  }
+}
