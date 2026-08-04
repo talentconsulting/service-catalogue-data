@@ -1,0 +1,216 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Commitments V2 API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/learners": {
+      "get": {
+        "summary": "Retrieve all learners",
+        "operationId": "GetAllLearners",
+        "parameters": [
+          {
+            "name": "sinceTime",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "The minimum creation time for learners to include."
+          },
+          {
+            "name": "batch_number",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "The batch number to retrieve."
+          },
+          {
+            "name": "batch_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1000
+            },
+            "description": "The maximum number of learners to retrieve in the batch."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of learners.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllLearnersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetAllLearnersResponse": {
+        "type": "object",
+        "properties": {
+          "BatchNumber": {
+            "type": "integer",
+            "description": "The number of the current batch."
+          },
+          "BatchSize": {
+            "type": "integer",
+            "description": "The size of the batch."
+          },
+          "TotalNumberOfBatches": {
+            "type": "integer",
+            "description": "The total number of batches available."
+          },
+          "Learners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Learner"
+            },
+            "description": "The list of learners in the batch."
+          }
+        },
+        "required": [
+          "BatchNumber",
+          "BatchSize",
+          "TotalNumberOfBatches",
+          "Learners"
+        ]
+      },
+      "Learner": {
+        "type": "object",
+        "properties": {
+          "ApprenticeshipId": {
+            "type": "integer",
+            "description": "The ID of the apprenticeship."
+          },
+          "FirstName": {
+            "type": "string",
+            "description": "The first name of the learner."
+          },
+          "LastName": {
+            "type": "string",
+            "description": "The last name of the learner."
+          },
+          "ULN": {
+            "type": "string",
+            "description": "The Unique Learner Number."
+          },
+          "TrainingCode": {
+            "type": "string",
+            "description": "The training code for the learner."
+          },
+          "TrainingCourseVersion": {
+            "type": "string",
+            "description": "The version of the training course."
+          },
+          "TrainingCourseVersionConfirmed": {
+            "type": "boolean",
+            "description": "Indicates whether the training course version was confirmed."
+          },
+          "TrainingCourseOption": {
+            "type": "string",
+            "description": "The training course option selected."
+          },
+          "StandardUId": {
+            "type": "string",
+            "description": "The Standard UID of the training course."
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start date of the apprenticeship."
+          },
+          "EndDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The planned end date of the apprenticeship."
+          },
+          "CreatedOn": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date the learner record was created."
+          },
+          "UpdatedOn": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date the learner record was last updated."
+          },
+          "StopDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The stop date of the apprenticeship, if applicable."
+          },
+          "PauseDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The pause date of the apprenticeship, if applicable."
+          },
+          "CompletionDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The completion date of the apprenticeship."
+          },
+          "UKPRN": {
+            "type": "integer",
+            "description": "The UK Provider Reference Number."
+          },
+          "LearnRefNumber": {
+            "type": "string",
+            "description": "The learner reference number."
+          },
+          "PaymentStatus": {
+            "$ref": "#/components/schemas/PaymentStatus",
+            "description": "The payment status of the apprenticeship."
+          },
+          "EmployerAccountId": {
+            "type": "integer",
+            "description": "The ID of the employer account."
+          },
+          "EmployerName": {
+            "type": "string",
+            "description": "The name of the employer."
+          }
+        },
+        "required": [
+          "ApprenticeshipId",
+          "FirstName",
+          "LastName",
+          "ULN",
+          "TrainingCode",
+          "TrainingCourseVersion",
+          "TrainingCourseVersionConfirmed",
+          "TrainingCourseOption",
+          "StandardUId",
+          "CreatedOn",
+          "UKPRN",
+          "LearnRefNumber",
+          "PaymentStatus",
+          "EmployerAccountId",
+          "EmployerName"
+        ]
+      },
+      "PaymentStatus": {
+        "type": "string",
+        "description": "The status of payments for the apprenticeship.",
+        "enum": [
+          "Active",
+          "Paused",
+          "Withdrawn",
+          "Completed"
+        ]
+      }
+    }
+  }
+}

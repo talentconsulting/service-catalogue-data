@@ -1,0 +1,249 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Transfer Request API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/accounts/{transferSenderId}/sender/transfers/{transferRequestId}": {
+      "get": {
+        "summary": "Get Transfer Request for Sender",
+        "operationId": "GetTransferRequestForSender",
+        "parameters": [
+          {
+            "name": "transferSenderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "transferRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transfer request found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTransferRequestResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transfer request not found"
+          }
+        }
+      }
+    },
+    "/api/accounts/{transferSenderId}/transfers/{transferRequestId}/approval/{cohortId}": {
+      "post": {
+        "summary": "Update Transfer Approval for Sender",
+        "operationId": "UpdateTransferApprovalForSender",
+        "parameters": [
+          {
+            "name": "transferSenderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "transferRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "cohortId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTransferApprovalForSenderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transfer approval updated successfully"
+          }
+        }
+      }
+    },
+    "/api/accounts/{transferReceiverId}/receiver/transfers/{transferRequestId}": {
+      "get": {
+        "summary": "Get Transfer Request for Receiver",
+        "operationId": "GetTransferRequestForReceiver",
+        "parameters": [
+          {
+            "name": "transferReceiverId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "transferRequestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transfer request found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTransferRequestResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transfer request not found"
+          }
+        }
+      }
+    },
+    "/api/accounts/{accountId}/transfers": {
+      "get": {
+        "summary": "Get Transfer Requests",
+        "operationId": "GetTransferRequests",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "originator",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/TransferType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transfer requests summary found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetTransferRequestSummaryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transfer requests summary not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetTransferRequestResponse": {
+        "type": "object",
+        "properties": {}
+      },
+      "UpdateTransferApprovalForSenderRequest": {
+        "type": "object",
+        "properties": {
+          "TransferSenderId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "TransferRequestId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "CohortId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "TransferReceiverId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "TransferApprovalStatus": {
+            "$ref": "#/components/schemas/TransferApprovalStatus"
+          },
+          "UserInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        }
+      },
+      "GetTransferRequestSummaryResponse": {
+        "type": "object",
+        "properties": {}
+      },
+      "TransferType": {
+        "type": "string",
+        "enum": [
+          "AsSender",
+          "AsReceiver"
+        ]
+      },
+      "TransferApprovalStatus": {
+        "type": "string",
+        "enum": [
+          "Pending",
+          "Approved",
+          "Rejected"
+        ]
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          },
+          "UserDisplayName": {
+            "type": "string"
+          },
+          "UserEmail": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

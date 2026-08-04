@@ -1,0 +1,233 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprenticeship Update API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/apprenticeships/{apprenticeshipId}/updates": {
+      "get": {
+        "summary": "Retrieve Apprenticeship Updates",
+        "parameters": [
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the apprenticeship",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "description": "Status of the apprenticeship updates",
+            "schema": {
+              "$ref": "#/components/schemas/ApprenticeshipUpdateStatus"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/apprenticeships/{apprenticeshipId}/updates/accept-apprenticeship-update": {
+      "post": {
+        "summary": "Accept Apprenticeship Update",
+        "parameters": [
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the apprenticeship",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcceptApprenticeshipUpdatesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update accepted successfully"
+          }
+        }
+      }
+    },
+    "/api/apprenticeships/{apprenticeshipId}/updates/reject-apprenticeship-update": {
+      "post": {
+        "summary": "Reject Apprenticeship Update",
+        "parameters": [
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the apprenticeship",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectApprenticeshipUpdatesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update rejected successfully"
+          }
+        }
+      }
+    },
+    "/api/apprenticeships/{apprenticeshipId}/updates/undo-apprenticeship-update": {
+      "post": {
+        "summary": "Undo Apprenticeship Update",
+        "parameters": [
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the apprenticeship",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UndoApprenticeshipUpdatesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update undone successfully"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApprenticeshipUpdateStatus": {
+        "type": "string",
+        "enum": [
+          "Pending",
+          "Approved",
+          "Rejected",
+          "Deleted",
+          "Superceded",
+          "Expired"
+        ]
+      },
+      "AcceptApprenticeshipUpdatesRequest": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "apprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        }
+      },
+      "RejectApprenticeshipUpdatesRequest": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "apprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        }
+      },
+      "UndoApprenticeshipUpdatesRequest": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "apprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        }
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "userDisplayName": {
+            "type": "string"
+          },
+          "userEmail": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      }
+    }
+  }
+}

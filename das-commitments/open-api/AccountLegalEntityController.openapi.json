@@ -1,0 +1,126 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AccountLegalEntity API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/AccountLegalEntity/{AccountLegalEntityId}": {
+      "get": {
+        "operationId": "GetAccountLegalEntity",
+        "summary": "Retrieve details of an account legal entity by its ID.",
+        "parameters": [
+          {
+            "name": "AccountLegalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "The ID of the account legal entity."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the account legal entity.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountLegalEntityResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. The request was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found. The account legal entity was not found."
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccountLegalEntityResponse": {
+        "type": "object",
+        "properties": {
+          "AccountId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The ID of the account."
+          },
+          "MaLegalEntityId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The ID of the legal entity within the account."
+          },
+          "AccountName": {
+            "type": "string",
+            "description": "The name of the account."
+          },
+          "LegalEntityName": {
+            "type": "string",
+            "description": "The name of the legal entity."
+          },
+          "LevyStatus": {
+            "type": "string",
+            "enum": [
+              "NonLevy",
+              "Levy"
+            ],
+            "description": "The levy status of the employer."
+          }
+        },
+        "required": [
+          "AccountId",
+          "MaLegalEntityId",
+          "AccountName",
+          "LegalEntityName",
+          "LevyStatus"
+        ]
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "Errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of error messages describing what went wrong."
+          }
+        },
+        "required": [
+          "Errors"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "tokenUrl": "https://example.com/oauth/token",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  }
+}

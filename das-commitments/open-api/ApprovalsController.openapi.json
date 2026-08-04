@@ -1,0 +1,270 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Approvals API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/approvals/{learningKey}": {
+      "post": {
+        "summary": "Create new approval.",
+        "operationId": "PostApprovals",
+        "parameters": [
+          {
+            "name": "learningKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Unique identifier for the learning approval."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CocApprovalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Approval created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprovalFieldChange"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. Possibly due to mismatch between body and path parameters."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "delete": {
+        "summary": "Delete approval.",
+        "operationId": "DeleteApprovals",
+        "parameters": [
+          {
+            "name": "learningKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Unique identifier for the learning approval to be deleted."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Approval deletion marked as Cancelled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Approval not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid state for deletion.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      },
+      "put": {
+        "summary": "Update approval.",
+        "operationId": "PutApprovals",
+        "parameters": [
+          {
+            "name": "learningKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Unique identifier for the learning approval."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CocApprovalRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Approval updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprovalFieldChange"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Approval not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. Possibly due to mismatch between body and path parameters."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CocApprovalRequest": {
+        "type": "object",
+        "properties": {
+          "LearningKey": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ApprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "LearningType": {
+            "type": "string",
+            "enum": [
+              "Apprenticeship",
+              "FoundationApprenticeship",
+              "ApprenticeshipUnit"
+            ]
+          },
+          "UKPRN": {
+            "type": "string"
+          },
+          "ULN": {
+            "type": "string"
+          },
+          "ApprovedUri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "Changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CocApprovalFieldChange"
+            }
+          }
+        },
+        "required": [
+          "LearningKey",
+          "ApprenticeshipId",
+          "LearningType",
+          "UKPRN",
+          "ULN"
+        ]
+      },
+      "CocApprovalFieldChange": {
+        "type": "object",
+        "properties": {
+          "ChangeType": {
+            "type": "string"
+          },
+          "Data": {
+            "$ref": "#/components/schemas/CocData"
+          }
+        },
+        "required": [
+          "ChangeType",
+          "Data"
+        ]
+      },
+      "CocData": {
+        "type": "object",
+        "properties": {
+          "Old": {
+            "type": "string"
+          },
+          "New": {
+            "type": "string"
+          },
+          "EffectiveFromDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "Old",
+          "New"
+        ]
+      },
+      "ApprovalFieldChange": {
+        "type": "object",
+        "properties": {
+          "ChangeType": {
+            "type": "string"
+          },
+          "ApprovalStatus": {
+            "type": "string"
+          },
+          "Reason": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

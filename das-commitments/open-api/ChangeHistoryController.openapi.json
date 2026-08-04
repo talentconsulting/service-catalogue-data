@@ -1,0 +1,208 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Change History API",
+    "version": "1.0.0",
+    "description": "API for retrieving change history for apprenticeships, providers, and employers."
+  },
+  "paths": {
+    "/api/change-history/{ApprenticeshipId}": {
+      "get": {
+        "summary": "Get Change History for an Apprenticeship",
+        "description": "Retrieves the change history for a specific apprenticeship.",
+        "operationId": "GetChangeHistory",
+        "parameters": [
+          {
+            "name": "ApprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "ID of the apprenticeship to retrieve change history for."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response containing change history.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetChangeHistoryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation errors occurred."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/change-history/{providerId}/Get-all-change-history": {
+      "get": {
+        "summary": "Get Change History for All Learners of a Provider",
+        "description": "Retrieves the change history for all learners associated with a specific provider.",
+        "operationId": "GetChangeHistoryForAllLearnersOfProvider",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "ID of the provider to retrieve change history for."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response containing change history.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllChangeHistoryForProviderQueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation errors occurred."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/change-history/employer/{accountId}/change-history": {
+      "get": {
+        "summary": "Get Change History for an Employer",
+        "description": "Retrieves the change history for all learners associated with a specific employer.",
+        "operationId": "GetChangeHistoryForEmployer",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "ID of the employer account to retrieve change history for."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response containing change history.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetChangeHistoryForEmployerResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Validation errors occurred."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChangeHistory": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ChangeType": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "ApprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "LearnerName": {
+            "type": "string"
+          },
+          "AppliedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EmployerName": {
+            "type": "string"
+          },
+          "ProviderName": {
+            "type": "string"
+          }
+        }
+      },
+      "GetChangeHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "ChangeHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangeHistory"
+            }
+          }
+        }
+      },
+      "GetAllChangeHistoryForProviderQueryResponse": {
+        "type": "object",
+        "properties": {
+          "ChangeHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangeHistory"
+            }
+          }
+        }
+      },
+      "GetChangeHistoryForEmployerResponse": {
+        "type": "object",
+        "properties": {
+          "ChangeHistory": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangeHistory"
+            }
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}
