@@ -1,0 +1,168 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Finance API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/payments/staging": {
+      "post": {
+        "operationId": "BulkPaymentsIngest",
+        "summary": "Ingest bulk payment staging information.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkPaymentsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request - Validation errors or missing required payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - Conflicting payment IDs detected.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "paymentIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Unexpected errors occurred during staging.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Unexpected error staging payments."
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created - Bulk payments successfully staged.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "insertedCount": {
+                      "type": "integer",
+                      "example": 10
+                    },
+                    "paymentIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BulkPaymentsRequest": {
+        "type": "object",
+        "properties": {
+          "Payments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentStagingModel"
+            }
+          }
+        }
+      },
+      "PaymentStagingModel": {
+        "type": "object",
+        "properties": {
+          "PaymentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Ukprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Uln": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ApprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "CollectionPeriodId": {
+            "type": "string"
+          },
+          "DeliveryPeriodMonth": {
+            "type": "integer"
+          },
+          "DeliveryPeriodYear": {
+            "type": "integer"
+          },
+          "CollectionPeriodMonth": {
+            "type": "integer"
+          },
+          "CollectionPeriodYear": {
+            "type": "integer"
+          },
+          "FundingSource": {
+            "type": "string"
+          },
+          "TransactionType": {
+            "type": "string"
+          },
+          "Amount": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "EvidenceSubmittedOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EmployerAccountVersion": {
+            "type": "string"
+          },
+          "ApprenticeshipVersion": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

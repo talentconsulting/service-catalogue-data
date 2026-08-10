@@ -1,0 +1,188 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Finance API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/payments/{paymentId}/metadata/staging": {
+      "put": {
+        "summary": "Update Payment Metadata Staging",
+        "description": "Updates the payment metadata staging for the specified payment ID.",
+        "operationId": "updatePaymentMetaDataStaging",
+        "parameters": [
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the payment to update metadata for.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentMetaDataStaging"
+              }
+            }
+          },
+          "description": "The metadata staging information to update for the payment."
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated the payment metadata staging.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "upserted": {
+                      "type": "boolean",
+                      "description": "Indicates whether the record was upserted."
+                    },
+                    "metadataId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "description": "The ID of the updated metadata."
+                    }
+                  },
+                  "required": [
+                    "upserted",
+                    "metadataId"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "The request was invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "example": [
+                  "Request body is required."
+                ]
+              }
+            }
+          },
+          "404": {
+            "description": "The specified payment ID was not found."
+          },
+          "500": {
+            "description": "An error occurred while updating the payment metadata staging."
+          }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PaymentMetaDataStaging": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "example": 12345
+          },
+          "ProviderName": {
+            "type": "string"
+          },
+          "StandardCode": {
+            "type": "integer",
+            "nullable": true
+          },
+          "FrameworkCode": {
+            "type": "integer",
+            "nullable": true
+          },
+          "ProgrammeType": {
+            "type": "integer",
+            "nullable": true
+          },
+          "PathwayCode": {
+            "type": "integer",
+            "nullable": true
+          },
+          "PathwayName": {
+            "type": "string"
+          },
+          "ApprenticeshipCourseName": {
+            "type": "string"
+          },
+          "ApprenticeshipCourseStartDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "ApprenticeshipCourseLevel": {
+            "type": "integer",
+            "nullable": true
+          },
+          "ApprenticeName": {
+            "type": "string"
+          },
+          "ApprenticeNINumber": {
+            "type": "string"
+          },
+          "IsHistoricProviderName": {
+            "type": "boolean"
+          },
+          "LearningType": {
+            "type": "string"
+          },
+          "CourseCode": {
+            "type": "string"
+          },
+          "CohortId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "CreatedBy": {
+            "type": "string"
+          },
+          "CorrelationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "PaymentId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "Id",
+          "ProviderName",
+          "PaymentId"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "tokenUrl": "https://example.com/oauth/token",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  }
+}

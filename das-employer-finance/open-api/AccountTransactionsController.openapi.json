@@ -1,0 +1,219 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Finance API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/accounts/{hashedAccountId}/transactions": {
+      "get": {
+        "operationId": "GetTransactionSummary",
+        "summary": "Retrieve transaction summaries for an account.",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transactionType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "periodEnd",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionSummaryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "ApiRoles_ReadAllEmployerAccountBalances": []
+          }
+        ]
+      }
+    },
+    "/api/accounts/{hashedAccountId}/transactions/{year}/{month}": {
+      "get": {
+        "operationId": "GetTransactions",
+        "summary": "Retrieve transactions for a specific year and month.",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "month",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "ApiRoles_ReadAllEmployerAccountBalances": []
+          }
+        ]
+      }
+    },
+    "/api/accounts/{hashedAccountId}/transactions/query": {
+      "get": {
+        "operationId": "QueryAccountTransactions",
+        "summary": "Query transactions between specified dates.",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransactionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "ApiRoles_ReadAllEmployerAccountBalances": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TransactionSummaryResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "Year": {
+              "type": "integer"
+            },
+            "Month": {
+              "type": "integer"
+            },
+            "Href": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      },
+      "TransactionsResponse": {
+        "type": "object",
+        "properties": {
+          "Year": {
+            "type": "integer"
+          },
+          "Month": {
+            "type": "integer"
+          },
+          "HasPreviousTransactions": {
+            "type": "boolean"
+          },
+          "PreviousMonthUri": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiRoles_ReadAllEmployerAccountBalances": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

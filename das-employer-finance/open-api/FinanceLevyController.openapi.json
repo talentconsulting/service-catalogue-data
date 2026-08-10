@@ -1,0 +1,227 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Finance Levy API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/accounts/{hashedAccountId}/levy": {
+      "get": {
+        "operationId": "getLevy",
+        "summary": "Get levy summary for an account",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Levy data retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevySummary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Levy data not found."
+          }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadAllEmployerAccountBalances": []
+          }
+        ]
+      }
+    },
+    "/api/accounts/{hashedAccountId}/levy/{payrollYear}/{payrollMonth}": {
+      "get": {
+        "operationId": "getLevyForPeriod",
+        "summary": "Get levy details for a specific payroll period",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "payrollYear",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "payrollMonth",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int16"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Levy data for the specified period retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LevyDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Levy data for the specified period not found."
+          }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadAllEmployerAccountBalances": []
+          }
+        ]
+      }
+    },
+    "/api/accounts/{hashedAccountId}/levy/english-fraction-history": {
+      "get": {
+        "operationId": "getEnglishFractionHistory",
+        "summary": "Get English fraction history for an account",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "empRef",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "English fraction history retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnglishFractionHistory"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "English fraction history not found."
+          }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadAllEmployerAccountBalances": []
+          }
+        ]
+      }
+    },
+    "/api/accounts/{hashedAccountId}/levy/english-fraction-current": {
+      "get": {
+        "operationId": "getEnglishFractionCurrent",
+        "summary": "Get current English fraction values for multiple employers",
+        "parameters": [
+          {
+            "name": "empRefs",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current English fraction values retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnglishFractionCurrent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "English fraction data not found."
+          }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadAllEmployerAccountBalances": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LevySummary": {
+        "type": "object",
+        "description": "Summary of levy for an account.",
+        "properties": {}
+      },
+      "LevyDetails": {
+        "type": "object",
+        "description": "Details of levy for a specific payroll period.",
+        "properties": {}
+      },
+      "EnglishFractionHistory": {
+        "type": "object",
+        "description": "Historical English fraction values for an account.",
+        "properties": {}
+      },
+      "EnglishFractionCurrent": {
+        "type": "object",
+        "description": "Current English fraction values for employers.",
+        "properties": {}
+      }
+    },
+    "securitySchemes": {
+      "ApiRoles.ReadAllEmployerAccountBalances": {
+        "type": "oauth2",
+        "description": "Access restricted to users with read permissions for all employer account balances.",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "scopes": {
+              "ReadAllEmployerAccountBalances": "Access to read all employer account balances"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,85 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Finance API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/accounts/{accountId}/transfer/connections": {
+      "get": {
+        "summary": "Get Transfers by Period End",
+        "description": "Retrieve transfer connections for a given account and period end.",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier for the account.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "periodEnd",
+            "in": "query",
+            "required": true,
+            "description": "Period end in the required format (e.g., YYYY-MM).",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with transfer details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request if the periodEnd query parameter is missing or invalid."
+          },
+          "404": {
+            "description": "Not Found if no transfers are found for the account and period end."
+          }
+        },
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadAllEmployerAccountBalances"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TransferResponse": {
+        "type": "object",
+        "properties": {
+          "accountTransfers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "description": "Response containing account transfers for the specified account and period end."
+      }
+    },
+    "securitySchemes": {
+      "ApiRoles": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization scheme based on the defined API roles."
+      }
+    }
+  }
+}

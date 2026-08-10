@@ -1,0 +1,261 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Finance API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/levy-declarations": {
+      "post": {
+        "summary": "Persist Levy Declarations",
+        "description": "Persists levy declarations data.",
+        "operationId": "persistLevyDeclarations",
+        "security": [
+          {
+            "ReadAllEmployerAccountBalances": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PersistLevyDeclarationRequestData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request payload."
+          }
+        }
+      }
+    },
+    "/api/levy-declarations/{empRef}/period-12-declarations": {
+      "get": {
+        "summary": "Get Existing Period 12 Levy Declarations",
+        "description": "Fetches existing period 12 levy declarations for a given employer reference.",
+        "operationId": "getExistingPeriod12LevyDeclarations",
+        "security": [
+          {
+            "ReadAllEmployerAccountBalances": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "empRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/levy-declarations/{empRef}/submission-ids": {
+      "get": {
+        "summary": "Get Submission IDs",
+        "description": "Gets the list of submission IDs for the given employer reference.",
+        "operationId": "getSubmissionIds",
+        "security": [
+          {
+            "ReadAllEmployerAccountBalances": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "empRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/levy-declarations/{empRef}/last-submission-date": {
+      "get": {
+        "summary": "Get Last Submission Date",
+        "description": "Fetches the last submission date for the given employer reference.",
+        "operationId": "getLastSubmissionDate",
+        "security": [
+          {
+            "ReadAllEmployerAccountBalances": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "empRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PersistLevyDeclarationRequestData": {
+        "type": "object",
+        "properties": {
+          "CorrelationId": {
+            "type": "string"
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "EmpRef": {
+            "type": "string"
+          },
+          "Declarations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NormalizedLevyDeclaration"
+            }
+          },
+          "GenerateTransactions": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "CorrelationId",
+          "AccountId",
+          "EmpRef",
+          "Declarations",
+          "GenerateTransactions"
+        ]
+      },
+      "NormalizedLevyDeclaration": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "LevyDueYtd": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "SubmissionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "SubmissionType": {
+            "type": "string"
+          },
+          "LevyAllowanceForFullYear": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "PayrollYear": {
+            "type": "string"
+          },
+          "PayrollMonth": {
+            "type": "integer",
+            "format": "int16"
+          },
+          "NoPaymentForPeriod": {
+            "type": "boolean"
+          },
+          "DateCeased": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "InactiveFrom": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "InactiveTo": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EndOfYearAdjustment": {
+            "type": "boolean"
+          },
+          "EndOfYearAdjustmentAmount": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "SubmissionId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "Id",
+          "SubmissionDate",
+          "SubmissionType",
+          "LevyAllowanceForFullYear",
+          "PayrollYear",
+          "NoPaymentForPeriod",
+          "EndOfYearAdjustment",
+          "EndOfYearAdjustmentAmount",
+          "SubmissionId"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "ReadAllEmployerAccountBalances": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  }
+}
