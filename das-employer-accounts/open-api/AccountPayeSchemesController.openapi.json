@@ -1,0 +1,124 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Accounts API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/accounts/{accountId}/payeschemes": {
+      "get": {
+        "summary": "Get PAYE Schemes for an Account",
+        "operationId": "GetPayeSchemes",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of PAYE schemes associated with the account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceList"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No PAYE schemes were found for the specified account."
+          }
+        },
+        "security": [
+          {
+            "ReadAllEmployerAccountBalances": []
+          }
+        ]
+      }
+    },
+    "/api/accounts/{accountId}/payeschemes/scheme": {
+      "get": {
+        "summary": "Get a Specific PAYE Scheme",
+        "operationId": "GetPayeScheme",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "payeSchemeRef",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the specified PAYE scheme.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The specified PAYE scheme was not found."
+          }
+        },
+        "security": [
+          {
+            "ReadAllEmployerAccountBalances": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Resource": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Href": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Id",
+          "Href"
+        ]
+      },
+      "ResourceList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Resource"
+        }
+      }
+    },
+    "securitySchemes": {
+      "ReadAllEmployerAccountBalances": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  }
+}

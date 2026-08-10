@@ -1,0 +1,308 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Accounts API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/accountlegalentities": {
+      "get": {
+        "operationId": "GetAccountLegalEntities",
+        "summary": "Retrieve account legal entities.",
+        "tags": [
+          "Account Legal Entities"
+        ],
+        "parameters": [
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "name": "PageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 100,
+              "maximum": 10000,
+              "default": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedApiResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadUserAccounts": []
+          }
+        ]
+      }
+    },
+    "/api/accountlegalentities/GetAll": {
+      "post": {
+        "operationId": "GetAllAccountLegalEntities",
+        "summary": "Retrieve all account legal entities based on hashed account ID.",
+        "tags": [
+          "Account Legal Entities"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetAllLegalEntitiesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with account legal entities.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllAccountLegalEntitiesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadUserAccounts": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetAllLegalEntitiesRequest": {
+        "type": "object",
+        "properties": {
+          "AccountIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "SearchTerm": {
+            "type": "string",
+            "default": ""
+          },
+          "PageNumber": {
+            "type": "integer",
+            "default": 1
+          },
+          "PageSize": {
+            "type": "integer",
+            "default": 10
+          },
+          "SortColumn": {
+            "type": "string",
+            "default": "Name"
+          },
+          "IsAscending": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "AccountIds"
+        ]
+      },
+      "GetAllAccountLegalEntitiesResponse": {
+        "type": "object",
+        "properties": {
+          "PageInfo": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "LegalEntities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntity"
+            }
+          }
+        }
+      },
+      "PageInfo": {
+        "type": "object",
+        "properties": {
+          "TotalCount": {
+            "type": "integer"
+          },
+          "PageIndex": {
+            "type": "integer"
+          },
+          "PageSize": {
+            "type": "integer"
+          },
+          "TotalPages": {
+            "type": "integer"
+          },
+          "HasPreviousPage": {
+            "type": "boolean"
+          },
+          "HasNextPage": {
+            "type": "boolean"
+          }
+        }
+      },
+      "LegalEntity": {
+        "type": "object",
+        "properties": {
+          "Agreements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Agreement"
+            }
+          },
+          "Code": {
+            "type": "string"
+          },
+          "DasAccountId": {
+            "type": "string"
+          },
+          "DateOfInception": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Address": {
+            "type": "string"
+          },
+          "LegalEntityId": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "PublicSectorDataSource": {
+            "type": "string"
+          },
+          "Sector": {
+            "type": "string"
+          },
+          "Source": {
+            "type": "string"
+          },
+          "SourceNumeric": {
+            "type": "integer"
+          },
+          "Status": {
+            "type": "string"
+          },
+          "AccountLegalEntityId": {
+            "type": "integer"
+          },
+          "AccountLegalEntityPublicHashedId": {
+            "type": "string"
+          },
+          "AccountName": {
+            "type": "string"
+          }
+        }
+      },
+      "Agreement": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer"
+          },
+          "SignedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "SignedByName": {
+            "type": "string"
+          },
+          "SignedById": {
+            "type": "integer"
+          },
+          "SignedByEmail": {
+            "type": "string"
+          },
+          "Status": {
+            "type": "string",
+            "enum": [
+              "Pending",
+              "Signed",
+              "Expired",
+              "Superseded",
+              "Removed"
+            ]
+          },
+          "TemplateVersionNumber": {
+            "type": "integer"
+          },
+          "AgreementType": {
+            "type": "string",
+            "enum": [
+              "Levy",
+              "Combined",
+              "Unknown"
+            ]
+          }
+        }
+      },
+      "PagedApiResponse": {
+        "type": "object",
+        "properties": {
+          "Data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountLegalEntity"
+            }
+          },
+          "Page": {
+            "type": "integer"
+          },
+          "TotalPages": {
+            "type": "integer"
+          }
+        }
+      },
+      "AccountLegalEntity": {
+        "type": "object",
+        "properties": {
+          "AccountId": {
+            "type": "integer"
+          },
+          "AccountLegalEntityId": {
+            "type": "integer"
+          },
+          "AccountLegalEntityPublicHashedId": {
+            "type": "string"
+          },
+          "LegalEntityId": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
