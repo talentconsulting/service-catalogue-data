@@ -1,26 +1,29 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SFA DAS Commitments V2 API",
+    "title": "Commitments V2 Apprenticeship API",
+    "description": "API for managing apprenticeships such as retrieval, updates, and validation of apprenticeship data.",
     "version": "1.0.0"
   },
   "paths": {
     "/api/apprenticeships/{apprenticeshipId}": {
       "get": {
-        "summary": "Get Apprenticeship by ID",
+        "summary": "Get Apprenticeship Details",
+        "operationId": "getApprenticeship",
         "parameters": [
           {
             "name": "apprenticeshipId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -38,25 +41,164 @@
     "/api/apprenticeships": {
       "get": {
         "summary": "Get Apprenticeships",
+        "operationId": "getApprenticeships",
         "parameters": [
           {
             "name": "AccountId",
             "in": "query",
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
             }
           },
           {
             "name": "ProviderId",
             "in": "query",
             "schema": {
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
+            }
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "name": "PageItemCount",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "SortField",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "ReverseSort",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "SearchTerm",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "EmployerName",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "ProviderName",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "CourseName",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "Status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ApprenticeshipStatus"
+            }
+          },
+          {
+            "name": "StartDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          },
+          {
+            "name": "EndDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          },
+          {
+            "name": "AccountLegalEntityId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "nullable": true
+            }
+          },
+          {
+            "name": "StartDateRangeFrom",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          },
+          {
+            "name": "StartDateRangeTo",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "nullable": true
+            }
+          },
+          {
+            "name": "Alert",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/Alerts"
+            }
+          },
+          {
+            "name": "ApprenticeConfirmationStatus",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ConfirmationStatus"
+            }
+          },
+          {
+            "name": "DeliveryModel",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/DeliveryModel"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -74,205 +216,30 @@
     "/api/apprenticeships/filters": {
       "get": {
         "summary": "Get Apprenticeship Filters",
+        "operationId": "getApprenticeshipsFilterValues",
         "parameters": [
-          {
-            "name": "EmployerAccountId",
-            "in": "query",
-            "schema": {
-              "type": "integer"
-            }
-          },
           {
             "name": "ProviderId",
             "in": "query",
             "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
             }
           },
-          "404": {
-            "description": "Not Found"
-          }
-        }
-      }
-    },
-    "/api/apprenticeships/details/editenddate": {
-      "post": {
-        "summary": "Edit Apprenticeship End Date",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EditEndDateRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/apprenticeships/{apprenticeshipId}/stop": {
-      "post": {
-        "summary": "Stop Apprenticeship",
-        "parameters": [
           {
-            "name": "apprenticeshipId",
-            "in": "path",
-            "required": true,
+            "name": "EmployerAccountId",
+            "in": "query",
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64",
+              "nullable": true
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/StopApprenticeshipRequest"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/apprenticeships/{apprenticeshipId}/payments": {
-      "patch": {
-        "summary": "Patch Apprenticeship Payments",
-        "parameters": [
-          {
-            "name": "apprenticeshipId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PatchApprenticeshipPaymentsRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/apprenticeships/details/pause": {
-      "post": {
-        "summary": "Pause Apprenticeship",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PauseApprenticeshipRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/apprenticeships/details/resume": {
-      "post": {
-        "summary": "Resume Apprenticeship",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ResumeApprenticeshipRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
-      }
-    },
-    "/api/apprenticeships/{apprenticeshipId}/resendinvitation": {
-      "post": {
-        "summary": "Resend Apprenticeship Invitation",
-        "parameters": [
-          {
-            "name": "apprenticeshipId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SaveDataRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "202": {
-            "description": "Accepted"
-          }
-        }
-      }
-    },
-    "/api/apprenticeships/edit/validate": {
-      "post": {
-        "summary": "Validate Apprenticeship for Edit",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ValidateApprenticeshipForEditRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Success"
+            "description": "Successful response"
           },
           "404": {
             "description": "Not Found"
@@ -285,191 +252,49 @@
     "schemas": {
       "GetApprenticeshipResponse": {
         "type": "object",
-        "properties": {
-          "ApprenticeshipId": {
-            "type": "integer"
-          },
-          "FirstName": {
-            "type": "string"
-          },
-          "LastName": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
+        "properties": {}
       },
       "GetApprenticeshipsResponse": {
         "type": "object",
-        "properties": {
-          "Apprenticeships": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/GetApprenticeshipResponse"
-            }
-          }
-        },
-        "additionalProperties": false
+        "properties": {}
       },
-      "EditEndDateRequest": {
-        "type": "object",
-        "properties": {
-          "ApprenticeshipId": {
-            "type": "integer"
-          },
-          "EndDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "UserInfo": {
-            "$ref": "#/components/schemas/UserInfo"
-          }
-        },
-        "additionalProperties": false
+      "ApprenticeshipStatus": {
+        "type": "string",
+        "enum": [
+          "WaitingToStart",
+          "Live",
+          "Paused",
+          "Stopped",
+          "Completed",
+          "Unknown"
+        ]
       },
-      "StopApprenticeshipRequest": {
-        "type": "object",
-        "properties": {
-          "AccountId": {
-            "type": "integer"
-          },
-          "StopDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "MadeRedundant": {
-            "type": "boolean"
-          },
-          "UserInfo": {
-            "$ref": "#/components/schemas/UserInfo"
-          }
-        },
-        "additionalProperties": false
+      "Alerts": {
+        "type": "string",
+        "enum": [
+          "IlrDataMismatch",
+          "ChangesPending",
+          "ChangesRequested",
+          "ChangesForReview",
+          "ConfirmDates"
+        ]
       },
-      "PatchApprenticeshipPaymentsRequest": {
-        "type": "object",
-        "properties": {
-          "PaymentFreezeDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "FreezePaymentsReason": {
-            "type": "string",
-            "enum": [
-              "LearnerOnBreak",
-              "LearnerWithdrawn",
-              "ChangeToTrainingDetails",
-              "DisagreeWithAutoApprovedChange"
-            ]
-          },
-          "Party": {
-            "type": "integer"
-          },
-          "UserInfo": {
-            "$ref": "#/components/schemas/UserInfo"
-          }
-        },
-        "additionalProperties": false
+      "ConfirmationStatus": {
+        "type": "string",
+        "enum": [
+          "NA",
+          "Overdue",
+          "Unconfirmed",
+          "Confirmed"
+        ]
       },
-      "PauseApprenticeshipRequest": {
-        "type": "object",
-        "properties": {
-          "ApprenticeshipId": {
-            "type": "integer"
-          },
-          "UserInfo": {
-            "$ref": "#/components/schemas/UserInfo"
-          }
-        },
-        "additionalProperties": false
-      },
-      "ResumeApprenticeshipRequest": {
-        "type": "object",
-        "properties": {
-          "ApprenticeshipId": {
-            "type": "integer"
-          },
-          "UserInfo": {
-            "$ref": "#/components/schemas/UserInfo"
-          }
-        },
-        "additionalProperties": false
-      },
-      "SaveDataRequest": {
-        "type": "object",
-        "properties": {
-          "UserInfo": {
-            "$ref": "#/components/schemas/UserInfo"
-          }
-        },
-        "additionalProperties": true
-      },
-      "ValidateApprenticeshipForEditRequest": {
-        "type": "object",
-        "properties": {
-          "ApprenticeshipId": {
-            "type": "integer"
-          },
-          "EmployerAccountId": {
-            "type": "integer"
-          },
-          "ProviderId": {
-            "type": "integer"
-          },
-          "FirstName": {
-            "type": "string"
-          },
-          "LastName": {
-            "type": "string"
-          },
-          "Cost": {
-            "type": "number"
-          },
-          "EmployerReference": {
-            "type": "string"
-          },
-          "DateOfBirth": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "StartDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "EndDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "ULN": {
-            "type": "string"
-          },
-          "DeliveryModel": {
-            "type": "string",
-            "enum": [
-              "Regular",
-              "PortableFlexiJob",
-              "FlexiJobAgency"
-            ]
-          },
-          "Email": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
-      },
-      "UserInfo": {
-        "type": "object",
-        "properties": {
-          "UserId": {
-            "type": "string"
-          },
-          "UserDisplayName": {
-            "type": "string"
-          },
-          "UserEmail": {
-            "type": "string"
-          }
-        },
-        "additionalProperties": false
+      "DeliveryModel": {
+        "type": "string",
+        "enum": [
+          "Regular",
+          "PortableFlexiJob",
+          "FlexiJobAgency"
+        ]
       }
     }
   }

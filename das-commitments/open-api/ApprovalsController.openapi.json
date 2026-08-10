@@ -1,13 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Approvals API",
+    "title": "CommitmentsV2 API",
     "version": "1.0.0"
   },
   "paths": {
     "/approvals/{learningKey}": {
       "post": {
-        "summary": "Create new approval.",
+        "summary": "Create an approval",
         "operationId": "PostApprovals",
         "parameters": [
           {
@@ -17,8 +17,7 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "Unique identifier for the learning approval."
+            }
           }
         ],
         "requestBody": {
@@ -33,7 +32,7 @@
         },
         "responses": {
           "201": {
-            "description": "Approval created.",
+            "description": "Approval created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -46,7 +45,14 @@
             }
           },
           "400": {
-            "description": "Bad request. Possibly due to mismatch between body and path parameters."
+            "description": "LearningKey mismatch or bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -56,7 +62,7 @@
         ]
       },
       "delete": {
-        "summary": "Delete approval.",
+        "summary": "Delete an approval",
         "operationId": "DeleteApprovals",
         "parameters": [
           {
@@ -66,13 +72,12 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "Unique identifier for the learning approval to be deleted."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Approval deletion marked as Cancelled.",
+            "description": "Approval deleted successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -82,7 +87,7 @@
             }
           },
           "404": {
-            "description": "Approval not found.",
+            "description": "Approval not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -92,7 +97,7 @@
             }
           },
           "400": {
-            "description": "Invalid state for deletion.",
+            "description": "Invalid approval state",
             "content": {
               "application/json": {
                 "schema": {
@@ -109,7 +114,7 @@
         ]
       },
       "put": {
-        "summary": "Update approval.",
+        "summary": "Update an approval",
         "operationId": "PutApprovals",
         "parameters": [
           {
@@ -119,8 +124,7 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "Unique identifier for the learning approval."
+            }
           }
         ],
         "requestBody": {
@@ -135,7 +139,7 @@
         },
         "responses": {
           "201": {
-            "description": "Approval updated.",
+            "description": "Approval updated successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -148,7 +152,7 @@
             }
           },
           "404": {
-            "description": "Approval not found.",
+            "description": "Pending approval not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -158,9 +162,21 @@
             }
           },
           "400": {
-            "description": "Bad request. Possibly due to mismatch between body and path parameters."
+            "description": "LearningKey mismatch or bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     }
   },
@@ -174,16 +190,10 @@
             "format": "uuid"
           },
           "ApprenticeshipId": {
-            "type": "integer",
-            "format": "int64"
+            "type": "integer"
           },
           "LearningType": {
-            "type": "string",
-            "enum": [
-              "Apprenticeship",
-              "FoundationApprenticeship",
-              "ApprenticeshipUnit"
-            ]
+            "type": "string"
           },
           "UKPRN": {
             "type": "string"
@@ -201,14 +211,7 @@
               "$ref": "#/components/schemas/CocApprovalFieldChange"
             }
           }
-        },
-        "required": [
-          "LearningKey",
-          "ApprenticeshipId",
-          "LearningType",
-          "UKPRN",
-          "ULN"
-        ]
+        }
       },
       "CocApprovalFieldChange": {
         "type": "object",
@@ -219,11 +222,7 @@
           "Data": {
             "$ref": "#/components/schemas/CocData"
           }
-        },
-        "required": [
-          "ChangeType",
-          "Data"
-        ]
+        }
       },
       "CocData": {
         "type": "object",
@@ -238,11 +237,7 @@
             "type": "string",
             "format": "date-time"
           }
-        },
-        "required": [
-          "Old",
-          "New"
-        ]
+        }
       },
       "ApprovalFieldChange": {
         "type": "object",

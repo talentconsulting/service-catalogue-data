@@ -1,61 +1,68 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Apprenticeship Update API",
-    "version": "1.0.0"
+    "title": "Apprenticeship Updates API",
+    "version": "1.0.0",
+    "description": "API for managing apprenticeship updates, including retrieval, acceptance, rejection, and undo operations."
   },
   "paths": {
     "/api/apprenticeships/{apprenticeshipId}/updates": {
       "get": {
-        "summary": "Retrieve Apprenticeship Updates",
+        "summary": "Get Apprenticeship Updates",
+        "description": "Retrieve updates for an apprenticeship based on its status.",
+        "operationId": "getApprenticeshipUpdates",
         "parameters": [
           {
             "name": "apprenticeshipId",
             "in": "path",
             "required": true,
-            "description": "The ID of the apprenticeship",
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "ID of the apprenticeship."
           },
           {
             "name": "status",
             "in": "query",
-            "required": false,
-            "description": "Status of the apprenticeship updates",
             "schema": {
               "$ref": "#/components/schemas/ApprenticeshipUpdateStatus"
-            }
+            },
+            "description": "Filter updates by their status."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful retrieval of apprenticeship updates.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/GetApprenticeshipUpdatesResponse"
                 }
               }
             }
           }
-        }
+        },
+        "tags": [
+          "Apprenticeship Updates"
+        ]
       }
     },
     "/api/apprenticeships/{apprenticeshipId}/updates/accept-apprenticeship-update": {
       "post": {
         "summary": "Accept Apprenticeship Update",
+        "description": "Accept a specific apprenticeship update.",
+        "operationId": "acceptApprenticeshipUpdates",
         "parameters": [
           {
             "name": "apprenticeshipId",
             "in": "path",
             "required": true,
-            "description": "The ID of the apprenticeship",
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "ID of the apprenticeship."
           }
         ],
         "requestBody": {
@@ -70,24 +77,29 @@
         },
         "responses": {
           "200": {
-            "description": "Update accepted successfully"
+            "description": "Successfully accepted the apprenticeship update."
           }
-        }
+        },
+        "tags": [
+          "Apprenticeship Updates"
+        ]
       }
     },
     "/api/apprenticeships/{apprenticeshipId}/updates/reject-apprenticeship-update": {
       "post": {
         "summary": "Reject Apprenticeship Update",
+        "description": "Reject a specific apprenticeship update.",
+        "operationId": "rejectApprenticeshipUpdates",
         "parameters": [
           {
             "name": "apprenticeshipId",
             "in": "path",
             "required": true,
-            "description": "The ID of the apprenticeship",
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "ID of the apprenticeship."
           }
         ],
         "requestBody": {
@@ -102,24 +114,29 @@
         },
         "responses": {
           "200": {
-            "description": "Update rejected successfully"
+            "description": "Successfully rejected the apprenticeship update."
           }
-        }
+        },
+        "tags": [
+          "Apprenticeship Updates"
+        ]
       }
     },
     "/api/apprenticeships/{apprenticeshipId}/updates/undo-apprenticeship-update": {
       "post": {
         "summary": "Undo Apprenticeship Update",
+        "description": "Undo a specific apprenticeship update.",
+        "operationId": "undoApprenticeshipUpdates",
         "parameters": [
           {
             "name": "apprenticeshipId",
             "in": "path",
             "required": true,
-            "description": "The ID of the apprenticeship",
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "ID of the apprenticeship."
           }
         ],
         "requestBody": {
@@ -134,9 +151,12 @@
         },
         "responses": {
           "200": {
-            "description": "Update undone successfully"
+            "description": "Successfully undone the apprenticeship update."
           }
-        }
+        },
+        "tags": [
+          "Apprenticeship Updates"
+        ]
       }
     }
   },
@@ -151,67 +171,8 @@
           "Deleted",
           "Superceded",
           "Expired"
-        ]
-      },
-      "AcceptApprenticeshipUpdatesRequest": {
-        "type": "object",
-        "properties": {
-          "providerId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "accountId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "apprenticeshipId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "userInfo": {
-            "$ref": "#/components/schemas/UserInfo"
-          }
-        }
-      },
-      "RejectApprenticeshipUpdatesRequest": {
-        "type": "object",
-        "properties": {
-          "providerId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "accountId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "apprenticeshipId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "userInfo": {
-            "$ref": "#/components/schemas/UserInfo"
-          }
-        }
-      },
-      "UndoApprenticeshipUpdatesRequest": {
-        "type": "object",
-        "properties": {
-          "providerId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "accountId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "apprenticeshipId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "userInfo": {
-            "$ref": "#/components/schemas/UserInfo"
-          }
-        }
+        ],
+        "description": "Status of the apprenticeship update."
       },
       "UserInfo": {
         "type": "object",
@@ -225,6 +186,107 @@
           "userEmail": {
             "type": "string",
             "format": "email"
+          }
+        },
+        "description": "User details associated with the operation."
+      },
+      "SaveDataRequest": {
+        "type": "object",
+        "properties": {
+          "userInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        },
+        "description": "Base class for requests that include user information."
+      },
+      "AcceptApprenticeshipUpdatesRequest": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SaveDataRequest"
+          }
+        ],
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "apprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "description": "Request schema for accepting apprenticeship updates."
+      },
+      "RejectApprenticeshipUpdatesRequest": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SaveDataRequest"
+          }
+        ],
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "apprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "description": "Request schema for rejecting apprenticeship updates."
+      },
+      "UndoApprenticeshipUpdatesRequest": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SaveDataRequest"
+          }
+        ],
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "apprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "description": "Request schema for undoing apprenticeship updates."
+      },
+      "GetApprenticeshipUpdatesRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/ApprenticeshipUpdateStatus"
+          }
+        },
+        "description": "Request schema for retrieving apprenticeship updates."
+      },
+      "GetApprenticeshipUpdatesResponse": {
+        "type": "object",
+        "description": "Response schema for retrieving apprenticeship updates.",
+        "properties": {
+          "updates": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            },
+            "description": "The updates retrieved."
           }
         }
       }

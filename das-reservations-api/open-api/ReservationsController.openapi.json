@@ -1,0 +1,489 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Reservations API",
+    "version": "1.0.0",
+    "description": "API for managing reservations."
+  },
+  "paths": {
+    "/api/reservations/accounts/Bulk-Create": {
+      "post": {
+        "operationId": "bulkCreateReservations",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCreateReservationsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk reservations created successfully."
+          },
+          "400": {
+            "description": "Invalid request."
+          }
+        }
+      }
+    },
+    "/api/accounts/{accountId}/reservations": {
+      "get": {
+        "operationId": "getAccountReservations",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reservations retrieved successfully."
+          },
+          "400": {
+            "description": "Invalid request."
+          }
+        }
+      },
+      "post": {
+        "operationId": "createAccountReservation",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reservation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reservation created successfully."
+          },
+          "400": {
+            "description": "Invalid request."
+          },
+          "422": {
+            "description": "Unprocessable request."
+          }
+        }
+      }
+    },
+    "/api/reservations/{id}": {
+      "get": {
+        "operationId": "getReservation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reservation retrieved successfully."
+          },
+          "400": {
+            "description": "Invalid request."
+          },
+          "404": {
+            "description": "Reservation not found."
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteReservation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "employerDeleted",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Reservation deleted successfully."
+          },
+          "400": {
+            "description": "Invalid request."
+          },
+          "410": {
+            "description": "Reservation permanently removed."
+          }
+        }
+      }
+    },
+    "/api/reservations/search": {
+      "get": {
+        "operationId": "searchReservations",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "searchTerm",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "selectedCourse",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "selectedEmployer",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "selectedStartDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "selectedLearningType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/LearningType"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageItemCount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results returned successfully."
+          },
+          "400": {
+            "description": "Invalid request."
+          },
+          "404": {
+            "description": "No search results found."
+          }
+        }
+      }
+    },
+    "/api/reservations/validate/{id}": {
+      "get": {
+        "operationId": "validateReservation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "courseCode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reservation validation completed successfully."
+          },
+          "400": {
+            "description": "Invalid request."
+          },
+          "404": {
+            "description": "Reservation not found."
+          }
+        }
+      }
+    },
+    "/api/reservations/{id}/change": {
+      "post": {
+        "operationId": "changeReservation",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeOfPartyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reservation party changed successfully."
+          },
+          "400": {
+            "description": "Invalid request."
+          }
+        }
+      }
+    },
+    "/api/reservations/accounts/{accountLegalEntityId}/bulk-create": {
+      "post": {
+        "operationId": "bulkCreateReservationsWithDetails",
+        "parameters": [
+          {
+            "name": "accountLegalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkReservation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Bulk reservations created successfully."
+          },
+          "400": {
+            "description": "Invalid request."
+          },
+          "404": {
+            "description": "Account legal entity not found."
+          }
+        }
+      }
+    },
+    "/api/reservations/accounts/bulk-validate": {
+      "post": {
+        "operationId": "bulkValidateReservations",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BulkValidateReservationRequest"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk reservation validation completed successfully."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "BulkCreateReservationsRequest": {
+        "type": "object",
+        "properties": {
+          "Reservations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BulkValidateReservationRequest"
+            }
+          }
+        }
+      },
+      "Reservation": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "AccountId": {
+            "type": "integer"
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "CourseId": {
+            "type": "string"
+          },
+          "ProviderId": {
+            "type": "integer"
+          },
+          "AccountLegalEntityId": {
+            "type": "integer"
+          },
+          "AccountLegalEntityName": {
+            "type": "string"
+          },
+          "IsLevyAccount": {
+            "type": "boolean"
+          },
+          "TransferSenderAccountId": {
+            "type": "integer"
+          },
+          "UserId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ChangeOfPartyRequest": {
+        "type": "object",
+        "properties": {
+          "AccountLegalEntityId": {
+            "type": "integer"
+          },
+          "ProviderId": {
+            "type": "integer"
+          }
+        }
+      },
+      "BulkReservation": {
+        "type": "object",
+        "properties": {
+          "Count": {
+            "type": "integer"
+          },
+          "TransferSenderId": {
+            "type": "integer"
+          }
+        }
+      },
+      "BulkValidateReservationRequest": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "CourseId": {
+            "type": "string"
+          },
+          "ProviderId": {
+            "type": "integer"
+          },
+          "AccountLegalEntityId": {
+            "type": "integer"
+          },
+          "TransferSenderAccountId": {
+            "type": "integer"
+          },
+          "UserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "RowNumber": {
+            "type": "integer"
+          }
+        }
+      },
+      "LearningType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "FoundationApprenticeship",
+          "ApprenticeshipUnit"
+        ]
+      }
+    }
+  }
+}

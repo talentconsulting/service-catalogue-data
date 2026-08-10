@@ -1,20 +1,23 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Commitments API",
-    "version": "1.0.0"
+    "title": "Commitments V2 API",
+    "description": "API for managing apprenticeship commitments.",
+    "version": "2.0.0"
   },
   "paths": {
     "/api/courses": {
       "get": {
-        "summary": "Retrieve all courses",
-        "operationId": "getAllCourses",
-        "tags": [
-          "Courses"
+        "summary": "Get all courses",
+        "operationId": "GetAllCourses",
+        "security": [
+          {
+            "bearerAuth": []
+          }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful response with a list of courses",
             "content": {
               "application/json": {
                 "schema": {
@@ -32,7 +35,7 @@
       "GetAllCoursesResponse": {
         "type": "object",
         "properties": {
-          "Courses": {
+          "courses": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Course"
@@ -43,38 +46,44 @@
       "Course": {
         "type": "object",
         "properties": {
-          "LarsCode": {
-            "type": "string"
-          },
-          "Title": {
-            "type": "string"
-          },
-          "Level": {
-            "type": "string"
-          },
-          "LearningType": {
-            "$ref": "#/components/schemas/LearningType"
-          },
-          "MaxFunding": {
-            "type": "integer"
-          },
-          "EffectiveFrom": {
+          "larsCode": {
             "type": "string",
-            "format": "date-time"
+            "description": "The Learning Aim Reference Service (LARS) code for the course."
           },
-          "EffectiveTo": {
+          "title": {
             "type": "string",
-            "format": "date-time"
+            "description": "The title of the course."
+          },
+          "level": {
+            "type": "string",
+            "description": "The education level of the course."
+          },
+          "learningType": {
+            "type": "string",
+            "description": "Type of learning associated with the course."
+          },
+          "maxFunding": {
+            "type": "integer",
+            "description": "The maximum funding for the course."
+          },
+          "effectiveFrom": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date from which the course is effective."
+          },
+          "effectiveTo": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date to which the course is effective."
           }
         }
-      },
-      "LearningType": {
-        "type": "string",
-        "enum": [
-          "Apprenticeship",
-          "FoundationApprenticeship",
-          "ApprenticeshipUnit"
-        ]
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }
