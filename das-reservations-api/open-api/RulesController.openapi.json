@@ -1,0 +1,184 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Reservations API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/rules": {
+      "get": {
+        "summary": "Retrieve all available rules",
+        "operationId": "getAllRules",
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved rules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/available-dates/{accountLegalEntityId}": {
+      "get": {
+        "summary": "Get available dates for an account legal entity",
+        "operationId": "getAvailableDates",
+        "parameters": [
+          {
+            "name": "accountLegalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "courseId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved available dates",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid arguments provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArgumentErrorViewModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/account/{accountId}": {
+      "get": {
+        "summary": "Get account rules",
+        "operationId": "getAccountRules",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved account rules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid arguments provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArgumentErrorViewModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rules/upcoming": {
+      "post": {
+        "summary": "Acknowledge rule as read by the user",
+        "operationId": "acknowledgeRuleAsRead",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserRuleAcknowledgementCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Rule successfully acknowledged"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ArgumentErrorViewModel": {
+        "type": "object",
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "Params": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Message",
+          "Params"
+        ]
+      },
+      "CreateUserRuleAcknowledgementCommand": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "RuleId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "TypeOfRule": {
+            "$ref": "#/components/schemas/RuleType"
+          }
+        },
+        "required": [
+          "Id",
+          "RuleId",
+          "TypeOfRule"
+        ]
+      },
+      "RuleType": {
+        "type": "string",
+        "enum": [
+          "None",
+          "CourseRule",
+          "GlobalRule"
+        ]
+      }
+    }
+  }
+}

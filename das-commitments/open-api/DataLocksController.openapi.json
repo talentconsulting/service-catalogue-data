@@ -1,14 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "DataLocks API",
-    "version": "1.0.0"
+    "title": "Data Locks API",
+    "version": "1.0.0",
+    "description": "API for managing data locks related to apprenticeships."
   },
   "paths": {
     "/api/apprenticeships/{apprenticeshipId}/datalocks": {
       "get": {
-        "summary": "Get Data Locks",
-        "operationId": "getDataLocks",
+        "summary": "Get all data locks for an apprenticeship",
         "parameters": [
           {
             "name": "apprenticeshipId",
@@ -17,12 +17,13 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "The ID of the apprenticeship."
           }
         ],
         "responses": {
           "200": {
-            "description": "The data locks for the apprenticeship.",
+            "description": "Successfully retrieved data locks.",
             "content": {
               "application/json": {
                 "schema": {
@@ -36,8 +37,7 @@
     },
     "/api/apprenticeships/{apprenticeshipId}/datalocksummaries": {
       "get": {
-        "summary": "Get Data Lock Summaries",
-        "operationId": "getDataLockSummaries",
+        "summary": "Get data lock summaries for an apprenticeship",
         "parameters": [
           {
             "name": "apprenticeshipId",
@@ -46,12 +46,13 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "The ID of the apprenticeship."
           }
         ],
         "responses": {
           "200": {
-            "description": "The data lock summaries for the apprenticeship.",
+            "description": "Successfully retrieved data lock summaries.",
             "content": {
               "application/json": {
                 "schema": {
@@ -65,8 +66,7 @@
     },
     "/api/apprenticeships/{apprenticeshipId}/datalocks/accept-changes": {
       "post": {
-        "summary": "Accept Data Lock Changes",
-        "operationId": "acceptDataLockChanges",
+        "summary": "Accept data lock changes for an apprenticeship",
         "parameters": [
           {
             "name": "apprenticeshipId",
@@ -75,10 +75,12 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "The ID of the apprenticeship."
           }
         ],
         "requestBody": {
+          "description": "Details about the data lock changes to be accepted.",
           "required": true,
           "content": {
             "application/json": {
@@ -90,15 +92,14 @@
         },
         "responses": {
           "200": {
-            "description": "Data lock changes accepted."
+            "description": "Successfully accepted data lock changes."
           }
         }
       }
     },
     "/api/apprenticeships/{apprenticeshipId}/datalocks/reject-changes": {
       "post": {
-        "summary": "Reject Data Lock Changes",
-        "operationId": "rejectDataLockChanges",
+        "summary": "Reject data lock changes for an apprenticeship",
         "parameters": [
           {
             "name": "apprenticeshipId",
@@ -107,10 +108,12 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "The ID of the apprenticeship."
           }
         ],
         "requestBody": {
+          "description": "Details about the data lock changes to be rejected.",
           "required": true,
           "content": {
             "application/json": {
@@ -122,15 +125,14 @@
         },
         "responses": {
           "200": {
-            "description": "Data lock changes rejected."
+            "description": "Successfully rejected data lock changes."
           }
         }
       }
     },
     "/api/apprenticeships/{apprenticeshipId}/datalocks/triage": {
       "post": {
-        "summary": "Triage Data Locks",
-        "operationId": "triageDataLocks",
+        "summary": "Triage data locks for an apprenticeship",
         "parameters": [
           {
             "name": "apprenticeshipId",
@@ -139,10 +141,12 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "The ID of the apprenticeship."
           }
         ],
         "requestBody": {
+          "description": "Details about the triage action to be undertaken.",
           "required": true,
           "content": {
             "application/json": {
@@ -154,7 +158,7 @@
         },
         "responses": {
           "200": {
-            "description": "Data locks triaged."
+            "description": "Successfully triaged data locks."
           }
         }
       }
@@ -162,67 +166,84 @@
   },
   "components": {
     "schemas": {
-      "UserInfo": {
+      "GetDataLocksResponse": {
         "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string"
-          },
-          "userDisplayName": {
-            "type": "string"
-          },
-          "userEmail": {
-            "type": "string"
-          }
-        }
+        "additionalProperties": true
+      },
+      "GetDataLockSummariesResponse": {
+        "type": "object",
+        "additionalProperties": true
       },
       "AcceptDataLocksRequestChangesRequest": {
         "type": "object",
         "properties": {
-          "apprenticeshipId": {
+          "ApprenticeshipId": {
             "type": "integer",
             "format": "int64"
           },
-          "userInfo": {
+          "UserInfo": {
             "$ref": "#/components/schemas/UserInfo"
           }
         },
         "required": [
-          "userInfo"
+          "ApprenticeshipId",
+          "UserInfo"
         ]
       },
       "RejectDataLocksRequestChangesRequest": {
         "type": "object",
         "properties": {
-          "apprenticeshipId": {
+          "ApprenticeshipId": {
             "type": "integer",
             "format": "int64"
           },
-          "userInfo": {
+          "UserInfo": {
             "$ref": "#/components/schemas/UserInfo"
           }
         },
         "required": [
-          "userInfo"
+          "ApprenticeshipId",
+          "UserInfo"
         ]
       },
       "TriageDataLocksRequest": {
         "type": "object",
         "properties": {
-          "apprenticeshipId": {
+          "ApprenticeshipId": {
             "type": "integer",
             "format": "int64"
           },
-          "triageStatus": {
+          "TriageStatus": {
             "$ref": "#/components/schemas/TriageStatus"
           },
-          "userInfo": {
+          "UserInfo": {
             "$ref": "#/components/schemas/UserInfo"
           }
         },
         "required": [
-          "triageStatus",
-          "userInfo"
+          "ApprenticeshipId",
+          "TriageStatus",
+          "UserInfo"
+        ]
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          },
+          "UserDisplayName": {
+            "type": "string"
+          },
+          "UserEmail": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "UserId",
+          "UserDisplayName",
+          "UserEmail"
         ]
       },
       "TriageStatus": {
@@ -232,129 +253,6 @@
           "Change",
           "Restart",
           "FixIlr"
-        ]
-      },
-      "DataLockErrorCode": {
-        "type": "string",
-        "enum": [
-          "None",
-          "Dlock01",
-          "Dlock02",
-          "Dlock03",
-          "Dlock04",
-          "Dlock05",
-          "Dlock06",
-          "Dlock07",
-          "Dlock08",
-          "Dlock09",
-          "Dlock10"
-        ]
-      },
-      "GetDataLocksResponse": {
-        "type": "object",
-        "properties": {
-          "dataLocks": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DataLockStatus"
-            }
-          }
-        }
-      },
-      "GetDataLockSummariesResponse": {
-        "type": "object",
-        "properties": {}
-      },
-      "DataLockStatus": {
-        "type": "object",
-        "properties": {
-          "dataLockEventId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "dataLockEventDatetime": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "priceEpisodeIdentifier": {
-            "type": "string"
-          },
-          "apprenticeshipId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "ilrTrainingCourseCode": {
-            "type": "string"
-          },
-          "ilrTrainingType": {
-            "$ref": "#/components/schemas/TrainingType"
-          },
-          "ilrActualStartDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "ilrEffectiveFromDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "ilrPriceEffectiveToDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "ilrTotalCost": {
-            "type": "number",
-            "format": "decimal"
-          },
-          "status": {
-            "$ref": "#/components/schemas/Status"
-          },
-          "triageStatus": {
-            "$ref": "#/components/schemas/TriageStatus"
-          },
-          "errorCode": {
-            "$ref": "#/components/schemas/DataLockErrorCode"
-          },
-          "apprenticeshipUpdateId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "isResolved": {
-            "type": "boolean"
-          },
-          "eventStatus": {
-            "$ref": "#/components/schemas/EventStatus"
-          },
-          "isExpired": {
-            "type": "boolean"
-          },
-          "expired": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "TrainingType": {
-        "type": "string",
-        "enum": [
-          "Standard",
-          "Framework"
-        ]
-      },
-      "Status": {
-        "type": "string",
-        "enum": [
-          "Unknown",
-          "Pass",
-          "Fail"
-        ]
-      },
-      "EventStatus": {
-        "type": "string",
-        "enum": [
-          "None",
-          "New",
-          "Updated",
-          "Removed"
         ]
       }
     }
