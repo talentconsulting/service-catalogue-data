@@ -4,17 +4,17 @@
   "path": "src",
   "dependencies": [
     {
-      "name": "apprenticeship-levy-api",
+      "name": "Apprenticeship Levy API",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
       "client": "IApprenticeshipLevyApiClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "Hmrc.BaseUrl"
+        "EmployerAccountsConfiguration.Hmrc.BaseUrl"
       ],
       "authentication": {
-        "type": "unknown",
+        "type": null,
         "configurationKeys": []
       },
       "operations": [],
@@ -22,7 +22,57 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/ApprenticeshipLevyApiServiceRegistrations.cs",
-          "reason": "HttpClient is registered for IApprenticeshipLevyApiClient with a dependency on Hmrc.BaseUrl."
+          "reason": "Detected IApprenticeshipLevyApiClient registration with HttpClient referencing Hmrc.BaseUrl."
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "ApprenticeshipLevyApiClient",
+      "kind": "http-api",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "IApprenticeshipLevyApiClient",
+      "technology": null,
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/HmrcService.cs",
+          "reason": "Calls IApprenticeshipLevyApiClient for data retrieval"
+        }
+      ],
+      "confidence": "medium"
+    },
+    {
+      "name": "Commitments V2 API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICommitmentsV2ApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "CommitmentsApiV2ClientConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/ICommitmentsV2ApiClient.cs",
+          "reason": "Detected ICommitmentsV2ApiClient interface defining API client methods."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/CommitmentsV2ApiClientServiceRegistrations.cs",
+          "reason": "Detected ICommitmentsV2ApiClient registration with HttpClient."
         }
       ],
       "confidence": "high"
@@ -30,10 +80,10 @@
     {
       "name": "CommitmentsV2ApiClient",
       "kind": "http-api",
-      "classification": "third-party",
+      "classification": "unknown",
       "direction": "outbound",
       "client": "CommitmentsV2ApiClient",
-      "technology": null,
+      "technology": "HttpClient",
       "configurationKeys": [
         "CommitmentsApiV2ClientConfiguration:ApiBaseUrl",
         "CommitmentsApiV2ClientConfiguration:IdentifierUri"
@@ -52,7 +102,7 @@
         },
         {
           "method": "GET",
-          "path": "api/apprenticeships/?accountId={accountId}&reverseSort={reverseSort}{sortField}{sortField}{searchTerm}",
+          "path": "api/apprenticeships/",
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/CommitmentsV2ApiClient.cs"
         },
         {
@@ -62,7 +112,7 @@
         },
         {
           "method": "GET",
-          "path": "api/cohorts/?accountId={accountId}",
+          "path": "api/cohorts/",
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/CommitmentsV2ApiClient.cs"
         },
         {
@@ -75,48 +125,24 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/CommitmentsV2ApiClient.cs",
-          "reason": "Class `CommitmentsV2ApiClient` directly interacts with external HTTP APIs using injected configuration."
+          "reason": "Outbound HTTP API client implementation found with configuration and authentication details."
         }
       ],
       "confidence": "high"
     },
     {
-      "name": "committments-v2-api",
-      "kind": "http-api",
-      "classification": "internal",
-      "direction": "outbound",
-      "client": "ICommitmentsV2ApiClient",
-      "technology": "HttpClient",
-      "configurationKeys": [
-        "CommitmentsApiV2Client.BaseUrl"
-      ],
-      "authentication": {
-        "type": "unknown",
-        "configurationKeys": []
-      },
-      "operations": [],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/CommitmentsV2ApiClientServiceRegistrations.cs",
-          "reason": "HttpClient is registered for ICommitmentsV2ApiClient with a dependency on CommitmentsApiV2ClientConfiguration."
-        }
-      ],
-      "confidence": "high"
-    },
-    {
-      "name": "content-api",
+      "name": "Content API",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
       "client": "IContentApiClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "ContentApi.ApiBaseUrl",
-        "ContentApi.IdentifierUri"
+        "EmployerAccountsConfiguration.ContentApi.ApiBaseUrl",
+        "EmployerAccountsConfiguration.ContentApi.IdentifierUri"
       ],
       "authentication": {
-        "type": "unknown",
+        "type": null,
         "configurationKeys": []
       },
       "operations": [
@@ -130,11 +156,11 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/ContentApiClientServiceRegistrations.cs",
-          "reason": "HttpClient is registered for IContentApiClient with a dependency on ContentClientApiConfiguration."
+          "reason": "Detected IContentApiClient registration with HttpClient."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/ContentBanner/WhenIGetContentDataFromClient.cs",
-          "reason": "HttpClient usage to call Content API via IContentApiClient."
+          "reason": "Detected outbound calls using HttpClient with GET method to Content API."
         }
       ],
       "confidence": "high"
@@ -142,18 +168,18 @@
     {
       "name": "ContentApiClient",
       "kind": "http-api",
-      "classification": "third-party",
+      "classification": "unknown",
       "direction": "outbound",
       "client": "ContentApiClient",
-      "technology": null,
+      "technology": "HttpClient",
       "configurationKeys": [
-        "IContentClientApiConfiguration:ApiBaseUrl",
-        "IContentClientApiConfiguration:IdentifierUri"
+        "ContentClientApiConfiguration:ApiBaseUrl",
+        "ContentClientApiConfiguration:IdentifierUri"
       ],
       "authentication": {
         "type": "Bearer",
         "configurationKeys": [
-          "IContentClientApiConfiguration:IdentifierUri"
+          "ContentClientApiConfiguration:IdentifierUri"
         ]
       },
       "operations": [
@@ -167,56 +193,7 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/ContentApiClient.cs",
-          "reason": "Class `ContentApiClient` directly interacts with external HTTP APIs using injected configuration."
-        }
-      ],
-      "confidence": "high"
-    },
-    {
-      "name": "EmployerAccountsOuterApi",
-      "kind": "http-api",
-      "classification": "internal",
-      "direction": "outbound",
-      "client": null,
-      "technology": null,
-      "configurationKeys": [
-        "SFA.DAS.EmployerAccounts:OuterApiApiBaseUri"
-      ],
-      "authentication": {
-        "type": null,
-        "configurationKeys": []
-      },
-      "operations": [
-        {
-          "method": "GET",
-          "path": "SearchOrganisation/IdentifiableOrganisationTypes",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/SearchOrganisation/WhenBuildingGetIdentifiableOrganisationTypesRequest.cs"
-        },
-        {
-          "method": "GET",
-          "path": "SearchOrganisation/review?identifier={identifier}&organisationType={organisationType}",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/SearchOrganisation/WhenBuildingGetLatestDetailsRequest.cs"
-        },
-        {
-          "method": "GET",
-          "path": "accountusers/{userId}/accounts?email={email}",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/EmployerUsers/WhenBuildingGetEmployerAccountsRequest.cs"
-        },
-        {
-          "method": "GET",
-          "path": "reservation/{accountId}",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/Reservations/WhenBuildingGetReservationsRequest.cs"
-        }
-      ],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/Reservations/WhenBuildingGetReservationsRequest.cs",
-          "reason": "Tests provide request templates for Outer API endpoints."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/EmployerUsers/WhenBuildingGetEmployerAccountsRequest.cs",
-          "reason": "Tests verify request configurations for endpoints using the Outer API."
+          "reason": "Outbound HTTP API client implementation found with configuration and authentication details."
         }
       ],
       "confidence": "high"
@@ -227,7 +204,7 @@
       "classification": "third-party",
       "direction": "outbound",
       "client": "IHttpClientWrapper",
-      "technology": null,
+      "technology": "HTTP",
       "configurationKeys": [
         "IHmrcConfiguration.BaseUrl",
         "IHmrcConfiguration.ClientId",
@@ -243,478 +220,38 @@
       },
       "operations": [
         {
-          "method": "POST",
-          "path": "oauth/token",
+          "method": null,
+          "path": "oauth/authorize?response_type=code&client_id={_configuration.ClientId}&scope={_configuration.Scope}&redirect_uri={redirectUrl}",
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/HmrcService.cs"
         },
         {
           "method": null,
-          "path": "oauth/authorize",
+          "path": "oauth/token",
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/HmrcService.cs"
         }
       ],
-      "resources": [
-        {
-          "type": "API client endpoint",
-          "name": "GetAllEmployers",
-          "direction": "outbound",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/HmrcService.cs"
-        },
-        {
-          "type": "API client endpoint",
-          "name": "GetEmployerDetails",
-          "direction": "outbound",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/HmrcService.cs"
-        },
-        {
-          "type": "API client endpoint",
-          "name": "GetEmployerLevyDeclarations",
-          "direction": "outbound",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/HmrcService.cs"
-        },
-        {
-          "type": "API client endpoint",
-          "name": "GetLastEnglishFractionUpdate",
-          "direction": "outbound",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/HmrcService.cs"
-        }
-      ],
+      "resources": [],
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/HmrcService.cs",
-          "reason": "Detected usage of IHttpClientWrapper with operations targeting HMRC API."
+          "reason": "Uses IHttpClientWrapper to communicate with HMRC API"
         }
       ],
       "confidence": "high"
     },
     {
-      "name": "HMRC.ESFA.Levy.Api.Client",
-      "kind": "http-api",
-      "classification": "third-party",
-      "direction": "outbound",
-      "client": null,
-      "technology": null,
-      "configurationKeys": [
-        "HmrcConfiguration.BaseUrl",
-        "HmrcConfiguration.ClientId",
-        "HmrcConfiguration.ClientSecret",
-        "HmrcConfiguration.Scope",
-        "HmrcConfiguration.ServerToken"
-      ],
-      "authentication": {
-        "type": "oauth2",
-        "configurationKeys": [
-          "HmrcConfiguration.ClientId",
-          "HmrcConfiguration.ClientSecret",
-          "HmrcConfiguration.ServerToken"
-        ]
-      },
-      "operations": [
-        {
-          "method": "GET",
-          "path": "GetAllEmployers",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForEmprefDiscovery.cs"
-        },
-        {
-          "method": "GET",
-          "path": "GetEmployerDetails",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForEmpref.cs"
-        },
-        {
-          "method": "GET",
-          "path": "GetEmployerFractionCalculations",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForEnglishFractions.cs"
-        },
-        {
-          "method": "GET",
-          "path": "GetLastEnglishFractionUpdate",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallHmrcServiceForLastEnglishFractionUpdateDate.cs"
-        },
-        {
-          "method": "GET",
-          "path": "GetLevyDeclarations",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForDeclarations.cs"
-        },
-        {
-          "method": "GET",
-          "path": "oauth/authorize",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForAuthentication.cs"
-        },
-        {
-          "method": "POST",
-          "path": "oauth/token",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForAuthentication.cs"
-        }
-      ],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallHmrcServiceForLastEnglishFractionUpdateDate.cs",
-          "reason": "HMRC API client is called to get English fraction update."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForEmprefDiscovery.cs",
-          "reason": "HMRC API client is used for employer reference discovery."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForEnglishFractions.cs",
-          "reason": "HMRC API client is used to get English fraction calculations."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForEmpref.cs",
-          "reason": "HMRC API client is used to get employer details."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForDeclarations.cs",
-          "reason": "HMRC API client is used to retrieve levy declarations."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForAuthentication.cs",
-          "reason": "HMRC API's OAuth endpoints are used for authentication."
-        }
-      ],
-      "confidence": "high"
-    },
-    {
-      "name": "HttpClient",
-      "kind": "http-api",
-      "classification": "third-party",
-      "direction": "outbound",
-      "client": null,
-      "technology": "HttpClient",
-      "configurationKeys": [],
-      "authentication": {
-        "type": "Bearer Token",
-        "configurationKeys": [
-          "identifierUri"
-        ]
-      },
-      "operations": [
-        {
-          "method": "GET",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/HttpService.cs"
-        }
-      ],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/HttpService.cs",
-          "reason": "HttpClient is used to make an outbound HTTP request with authorization header."
-        }
-      ],
-      "confidence": "high"
-    },
-    {
-      "name": "IAccountApiClient",
-      "kind": "http-api",
-      "classification": "unknown",
-      "direction": "outbound",
-      "client": null,
-      "technology": null,
-      "configurationKeys": [],
-      "authentication": {
-        "type": null,
-        "configurationKeys": []
-      },
-      "operations": [
-        {
-          "method": "GET",
-          "path": "ping",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Commands/RunHealthCheckCommand/RunHealthCheckCommandHandler.cs"
-        }
-      ],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Commands/RunHealthCheckCommand/RunHealthCheckCommandHandler.cs",
-          "reason": "IAccountApiClient.Ping called in RunHealthCheckCommandHandler"
-        }
-      ],
-      "confidence": "high"
-    },
-    {
-      "name": "IOuterApiClient",
-      "kind": "http-api",
-      "classification": "internal",
-      "direction": "outbound",
-      "client": "IOuterApiClient",
-      "technology": null,
-      "configurationKeys": [
-        "SFA.DAS.EmployerAccounts:EmployerAccountsOuterApiConfiguration:BaseUrl",
-        "SFA.DAS.EmployerAccounts:EmployerAccountsOuterApiConfiguration:Key"
-      ],
-      "authentication": {
-        "type": "apiKey",
-        "configurationKeys": [
-          "SFA.DAS.EmployerAccounts:EmployerAccountsOuterApiConfiguration:Key"
-        ]
-      },
-      "operations": [
-        {
-          "method": "GET",
-          "path": "ping",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Commands/RunHealthCheckCommand/RunHealthCheckCommandHandler.cs"
-        },
-        {
-          "method": "GET",
-          "path": "{path}",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Recruit/WhenIGetVacancies.cs"
-        },
-        {
-          "method": "GET",
-          "path": "{path}",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/ReferenceData/WhenISearchOrganisations.cs"
-        },
-        {
-          "method": "GET",
-          "path": "{path}",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Reservations/WhenIGetReservationData.cs"
-        },
-        {
-          "method": "GET",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/PayeSchemesWithEnglishFractionService.cs"
-        },
-        {
-          "method": "GET",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/RecruitService.cs"
-        },
-        {
-          "method": "GET",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/ReferenceDataService.cs"
-        },
-        {
-          "method": "GET",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/ReservationsService.cs"
-        },
-        {
-          "method": "GET",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/UserAccountService.cs"
-        }
-      ],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/ReservationsService.cs",
-          "reason": "IOuterApiClient is used for outbound requests to retrieve reservations."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/UserAccountService.cs",
-          "reason": "IOuterApiClient is used for retrieving user account information via HTTP."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/ReferenceDataService.cs",
-          "reason": "IOuterApiClient is used to call external APIs for fetching data."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/PayeSchemesWithEnglishFractionService.cs",
-          "reason": "IOuterApiClient is used to make HTTP GET requests to external APIs."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/RecruitService.cs",
-          "reason": "IOuterApiClient is utilized to fetch data using HTTP GET requests."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Commands/RunHealthCheckCommand/RunHealthCheckCommandHandler.cs",
-          "reason": "IOuterApiClient.Get called in RunHealthCheckCommandHandler"
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Recruit/WhenIGetVacancies.cs",
-          "reason": "Mock<IOuterApiClient> setup references IOuterApiClient.Get with request object"
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/ReferenceData/WhenISearchOrganisations.cs",
-          "reason": "Mock<IOuterApiClient> setup references IOuterApiClient.Get with request object"
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Reservations/WhenIGetReservationData.cs",
-          "reason": "Mock<IOuterApiClient> setup references IOuterApiClient.Get with request object"
-        }
-      ],
-      "confidence": "high"
-    },
-    {
-      "name": "outer-api",
-      "kind": "http-api",
-      "classification": "internal",
-      "direction": "outbound",
-      "client": "IOuterApiClient",
-      "technology": "HttpClient",
-      "configurationKeys": [
-        "OuterApi.BaseUrl"
-      ],
-      "authentication": {
-        "type": "unknown",
-        "configurationKeys": [
-          "OuterApi.Key"
-        ]
-      },
-      "operations": [],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/EmployerAccountsOuterApiServiceRegistrations.cs",
-          "reason": "HttpClient is registered for IOuterApiClient with a dependency on EmployerAccountsOuterApiConfiguration."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/OuterApiClient.cs",
-          "reason": "HttpClient usage to call Outer API via IOuterApiClient."
-        }
-      ],
-      "confidence": "high"
-    },
-    {
-      "name": "OuterApi",
-      "kind": "http-api",
-      "classification": "internal",
-      "direction": "outbound",
-      "client": "IOuterApiClient",
-      "technology": null,
-      "configurationKeys": [
-        "EmployerAccountsOuterApiConfiguration.BaseUrl",
-        "EmployerAccountsOuterApiConfiguration.Key"
-      ],
-      "authentication": {
-        "type": "key-based",
-        "configurationKeys": [
-          "EmployerAccountsOuterApiConfiguration.Key"
-        ]
-      },
-      "operations": [
-        {
-          "method": "GET",
-          "path": "SearchOrganisation/organisations/search/results",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/SearchOrganisation/WhenBuildingSearchOrganisationRequest.cs"
-        },
-        {
-          "method": "GET",
-          "path": "test-url/get",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/WhenHandlingAGetRequest.cs"
-        },
-        {
-          "method": "GET",
-          "path": "vacancies/{accountId}",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/Vacancies/WhenBuildingGetVacanciesApiRequest.cs"
-        },
-        {
-          "method": null,
-          "path": "SearchOrganisation/organisations/search/results",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/SearchOrganisation/SearchOrganisationRequest.cs"
-        },
-        {
-          "method": null,
-          "path": "SearchOrganisation/review",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/SearchOrganisation/GetLatestDetailsRequest.cs"
-        },
-        {
-          "method": null,
-          "path": "accountusers/{_userId}/accounts",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/UserAccounts/GetUserAccountsRequest.cs"
-        },
-        {
-          "method": null,
-          "path": "vacancies/{accountId}",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/Vacancies/GetVacanciesApiRequest.cs"
-        },
-        {
-          "method": null,
-          "path": null,
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/PayeSchemes/WhenIGetAccountPayeSchemesWithEnglishFraction.cs"
-        }
-      ],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Queries/GetCreateAccountTaskList/GetCreateAccountTaskListQueryHandler.cs",
-          "reason": "Found operations using IOuterApiClient.Get."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Queries/GetEmployerEnglishFractionHistory/GetEmployerEnglishFractionHistoryQueryHandler.cs",
-          "reason": "Found operations using IOuterApiClient.Get."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/EmployerAccountService.cs",
-          "reason": "Found operations using IOuterApiClient.Get."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/PayeSchemes/WhenIGetAccountPayeSchemesWithEnglishFraction.cs",
-          "reason": "OuterApi client is called to get English fractions."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/WhenHandlingAGetRequest.cs",
-          "reason": "OuterApi client used to make an outbound request with authentication."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/SearchOrganisation/WhenBuildingSearchOrganisationRequest.cs",
-          "reason": "URL for SearchOrganisation API is being constructed."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/Vacancies/WhenBuildingGetVacanciesApiRequest.cs",
-          "reason": "URL for Vacancies API is being constructed."
-        }
-      ],
-      "confidence": "high"
-    },
-    {
-      "name": "PensionRegulatorApi",
-      "kind": "http-api",
-      "classification": "internal",
-      "direction": "outbound",
-      "client": "IHttpService",
-      "technology": "HttpClient",
-      "configurationKeys": [
-        "PensionRegulatorApi.BaseUrl",
-        "PensionRegulatorApi.IdentifierUri"
-      ],
-      "authentication": {
-        "type": "Bearer Token",
-        "configurationKeys": [
-          "PensionRegulatorApi.IdentifierUri"
-        ]
-      },
-      "operations": [
-        {
-          "method": "GET",
-          "path": "api/pensionsregulator/organisations/{aorn}?payeRef={payeRef}",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/PensionRegulatorService.cs"
-        },
-        {
-          "method": "GET",
-          "path": "api/pensionsregulator/organisations?payeRef={payeRef}",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/PensionRegulatorService.cs"
-        },
-        {
-          "method": "GET",
-          "path": "api/pensionsregulator/{organisationId}",
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/PensionRegulatorService.cs"
-        }
-      ],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/PensionRegulatorService.cs",
-          "reason": "HttpService is used to call external Pension Regulator API."
-        }
-      ],
-      "confidence": "high"
-    },
-    {
-      "name": "SFA.DAS.EmployerAccounts.Infrastructure.Data.HttpClientWrapper",
+      "name": "HttpClientWrapper",
       "kind": "http-api",
       "classification": "unknown",
       "direction": "outbound",
       "client": "HttpClientWrapper",
       "technology": "HttpClient",
       "configurationKeys": [
+        "AuthScheme",
         "BaseUrl"
       ],
       "authentication": {
-        "type": "AuthorizationHeader",
+        "type": "token",
         "configurationKeys": [
           "AuthScheme"
         ]
@@ -735,18 +272,145 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/Data/HttpClientWrapper.cs",
-          "reason": "Generic HTTP client operations found in HttpClientWrapper class."
+          "reason": "HttpClient.SendAsync used for HTTP requests."
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "HttpService",
+      "kind": "http-api",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "HttpClient",
+      "technology": null,
+      "configurationKeys": [],
+      "authentication": {
+        "type": "bearer",
+        "configurationKeys": []
+      },
+      "operations": [
+        {
+          "method": "GET",
+          "path": null,
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/HttpService.cs"
+        }
+      ],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/HttpService.cs",
+          "reason": "Performs outbound GET requests using HttpClient with Bearer token authentication."
         }
       ],
       "confidence": "medium"
     },
     {
-      "name": "SFA.DAS.EmployerAccounts.OuterApi",
+      "name": "IAccountApiClient",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
       "client": null,
+      "technology": "HTTP",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [
+        {
+          "method": null,
+          "path": "Ping",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Commands/RunHealthCheckCommand/RunHealthCheckCommandHandler.cs"
+        }
+      ],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Commands/RunHealthCheckCommand/RunHealthCheckCommandHandler.cs",
+          "reason": "IAccountApiClient is invoked for a 'Ping' operation as part of a health check command handler."
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "IApprenticeshipLevyApiClient",
+      "kind": "http-api",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
       "technology": null,
+      "configurationKeys": [],
+      "authentication": {
+        "type": "bearer-token",
+        "configurationKeys": [
+          "PrivilegedAccessToken.AccessCode"
+        ]
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "data-fetch",
+          "name": "GetAllEmployers",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForEmprefDiscovery.cs"
+        },
+        {
+          "type": "data-fetch",
+          "name": "GetEmployerDetails",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForEmpref.cs"
+        },
+        {
+          "type": "data-fetch",
+          "name": "GetEmployerFractionCalculations",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForEnglishFractions.cs"
+        },
+        {
+          "type": "data-fetch",
+          "name": "GetEmployerLevyDeclarations",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForDeclarations.cs"
+        },
+        {
+          "type": "data-fetch",
+          "name": "GetLastEnglishFractionUpdate",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallHmrcServiceForLastEnglishFractionUpdateDate.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallHmrcServiceForLastEnglishFractionUpdateDate.cs",
+          "reason": "Mocked IApprenticeshipLevyApiClient method for English fraction updates."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForEnglishFractions.cs",
+          "reason": "Mocked IApprenticeshipLevyApiClient method for English fractions."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForEmpref.cs",
+          "reason": "Mocked IApprenticeshipLevyApiClient method for employer details."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForEmprefDiscovery.cs",
+          "reason": "Mocked IApprenticeshipLevyApiClient method for employer discovery."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Hmrc/WhenICallTheHmrcServiceForDeclarations.cs",
+          "reason": "Mocked IApprenticeshipLevyApiClient method for levy declarations."
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "IOuterApiClient",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IOuterApiClient",
+      "technology": "HTTP",
       "configurationKeys": [],
       "authentication": {
         "type": null,
@@ -755,8 +419,147 @@
       "operations": [
         {
           "method": "GET",
+          "path": "api/finance/englishfractioncurrent",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/PayeSchemesWithEnglishFractionService.cs"
+        },
+        {
+          "method": "GET",
+          "path": "api/reservations",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/ReservationsService.cs"
+        },
+        {
+          "method": "GET",
+          "path": "api/searchorganisation",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/ReferenceDataService.cs"
+        },
+        {
+          "method": "GET",
+          "path": "api/useraccounts",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/UserAccountService.cs"
+        },
+        {
+          "method": "GET",
+          "path": "api/vacancies",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/RecruitService.cs"
+        },
+        {
+          "method": "GET",
+          "path": null,
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/ReferenceData/WhenISearchOrganisations.cs"
+        },
+        {
+          "method": "GET",
+          "path": null,
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Reservations/WhenIGetReservationData.cs"
+        },
+        {
+          "method": "GET",
+          "path": null,
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Commands/RunHealthCheckCommand/RunHealthCheckCommandHandler.cs"
+        },
+        {
+          "method": null,
+          "path": "GetUrl",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Recruit/WhenIGetVacancies.cs"
+        }
+      ],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/UserAccountService.cs",
+          "reason": "Contains code invoking IOuterApiClient for GET operations to fetch user accounts."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/ReferenceDataService.cs",
+          "reason": "IOuterApiClient fetches details with HTTP GET requests from external endpoints."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/RecruitService.cs",
+          "reason": "IOuterApiClient is invoked for HTTP GET requests to API endpoints."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Reservations/WhenIGetReservationData.cs",
+          "reason": "IOuterApiClient is mocked and used to fetch reservation data."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/ReferenceData/WhenISearchOrganisations.cs",
+          "reason": "IOuterApiClient is mocked and used to make GET requests."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Services/Recruit/WhenIGetVacancies.cs",
+          "reason": "IOuterApiClient is used in tests as a Mock and configured for HTTP Get operations."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Commands/RunHealthCheckCommand/RunHealthCheckCommandHandler.cs",
+          "reason": "IOuterApiClient is used to perform a GET operation within a health check."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/ReservationsService.cs",
+          "reason": "Service integrates with IOuterApiClient for fetching reservations using outbound HTTP requests."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/PayeSchemesWithEnglishFractionService.cs",
+          "reason": "Uses IOuterApiClient to perform HTTP GET requests potentially mapped to an API operation."
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "Outer API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IOuterApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "EmployerAccountsOuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": "Subscription-Key",
+        "configurationKeys": [
+          "EmployerAccountsOuterApiConfiguration.Key"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/EmployerAccountsOuterApiServiceRegistrations.cs",
+          "reason": "Detected IOuterApiClient registration with HttpClient."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/OuterApiClient.cs",
+          "reason": "Detected outbound HttpClient calls within OuterApiClient with authentication header."
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "OuterApi",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "OuterApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "EmployerAccountsOuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": "header",
+        "configurationKeys": [
+          "EmployerAccountsOuterApiConfiguration.Key"
+        ]
+      },
+      "operations": [
+        {
+          "method": "GET",
           "path": "SearchOrganisation/IdentifiableOrganisationTypes",
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/SearchOrganisation/GetIdentifiableOrganisationTypesRequest.cs"
+        },
+        {
+          "method": "GET",
+          "path": "SearchOrganisation/organisations/search/results",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/SearchOrganisation/WhenBuildingSearchOrganisationRequest.cs"
         },
         {
           "method": "GET",
@@ -787,37 +590,130 @@
           "method": "GET",
           "path": "reservation/{AccountId}",
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/Reservations/GetReservationsRequest.cs"
+        },
+        {
+          "method": "GET",
+          "path": "test-url/get",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/WhenHandlingAGetRequest.cs"
+        },
+        {
+          "method": "GET",
+          "path": "vacancies/{accountId}",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/Vacancies/WhenBuildingGetVacanciesApiRequest.cs"
+        },
+        {
+          "method": null,
+          "path": "SearchOrganisation/organisations/search/results?searchTerm={SearchTerm}&maximumResults={MaximumResults}",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/SearchOrganisation/SearchOrganisationRequest.cs"
+        },
+        {
+          "method": null,
+          "path": "SearchOrganisation/review?identifier={Identifier}&organisationType={OrganisationType}",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/SearchOrganisation/GetLatestDetailsRequest.cs"
+        },
+        {
+          "method": null,
+          "path": "accountusers/{_userId}/accounts?email={_email}",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/UserAccounts/GetUserAccountsRequest.cs"
+        },
+        {
+          "method": null,
+          "path": "vacancies/{accountId}",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/Vacancies/GetVacanciesApiRequest.cs"
         }
       ],
       "resources": [],
       "evidence": [
         {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/Vacancies/WhenBuildingGetVacanciesApiRequest.cs",
+          "reason": "API operation path constructed with endpoint template."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/WhenHandlingAGetRequest.cs",
+          "reason": "HttpClient configured with headers and a base URL."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.UnitTests/Infrastructure/OuterApi/Requests/SearchOrganisation/WhenBuildingSearchOrganisationRequest.cs",
+          "reason": "Path and query parameters defined for outbound API request."
+        },
+        {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/Accounts/GetCreateTaskListRequest.cs",
-          "reason": "OuterApi URL pattern detected in the GetCreateTaskListRequest class."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/Finance/GetEnglishFractionCurrentRequest.cs",
-          "reason": "OuterApi URL pattern detected in the GetEnglishFractionCurrentRequest class."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/Finance/GetEnglishFractionHistoryRequest.cs",
-          "reason": "OuterApi URL pattern detected in the GetEnglishFractionHistoryRequest class."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/SearchOrganisation/GetIdentifiableOrganisationTypesRequest.cs",
-          "reason": "OuterApi URL pattern detected in the GetIdentifiableOrganisationTypesRequest class."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/Reservations/GetReservationsRequest.cs",
-          "reason": "OuterApi URL pattern detected in the GetReservationsRequest class."
+          "reason": "Path templates indicate HTTP requests constructed for OuterApi."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/Accounts/GetTasksRequest.cs",
-          "reason": "OuterApi URL pattern detected in the GetTasksRequest class."
+          "reason": "Path templates indicate HTTP requests constructed for OuterApi."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/Finance/GetEnglishFractionCurrentRequest.cs",
+          "reason": "Path templates indicate HTTP requests constructed for OuterApi."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/Finance/GetEnglishFractionHistoryRequest.cs",
+          "reason": "Path templates indicate HTTP requests constructed for OuterApi."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/HealthCheck/PingRequest.cs",
-          "reason": "OuterApi URL pattern detected in the PingRequest class."
+          "reason": "Path templates indicate HTTP requests constructed for OuterApi."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/Reservations/GetReservationsRequest.cs",
+          "reason": "Path templates indicate HTTP requests constructed for OuterApi."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Infrastructure/OuterApi/Requests/SearchOrganisation/GetIdentifiableOrganisationTypesRequest.cs",
+          "reason": "Path templates indicate HTTP requests constructed for OuterApi."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Queries/GetCreateAccountTaskList/GetCreateAccountTaskListQueryHandler.cs",
+          "reason": "Uses IOuterApiClient to make outbound API calls"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/EmployerAccountService.cs",
+          "reason": "Uses IOuterApiClient to make outbound API calls"
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "PensionRegulatorApi",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": null,
+      "configurationKeys": [
+        "PensionRegulatorApi.BaseUrl",
+        "PensionRegulatorApi.IdentifierUri"
+      ],
+      "authentication": {
+        "type": "bearer",
+        "configurationKeys": [
+          "PensionRegulatorApi.IdentifierUri"
+        ]
+      },
+      "operations": [
+        {
+          "method": "GET",
+          "path": "api/pensionsregulator/organisations/{aorn}?payeRef={payeRef}",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/PensionRegulatorService.cs"
+        },
+        {
+          "method": "GET",
+          "path": "api/pensionsregulator/organisations?payeRef={payeRef}",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/PensionRegulatorService.cs"
+        },
+        {
+          "method": "GET",
+          "path": "api/pensionsregulator/{organisationId}",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/PensionRegulatorService.cs"
+        }
+      ],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Services/PensionRegulatorService.cs",
+          "reason": "Service constructs URL paths for outbound HTTP GET requests to Pension Regulator API based on configuration keys and inputs."
         }
       ],
       "confidence": "high"
