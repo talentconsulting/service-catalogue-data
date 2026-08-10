@@ -1,0 +1,176 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Finance API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/period-ends": {
+      "get": {
+        "summary": "Get All Period Ends",
+        "operationId": "GetAllPeriodEnds",
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadAllEmployerAccountBalances"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PeriodEnd"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create New Period End",
+        "operationId": "CreatePeriodEnd",
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadAllEmployerAccountBalances"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PeriodEnd"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeriodEnd"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "Could not create period end"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/period-ends/{periodEndId}": {
+      "get": {
+        "summary": "Get Period End By ID",
+        "operationId": "GetPeriodEndById",
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadAllEmployerAccountBalances"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "periodEndId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PeriodEnd"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PeriodEnd": {
+        "type": "object",
+        "properties": {
+          "PeriodEndId": {
+            "type": "string"
+          },
+          "CalendarPeriodMonth": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "CalendarPeriodYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "AccountDataValidAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "CommitmentDataValidAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "CompletionDateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "PaymentsForPeriod": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "PeriodEndId",
+          "CalendarPeriodMonth",
+          "CalendarPeriodYear",
+          "CompletionDateTime",
+          "PaymentsForPeriod"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "ApiRoles": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

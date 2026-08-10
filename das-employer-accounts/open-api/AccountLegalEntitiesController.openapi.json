@@ -7,11 +7,8 @@
   "paths": {
     "/api/accountlegalentities": {
       "get": {
-        "operationId": "GetAccountLegalEntities",
-        "summary": "Retrieve account legal entities.",
-        "tags": [
-          "Account Legal Entities"
-        ],
+        "summary": "Get account legal entities",
+        "operationId": "getAccountLegalEntities",
         "parameters": [
           {
             "name": "PageNumber",
@@ -20,7 +17,7 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "default": 1
+              "maximum": 2147483647
             }
           },
           {
@@ -30,18 +27,17 @@
             "schema": {
               "type": "integer",
               "minimum": 100,
-              "maximum": 10000,
-              "default": 1000
+              "maximum": 10000
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PagedApiResponse"
+                  "$ref": "#/components/schemas/PagedApiResponse_AccountLegalEntity"
                 }
               }
             }
@@ -49,18 +45,15 @@
         },
         "security": [
           {
-            "ApiRoles.ReadUserAccounts": []
+            "ApiRolesReadUserAccounts": []
           }
         ]
       }
     },
     "/api/accountlegalentities/GetAll": {
       "post": {
-        "operationId": "GetAllAccountLegalEntities",
-        "summary": "Retrieve all account legal entities based on hashed account ID.",
-        "tags": [
-          "Account Legal Entities"
-        ],
+        "summary": "Get all legal entities by account ID",
+        "operationId": "getAllLegalEntities",
         "requestBody": {
           "required": true,
           "content": {
@@ -73,7 +66,7 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response with account legal entities.",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -83,15 +76,15 @@
             }
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Bad request"
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error"
           }
         },
         "security": [
           {
-            "ApiRoles.ReadUserAccounts": []
+            "ApiRolesReadUserAccounts": []
           }
         ]
       }
@@ -99,6 +92,42 @@
   },
   "components": {
     "schemas": {
+      "PagedApiResponse_AccountLegalEntity": {
+        "type": "object",
+        "properties": {
+          "Data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountLegalEntity"
+            }
+          },
+          "Page": {
+            "type": "integer"
+          },
+          "TotalPages": {
+            "type": "integer"
+          }
+        }
+      },
+      "GetAccountLegalEntitiesQuery": {
+        "type": "object",
+        "properties": {
+          "PageNumber": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "PageSize": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 10000
+          }
+        },
+        "required": [
+          "PageNumber",
+          "PageSize"
+        ]
+      },
       "GetAllLegalEntitiesRequest": {
         "type": "object",
         "properties": {
@@ -109,24 +138,19 @@
             }
           },
           "SearchTerm": {
-            "type": "string",
-            "default": ""
+            "type": "string"
           },
           "PageNumber": {
-            "type": "integer",
-            "default": 1
+            "type": "integer"
           },
           "PageSize": {
-            "type": "integer",
-            "default": 10
+            "type": "integer"
           },
           "SortColumn": {
-            "type": "string",
-            "default": "Name"
+            "type": "string"
           },
           "IsAscending": {
-            "type": "boolean",
-            "default": false
+            "type": "boolean"
           }
         },
         "required": [
@@ -224,6 +248,26 @@
           }
         }
       },
+      "AccountLegalEntity": {
+        "type": "object",
+        "properties": {
+          "AccountId": {
+            "type": "integer"
+          },
+          "AccountLegalEntityId": {
+            "type": "integer"
+          },
+          "AccountLegalEntityPublicHashedId": {
+            "type": "string"
+          },
+          "LegalEntityId": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          }
+        }
+      },
       "Agreement": {
         "type": "object",
         "properties": {
@@ -265,43 +309,13 @@
             ]
           }
         }
-      },
-      "PagedApiResponse": {
-        "type": "object",
-        "properties": {
-          "Data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AccountLegalEntity"
-            }
-          },
-          "Page": {
-            "type": "integer"
-          },
-          "TotalPages": {
-            "type": "integer"
-          }
-        }
-      },
-      "AccountLegalEntity": {
-        "type": "object",
-        "properties": {
-          "AccountId": {
-            "type": "integer"
-          },
-          "AccountLegalEntityId": {
-            "type": "integer"
-          },
-          "AccountLegalEntityPublicHashedId": {
-            "type": "string"
-          },
-          "LegalEntityId": {
-            "type": "integer"
-          },
-          "Name": {
-            "type": "string"
-          }
-        }
+      }
+    },
+    "securitySchemes": {
+      "ApiRolesReadUserAccounts": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
       }
     }
   }

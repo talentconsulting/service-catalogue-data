@@ -1,0 +1,204 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Finance API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/transaction-lines/staging": {
+      "post": {
+        "operationId": "bulkTransactionLineStagingIngest",
+        "summary": "Ingest bulk transaction line staging data",
+        "description": "Endpoint to ingest transaction line staging data in bulk.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransactionLineStagingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "400": {
+            "description": "Bad Request - Validation errors or missing transaction lines.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "IsSuccess": {
+                      "type": "boolean"
+                    },
+                    "Message": {
+                      "type": "string"
+                    },
+                    "validationErrors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  "required": [
+                    "IsSuccess",
+                    "Message",
+                    "validationErrors"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Failed to ingest transaction lines.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "IsSuccess": {
+                      "type": "boolean"
+                    },
+                    "Message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "IsSuccess",
+                    "Message"
+                  ]
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created - Transaction lines successfully ingested.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "IsSuccess": {
+                      "type": "boolean"
+                    },
+                    "Message": {
+                      "type": "string"
+                    },
+                    "insertedCount": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "IsSuccess",
+                    "Message",
+                    "insertedCount"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TransactionLineStagingRequest": {
+        "type": "object",
+        "properties": {
+          "TransactionLines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransactionLineStagingModel"
+            }
+          }
+        },
+        "required": [
+          "TransactionLines"
+        ]
+      },
+      "TransactionLineStagingModel": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer"
+          },
+          "AccountId": {
+            "type": "integer"
+          },
+          "DateCreated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "SubmissionId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "TransactionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "TransactionType": {
+            "type": "integer"
+          },
+          "LevyDeclared": {
+            "type": "number",
+            "nullable": true
+          },
+          "Amount": {
+            "type": "number"
+          },
+          "EmpRef": {
+            "type": "string",
+            "nullable": true
+          },
+          "PeriodEnd": {
+            "type": "string"
+          },
+          "Ukprn": {
+            "type": "integer",
+            "nullable": true
+          },
+          "SfaCoInvestmentAmount": {
+            "type": "number"
+          },
+          "EmployerCoInvestmentAmount": {
+            "type": "number"
+          },
+          "EnglishFraction": {
+            "type": "number",
+            "nullable": true
+          },
+          "TransferSenderAccountId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "TransferSenderAccountName": {
+            "type": "string",
+            "nullable": true
+          },
+          "TransferReceiverAccountId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "TransferReceiverAccountName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "Id",
+          "AccountId",
+          "DateCreated",
+          "TransactionDate",
+          "TransactionType",
+          "Amount",
+          "PeriodEnd",
+          "SfaCoInvestmentAmount",
+          "EmployerCoInvestmentAmount"
+        ]
+      }
+    }
+  }
+}
