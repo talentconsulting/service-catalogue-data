@@ -1,0 +1,165 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Accounts API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/user": {
+      "get": {
+        "operationId": "getUserByEmail",
+        "summary": "Retrieve a user by their email address.",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadUserAccounts"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/user/by-ref/{userRef}": {
+      "get": {
+        "operationId": "getUserByRef",
+        "summary": "Retrieve a user by their reference.",
+        "parameters": [
+          {
+            "name": "userRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found."
+          }
+        },
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadUserAccounts"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/user/upsert": {
+      "put": {
+        "operationId": "upsertRegisteredUser",
+        "summary": "Upsert (create or update) a registered user.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertRegisteredUserCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The operation was successful."
+          },
+          "500": {
+            "description": "An error occurred while processing the request."
+          }
+        },
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadUserAccounts"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpsertRegisteredUserCommand": {
+        "type": "object",
+        "properties": {
+          "UserRef": {
+            "type": "string"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "EmailAddress": {
+            "type": "string",
+            "format": "email"
+          },
+          "CorrelationId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "UserRef",
+          "FirstName",
+          "LastName",
+          "EmailAddress",
+          "CorrelationId"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "ApiRoles": {
+        "type": "oauth2",
+        "description": "OAuth2 authorization with role-based access control policies.",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://example.com/auth",
+            "scopes": {
+              "ReadUserAccounts": "Allows read access to user accounts."
+            }
+          }
+        }
+      }
+    }
+  }
+}

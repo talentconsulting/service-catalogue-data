@@ -1,0 +1,84 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Accounts API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/accounthistories": {
+      "get": {
+        "operationId": "GetAccountHistoryByRef",
+        "summary": "Retrieve account history by PAYE reference",
+        "parameters": [
+          {
+            "name": "payeRef",
+            "in": "query",
+            "required": true,
+            "description": "The PAYE reference used to retrieve the account history",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the account history details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountHistory"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The PAYE reference provided does not exist"
+          }
+        },
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadAllEmployerAccountBalances"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccountHistory": {
+        "type": "object",
+        "properties": {
+          "AccountId": {
+            "type": "string"
+          },
+          "AddedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "RemovedDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "AccountId",
+          "AddedDate"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "ApiRoles": {
+        "type": "oauth2",
+        "flows": {
+          "clientCredentials": {
+            "scopes": {
+              "ReadAllEmployerAccountBalances": "Permission to read all employer account balances"
+            }
+          }
+        }
+      }
+    }
+  }
+}

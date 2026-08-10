@@ -1,0 +1,174 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Support API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/support/change-role": {
+      "post": {
+        "summary": "Change the role of a team member",
+        "operationId": "changeRole",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportChangeTeamMemberRoleCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role changed successfully"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadUserAccounts": []
+          }
+        ]
+      }
+    },
+    "/api/support/resend-invitation": {
+      "post": {
+        "summary": "Resend an invitation",
+        "operationId": "resendInvitation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportResendInvitationCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invitation resent successfully"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadUserAccounts": []
+          }
+        ]
+      }
+    },
+    "/api/support/send-invitation": {
+      "post": {
+        "summary": "Send a new invitation",
+        "operationId": "sendInvitation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SupportCreateInvitationCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Invitation sent successfully"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadUserAccounts": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SupportChangeTeamMemberRoleCommand": {
+        "type": "object",
+        "properties": {
+          "HashedAccountId": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        },
+        "required": [
+          "HashedAccountId",
+          "Email",
+          "Role"
+        ]
+      },
+      "SupportCreateInvitationCommand": {
+        "type": "object",
+        "properties": {
+          "HashedAccountId": {
+            "type": "string"
+          },
+          "NameOfPersonBeingInvited": {
+            "type": "string"
+          },
+          "EmailOfPersonBeingInvited": {
+            "type": "string"
+          },
+          "RoleOfPersonBeingInvited": {
+            "$ref": "#/components/schemas/Role"
+          }
+        },
+        "required": [
+          "HashedAccountId",
+          "NameOfPersonBeingInvited",
+          "EmailOfPersonBeingInvited",
+          "RoleOfPersonBeingInvited"
+        ]
+      },
+      "SupportResendInvitationCommand": {
+        "type": "object",
+        "properties": {
+          "Email": {
+            "type": "string"
+          },
+          "HashedAccountId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Email",
+          "HashedAccountId"
+        ]
+      },
+      "Role": {
+        "type": "string",
+        "enum": [
+          "None",
+          "Owner",
+          "Transactor",
+          "Viewer"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "ApiRoles.ReadUserAccounts": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "API key required to access endpoints"
+      }
+    }
+  }
+}
