@@ -1,0 +1,866 @@
+{
+  "database": {
+    "name": null,
+    "engine": null
+  },
+  "tables": [
+    {
+      "name": "Account",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "Id",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Name",
+          "type": "VARCHAR(500)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "IsLevy",
+          "type": "BIT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "0",
+          "ordinal": null
+        },
+        {
+          "name": "ReservationLimit",
+          "type": "INT",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": [
+        {
+          "name": "AK_Account_Column",
+          "type": null,
+          "columns": [
+            "Id"
+          ],
+          "unique": true,
+          "filter": null
+        }
+      ]
+    },
+    {
+      "name": "AccountLegalEntity",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "Id",
+          "type": "UNIQUEIDENTIFIER",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "AccountId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "LegalEntityId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "AccountLegalEntityId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "AccountLegalEntityName",
+          "type": "VARCHAR(100)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "AgreementSigned",
+          "type": "BIT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "0",
+          "ordinal": null
+        },
+        {
+          "name": "IsLevy",
+          "type": "BIT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "0",
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": [
+        {
+          "name": "AK_AccountLegalEntity_Column",
+          "type": null,
+          "columns": [
+            "AccountLegalEntityId"
+          ],
+          "unique": true,
+          "filter": null
+        },
+        {
+          "name": "IDX_AccountLegalEntity_AccountLegalEntityId",
+          "type": "NONCLUSTERED",
+          "columns": [
+            "AccountLegalEntityId"
+          ],
+          "unique": false,
+          "filter": null
+        },
+        {
+          "name": "IDX_AccountLegalEntity_AccountId",
+          "type": "NONCLUSTERED",
+          "columns": [
+            "AccountId"
+          ],
+          "unique": false,
+          "filter": null
+        },
+        {
+          "name": "IDX_AccountLegalEntity_AccountIdLegalEntityId",
+          "type": "NONCLUSTERED",
+          "columns": [
+            "AccountId",
+            "LegalEntityId"
+          ],
+          "unique": false,
+          "filter": null
+        }
+      ]
+    },
+    {
+      "name": "ClientOutboxData",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "MessageId",
+          "type": "UNIQUEIDENTIFIER",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "EndpointName",
+          "type": "NVARCHAR(150)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "CreatedAt",
+          "type": "DATETIME",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Dispatched",
+          "type": "BIT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "0",
+          "ordinal": null
+        },
+        {
+          "name": "DispatchedAt",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Operations",
+          "type": "NVARCHAR(MAX)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "PersistenceVersion",
+          "type": "VARCHAR(23)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "'1.0.0'",
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": [
+        {
+          "name": "IX_CreatedAt_PersistenceVersion",
+          "type": null,
+          "columns": [
+            "CreatedAt",
+            "PersistenceVersion"
+          ],
+          "unique": false,
+          "filter": "[Dispatched] = 0"
+        },
+        {
+          "name": "IX_DispatchedAt_PersistenceVersion",
+          "type": null,
+          "columns": [
+            "DispatchedAt",
+            "PersistenceVersion"
+          ],
+          "unique": false,
+          "filter": "[Dispatched] = 1"
+        }
+      ]
+    },
+    {
+      "name": "Course",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "CourseId",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Title",
+          "type": "VARCHAR(500)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Level",
+          "type": "TINYINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "EffectiveTo",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "ApprenticeshipType",
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "LearningType",
+          "type": "TINYINT",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": [
+        {
+          "name": "IX_Course_EffectiveTo_CourseId",
+          "type": "NONCLUSTERED",
+          "columns": [
+            "EffectiveTo",
+            "CourseId"
+          ],
+          "unique": false,
+          "filter": null
+        }
+      ]
+    },
+    {
+      "name": "GlobalRule",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "Id",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": true,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "ActiveFrom",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "ActiveTo",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Restriction",
+          "type": "TINYINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "RuleType",
+          "type": "TINYINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": []
+    },
+    {
+      "name": "GlobalRuleAccountExemption",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "GlobalRuleId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "AccountId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": 2
+        }
+      ],
+      "relationships": [
+        {
+          "name": "FK_GlobalRuleAccountExemption_GlobalRule",
+          "type": "many-to-one",
+          "fromColumns": [
+            "GlobalRuleId"
+          ],
+          "targetTable": "GlobalRule",
+          "targetColumns": [
+            "Id"
+          ],
+          "onDelete": null
+        },
+        {
+          "name": "FK_GlobalRuleAccountExemption_Account",
+          "type": "many-to-one",
+          "fromColumns": [
+            "AccountId"
+          ],
+          "targetTable": "Account",
+          "targetColumns": [
+            "Id"
+          ],
+          "onDelete": null
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "OutboxData",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "MessageId",
+          "type": "NVARCHAR(200)",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "Dispatched",
+          "type": "BIT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "0",
+          "ordinal": 2
+        },
+        {
+          "name": "DispatchedAt",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 3
+        },
+        {
+          "name": "PersistenceVersion",
+          "type": "VARCHAR(23)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 4
+        },
+        {
+          "name": "Operations",
+          "type": "NVARCHAR(MAX)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 5
+        }
+      ],
+      "relationships": [],
+      "indexes": [
+        {
+          "name": "IX_DispatchedAt",
+          "type": null,
+          "columns": [
+            "DispatchedAt"
+          ],
+          "unique": false,
+          "filter": "[Dispatched] = 1"
+        }
+      ]
+    },
+    {
+      "name": "ProviderPermission",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "AccountId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "AccountLegalEntityId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": 2
+        },
+        {
+          "name": "Ukprn",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": 3
+        },
+        {
+          "name": "CanCreateCohort",
+          "type": "BIT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 4
+        }
+      ],
+      "relationships": [],
+      "indexes": [
+        {
+          "name": "IDX_ProviderPermission_AccountId",
+          "type": null,
+          "columns": [
+            "AccountId"
+          ],
+          "unique": false,
+          "filter": null
+        },
+        {
+          "name": "IDX_ProviderPermission_UkprnAccountLegalEntityId",
+          "type": null,
+          "columns": [
+            "Ukprn",
+            "AccountLegalEntityId"
+          ],
+          "unique": false,
+          "filter": null
+        },
+        {
+          "name": "IDX_ProviderPermission_Ukprn",
+          "type": null,
+          "columns": [
+            "Ukprn"
+          ],
+          "unique": false,
+          "filter": null
+        }
+      ]
+    },
+    {
+      "name": "Reservation",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "Id",
+          "type": "UNIQUEIDENTIFIER",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "AccountId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 2
+        },
+        {
+          "name": "IsLevyAccount",
+          "type": "TINYINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 3
+        },
+        {
+          "name": "CreatedDate",
+          "type": "DATETIME",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "GETDATE()",
+          "ordinal": 4
+        },
+        {
+          "name": "StartDate",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 5
+        },
+        {
+          "name": "ExpiryDate",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 6
+        },
+        {
+          "name": "Status",
+          "type": "TINYINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "0",
+          "ordinal": 7
+        },
+        {
+          "name": "CourseId",
+          "type": "VARCHAR(20)",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 8
+        },
+        {
+          "name": "AccountLegalEntityId",
+          "type": "BIGINT",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 9
+        },
+        {
+          "name": "ProviderId",
+          "type": "INT",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 10
+        },
+        {
+          "name": "AccountLegalEntityName",
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 11
+        },
+        {
+          "name": "TransferSenderAccountId",
+          "type": "BIGINT",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 12
+        },
+        {
+          "name": "UserId",
+          "type": "UNIQUEIDENTIFIER",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 13
+        },
+        {
+          "name": "ClonedReservationId",
+          "type": "UNIQUEIDENTIFIER",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 14
+        },
+        {
+          "name": "ConfirmedDate",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 15
+        },
+        {
+          "name": "CohortId",
+          "type": "BIGINT",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 16
+        },
+        {
+          "name": "DraftApprenticeshipId",
+          "type": "BIGINT",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 17
+        }
+      ],
+      "relationships": [
+        {
+          "name": "FK_Reservation_Course",
+          "type": "many-to-one",
+          "fromColumns": [
+            "CourseId"
+          ],
+          "targetTable": "Course",
+          "targetColumns": [
+            "CourseId"
+          ],
+          "onDelete": null
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IDX_Reservation_AccountId",
+          "type": null,
+          "columns": [
+            "AccountId"
+          ],
+          "unique": false,
+          "filter": null
+        },
+        {
+          "name": "IDX_Reservation_ProviderId",
+          "type": null,
+          "columns": [
+            "ProviderId"
+          ],
+          "unique": false,
+          "filter": null
+        },
+        {
+          "name": "IDX_Reservation_AccountLegalEntityIsLevyAccountStatus",
+          "type": null,
+          "columns": [
+            "AccountLegalEntityId",
+            "IsLevyAccount",
+            "Status"
+          ],
+          "unique": false,
+          "filter": null
+        }
+      ]
+    },
+    {
+      "name": "Rule",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "Id",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": true,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "CourseId",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 2
+        },
+        {
+          "name": "Restriction",
+          "type": "TINYINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 3
+        },
+        {
+          "name": "CreatedDate",
+          "type": "DATETIME",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "GETDATE()",
+          "ordinal": 4
+        },
+        {
+          "name": "ActiveFrom",
+          "type": "DATETIME",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 5
+        },
+        {
+          "name": "ActiveTo",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 6
+        }
+      ],
+      "relationships": [
+        {
+          "name": "FK_Rule_Apprenticeship",
+          "type": "many-to-one",
+          "fromColumns": [
+            "CourseId"
+          ],
+          "targetTable": "Course",
+          "targetColumns": [
+            "CourseId"
+          ],
+          "onDelete": null
+        }
+      ],
+      "indexes": []
+    }
+  ],
+  "types": []
+}
