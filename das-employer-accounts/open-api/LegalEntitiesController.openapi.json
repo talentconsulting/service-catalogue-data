@@ -1,40 +1,42 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts API",
+    "title": "Employer Accounts API - LegalEntities",
     "version": "1.0.0"
   },
   "paths": {
     "/api/accounts/{accountId}/legalentities": {
       "get": {
         "operationId": "GetLegalEntities",
-        "summary": "Retrieve legal entities for a given account.",
+        "summary": "Retrieve legal entities associated with an account.",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+              "type": "integer"
+            },
+            "description": "The ID of the account."
           },
           {
             "name": "includeDetails",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean"
-            }
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to include detailed legal entity information."
           }
         ],
         "responses": {
           "200": {
-            "description": "List of legal entities.",
+            "description": "A list of resources or detailed legal entities.",
             "content": {
               "application/json": {
                 "schema": {
-                  "anyOf": [
+                  "oneOf": [
                     {
                       "$ref": "#/components/schemas/ResourceList"
                     },
@@ -50,51 +52,48 @@
             }
           },
           "404": {
-            "description": "No legal entities found or invalid request."
+            "description": "No legal entities found for the provided account ID."
           }
-        },
-        "security": [
-          {
-            "ApiRoles": []
-          }
-        ]
+        }
       }
     },
     "/api/accounts/{accountId}/legalentities/{legalEntityId}": {
       "get": {
         "operationId": "GetLegalEntity",
-        "summary": "Retrieve a specific legal entity for a given account.",
+        "summary": "Retrieve a specific legal entity by ID.",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+              "type": "integer"
+            },
+            "description": "The ID of the account."
           },
           {
             "name": "legalEntityId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+              "type": "integer"
+            },
+            "description": "The ID of the legal entity."
           },
           {
             "name": "includeAllAgreements",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean"
-            }
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Whether to include all agreements for the legal entity."
           }
         ],
         "responses": {
           "200": {
-            "description": "Details of the legal entity.",
+            "description": "Detailed information on the specified legal entity.",
             "content": {
               "application/json": {
                 "schema": {
@@ -104,14 +103,9 @@
             }
           },
           "404": {
-            "description": "Legal entity not found."
+            "description": "The specified legal entity was not found."
           }
-        },
-        "security": [
-          {
-            "ApiRoles": []
-          }
-        ]
+        }
       }
     }
   },
@@ -121,10 +115,12 @@
         "type": "object",
         "properties": {
           "Id": {
-            "type": "string"
+            "type": "string",
+            "description": "The unique identifier for the resource."
           },
           "Href": {
-            "type": "string"
+            "type": "string",
+            "description": "The hyperlink to the resource."
           }
         },
         "required": [
@@ -140,14 +136,7 @@
       },
       "LegalEntity": {
         "type": "object",
-        "description": "A placeholder for the legal entity object. Exact structure unknown from the source."
-      }
-    },
-    "securitySchemes": {
-      "ApiRoles": {
-        "type": "apiKey",
-        "name": "Authorization",
-        "in": "header"
+        "description": "A representation of a legal entity."
       }
     }
   }

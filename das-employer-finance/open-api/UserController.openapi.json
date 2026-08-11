@@ -2,17 +2,13 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Finance API",
-    "version": "1.0.0",
-    "description": "API for managing employer finance-related operations."
+    "version": "1.0.0"
   },
   "paths": {
     "/api/user/upsert": {
       "put": {
-        "summary": "Upsert a registered user",
-        "operationId": "UpsertRegisteredUser",
-        "tags": [
-          "User"
-        ],
+        "summary": "Upsert a registered user.",
+        "operationId": "upsertUser",
         "requestBody": {
           "required": true,
           "content": {
@@ -25,15 +21,15 @@
         },
         "responses": {
           "200": {
-            "description": "Successfully upserted the user."
+            "description": "OK"
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
           }
         },
         "security": [
           {
-            "ApiKeyAuth": []
+            "OAuth2": []
           }
         ]
       }
@@ -54,8 +50,7 @@
             "type": "string"
           },
           "EmailAddress": {
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           "CorrelationId": {
             "type": "string"
@@ -71,10 +66,16 @@
       }
     },
     "securitySchemes": {
-      "ApiKeyAuth": {
-        "type": "apiKey",
-        "name": "Authorization",
-        "in": "header"
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://example.com/auth",
+            "scopes": {
+              "ApiRoles.ReadUserAccounts": "Permission to read user accounts"
+            }
+          }
+        }
       }
     }
   }

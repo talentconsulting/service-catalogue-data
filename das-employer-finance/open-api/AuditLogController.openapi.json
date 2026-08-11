@@ -1,14 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Finance Audit Logs API",
+    "title": "Employer Finance API",
     "version": "1.0.0"
   },
   "paths": {
     "/jobs": {
       "post": {
         "operationId": "CreateJob",
-        "description": "Create a new audit job.",
+        "summary": "Create a new audit job.",
         "requestBody": {
           "required": true,
           "content": {
@@ -31,20 +31,13 @@
             }
           },
           "400": {
-            "description": "Invalid job payload or job already exists.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuditErrorDetails"
-                }
-              }
-            }
+            "description": "Invalid request payload."
           }
         }
       },
       "get": {
         "operationId": "GetJobs",
-        "description": "Retrieve a paginated list of audit jobs.",
+        "summary": "Retrieve a paginated list of audit jobs.",
         "parameters": [
           {
             "name": "page",
@@ -52,9 +45,9 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "default": 1
-            },
-            "description": "The page number (1 or greater)."
+              "default": 1,
+              "minimum": 1
+            }
           },
           {
             "name": "pagesize",
@@ -65,13 +58,12 @@
               "default": 20,
               "minimum": 10,
               "maximum": 100
-            },
-            "description": "The size of the page (between 10 and 100)."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of jobs.",
+            "description": "List of audit jobs retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -84,14 +76,7 @@
             }
           },
           "400": {
-            "description": "Invalid pagination parameters.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuditErrorDetails"
-                }
-              }
-            }
+            "description": "Invalid paging parameters."
           }
         }
       }
@@ -99,7 +84,7 @@
     "/jobs/{jobId}": {
       "get": {
         "operationId": "GetJob",
-        "description": "Retrieve details of a specific audit job.",
+        "summary": "Retrieve a specific audit job by ID.",
         "parameters": [
           {
             "name": "jobId",
@@ -107,13 +92,12 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "The ID of the job."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Details of the job.",
+            "description": "Audit job retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -123,7 +107,7 @@
             }
           },
           "404": {
-            "description": "Job not found."
+            "description": "Audit job not found."
           }
         }
       }
@@ -131,7 +115,7 @@
     "/jobs/{jobId}/logs": {
       "get": {
         "operationId": "GetJobLogs",
-        "description": "Retrieve a paginated list of logs associated with a specific audit job.",
+        "summary": "Retrieve paginated logs for a specific audit job.",
         "parameters": [
           {
             "name": "jobId",
@@ -139,8 +123,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "The ID of the job."
+            }
           },
           {
             "name": "page",
@@ -148,9 +131,9 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "default": 1
-            },
-            "description": "The page number (1 or greater)."
+              "default": 1,
+              "minimum": 1
+            }
           },
           {
             "name": "pagesize",
@@ -161,33 +144,25 @@
               "default": 20,
               "minimum": 10,
               "maximum": 100
-            },
-            "description": "The size of the page (between 10 and 100)."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Paginated list of logs.",
+            "description": "Logs retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "$ref": "#/components/schemas/CreateWorkflowLogRequest"
                   }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid pagination parameters.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuditErrorDetails"
-                }
-              }
-            }
+            "description": "Invalid paging parameters."
           }
         }
       }
@@ -195,7 +170,7 @@
     "/jobs/{jobId}/workflows/{workflowId}/logs": {
       "post": {
         "operationId": "CreateWorkflowLog",
-        "description": "Create a new log for a specific workflow.",
+        "summary": "Create a workflow log for a specific job and workflow.",
         "parameters": [
           {
             "name": "jobId",
@@ -203,8 +178,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "The ID of the job."
+            }
           },
           {
             "name": "workflowId",
@@ -212,8 +186,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "The ID of the workflow."
+            }
           }
         ],
         "requestBody": {
@@ -228,7 +201,7 @@
         },
         "responses": {
           "201": {
-            "description": "Log created successfully.",
+            "description": "Workflow log created successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -238,20 +211,13 @@
             }
           },
           "400": {
-            "description": "Invalid workflow log payload.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuditErrorDetails"
-                }
-              }
-            }
+            "description": "Invalid workflow log payload."
           }
         }
       },
       "get": {
         "operationId": "GetWorkflowLogs",
-        "description": "Retrieve logs for a specific workflow.",
+        "summary": "Retrieve paginated workflow logs for a specific job and workflow.",
         "parameters": [
           {
             "name": "jobId",
@@ -259,8 +225,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "The ID of the job."
+            }
           },
           {
             "name": "workflowId",
@@ -268,8 +233,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "The ID of the workflow."
+            }
           },
           {
             "name": "page",
@@ -277,9 +241,9 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "default": 1
-            },
-            "description": "The page number (1 or greater)."
+              "default": 1,
+              "minimum": 1
+            }
           },
           {
             "name": "pagesize",
@@ -290,8 +254,7 @@
               "default": 20,
               "minimum": 10,
               "maximum": 100
-            },
-            "description": "The size of the page (between 10 and 100)."
+            }
           }
         ],
         "responses": {
@@ -302,21 +265,14 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "$ref": "#/components/schemas/CreateWorkflowLogRequest"
                   }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid pagination parameters.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AuditErrorDetails"
-                }
-              }
-            }
+            "description": "Invalid paging parameters."
           }
         }
       }
@@ -338,7 +294,8 @@
             "format": "date-time"
           },
           "NumRecords": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 0
           }
         },
         "required": [
@@ -367,7 +324,8 @@
         "type": "object",
         "properties": {
           "Sequence": {
-            "type": "integer"
+            "type": "integer",
+            "minimum": 1
           },
           "SpanId": {
             "type": "string"

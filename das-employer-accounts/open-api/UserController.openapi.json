@@ -7,25 +7,26 @@
   "paths": {
     "/api/user": {
       "get": {
-        "summary": "Get User by Email",
-        "operationId": "getUserByEmail",
+        "summary": "Get user by email",
+        "description": "Retrieve a user by their email",
         "parameters": [
           {
             "name": "email",
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "email"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "User found",
+            "description": "User retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/User"
                 }
               }
             }
@@ -36,15 +37,15 @@
         },
         "security": [
           {
-            "ApiRoles.ReadUserAccounts": []
+            "ApiRolesReadUserAccounts": []
           }
         ]
       }
     },
     "/api/user/by-ref/{userRef}": {
       "get": {
-        "summary": "Get User by Reference",
-        "operationId": "getUserByRef",
+        "summary": "Get user by reference",
+        "description": "Retrieve a user by their unique reference ID",
         "parameters": [
           {
             "name": "userRef",
@@ -57,11 +58,11 @@
         ],
         "responses": {
           "200": {
-            "description": "User found",
+            "description": "User retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/User"
                 }
               }
             }
@@ -72,15 +73,15 @@
         },
         "security": [
           {
-            "ApiRoles.ReadUserAccounts": []
+            "ApiRolesReadUserAccounts": []
           }
         ]
       }
     },
     "/api/user/upsert": {
       "put": {
-        "summary": "Upsert Registered User",
-        "operationId": "upsertRegisteredUser",
+        "summary": "Upsert user",
+        "description": "Create or update a user record",
         "requestBody": {
           "required": true,
           "content": {
@@ -101,7 +102,7 @@
         },
         "security": [
           {
-            "ApiRoles.ReadUserAccounts": []
+            "ApiRolesReadUserAccounts": []
           }
         ]
       }
@@ -109,6 +110,10 @@
   },
   "components": {
     "schemas": {
+      "User": {
+        "type": "object",
+        "additionalProperties": false
+      },
       "UpsertRegisteredUserCommand": {
         "type": "object",
         "properties": {
@@ -122,7 +127,8 @@
             "type": "string"
           },
           "EmailAddress": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           },
           "CorrelationId": {
             "type": "string"
@@ -134,14 +140,14 @@
           "LastName",
           "EmailAddress",
           "CorrelationId"
-        ]
+        ],
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
-      "ApiRoles.ReadUserAccounts": {
-        "type": "apiKey",
-        "name": "Authorization",
-        "in": "header"
+      "ApiRolesReadUserAccounts": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

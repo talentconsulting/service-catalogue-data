@@ -1,20 +1,15 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts API",
-    "version": "1.0.0",
-    "description": "API for managing employer accounts and related operations."
+    "title": "Employer Accounts Support API",
+    "version": "1.0.0"
   },
   "paths": {
     "/api/support/change-role": {
       "post": {
-        "summary": "Change role of a team member.",
+        "summary": "Change the role of a team member",
+        "description": "Allows modification of a team member's role within an account.",
         "operationId": "changeRole",
-        "security": [
-          {
-            "ApiRoles.ReadUserAccounts": []
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -27,23 +22,24 @@
         },
         "responses": {
           "200": {
-            "description": "Role changed successfully."
+            "description": "Role successfully changed."
           },
           "500": {
             "description": "Internal server error."
           }
-        }
+        },
+        "security": [
+          {
+            "defaultAuth": []
+          }
+        ]
       }
     },
     "/api/support/resend-invitation": {
       "post": {
-        "summary": "Resend an invitation to a user.",
+        "summary": "Resend an account invitation",
+        "description": "Resends an invitation to a team member.",
         "operationId": "resendInvitation",
-        "security": [
-          {
-            "ApiRoles.ReadUserAccounts": []
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -56,23 +52,24 @@
         },
         "responses": {
           "200": {
-            "description": "Invitation resent successfully."
+            "description": "Invitation successfully resent."
           },
           "500": {
             "description": "Internal server error."
           }
-        }
+        },
+        "security": [
+          {
+            "defaultAuth": []
+          }
+        ]
       }
     },
     "/api/support/send-invitation": {
       "post": {
-        "summary": "Send an invitation to a user.",
+        "summary": "Send a new account invitation",
+        "description": "Sends a new invitation to a prospective team member.",
         "operationId": "sendInvitation",
-        "security": [
-          {
-            "ApiRoles.ReadUserAccounts": []
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -85,12 +82,17 @@
         },
         "responses": {
           "200": {
-            "description": "Invitation sent successfully."
+            "description": "Invitation successfully sent."
           },
           "500": {
             "description": "Internal server error."
           }
-        }
+        },
+        "security": [
+          {
+            "defaultAuth": []
+          }
+        ]
       }
     }
   },
@@ -113,21 +115,6 @@
           "HashedAccountId",
           "Email",
           "Role"
-        ]
-      },
-      "SupportResendInvitationCommand": {
-        "type": "object",
-        "properties": {
-          "Email": {
-            "type": "string"
-          },
-          "HashedAccountId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "Email",
-          "HashedAccountId"
         ]
       },
       "SupportCreateInvitationCommand": {
@@ -153,6 +140,21 @@
           "RoleOfPersonBeingInvited"
         ]
       },
+      "SupportResendInvitationCommand": {
+        "type": "object",
+        "properties": {
+          "Email": {
+            "type": "string"
+          },
+          "HashedAccountId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Email",
+          "HashedAccountId"
+        ]
+      },
       "Role": {
         "type": "string",
         "enum": [
@@ -160,15 +162,13 @@
           "Owner",
           "Transactor",
           "Viewer"
-        ],
-        "description": "Role assigned to a user."
+        ]
       }
     },
     "securitySchemes": {
-      "ApiRoles.ReadUserAccounts": {
+      "defaultAuth": {
         "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+        "scheme": "bearer"
       }
     }
   }

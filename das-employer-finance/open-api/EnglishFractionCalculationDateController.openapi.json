@@ -2,13 +2,14 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Finance API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing English Fraction Calculation Date"
   },
   "paths": {
     "/api/english-fraction-calculation-date/{empRef}": {
       "get": {
-        "summary": "Get the last English fraction calculation date",
         "operationId": "GetLastCalculationDate",
+        "summary": "Gets the last English fraction calculation date for an employer",
         "parameters": [
           {
             "name": "empRef",
@@ -17,12 +18,12 @@
             "schema": {
               "type": "string"
             },
-            "description": "Employer reference"
+            "description": "The employer reference ID"
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -32,20 +33,27 @@
             }
           },
           "400": {
-            "description": "Validation error"
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "ApiRoles_ReadAllEmployerAccountBalances": []
+            "ApiRoles.ReadAllEmployerAccountBalances": []
           }
         ]
       }
     },
     "/api/english-fraction-calculation-date": {
       "post": {
-        "summary": "Persist English fraction calculation date",
-        "operationId": "PersistCalculationDate",
+        "operationId": "Persist",
+        "summary": "Persists the English fraction calculation date",
         "requestBody": {
           "required": true,
           "content": {
@@ -55,19 +63,33 @@
               }
             }
           },
-          "description": "The calculation date to persist"
+          "description": "Request payload containing the calculation date"
         },
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Validation error or invalid request payload"
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "ApiRoles_ReadAllEmployerAccountBalances": []
+            "ApiRoles.ReadAllEmployerAccountBalances": []
           }
         ]
       }
@@ -81,7 +103,7 @@
           "DateCalculated": {
             "type": "string",
             "format": "date-time",
-            "description": "The date of the English fraction calculation"
+            "description": "The date calculated for the English fraction"
           }
         },
         "required": [
@@ -90,9 +112,8 @@
       }
     },
     "securitySchemes": {
-      "ApiRoles_ReadAllEmployerAccountBalances": {
-        "type": "http",
-        "scheme": "bearer",
+      "ApiRoles.ReadAllEmployerAccountBalances": {
+        "type": "oauth2",
         "description": "Requires the ReadAllEmployerAccountBalances role"
       }
     }

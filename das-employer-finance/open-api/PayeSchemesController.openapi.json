@@ -7,37 +7,36 @@
   "paths": {
     "/api/paye-schemes/last-submission-date": {
       "get": {
-        "summary": "Get last PAYE scheme submission date",
+        "summary": "Get last submission date for a PAYE scheme",
         "operationId": "getLastSubmissionDate",
         "parameters": [
           {
             "name": "empRef",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "Employer reference used to identify the PAYE scheme."
+            "description": "The employer reference (EMPREF)."
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "$ref": "#/components/schemas/LastSubmissionDateResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request - Validation errors encountered",
+            "description": "Validation error",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationErrors"
+                  "$ref": "#/components/schemas/ValidationErrorResponse"
                 }
               }
             }
@@ -53,18 +52,42 @@
   },
   "components": {
     "schemas": {
-      "ValidationErrors": {
+      "LastSubmissionDateResponse": {
         "type": "object",
-        "additionalProperties": {
-          "type": "string"
-        }
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The last submission date for the PAYE scheme."
+          }
+        },
+        "additionalProperties": false
+      },
+      "ValidationErrorResponse": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "A dictionary of validation errors, mapping fields to error messages."
+          }
+        },
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
       "ApiRoles_ReadAllEmployerAccountBalances": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "Authorization policy for reading all employer account balances."
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://example.com/auth",
+            "scopes": {
+              "ReadAllEmployerAccountBalances": "Access to read all employer account balances."
+            }
+          }
+        }
       }
     }
   }
