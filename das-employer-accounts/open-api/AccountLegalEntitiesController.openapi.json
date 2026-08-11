@@ -13,17 +13,16 @@
           {
             "name": "PageNumber",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "integer",
-              "minimum": 1,
-              "maximum": 2147483647
+              "minimum": 1
             }
           },
           {
             "name": "PageSize",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "integer",
               "minimum": 100,
@@ -33,27 +32,22 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful response containing account legal entities",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PagedApiResponse_AccountLegalEntity"
+                  "$ref": "#/components/schemas/GetAccountLegalEntitiesResponse"
                 }
               }
             }
           }
-        },
-        "security": [
-          {
-            "ApiRolesReadUserAccounts": []
-          }
-        ]
+        }
       }
     },
     "/api/accountlegalentities/GetAll": {
       "post": {
-        "summary": "Get all legal entities by account ID",
-        "operationId": "getAllLegalEntities",
+        "summary": "Get all account legal entities",
+        "operationId": "getAllAccountLegalEntities",
         "requestBody": {
           "required": true,
           "content": {
@@ -66,7 +60,7 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful response containing all account legal entities",
             "content": {
               "application/json": {
                 "schema": {
@@ -76,57 +70,38 @@
             }
           },
           "400": {
-            "description": "Bad request"
+            "description": "Bad Request"
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal Server Error"
           }
-        },
-        "security": [
-          {
-            "ApiRolesReadUserAccounts": []
-          }
-        ]
+        }
       }
     }
   },
   "components": {
     "schemas": {
-      "PagedApiResponse_AccountLegalEntity": {
-        "type": "object",
-        "properties": {
-          "Data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AccountLegalEntity"
-            }
-          },
-          "Page": {
-            "type": "integer"
-          },
-          "TotalPages": {
-            "type": "integer"
-          }
-        }
-      },
       "GetAccountLegalEntitiesQuery": {
         "type": "object",
         "properties": {
           "PageNumber": {
             "type": "integer",
-            "minimum": 1,
-            "maximum": 2147483647
+            "minimum": 1
           },
           "PageSize": {
             "type": "integer",
             "minimum": 100,
             "maximum": 10000
           }
-        },
-        "required": [
-          "PageNumber",
-          "PageSize"
-        ]
+        }
+      },
+      "GetAccountLegalEntitiesResponse": {
+        "type": "object",
+        "properties": {
+          "AccountLegalEntities": {
+            "$ref": "#/components/schemas/PagedApiResponse"
+          }
+        }
       },
       "GetAllLegalEntitiesRequest": {
         "type": "object",
@@ -141,16 +116,20 @@
             "type": "string"
           },
           "PageNumber": {
-            "type": "integer"
+            "type": "integer",
+            "default": 1
           },
           "PageSize": {
-            "type": "integer"
+            "type": "integer",
+            "default": 10
           },
           "SortColumn": {
-            "type": "string"
+            "type": "string",
+            "default": "Name"
           },
           "IsAscending": {
-            "type": "boolean"
+            "type": "boolean",
+            "default": false
           }
         },
         "required": [
@@ -168,6 +147,23 @@
             "items": {
               "$ref": "#/components/schemas/LegalEntity"
             }
+          }
+        }
+      },
+      "PagedApiResponse": {
+        "type": "object",
+        "properties": {
+          "Data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountLegalEntity"
+            }
+          },
+          "Page": {
+            "type": "integer"
+          },
+          "TotalPages": {
+            "type": "integer"
           }
         }
       },
@@ -288,34 +284,33 @@
             "type": "string"
           },
           "Status": {
-            "type": "string",
-            "enum": [
-              "Pending",
-              "Signed",
-              "Expired",
-              "Superseded",
-              "Removed"
-            ]
+            "$ref": "#/components/schemas/EmployerAgreementStatus"
           },
           "TemplateVersionNumber": {
             "type": "integer"
           },
           "AgreementType": {
-            "type": "string",
-            "enum": [
-              "Levy",
-              "Combined",
-              "Unknown"
-            ]
+            "$ref": "#/components/schemas/AgreementType"
           }
         }
-      }
-    },
-    "securitySchemes": {
-      "ApiRolesReadUserAccounts": {
-        "type": "apiKey",
-        "name": "Authorization",
-        "in": "header"
+      },
+      "EmployerAgreementStatus": {
+        "type": "string",
+        "enum": [
+          "Pending",
+          "Signed",
+          "Expired",
+          "Superseded",
+          "Removed"
+        ]
+      },
+      "AgreementType": {
+        "type": "string",
+        "enum": [
+          "Levy",
+          "Combined",
+          "Unknown"
+        ]
       }
     }
   }

@@ -7,42 +7,40 @@
   "paths": {
     "/api/accounts": {
       "get": {
-        "operationId": "getAccounts",
-        "summary": "Retrieve employer accounts",
+        "summary": "Get accounts",
+        "operationId": "GetAccounts",
         "parameters": [
           {
             "name": "toDate",
             "in": "query",
-            "required": false,
             "schema": {
-              "type": "string"
-            }
+              "type": "string",
+              "format": "date-time"
+            },
+            "required": false
           },
           {
             "name": "pageSize",
             "in": "query",
-            "required": false,
             "schema": {
               "type": "integer",
               "default": 1000
-            }
+            },
+            "required": false
           },
           {
             "name": "pageNumber",
             "in": "query",
-            "required": false,
             "schema": {
               "type": "integer",
               "default": 1
-            }
+            },
+            "required": false
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Success"
           }
         },
         "security": [
@@ -52,8 +50,8 @@
         ]
       },
       "post": {
-        "operationId": "createEmployerAccountViaProvider",
-        "summary": "Create an employer account via provider",
+        "summary": "Create employer account via provider",
+        "operationId": "CreateEmployerAccountViaProviderRequest",
         "requestBody": {
           "required": true,
           "content": {
@@ -66,7 +64,7 @@
         },
         "responses": {
           "201": {
-            "description": "Account created successfully",
+            "description": "Created",
             "content": {
               "application/json": {
                 "schema": {
@@ -74,22 +72,19 @@
                 }
               }
             }
-          },
-          "500": {
-            "description": "Internal server error"
           }
         },
         "security": [
           {
-            "BearerAuth": []
+            "defaultAuth": []
           }
         ]
       }
     },
     "/api/accounts/{accountId}": {
       "get": {
-        "operationId": "getAccountByAccountId",
-        "summary": "Retrieve account by numeric account ID",
+        "summary": "Get account by ID",
+        "operationId": "GetAccountById",
         "parameters": [
           {
             "name": "accountId",
@@ -102,13 +97,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Success"
           },
           "404": {
-            "description": "Account not found"
+            "description": "Not Found"
           }
         },
         "security": [
@@ -120,8 +112,8 @@
     },
     "/api/accounts/{hashedAccountId}": {
       "get": {
-        "operationId": "getAccountByHashedAccountId",
-        "summary": "Retrieve account by hashed account ID",
+        "summary": "Get account by hashed ID",
+        "operationId": "GetAccount",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -134,13 +126,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Success"
           },
           "404": {
-            "description": "Account not found"
+            "description": "Not Found"
           }
         },
         "security": [
@@ -152,8 +141,8 @@
     },
     "/api/accounts/{hashedAccountId}/users": {
       "get": {
-        "operationId": "getAccountUsersByHashedAccountId",
-        "summary": "Retrieve account users by hashed account ID",
+        "summary": "Get account users by hashed ID",
+        "operationId": "GetAccountUsers",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -166,10 +155,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Success"
           }
         },
         "security": [
@@ -179,10 +165,10 @@
         ]
       }
     },
-    "/api/accounts/{accountId}/users": {
+    "/api/accounts/internal/{accountId}/users": {
       "get": {
-        "operationId": "getAccountUsersByAccountId",
-        "summary": "Retrieve account users by numeric account ID",
+        "summary": "Get account users by internal account ID",
+        "operationId": "GetAccountUsersByInternalAccountId",
         "parameters": [
           {
             "name": "accountId",
@@ -195,10 +181,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Success"
           }
         },
         "security": [
@@ -208,10 +191,10 @@
         ]
       }
     },
-    "/api/accounts/{accountId}/users/which-receive-notifications": {
+    "/api/accounts/internal/{accountId}/users/which-receive-notifications": {
       "get": {
-        "operationId": "getAccountUsersReceivingNotifications",
-        "summary": "Get users of an account which receive notifications",
+        "summary": "Get account users which receive notifications",
+        "operationId": "GetAccountUsersWhichReceiveNotifications",
         "parameters": [
           {
             "name": "accountId",
@@ -224,10 +207,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Success"
           }
         },
         "security": [
@@ -237,26 +217,33 @@
         ]
       }
     },
-    "/api/accounts/acknowledge-training-provider-task": {
-      "patch": {
-        "operationId": "acknowledgeTrainingProviderTask",
-        "summary": "Acknowledge training provider task for a given account",
+    "/api/accounts/queries": {
+      "post": {
+        "summary": "Query accounts",
+        "operationId": "QueryAccounts",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AcknowledgeTrainingProviderTaskCommand"
+                "$ref": "#/components/schemas/AccountsQueryRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountsQueryResponse"
+                }
+              }
+            }
           },
-          "500": {
-            "description": "Internal server error"
+          "400": {
+            "description": "Bad Request"
           }
         },
         "security": [
@@ -268,8 +255,8 @@
     },
     "/api/accounts/updated": {
       "get": {
-        "operationId": "getAccountsUpdatedSince",
-        "summary": "Retrieve accounts updated since a given date",
+        "summary": "Get accounts updated since a date",
+        "operationId": "GetAccountsUpdated",
         "parameters": [
           {
             "name": "sinceDate",
@@ -283,34 +270,54 @@
           {
             "name": "pageNumber",
             "in": "query",
-            "required": false,
             "schema": {
               "type": "integer",
               "default": 1
-            }
+            },
+            "required": false
           },
           {
             "name": "pageSize",
             "in": "query",
-            "required": false,
             "schema": {
               "type": "integer",
               "default": 1000
-            }
+            },
+            "required": false
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Success"
           },
           "400": {
-            "description": "Bad request"
-          },
-          "500": {
-            "description": "Internal server error"
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadAllAccountUsers": []
+          }
+        ]
+      }
+    },
+    "/api/accounts/acknowledge-training-provider-task": {
+      "patch": {
+        "summary": "Acknowledge training provider task",
+        "operationId": "AcknowledgeTrainingProviderTask",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcknowledgeTrainingProviderTaskCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
           }
         },
         "security": [
@@ -322,8 +329,8 @@
     },
     "/api/accounts/search": {
       "get": {
-        "operationId": "searchAccounts",
-        "summary": "Search employer accounts by employer name",
+        "summary": "Search accounts",
+        "operationId": "SearchAccounts",
         "parameters": [
           {
             "name": "employerName",
@@ -336,54 +343,15 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Success"
           },
           "400": {
-            "description": "Bad request"
+            "description": "Bad Request"
           }
         },
         "security": [
           {
-            "BearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/accounts/queries": {
-      "post": {
-        "operationId": "queryAccounts",
-        "summary": "Query accounts with filters",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AccountsQueryRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AccountsQueryResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          }
-        },
-        "security": [
-          {
-            "ApiRoles.ReadAllAccountUsers": []
+            "defaultAuth": []
           }
         ]
       }
@@ -402,7 +370,8 @@
             "format": "uuid"
           },
           "Email": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           },
           "FirstName": {
             "type": "string"
@@ -425,19 +394,7 @@
           "EmployerOrganisationReferenceNumber": {
             "type": "string"
           }
-        },
-        "required": [
-          "RequestId",
-          "UserRef",
-          "Email",
-          "FirstName",
-          "LastName",
-          "EmployerOrganisationName",
-          "EmployerPaye",
-          "EmployerAorn",
-          "EmployerAddress",
-          "EmployerOrganisationReferenceNumber"
-        ]
+        }
       },
       "CreateEmployerAccountViaProviderResponseModel": {
         "type": "object",
@@ -448,22 +405,7 @@
           "AccountLegalEntityId": {
             "type": "integer"
           }
-        },
-        "required": [
-          "AccountId",
-          "AccountLegalEntityId"
-        ]
-      },
-      "AcknowledgeTrainingProviderTaskCommand": {
-        "type": "object",
-        "properties": {
-          "AccountId": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "AccountId"
-        ]
+        }
       },
       "AccountsQueryRequest": {
         "type": "object",
@@ -531,20 +473,14 @@
             "type": "string"
           }
         }
-      }
-    },
-    "securitySchemes": {
-      "BearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
       },
-      "ApiRoles.ReadAllEmployerAccountBalances": {
-        "type": "http",
-        "scheme": "bearer"
-      },
-      "ApiRoles.ReadAllAccountUsers": {
-        "type": "http",
-        "scheme": "bearer"
+      "AcknowledgeTrainingProviderTaskCommand": {
+        "type": "object",
+        "properties": {
+          "AccountId": {
+            "type": "integer"
+          }
+        }
       }
     }
   }

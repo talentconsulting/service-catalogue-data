@@ -8,8 +8,8 @@
     "/api/levy-declarations": {
       "post": {
         "summary": "Persist Levy Declarations",
-        "description": "Persists levy declarations data.",
-        "operationId": "persistLevyDeclarations",
+        "description": "Persists levy declaration data.",
+        "operationId": "PersistLevyDeclarations",
         "security": [
           {
             "ReadAllEmployerAccountBalances": []
@@ -27,7 +27,7 @@
         },
         "responses": {
           "200": {
-            "description": "Successful operation.",
+            "description": "Levy declaration persisted successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -37,16 +37,26 @@
             }
           },
           "400": {
-            "description": "Invalid request payload."
+            "description": "Validation errors or missing payload.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
     "/api/levy-declarations/{empRef}/period-12-declarations": {
       "get": {
-        "summary": "Get Existing Period 12 Levy Declarations",
-        "description": "Fetches existing period 12 levy declarations for a given employer reference.",
-        "operationId": "getExistingPeriod12LevyDeclarations",
+        "summary": "Get Period 12 Declarations",
+        "description": "Retrieves existing Period 12 levy declarations for the specified employer reference.",
+        "operationId": "GetPeriod12Declarations",
         "security": [
           {
             "ReadAllEmployerAccountBalances": []
@@ -59,12 +69,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Employer reference."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation.",
+            "description": "Period 12 declarations retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -79,8 +90,8 @@
     "/api/levy-declarations/{empRef}/submission-ids": {
       "get": {
         "summary": "Get Submission IDs",
-        "description": "Gets the list of submission IDs for the given employer reference.",
-        "operationId": "getSubmissionIds",
+        "description": "Retrieves submission IDs for the specified employer reference.",
+        "operationId": "GetSubmissionIds",
         "security": [
           {
             "ReadAllEmployerAccountBalances": []
@@ -93,12 +104,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Employer reference."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation.",
+            "description": "Submission IDs retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -116,8 +128,8 @@
     "/api/levy-declarations/{empRef}/last-submission-date": {
       "get": {
         "summary": "Get Last Submission Date",
-        "description": "Fetches the last submission date for the given employer reference.",
-        "operationId": "getLastSubmissionDate",
+        "description": "Retrieves the last submission date for the specified employer reference.",
+        "operationId": "GetLastSubmissionDate",
         "security": [
           {
             "ReadAllEmployerAccountBalances": []
@@ -130,12 +142,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Employer reference."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation.",
+            "description": "Last submission date retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -155,23 +168,27 @@
         "type": "object",
         "properties": {
           "CorrelationId": {
-            "type": "string"
+            "type": "string",
+            "description": "Correlation ID for tracking."
           },
           "AccountId": {
             "type": "integer",
-            "format": "int64"
+            "description": "The account ID associated with the levy declarations."
           },
           "EmpRef": {
-            "type": "string"
+            "type": "string",
+            "description": "Employer reference."
           },
           "Declarations": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/NormalizedLevyDeclaration"
-            }
+            },
+            "description": "List of levy declarations."
           },
           "GenerateTransactions": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Flag indicating whether transactions should be generated."
           }
         },
         "required": [
@@ -186,55 +203,67 @@
         "type": "object",
         "properties": {
           "Id": {
-            "type": "string"
+            "type": "string",
+            "description": "Unique identifier for the levy declaration."
           },
           "LevyDueYtd": {
             "type": "number",
-            "format": "decimal"
+            "format": "decimal",
+            "description": "Total levy due year-to-date."
           },
           "SubmissionDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Date the submission was made."
           },
           "SubmissionType": {
-            "type": "string"
+            "type": "string",
+            "description": "Type of the submission."
           },
           "LevyAllowanceForFullYear": {
             "type": "number",
-            "format": "decimal"
+            "format": "decimal",
+            "description": "Annual levy allowance."
           },
           "PayrollYear": {
-            "type": "string"
+            "type": "string",
+            "description": "Payroll year."
           },
           "PayrollMonth": {
             "type": "integer",
-            "format": "int16"
+            "description": "Payroll month."
           },
           "NoPaymentForPeriod": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Indicates whether there is no payment for the period."
           },
           "DateCeased": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Date the account ceased."
           },
           "InactiveFrom": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Start date of inactivity."
           },
           "InactiveTo": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "End date of inactivity."
           },
           "EndOfYearAdjustment": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Indicates whether this is an end-of-year adjustment."
           },
           "EndOfYearAdjustmentAmount": {
             "type": "number",
-            "format": "decimal"
+            "format": "decimal",
+            "description": "Amount for the end-of-year adjustment."
           },
           "SubmissionId": {
             "type": "integer",
-            "format": "int64"
+            "description": "Unique identifier for the submission."
           }
         },
         "required": [
@@ -252,9 +281,16 @@
     },
     "securitySchemes": {
       "ReadAllEmployerAccountBalances": {
-        "type": "apiKey",
-        "name": "Authorization",
-        "in": "header"
+        "type": "oauth2",
+        "description": "Requires the ReadAllEmployerAccountBalances role.",
+        "flows": {
+          "clientCredentials": {
+            "tokenUrl": "https://example.com/token",
+            "scopes": {
+              "ReadAllEmployerAccountBalances": "Allows reading all employer account balances."
+            }
+          }
+        }
       }
     }
   }

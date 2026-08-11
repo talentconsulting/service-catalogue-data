@@ -8,13 +8,13 @@
     "/api/accounts/{accountId}/transfer/connections": {
       "get": {
         "summary": "Get Transfers by Period End",
-        "description": "Retrieve transfer connections for a given account and period end.",
+        "description": "Fetch transfers for a specific account during a specified period end.",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
-            "description": "Unique identifier for the account.",
+            "description": "Account ID",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -24,7 +24,7 @@
             "name": "periodEnd",
             "in": "query",
             "required": true,
-            "description": "Period end in the required format (e.g., YYYY-MM).",
+            "description": "Period end identifier",
             "schema": {
               "type": "string"
             }
@@ -32,7 +32,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with transfer details.",
+            "description": "Successful response containing account transfers.",
             "content": {
               "application/json": {
                 "schema": {
@@ -42,17 +42,29 @@
             }
           },
           "400": {
-            "description": "Bad Request if the periodEnd query parameter is missing or invalid."
+            "description": "Bad request when the periodEnd parameter is missing or invalid.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Not Found if no transfers are found for the account and period end."
+            "description": "Not found when no transfers exist for the given accountId and periodEnd.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "ApiRoles": [
-              "ReadAllEmployerAccountBalances"
-            ]
+            "ApiRoles.ReadAllEmployerAccountBalances": []
           }
         ]
       }
@@ -66,19 +78,17 @@
           "accountTransfers": {
             "type": "array",
             "items": {
-              "type": "object",
-              "additionalProperties": true
+              "type": "object"
             }
           }
-        },
-        "description": "Response containing account transfers for the specified account and period end."
+        }
       }
     },
     "securitySchemes": {
-      "ApiRoles": {
+      "ApiRoles.ReadAllEmployerAccountBalances": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Authorization scheme based on the defined API roles."
+        "description": "Access token required to verify ReadAllEmployerAccountBalances policy."
       }
     }
   }

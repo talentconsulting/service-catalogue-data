@@ -7,11 +7,15 @@
   "paths": {
     "/api/staging/staged-to-operational": {
       "post": {
-        "summary": "Transfer staged data to operational",
-        "description": "Transfers staged employer finance data to operational.",
-        "operationId": "stagedToOperational",
-        "parameters": [],
+        "summary": "Transfer from staged to operational",
+        "description": "Transfers data from staged to operational.",
+        "security": [
+          {
+            "ReadAllEmployerAccountBalances": []
+          }
+        ],
         "requestBody": {
+          "description": "Payload to transfer staged data to operational.",
           "required": true,
           "content": {
             "application/json": {
@@ -22,43 +26,15 @@
           }
         },
         "responses": {
-          "201": {
-            "description": "Created - The operation was successful.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "isSuccess": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "processedCount": {
-                      "type": "integer",
-                      "format": "int32"
-                    }
-                  }
-                }
-              }
-            }
-          },
           "400": {
-            "description": "Bad Request - Invalid input payload or validation errors.",
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": {
+                    "error": {
                       "type": "string"
-                    },
-                    "details": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
                     }
                   }
                 }
@@ -66,35 +42,50 @@
             }
           },
           "500": {
-            "description": "Internal Server Error - An error occurred during processing.",
+            "description": "Internal Server Error",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "isSuccess": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "example": false
                     },
                     "message": {
                       "type": "string"
                     },
                     "processedCount": {
-                      "type": "integer",
-                      "format": "int32"
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "isSuccess": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "processedCount": {
+                      "type": "integer"
                     }
                   }
                 }
               }
             }
           }
-        },
-        "security": [
-          {
-            "ApiRoles": [
-              "ReadAllEmployerAccountBalances"
-            ]
-          }
-        ]
+        }
       }
     }
   },
@@ -105,13 +96,15 @@
         "properties": {
           "AccountId": {
             "type": "integer",
-            "format": "int64"
+            "description": "The ID of the account."
           },
           "PeriodEnd": {
-            "type": "string"
+            "type": "string",
+            "description": "The period end identifier."
           },
           "CorrelationId": {
-            "type": "string"
+            "type": "string",
+            "description": "Correlation ID for tracking purposes."
           }
         },
         "required": [
@@ -122,10 +115,11 @@
       }
     },
     "securitySchemes": {
-      "ApiRoles": {
+      "ReadAllEmployerAccountBalances": {
         "type": "apiKey",
         "name": "Authorization",
-        "in": "header"
+        "in": "header",
+        "description": "Requires the ReadAllEmployerAccountBalances policy."
       }
     }
   }

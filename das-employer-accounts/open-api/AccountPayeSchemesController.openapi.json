@@ -2,13 +2,14 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Accounts API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing employer account PAYE schemes."
   },
   "paths": {
     "/api/accounts/{accountId}/payeschemes": {
       "get": {
+        "summary": "Get PAYE schemes for an account",
         "operationId": "GetPayeSchemes",
-        "summary": "Retrieve PAYE schemes for an account.",
         "parameters": [
           {
             "name": "accountId",
@@ -17,12 +18,13 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "ID of the account to retrieve PAYE schemes for."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with a list of PAYE schemes.",
+            "description": "List of PAYE schemes.",
             "content": {
               "application/json": {
                 "schema": {
@@ -32,12 +34,12 @@
             }
           },
           "404": {
-            "description": "Account not found."
+            "description": "No PAYE schemes found for the specified account."
           }
         },
         "security": [
           {
-            "ApiRoles": [
+            "ApiRolesAuth": [
               "ReadAllEmployerAccountBalances"
             ]
           }
@@ -46,8 +48,8 @@
     },
     "/api/accounts/{accountId}/payeschemes/scheme": {
       "get": {
+        "summary": "Get details of a specific PAYE scheme",
         "operationId": "GetPayeScheme",
-        "summary": "Retrieve details of a specific PAYE scheme for an account.",
         "parameters": [
           {
             "name": "accountId",
@@ -56,7 +58,8 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "ID of the account to retrieve the PAYE scheme for."
           },
           {
             "name": "payeSchemeRef",
@@ -64,27 +67,28 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Reference of the PAYE scheme to retrieve."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with PAYE scheme details.",
+            "description": "Details of the PAYE scheme.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/Resource"
                 }
               }
             }
           },
           "404": {
-            "description": "PAYE scheme not found."
+            "description": "PAYE scheme not found for the specified account."
           }
         },
         "security": [
           {
-            "ApiRoles": [
+            "ApiRolesAuth": [
               "ReadAllEmployerAccountBalances"
             ]
           }
@@ -98,25 +102,33 @@
         "type": "object",
         "properties": {
           "Id": {
-            "type": "string"
+            "type": "string",
+            "description": "ID of the resource."
           },
           "Href": {
-            "type": "string"
+            "type": "string",
+            "description": "URL of the resource."
           }
-        }
+        },
+        "required": [
+          "Id",
+          "Href"
+        ]
       },
       "ResourceList": {
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/Resource"
-        }
+        },
+        "description": "A list of resource objects."
       }
     },
     "securitySchemes": {
-      "ApiRoles": {
+      "ApiRolesAuth": {
         "type": "apiKey",
         "name": "Authorization",
-        "in": "header"
+        "in": "header",
+        "description": "Role-based authentication with API roles."
       }
     }
   }
