@@ -174,11 +174,32 @@ function splitPascalCase(value) {
   return value.replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
 }
 
+function c4Type(dependency) {
+  return dependency.classification === 'internal' ? 'Container' : 'External System';
+}
+
+function orgName(repository) {
+  return (repository || '').split('/')[0] || 'System';
+}
+
+function relationshipLabel(dependency) {
+  const verb = dependency.direction === 'inbound' ? 'Called by' : 'Calls';
+  const technology = [dependency.kind === 'http-api' ? 'HTTP' : dependency.kind, dependency.technology].filter(Boolean).join('/');
+  return `${verb}${technology ? ` [${technology}]` : ''}`;
+}
+
+function ringLayout(group, center, radiusX, radiusY, angleOffset = 0) {
+  return group.map((dependency, index) => {
+    const angle = group.length === 1 ? -Math.PI / 2 : (Math.PI * 2 * index / group.length) - Math.PI / 2 + angleOffset;
+    return { ...dependency, x: center.x + Math.cos(angle) * radiusX, y: center.y + Math.sin(angle) * radiusY };
+  });
+}
+
 function renderDependencies(resetToolbar = true) {
   const dependencies = (state.data.dependencies || []).map((dependency, index) => ({ ...dependency, id: String(index) }));
   const operations = dependencies.reduce((sum, dependency) => sum + (dependency.operations?.length || 0), 0);
-  const evidence = dependencies.reduce((sum, dependency) => sum + (dependency.evidence?.length || 0), 0);
-  if (resetToolbar) toolbar.innerHTML = `${searchControl('Filter dependencies')}<span class="spacer"></span><span class="toolbar-meta">${dependencies.length} services · ${operations} operations · ${evidence} evidence items</span>`;
+  const internalCount = dependencies.filter((dependency) => dependency.classification === 'internal').length;
+  if (resetToolbar) toolbar.innerHTML = `${searchControl('Filter dependencies')}<span class="spacer"></span><span class="toolbar-meta">${dependencies.length} dependencies · ${internalCount} internal · ${dependencies.length - internalCount} external · ${operations} operations</span>`;
   const filtered = dependencies.filter((dependency) => `${dependency.name} ${dependency.kind} ${dependency.classification} ${dependency.direction} ${dependency.client} ${dependency.technology}`.toLowerCase().includes(state.filter));
   if (!dependencies.length) {
     content.innerHTML = '<div class="empty-state"><span class="empty-icon" aria-hidden="true">◇</span><h2>No service dependencies recorded</h2><p>The generated dependency catalogue is empty.</p></div>';
@@ -191,26 +212,44 @@ function renderDependencies(resetToolbar = true) {
   }
   if (!state.selected || !filtered.some((item) => item.id === state.selected)) state.selected = filtered[0].id;
   const selected = dependencies.find((item) => item.id === state.selected);
-  const center = { x: 500, y: 280 };
-  const radiusX = 370;
-  const radiusY = 210;
-  const nodes = filtered.map((dependency, index) => {
-    const angle = filtered.length === 1 ? 0 : (Math.PI * 2 * index / filtered.length) - Math.PI / 2;
-    return { ...dependency, x: center.x + Math.cos(angle) * radiusX, y: center.y + Math.sin(angle) * radiusY };
-  });
+  const VIEW_W = 1340, VIEW_H = 780;
+  const center = { x: VIEW_W / 2, y: VIEW_H / 2 };
+  const nodeHalfW = 88, nodeHalfH = 42, pad = 26;
+  const internalRx = 270, internalRy = 150;
+  const boundaryRx = internalRx + nodeHalfW + pad;
+  const boundaryRy = internalRy + nodeHalfH + pad;
+  const externalScale = 1.4;
+  const internal = ringLayout(filtered.filter((d) => d.classification === 'internal'), center, internalRx, internalRy, 0);
+  const external = ringLayout(filtered.filter((d) => d.classification !== 'internal'), center, boundaryRx * externalScale, boundaryRy * externalScale, Math.PI / 5);
+  const nodes = [...internal, ...external];
+  const pct = (value, axis) => `${((value / (axis === 'x' ? VIEW_W : VIEW_H)) * 100).toFixed(2)}%`;
   content.innerHTML = `<div class="dependency-view">
-    <div class="dependency-graph" role="group" aria-label="Service dependency graph for ${escapeHtml(titleCase(state.source.name))}">
-      <svg viewBox="0 0 1000 560" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+    <div class="c4-legend">
+      <span class="c4-legend-item"><span class="c4-swatch focus"></span>Software system (this service)</span>
+      <span class="c4-legend-item"><span class="c4-swatch internal"></span>Container — internal</span>
+      <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
+      <span class="c4-legend-item"><span class="c4-boundary-swatch"></span>${escapeHtml(orgName(state.data.repository))} system boundary</span>
+    </div>
+    <div class="dependency-graph" role="group" aria-label="C4 container diagram for ${escapeHtml(titleCase(state.source.name))}">
+      <svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
         <defs>
           <marker id="arrow-outbound" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker>
           <marker id="arrow-inbound" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker>
         </defs>
-        ${nodes.map((node) => node.direction === 'inbound'
-          ? `<line class="inbound" x1="${node.x}" y1="${node.y}" x2="${center.x}" y2="${center.y}" marker-end="url(#arrow-inbound)"></line>`
-          : `<line class="outbound" x1="${center.x}" y1="${center.y}" x2="${node.x}" y2="${node.y}" marker-end="url(#arrow-outbound)"></line>`).join('')}
+        <ellipse class="c4-boundary" cx="${center.x}" cy="${center.y}" rx="${boundaryRx}" ry="${boundaryRy}"></ellipse>
+        <text class="c4-boundary-label" x="${center.x - boundaryRx + 18}" y="${center.y - boundaryRy + 26}">${escapeHtml(orgName(state.data.repository))}</text>
+        ${nodes.map((node) => {
+          const [x1, y1, x2, y2] = node.direction === 'inbound' ? [node.x, node.y, center.x, center.y] : [center.x, center.y, node.x, node.y];
+          const midX = (x1 + x2) / 2;
+          const midY = (y1 + y2) / 2;
+          const label = relationshipLabel(node);
+          return `<line class="${escapeHtml(node.direction === 'inbound' ? 'inbound' : 'outbound')}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#arrow-${node.direction === 'inbound' ? 'inbound' : 'outbound'})"></line>
+            <rect class="rel-label-bg" x="${midX - label.length * 3.3}" y="${midY - 9}" width="${label.length * 6.6}" height="15" rx="4"></rect>
+            <text class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
+        }).join('')}
       </svg>
-      <div class="dependency-node service-node" style="left:${center.x / 10}%;top:${center.y / 5.6}%"><span>Current service</span><strong>${escapeHtml(titleCase(state.source.name))}</strong></div>
-      ${nodes.map((node) => `<button class="dependency-node ${escapeHtml(node.direction || 'unknown')}" type="button" data-dependency="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${node.x / 10}%;top:${node.y / 5.6}%"><span>${escapeHtml(node.direction || 'unknown')} · ${escapeHtml(node.kind || 'service')}</span><strong>${escapeHtml(splitPascalCase(node.name))}</strong></button>`).join('')}
+      <div class="dependency-node service-node" style="left:${pct(center.x, 'x')};top:${pct(center.y, 'y')}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(state.source.name))}</strong></div>
+      ${nodes.map((node) => `<button class="dependency-node ${node.classification === 'internal' ? 'internal' : 'external'}" type="button" data-dependency="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(node.x, 'x')};top:${pct(node.y, 'y')}"><span class="c4-type">${escapeHtml(c4Type(node))}</span><strong>${escapeHtml(splitPascalCase(node.name))}</strong><span class="c4-meta">${escapeHtml(node.technology || node.kind || 'service')} · ${node.operations?.length || 0} op${node.operations?.length === 1 ? '' : 's'}</span></button>`).join('')}
     </div>
     ${dependencyDetail(selected)}
   </div>`;
@@ -221,6 +260,7 @@ function renderDependencies(resetToolbar = true) {
 function dependencyDetail(dependency) {
   const authentication = dependency.authentication || {};
   const facts = [
+    ['Type', c4Type(dependency)],
     ['Client', dependency.client],
     ['Technology', dependency.technology],
     ['Authentication', authentication.type],
