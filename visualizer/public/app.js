@@ -1,6 +1,7 @@
 const state = {
   catalog: [], source: null, view: 'database', data: null,
-  filter: '', selected: null, messageType: 'all', apiFile: null
+  filter: '', selected: null, messageType: 'all', apiFile: null,
+  mode: 'source', landscape: null
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -8,6 +9,7 @@ const sourceSelect = $('#source-select');
 const content = $('#content');
 const toolbar = $('#toolbar');
 const tabs = $('#view-tabs');
+const landscapeToggle = $('#landscape-toggle');
 const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
 const titleCase = (value) => value.replace(/(^|[-_])(\w)/g, (_, space, char) => `${space ? ' ' : ''}${char.toUpperCase()}`);
 
@@ -49,6 +51,13 @@ function setHero() {
 
 function defaultView() {
   return sourceCapabilities().find((item) => item.enabled)?.id || 'database';
+}
+
+function applyMode() {
+  const isLandscape = state.mode === 'landscape';
+  document.querySelector('main').classList.toggle('landscape-mode', isLandscape);
+  landscapeToggle.setAttribute('aria-pressed', String(isLandscape));
+  landscapeToggle.textContent = isLandscape ? '← Back to source' : 'System landscape';
 }
 
 async function selectSource(id) {
@@ -182,10 +191,105 @@ function orgName(repository) {
   return (repository || '').split('/')[0] || 'System';
 }
 
+function orgFromRepoUrl(url) {
+  return (url || '').replace(/^https?:\/\/[^/]+\//, '').split('/')[0] || 'System';
+}
+
 function relationshipLabel(dependency) {
   const verb = dependency.direction === 'inbound' ? 'Called by' : 'Calls';
-  const technology = [dependency.kind === 'http-api' ? 'HTTP' : dependency.kind, dependency.technology].filter(Boolean).join('/');
-  return `${verb}${technology ? ` [${technology}]` : ''}`;
+  const kindLabel = dependency.kind === 'http-api' ? 'HTTP' : dependency.kind;
+  const seen = new Set();
+  const parts = [kindLabel, dependency.technology].filter(Boolean).filter((value) => {
+    const key = value.toString().toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return `${verb}${parts.length ? ` [${parts.join('/')}]` : ''}`;
+}
+
+const LANDSCAPE_STOPWORDS = new Set(['das', 'sfa', 'api', 'apis', 'client', 'clients', 'service', 'services', 'http', 'https', 'httpclient', 'httphelper', 'httpservice', 'wrapper', 'outer', 'inner', 'the', 'a', 'an', 'i', 'v1', 'v2', 'v3']);
+
+function tokenize(value) {
+  return splitPascalCase(String(value || ''))
+    .split(/[^a-zA-Z0-9]+/)
+    .map((word) => word.toLowerCase())
+    .map((word) => (word.length > 4 && word.endsWith('s') ? word.slice(0, -1) : word))
+    .filter((word) => word.length > 1 && !LANDSCAPE_STOPWORDS.has(word));
+}
+
+function isSubset(small, big) {
+  for (const token of small) if (!big.has(token)) return false;
+  return true;
+}
+
+function canRelate(a, b) {
+  return a.size > 0 && b.size > 0 && (isSubset(a, b) || isSubset(b, a));
+}
+
+function edgeLabel(edge) {
+  const technology = edge.technologies.join('/');
+  return `Calls${technology ? ` [${technology}]` : ''}${edge.count > 1 ? ` ×${edge.count}` : ''}`;
+}
+
+function buildLandscape(sources, dependencySets) {
+  const systemTokenMap = new Map(sources.map((s) => [s.id, new Set(tokenize(s.name))]));
+  const edgeMap = new Map();
+
+  function addEdge(from, to, dependency) {
+    const key = `${from}|${to}`;
+    if (!edgeMap.has(key)) edgeMap.set(key, { from, to, count: 0, operations: 0, technologies: new Set(), names: new Set() });
+    const edge = edgeMap.get(key);
+    edge.count += 1;
+    edge.operations += dependency.operations?.length || 0;
+    const kindLabel = dependency.kind === 'http-api' ? 'HTTP' : dependency.kind;
+    [kindLabel, dependency.technology].filter(Boolean).forEach((value) => edge.technologies.add(value));
+    edge.names.add(dependency.name);
+  }
+
+  const externalEntries = [];
+  for (const { source, dependencies } of dependencySets) {
+    const ownTokens = systemTokenMap.get(source.id);
+    for (const dependency of dependencies) {
+      const depTokens = new Set(tokenize(dependency.name));
+      if (canRelate(depTokens, ownTokens)) continue;
+      const matchedSystem = sources.find((candidate) => candidate.id !== source.id && canRelate(depTokens, systemTokenMap.get(candidate.id)));
+      if (matchedSystem) {
+        addEdge(`sys:${source.id}`, `sys:${matchedSystem.id}`, dependency);
+        continue;
+      }
+      if (depTokens.size === 0) continue;
+      externalEntries.push({ source, dependency, tokens: depTokens });
+    }
+  }
+
+  const parent = externalEntries.map((_, index) => index);
+  const find = (i) => { while (parent[i] !== i) i = parent[i]; return i; };
+  for (let i = 0; i < externalEntries.length; i++) {
+    for (let j = i + 1; j < externalEntries.length; j++) {
+      if (canRelate(externalEntries[i].tokens, externalEntries[j].tokens)) parent[find(i)] = find(j);
+    }
+  }
+
+  const clusters = new Map();
+  externalEntries.forEach((entry, index) => {
+    const root = find(index);
+    if (!clusters.has(root)) clusters.set(root, []);
+    clusters.get(root).push(entry);
+  });
+
+  const externals = [];
+  let extIndex = 0;
+  for (const members of clusters.values()) {
+    const id = `ext:${extIndex++}`;
+    const name = members.reduce((best, member) => (member.dependency.name.length > best.length ? member.dependency.name : best), members[0].dependency.name);
+    members.forEach((member) => addEdge(`sys:${member.source.id}`, id, member.dependency));
+    externals.push({ id, name, members });
+  }
+
+  const systems = sources.map((s) => ({ id: `sys:${s.id}`, sourceId: s.id, name: s.name, repository: s.repository }));
+  const edges = [...edgeMap.values()].map((edge) => ({ ...edge, technologies: [...edge.technologies], names: [...edge.names] }));
+  return { systems, externals, edges };
 }
 
 function ringLayout(group, center, radiusX, radiusY, angleOffset = 0) {
@@ -212,9 +316,9 @@ function renderDependencies(resetToolbar = true) {
   }
   if (!state.selected || !filtered.some((item) => item.id === state.selected)) state.selected = filtered[0].id;
   const selected = dependencies.find((item) => item.id === state.selected);
-  const VIEW_W = 1340, VIEW_H = 780;
+  const VIEW_W = 1400, VIEW_H = 800;
   const center = { x: VIEW_W / 2, y: VIEW_H / 2 };
-  const nodeHalfW = 88, nodeHalfH = 42, pad = 26;
+  const nodeHalfW = 98, nodeHalfH = 48, pad = 26;
   const internalRx = 270, internalRy = 150;
   const boundaryRx = internalRx + nodeHalfW + pad;
   const boundaryRy = internalRy + nodeHalfH + pad;
@@ -297,6 +401,130 @@ function dependencyEvidence(evidence) {
   return `<ol class="evidence-list">${evidence.map((item) => `<li><p>${escapeHtml(item.reason || 'Dependency reference')}</p>${sourceLink(item.sourceFile, 'service-dependencies')}</li>`).join('')}</ol>`;
 }
 
+function setLandscapeHero() {
+  $('#source-title').textContent = 'System landscape';
+  $('#source-stats').innerHTML = '';
+}
+
+async function loadLandscape() {
+  toolbar.innerHTML = '';
+  content.innerHTML = '<div class="loading">Reading catalogue data…</div>';
+  state.selected = null;
+  try {
+    const withDeps = state.catalog.filter((source) => source.capabilities.dependencies);
+    const results = await Promise.all(withDeps.map((source) => getJson(`/api/sources/${encodeURIComponent(source.id)}/dependencies`)
+      .then((data) => ({ source, dependencies: data.dependencies || [] }))
+      .catch(() => null)));
+    state.landscape = buildLandscape(state.catalog, results.filter(Boolean));
+    renderLandscape();
+  } catch (error) {
+    content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function renderLandscape() {
+  const graph = state.landscape;
+  const allNodes = [...graph.systems, ...graph.externals];
+  $('#source-stats').innerHTML = `
+    <div class="stat"><dt>Systems</dt><dd>${graph.systems.length}</dd></div>
+    <div class="stat"><dt>External</dt><dd>${graph.externals.length}</dd></div>
+    <div class="stat"><dt>Relationships</dt><dd>${graph.edges.length}</dd></div>`;
+  toolbar.innerHTML = `<span class="toolbar-meta">Inferred by matching each repository's outbound service dependencies against the catalogue and clustering the rest as external systems</span>`;
+  if (!allNodes.length) {
+    content.innerHTML = '<div class="empty-state"><span class="empty-icon" aria-hidden="true">◇</span><h2>No dependency data available</h2><p>None of the cataloged repositories publish service-dependencies data.</p></div>';
+    return;
+  }
+  if (!state.selected || !allNodes.some((node) => node.id === state.selected)) state.selected = graph.systems[0]?.id || graph.externals[0]?.id;
+  const selected = allNodes.find((node) => node.id === state.selected);
+
+  const VIEW_W = 1440, VIEW_H = 880;
+  const center = { x: VIEW_W / 2, y: VIEW_H / 2 };
+  const nodeHalfW = 98, nodeHalfH = 48, pad = 26;
+  const systemsRx = 300, systemsRy = 190;
+  const boundaryRx = systemsRx + nodeHalfW + pad;
+  const boundaryRy = systemsRy + nodeHalfH + pad;
+  const externalScale = 1.4;
+  const systemNodes = ringLayout(graph.systems, center, systemsRx, systemsRy, 0);
+  const externalNodes = ringLayout(graph.externals, center, boundaryRx * externalScale, boundaryRy * externalScale, graph.externals.length ? Math.PI / graph.externals.length : 0);
+  const posById = new Map([...systemNodes, ...externalNodes].map((node) => [node.id, node]));
+  const pct = (value, axis) => `${((value / (axis === 'x' ? VIEW_W : VIEW_H)) * 100).toFixed(2)}%`;
+  const orgLabel = orgFromRepoUrl(graph.systems[0]?.repository);
+
+  content.innerHTML = `<div class="dependency-view">
+    <div class="c4-legend">
+      <span class="c4-legend-item"><span class="c4-swatch internal"></span>Software system (cataloged)</span>
+      <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
+      <span class="c4-legend-item"><span class="c4-boundary-swatch"></span>${escapeHtml(orgLabel)} system boundary</span>
+    </div>
+    <div class="dependency-graph" role="group" aria-label="C4 system landscape diagram">
+      <svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <marker id="arrow-outbound" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker>
+        </defs>
+        <ellipse class="c4-boundary" cx="${center.x}" cy="${center.y}" rx="${boundaryRx}" ry="${boundaryRy}"></ellipse>
+        <text class="c4-boundary-label" x="${center.x - boundaryRx + 18}" y="${center.y - boundaryRy + 26}">${escapeHtml(orgLabel)}</text>
+        ${graph.edges.map((edge) => {
+          const from = posById.get(edge.from);
+          const to = posById.get(edge.to);
+          if (!from || !to) return '';
+          const midX = (from.x + to.x) / 2;
+          const midY = (from.y + to.y) / 2;
+          const label = edgeLabel(edge);
+          return `<line class="outbound" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" marker-end="url(#arrow-outbound)"></line>
+            <rect class="rel-label-bg" x="${midX - label.length * 3.3}" y="${midY - 9}" width="${label.length * 6.6}" height="15" rx="4"></rect>
+            <text class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
+        }).join('')}
+      </svg>
+      ${systemNodes.map((node) => `<button class="dependency-node internal" type="button" data-node="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(node.x, 'x')};top:${pct(node.y, 'y')}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(node.name))}</strong><span class="c4-meta">${graph.edges.filter((edge) => edge.from === node.id || edge.to === node.id).length} relationship(s)</span></button>`).join('')}
+      ${externalNodes.map((node) => `<button class="dependency-node external" type="button" data-node="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(node.x, 'x')};top:${pct(node.y, 'y')}"><span class="c4-type">External System</span><strong>${escapeHtml(splitPascalCase(node.name))}</strong><span class="c4-meta">${node.members.length} reference(s)</span></button>`).join('')}
+    </div>
+    ${landscapeDetail(selected, graph)}
+  </div>`;
+  document.querySelectorAll('[data-node]').forEach((button) => { button.onclick = () => { state.selected = button.dataset.node; renderLandscape(); }; });
+  document.querySelectorAll('[data-jump]').forEach((button) => { button.onclick = () => jumpToSource(button.dataset.jump); });
+}
+
+function landscapeDetail(node, graph) {
+  if (!node) return '';
+  const isSystem = node.id.startsWith('sys:');
+  const lookup = (id) => graph.systems.find((item) => item.id === id) || graph.externals.find((item) => item.id === id);
+  if (isSystem) {
+    const outbound = graph.edges.filter((edge) => edge.from === node.id);
+    const inbound = graph.edges.filter((edge) => edge.to === node.id);
+    const rows = (list, otherKey) => list.map((edge) => {
+      const other = lookup(edge[otherKey]);
+      return `<tr><td>${escapeHtml(other ? titleCase(other.name) : 'Unknown')}</td><td>${escapeHtml(edgeLabel(edge))}</td><td>${edge.names.length} dependenc${edge.names.length === 1 ? 'y' : 'ies'}</td></tr>`;
+    }).join('');
+    return `<article class="dependency-detail">
+      <p class="eyebrow">Software system</p>
+      <h2>${escapeHtml(titleCase(node.name))}</h2>
+      <p class="detail-subtitle">${escapeHtml((node.repository || '').replace('https://github.com/', 'github.com/'))}</p>
+      <div class="badges"><button class="badge blue as-link" type="button" data-jump="${escapeHtml(node.sourceId)}">View full dependencies →</button></div>
+      <h3>Calls out to</h3>${outbound.length ? `<table class="data-table"><thead><tr><th>Target</th><th>Relationship</th><th>Dependencies</th></tr></thead><tbody>${rows(outbound, 'to')}</tbody></table>` : '<p class="muted">No outbound relationships recorded.</p>'}
+      <h3>Called by</h3>${inbound.length ? `<table class="data-table"><thead><tr><th>Source</th><th>Relationship</th><th>Dependencies</th></tr></thead><tbody>${rows(inbound, 'from')}</tbody></table>` : '<p class="muted">No inbound relationships recorded.</p>'}
+    </article>`;
+  }
+  return `<article class="dependency-detail">
+    <p class="eyebrow">External system</p>
+    <h2>${escapeHtml(splitPascalCase(node.name))}</h2>
+    <p class="detail-subtitle">Not present in the catalogue — inferred from dependency names that didn't match a cataloged repository.</p>
+    <h3>Referenced by</h3>
+    <table class="data-table"><thead><tr><th>Source</th><th>Dependency</th><th>Technology</th><th>Confidence</th></tr></thead><tbody>${node.members.map((member) => `<tr><td><button class="as-link" type="button" data-jump="${escapeHtml(member.source.id)}">${escapeHtml(titleCase(member.source.name))}</button></td><td>${escapeHtml(member.dependency.name)}</td><td>${escapeHtml(member.dependency.technology || member.dependency.kind || '—')}</td><td>${escapeHtml(member.dependency.confidence || '—')}</td></tr>`).join('')}</tbody></table>
+  </article>`;
+}
+
+async function jumpToSource(sourceId) {
+  state.mode = 'source';
+  applyMode();
+  sourceSelect.value = sourceId;
+  await selectSource(sourceId);
+  if (state.source.capabilities.dependencies) {
+    state.view = 'dependencies';
+    renderTabs();
+    await loadView();
+  }
+}
+
 function sourceLink(path, scanKind = 'eventcatalog') {
   if (!path) return '<span class="muted">Not recorded</span>';
   const revision = state.source.scans[scanKind]?.['last-commit-hash-scanned'] || state.data.ref || 'HEAD';
@@ -366,7 +594,23 @@ tabs.addEventListener('click', async (event) => {
   await loadView();
 });
 
-sourceSelect.addEventListener('change', () => selectSource(sourceSelect.value));
+sourceSelect.addEventListener('change', async () => {
+  if (state.mode === 'landscape') { state.mode = 'source'; applyMode(); }
+  await selectSource(sourceSelect.value);
+});
+
+landscapeToggle.addEventListener('click', async () => {
+  state.mode = state.mode === 'landscape' ? 'source' : 'landscape';
+  applyMode();
+  if (state.mode === 'landscape') {
+    setLandscapeHero();
+    await loadLandscape();
+  } else {
+    setHero();
+    renderTabs();
+    await loadView();
+  }
+});
 
 async function init() {
   try {
@@ -374,6 +618,7 @@ async function init() {
     state.catalog = catalog.sources;
     if (!state.catalog.length) throw new Error('The manifest does not contain any sources.');
     sourceSelect.innerHTML = state.catalog.map((source) => `<option value="${source.id}">${escapeHtml(titleCase(source.name))}</option>`).join('');
+    applyMode();
     await selectSource(state.catalog[0].id);
   } catch (error) {
     content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
