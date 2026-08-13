@@ -76,14 +76,63 @@ async function loadView() {
   content.innerHTML = '<div class="loading">Reading catalogue data…</div>';
   state.filter = '';
   state.selected = null;
+  state.diagramPositions = null;
   try {
     let url = `/api/sources/${encodeURIComponent(state.source.id)}/${state.view}`;
     if (state.view === 'openapi') url += `?file=${encodeURIComponent(state.apiFile)}`;
     state.data = await getJson(url);
+    if (state.view === 'dependencies' && state.source.capabilities.messages) {
+      try {
+        const messages = await getJson(`/api/sources/${encodeURIComponent(state.source.id)}/messages`);
+        state.data = { ...state.data, dependencies: [...(state.data.dependencies || []), ...messageDependencies(messages)] };
+      } catch { /* messages are supplementary; ignore failures */ }
+    }
     renderView();
   } catch (error) {
     content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
   }
+}
+
+function namespaceServiceSegment(namespace) {
+  const orgPrefixes = new Set(['sfa', 'das']);
+  const parts = String(namespace || '').split('.');
+  let index = 0;
+  while (index < parts.length && orgPrefixes.has(parts[index].toLowerCase())) index++;
+  return parts[index] || null;
+}
+
+function messageDependencies(messages) {
+  const events = (messages.events || []).map((m) => ({ ...m, messageKind: 'event' }));
+  const commands = (messages.commands || []).map((m) => ({ ...m, messageKind: 'command' }));
+  const withHandlers = [...events, ...commands].filter((m) => m.namespace && m.handlers?.length);
+  const ownTokens = new Set(tokenize(state.source.name));
+  const groups = new Map();
+  for (const message of withHandlers) {
+    const segment = namespaceServiceSegment(message.namespace);
+    if (!segment) continue;
+    const segmentTokens = new Set(tokenize(segment));
+    if (canRelate(segmentTokens, ownTokens)) continue;
+    const key = segment.toLowerCase();
+    if (!groups.has(key)) groups.set(key, { label: segment, tokens: segmentTokens, messages: [] });
+    groups.get(key).messages.push(message);
+  }
+  return [...groups.values()].map((group) => {
+    const matchedSystem = state.catalog.find((candidate) => candidate.id !== state.source.id && canRelate(group.tokens, new Set(tokenize(candidate.name))));
+    return {
+      name: matchedSystem ? titleCase(matchedSystem.name) : splitPascalCase(group.label),
+      kind: 'message',
+      classification: matchedSystem ? 'internal' : 'unknown',
+      direction: 'inbound',
+      client: null,
+      technology: 'Event',
+      configurationKeys: [],
+      authentication: { type: null, configurationKeys: [] },
+      operations: group.messages.map((message) => ({ method: message.messageKind === 'command' ? 'COMMAND' : 'EVENT', path: message.name, sourceFile: message.handlers[0]?.sourceFile })),
+      resources: [],
+      evidence: group.messages.flatMap((message) => message.handlers.map((handler) => ({ sourceFile: handler.sourceFile, reason: `Handles ${message.messageKind} '${message.name}' published under namespace '${message.namespace}'.` }))),
+      confidence: 'medium'
+    };
+  });
 }
 
 function searchControl(placeholder) {
@@ -294,8 +343,76 @@ function buildLandscape(sources, dependencySets) {
 
 function ringLayout(group, center, radiusX, radiusY, angleOffset = 0) {
   return group.map((dependency, index) => {
-    const angle = group.length === 1 ? -Math.PI / 2 : (Math.PI * 2 * index / group.length) - Math.PI / 2 + angleOffset;
+    const angle = (Math.PI * 2 * index / group.length) - Math.PI / 2 + angleOffset;
     return { ...dependency, x: center.x + Math.cos(angle) * radiusX, y: center.y + Math.sin(angle) * radiusY };
+  });
+}
+
+function resolvedPosition(positions, node) {
+  if (!positions.has(node.id)) positions.set(node.id, { x: node.x, y: node.y });
+  return positions.get(node.id);
+}
+
+function redrawEdgeLine(graphEl, line, positions) {
+  const from = positions.get(line.dataset.from);
+  const to = positions.get(line.dataset.to);
+  if (!from || !to) return;
+  line.setAttribute('x1', from.x);
+  line.setAttribute('y1', from.y);
+  line.setAttribute('x2', to.x);
+  line.setAttribute('y2', to.y);
+  const midX = (from.x + to.x) / 2;
+  const midY = (from.y + to.y) / 2;
+  const bg = graphEl.querySelector(`#${line.dataset.edgeId}-bg`);
+  const text = graphEl.querySelector(`#${line.dataset.edgeId}-text`);
+  if (bg) {
+    const halfWidth = Number(bg.dataset.halfWidth || 0);
+    bg.setAttribute('x', midX - halfWidth);
+    bg.setAttribute('y', midY - 9);
+  }
+  if (text) {
+    text.setAttribute('x', midX);
+    text.setAttribute('y', midY + 2);
+  }
+}
+
+function makeDraggableGraph(graphEl, positions, viewW, viewH) {
+  if (!graphEl || window.matchMedia('(max-width: 760px)').matches) return;
+  let drag = null;
+  graphEl.querySelectorAll('[data-node]').forEach((el) => {
+    el.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0) return;
+      const pos = positions.get(el.dataset.node);
+      if (!pos) return;
+      const rect = graphEl.getBoundingClientRect();
+      const scale = Math.min(rect.width / viewW, rect.height / viewH) || 1;
+      drag = { id: el.dataset.node, el, startX: event.clientX, startY: event.clientY, originX: pos.x, originY: pos.y, scale, moved: false };
+      el.setPointerCapture(event.pointerId);
+    });
+    el.addEventListener('pointermove', (event) => {
+      if (!drag || drag.el !== el) return;
+      const dx = (event.clientX - drag.startX) / drag.scale;
+      const dy = (event.clientY - drag.startY) / drag.scale;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) drag.moved = true;
+      const next = { x: drag.originX + dx, y: drag.originY + dy };
+      positions.set(drag.id, next);
+      el.style.left = `${(next.x / viewW * 100).toFixed(2)}%`;
+      el.style.top = `${(next.y / viewH * 100).toFixed(2)}%`;
+      graphEl.querySelectorAll(`line[data-from="${drag.id}"], line[data-to="${drag.id}"]`).forEach((line) => redrawEdgeLine(graphEl, line, positions));
+    });
+    el.addEventListener('pointerup', (event) => {
+      if (!drag || drag.el !== el) return;
+      el.releasePointerCapture(event.pointerId);
+      if (drag.moved) el.dataset.justDragged = 'true';
+      drag = null;
+    });
+    el.addEventListener('click', (event) => {
+      if (el.dataset.justDragged === 'true') {
+        delete el.dataset.justDragged;
+        event.stopPropagation();
+        event.preventDefault();
+      }
+    }, true);
   });
 }
 
@@ -303,7 +420,8 @@ function renderDependencies(resetToolbar = true) {
   const dependencies = (state.data.dependencies || []).map((dependency, index) => ({ ...dependency, id: String(index) }));
   const operations = dependencies.reduce((sum, dependency) => sum + (dependency.operations?.length || 0), 0);
   const internalCount = dependencies.filter((dependency) => dependency.classification === 'internal').length;
-  if (resetToolbar) toolbar.innerHTML = `${searchControl('Filter dependencies')}<span class="spacer"></span><span class="toolbar-meta">${dependencies.length} dependencies · ${internalCount} internal · ${dependencies.length - internalCount} external · ${operations} operations</span>`;
+  const messageCount = dependencies.filter((dependency) => dependency.kind === 'message').length;
+  if (resetToolbar) toolbar.innerHTML = `${searchControl('Filter dependencies')}<span class="spacer"></span><span class="toolbar-meta">${dependencies.length} dependencies · ${internalCount} internal · ${dependencies.length - internalCount} external · ${messageCount} message-based · ${operations} operations</span>`;
   const filtered = dependencies.filter((dependency) => `${dependency.name} ${dependency.kind} ${dependency.classification} ${dependency.direction} ${dependency.client} ${dependency.technology}`.toLowerCase().includes(state.filter));
   if (!dependencies.length) {
     content.innerHTML = '<div class="empty-state"><span class="empty-icon" aria-hidden="true">◇</span><h2>No service dependencies recorded</h2><p>The generated dependency catalogue is empty.</p></div>';
@@ -326,13 +444,20 @@ function renderDependencies(resetToolbar = true) {
   const internal = ringLayout(filtered.filter((d) => d.classification === 'internal'), center, internalRx, internalRy, 0);
   const external = ringLayout(filtered.filter((d) => d.classification !== 'internal'), center, boundaryRx * externalScale, boundaryRy * externalScale, Math.PI / 5);
   const nodes = [...internal, ...external];
+  if (!state.diagramPositions) state.diagramPositions = new Map();
+  const positions = state.diagramPositions;
+  positions.set('center', positions.get('center') || { x: center.x, y: center.y });
+  nodes.forEach((node) => resolvedPosition(positions, node));
   const pct = (value, axis) => `${((value / (axis === 'x' ? VIEW_W : VIEW_H)) * 100).toFixed(2)}%`;
+  const posOf = (node) => positions.get(node.id) || node;
+  const centerPos = positions.get('center');
   content.innerHTML = `<div class="dependency-view">
     <div class="c4-legend">
       <span class="c4-legend-item"><span class="c4-swatch focus"></span>Software system (this service)</span>
       <span class="c4-legend-item"><span class="c4-swatch internal"></span>Container — internal</span>
       <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
       <span class="c4-legend-item"><span class="c4-boundary-swatch"></span>${escapeHtml(orgName(state.data.repository))} system boundary</span>
+      <span class="c4-legend-item">Drag any box to rearrange</span>
     </div>
     <div class="dependency-graph" role="group" aria-label="C4 container diagram for ${escapeHtml(titleCase(state.source.name))}">
       <svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
@@ -342,27 +467,38 @@ function renderDependencies(resetToolbar = true) {
         </defs>
         <ellipse class="c4-boundary" cx="${center.x}" cy="${center.y}" rx="${boundaryRx}" ry="${boundaryRy}"></ellipse>
         <text class="c4-boundary-label" x="${center.x - boundaryRx + 18}" y="${center.y - boundaryRy + 26}">${escapeHtml(orgName(state.data.repository))}</text>
-        ${nodes.map((node) => {
-          const [x1, y1, x2, y2] = node.direction === 'inbound' ? [node.x, node.y, center.x, center.y] : [center.x, center.y, node.x, node.y];
+        ${nodes.map((node, index) => {
+          const pos = posOf(node);
+          const inbound = node.direction === 'inbound';
+          const [fromId, toId] = inbound ? [node.id, 'center'] : ['center', node.id];
+          const [x1, y1, x2, y2] = inbound ? [pos.x, pos.y, centerPos.x, centerPos.y] : [centerPos.x, centerPos.y, pos.x, pos.y];
           const midX = (x1 + x2) / 2;
           const midY = (y1 + y2) / 2;
           const label = relationshipLabel(node);
-          return `<line class="${escapeHtml(node.direction === 'inbound' ? 'inbound' : 'outbound')}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#arrow-${node.direction === 'inbound' ? 'inbound' : 'outbound'})"></line>
-            <rect class="rel-label-bg" x="${midX - label.length * 3.3}" y="${midY - 9}" width="${label.length * 6.6}" height="15" rx="4"></rect>
-            <text class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
+          const halfWidth = label.length * 3.3;
+          const edgeId = `dep-edge-${index}`;
+          return `<line id="${edgeId}" class="${inbound ? 'inbound' : 'outbound'}" data-edge-id="${edgeId}" data-from="${escapeHtml(fromId)}" data-to="${escapeHtml(toId)}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#arrow-${inbound ? 'inbound' : 'outbound'})"></line>
+            <rect id="${edgeId}-bg" class="rel-label-bg" data-half-width="${halfWidth}" x="${midX - halfWidth}" y="${midY - 9}" width="${halfWidth * 2}" height="15" rx="4"></rect>
+            <text id="${edgeId}-text" class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
         }).join('')}
       </svg>
-      <div class="dependency-node service-node" style="left:${pct(center.x, 'x')};top:${pct(center.y, 'y')}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(state.source.name))}</strong></div>
-      ${nodes.map((node) => `<button class="dependency-node ${node.classification === 'internal' ? 'internal' : 'external'}" type="button" data-dependency="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(node.x, 'x')};top:${pct(node.y, 'y')}"><span class="c4-type">${escapeHtml(c4Type(node))}</span><strong>${escapeHtml(splitPascalCase(node.name))}</strong><span class="c4-meta">${escapeHtml(node.technology || node.kind || 'service')} · ${node.operations?.length || 0} op${node.operations?.length === 1 ? '' : 's'}</span></button>`).join('')}
+      <div class="dependency-node service-node" data-node="center" style="left:${pct(centerPos.x, 'x')};top:${pct(centerPos.y, 'y')}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(state.source.name))}</strong></div>
+      ${nodes.map((node) => {
+        const pos = posOf(node);
+        const nodeClass = node.kind === 'message' ? 'message' : (node.classification === 'internal' ? 'internal' : 'external');
+        return `<button class="dependency-node ${nodeClass}" type="button" data-node="${escapeHtml(node.id)}" data-dependency="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')}"><span class="c4-type">${escapeHtml(c4Type(node))}</span><strong>${escapeHtml(splitPascalCase(node.name))}</strong><span class="c4-meta">${escapeHtml(node.technology || node.kind || 'service')} · ${node.operations?.length || 0} op${node.operations?.length === 1 ? '' : 's'}</span></button>`;
+      }).join('')}
     </div>
     ${dependencyDetail(selected)}
   </div>`;
   wireSearch();
-  document.querySelectorAll('[data-dependency]').forEach((button) => { button.onclick = () => { state.selected = button.dataset.dependency; renderDependencies(false); }; });
+  makeDraggableGraph($('.dependency-graph'), positions, VIEW_W, VIEW_H);
+  document.querySelectorAll('[data-dependency]').forEach((button) => { button.addEventListener('click', () => { state.selected = button.dataset.dependency; renderDependencies(false); }); });
 }
 
 function dependencyDetail(dependency) {
   const authentication = dependency.authentication || {};
+  const scanKind = dependency.kind === 'message' ? 'eventcatalog' : 'service-dependencies';
   const facts = [
     ['Type', c4Type(dependency)],
     ['Client', dependency.client],
@@ -375,16 +511,16 @@ function dependencyDetail(dependency) {
     <h2>${escapeHtml(dependency.name)}</h2>
     <div class="badges"><span class="badge blue">${escapeHtml(dependency.kind || 'service')}</span><span class="badge ${dependency.classification === 'unknown' ? 'amber' : ''}">${escapeHtml(dependency.classification || 'unknown')}</span></div>
     <dl class="dependency-facts">${facts.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(value || 'Not recorded')}</dd></div>`).join('')}</dl>
-    <h3>Operations</h3>${dependencyOperations(dependency.operations || [])}
+    <h3>Operations</h3>${dependencyOperations(dependency.operations || [], scanKind)}
     <h3>Configuration</h3>${dependencyKeys([...(dependency.configurationKeys || []), ...(authentication.configurationKeys || [])])}
     ${(dependency.resources || []).length ? `<h3>Resources</h3>${dependencyResources(dependency.resources)}` : ''}
-    <h3>Evidence</h3>${dependencyEvidence(dependency.evidence || [])}
+    <h3>Evidence</h3>${dependencyEvidence(dependency.evidence || [], scanKind)}
   </article>`;
 }
 
-function dependencyOperations(operations) {
+function dependencyOperations(operations, scanKind = 'service-dependencies') {
   if (!operations.length) return '<p class="muted">No operations recorded.</p>';
-  return `<div class="table-wrap"><table class="data-table"><thead><tr><th>Method</th><th>Path</th><th>Source</th></tr></thead><tbody>${operations.map((operation) => `<tr><td><span class="method ${escapeHtml((operation.method || '').toLowerCase())}">${escapeHtml(operation.method || '—')}</span></td><td><code>${escapeHtml(operation.path || 'Not resolved')}</code></td><td>${sourceLink(operation.sourceFile, 'service-dependencies')}</td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="table-wrap"><table class="data-table"><thead><tr><th>Method</th><th>Path</th><th>Source</th></tr></thead><tbody>${operations.map((operation) => `<tr><td><span class="method ${escapeHtml((operation.method || '').toLowerCase())}">${escapeHtml(operation.method || '—')}</span></td><td><code>${escapeHtml(operation.path || 'Not resolved')}</code></td><td>${sourceLink(operation.sourceFile, scanKind)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 function dependencyKeys(keys) {
@@ -396,9 +532,9 @@ function dependencyResources(resources) {
   return `<table class="data-table"><thead><tr><th>Name</th><th>Type</th></tr></thead><tbody>${resources.map((resource) => `<tr><td>${escapeHtml(resource.name || resource.path || 'Unnamed')}</td><td>${escapeHtml(resource.type || resource.kind || 'Not recorded')}</td></tr>`).join('')}</tbody></table>`;
 }
 
-function dependencyEvidence(evidence) {
+function dependencyEvidence(evidence, scanKind = 'service-dependencies') {
   if (!evidence.length) return '<p class="muted">No source evidence recorded.</p>';
-  return `<ol class="evidence-list">${evidence.map((item) => `<li><p>${escapeHtml(item.reason || 'Dependency reference')}</p>${sourceLink(item.sourceFile, 'service-dependencies')}</li>`).join('')}</ol>`;
+  return `<ol class="evidence-list">${evidence.map((item) => `<li><p>${escapeHtml(item.reason || 'Dependency reference')}</p>${sourceLink(item.sourceFile, scanKind)}</li>`).join('')}</ol>`;
 }
 
 function setLandscapeHero() {
@@ -410,6 +546,7 @@ async function loadLandscape() {
   toolbar.innerHTML = '';
   content.innerHTML = '<div class="loading">Reading catalogue data…</div>';
   state.selected = null;
+  state.landscapePositions = null;
   try {
     const withDeps = state.catalog.filter((source) => source.capabilities.dependencies);
     const results = await Promise.all(withDeps.map((source) => getJson(`/api/sources/${encodeURIComponent(source.id)}/dependencies`)
@@ -446,7 +583,10 @@ function renderLandscape() {
   const externalScale = 1.4;
   const systemNodes = ringLayout(graph.systems, center, systemsRx, systemsRy, 0);
   const externalNodes = ringLayout(graph.externals, center, boundaryRx * externalScale, boundaryRy * externalScale, graph.externals.length ? Math.PI / graph.externals.length : 0);
-  const posById = new Map([...systemNodes, ...externalNodes].map((node) => [node.id, node]));
+  if (!state.landscapePositions) state.landscapePositions = new Map();
+  const positions = state.landscapePositions;
+  [...systemNodes, ...externalNodes].forEach((node) => resolvedPosition(positions, node));
+  const posOf = (node) => positions.get(node.id) || node;
   const pct = (value, axis) => `${((value / (axis === 'x' ? VIEW_W : VIEW_H)) * 100).toFixed(2)}%`;
   const orgLabel = orgFromRepoUrl(graph.systems[0]?.repository);
 
@@ -455,6 +595,7 @@ function renderLandscape() {
       <span class="c4-legend-item"><span class="c4-swatch internal"></span>Software system (cataloged)</span>
       <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
       <span class="c4-legend-item"><span class="c4-boundary-swatch"></span>${escapeHtml(orgLabel)} system boundary</span>
+      <span class="c4-legend-item">Drag any box to rearrange</span>
     </div>
     <div class="dependency-graph" role="group" aria-label="C4 system landscape diagram">
       <svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
@@ -463,24 +604,27 @@ function renderLandscape() {
         </defs>
         <ellipse class="c4-boundary" cx="${center.x}" cy="${center.y}" rx="${boundaryRx}" ry="${boundaryRy}"></ellipse>
         <text class="c4-boundary-label" x="${center.x - boundaryRx + 18}" y="${center.y - boundaryRy + 26}">${escapeHtml(orgLabel)}</text>
-        ${graph.edges.map((edge) => {
-          const from = posById.get(edge.from);
-          const to = posById.get(edge.to);
-          if (!from || !to) return '';
+        ${graph.edges.map((edge, index) => {
+          if (!positions.has(edge.from) || !positions.has(edge.to)) return '';
+          const from = positions.get(edge.from);
+          const to = positions.get(edge.to);
           const midX = (from.x + to.x) / 2;
           const midY = (from.y + to.y) / 2;
           const label = edgeLabel(edge);
-          return `<line class="outbound" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" marker-end="url(#arrow-outbound)"></line>
-            <rect class="rel-label-bg" x="${midX - label.length * 3.3}" y="${midY - 9}" width="${label.length * 6.6}" height="15" rx="4"></rect>
-            <text class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
+          const halfWidth = label.length * 3.3;
+          const edgeId = `land-edge-${index}`;
+          return `<line id="${edgeId}" class="outbound" data-edge-id="${edgeId}" data-from="${escapeHtml(edge.from)}" data-to="${escapeHtml(edge.to)}" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" marker-end="url(#arrow-outbound)"></line>
+            <rect id="${edgeId}-bg" class="rel-label-bg" data-half-width="${halfWidth}" x="${midX - halfWidth}" y="${midY - 9}" width="${halfWidth * 2}" height="15" rx="4"></rect>
+            <text id="${edgeId}-text" class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
         }).join('')}
       </svg>
-      ${systemNodes.map((node) => `<button class="dependency-node internal" type="button" data-node="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(node.x, 'x')};top:${pct(node.y, 'y')}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(node.name))}</strong><span class="c4-meta">${graph.edges.filter((edge) => edge.from === node.id || edge.to === node.id).length} relationship(s)</span></button>`).join('')}
-      ${externalNodes.map((node) => `<button class="dependency-node external" type="button" data-node="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(node.x, 'x')};top:${pct(node.y, 'y')}"><span class="c4-type">External System</span><strong>${escapeHtml(splitPascalCase(node.name))}</strong><span class="c4-meta">${node.members.length} reference(s)</span></button>`).join('')}
+      ${systemNodes.map((node) => { const pos = posOf(node); return `<button class="dependency-node internal" type="button" data-node="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(node.name))}</strong><span class="c4-meta">${graph.edges.filter((edge) => edge.from === node.id || edge.to === node.id).length} relationship(s)</span></button>`; }).join('')}
+      ${externalNodes.map((node) => { const pos = posOf(node); return `<button class="dependency-node external" type="button" data-node="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')}"><span class="c4-type">External System</span><strong>${escapeHtml(splitPascalCase(node.name))}</strong><span class="c4-meta">${node.members.length} reference(s)</span></button>`; }).join('')}
     </div>
     ${landscapeDetail(selected, graph)}
   </div>`;
-  document.querySelectorAll('[data-node]').forEach((button) => { button.onclick = () => { state.selected = button.dataset.node; renderLandscape(); }; });
+  makeDraggableGraph($('.dependency-graph'), positions, VIEW_W, VIEW_H);
+  document.querySelectorAll('[data-node]').forEach((button) => { button.addEventListener('click', () => { state.selected = button.dataset.node; renderLandscape(); }); });
   document.querySelectorAll('[data-jump]').forEach((button) => { button.onclick = () => jumpToSource(button.dataset.jump); });
 }
 
