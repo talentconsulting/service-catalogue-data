@@ -24,7 +24,7 @@ function sourceCapabilities() {
   return [
     { id: 'database', label: 'Data schema', enabled: state.source.capabilities.database },
     { id: 'messages', label: 'Events & commands', enabled: state.source.capabilities.messages },
-    { id: 'dependencies', label: 'Dependencies', enabled: state.source.capabilities.dependencies },
+    { id: 'dependencies', label: 'Dependencies', enabled: state.source.capabilities.dependencies || state.source.capabilities.messages },
     { id: 'openapi', label: 'API specs', enabled: state.source.capabilities.openapi }
   ];
 }
@@ -78,19 +78,35 @@ async function loadView() {
   state.selected = null;
   state.diagramPositions = null;
   try {
-    let url = `/api/sources/${encodeURIComponent(state.source.id)}/${state.view}`;
-    if (state.view === 'openapi') url += `?file=${encodeURIComponent(state.apiFile)}`;
-    state.data = await getJson(url);
-    if (state.view === 'dependencies' && state.source.capabilities.messages) {
-      try {
-        const messages = await getJson(`/api/sources/${encodeURIComponent(state.source.id)}/messages`);
-        state.data = { ...state.data, dependencies: [...(state.data.dependencies || []), ...messageDependencies(messages)] };
-      } catch { /* messages are supplementary; ignore failures */ }
+    if (state.view === 'dependencies') {
+      state.data = await loadDependenciesFor(state.source);
+    } else {
+      let url = `/api/sources/${encodeURIComponent(state.source.id)}/${state.view}`;
+      if (state.view === 'openapi') url += `?file=${encodeURIComponent(state.apiFile)}`;
+      state.data = await getJson(url);
     }
     renderView();
   } catch (error) {
     content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
   }
+}
+
+async function loadDependenciesFor(source) {
+  let data = { repository: orgRepoSlug(source.repository), dependencies: [] };
+  if (source.capabilities.dependencies) {
+    data = await getJson(`/api/sources/${encodeURIComponent(source.id)}/dependencies`);
+  }
+  if (source.capabilities.messages) {
+    try {
+      const messages = await getJson(`/api/sources/${encodeURIComponent(source.id)}/messages`);
+      data = { ...data, dependencies: [...(data.dependencies || []), ...messageDependencies(source, messages)] };
+    } catch { /* messages are supplementary; ignore failures */ }
+  }
+  return data;
+}
+
+function orgRepoSlug(repositoryUrl) {
+  return (repositoryUrl || '').replace(/^https?:\/\/[^/]+\//, '').replace(/\/$/, '');
 }
 
 function namespaceServiceSegment(namespace) {
@@ -101,11 +117,11 @@ function namespaceServiceSegment(namespace) {
   return parts[index] || null;
 }
 
-function messageDependencies(messages) {
+function messageDependencies(source, messages) {
   const events = (messages.events || []).map((m) => ({ ...m, messageKind: 'event' }));
   const commands = (messages.commands || []).map((m) => ({ ...m, messageKind: 'command' }));
   const withHandlers = [...events, ...commands].filter((m) => m.namespace && m.handlers?.length);
-  const ownTokens = new Set(tokenize(state.source.name));
+  const ownTokens = new Set(tokenize(source.name));
   const groups = new Map();
   for (const message of withHandlers) {
     const segment = namespaceServiceSegment(message.namespace);
@@ -117,7 +133,7 @@ function messageDependencies(messages) {
     groups.get(key).messages.push(message);
   }
   return [...groups.values()].map((group) => {
-    const matchedSystem = state.catalog.find((candidate) => candidate.id !== state.source.id && canRelate(group.tokens, new Set(tokenize(candidate.name))));
+    const matchedSystem = state.catalog.find((candidate) => candidate.id !== source.id && canRelate(group.tokens, new Set(tokenize(candidate.name))));
     return {
       name: matchedSystem ? titleCase(matchedSystem.name) : splitPascalCase(group.label),
       kind: 'message',
@@ -278,7 +294,8 @@ function canRelate(a, b) {
 
 function edgeLabel(edge) {
   const technology = edge.technologies.join('/');
-  return `Calls${technology ? ` [${technology}]` : ''}${edge.count > 1 ? ` ×${edge.count}` : ''}`;
+  const verb = edge.kinds.includes('message') && !edge.kinds.includes('http-api') ? 'Publishes to' : 'Calls';
+  return `${verb}${technology ? ` [${technology}]` : ''}${edge.count > 1 ? ` ×${edge.count}` : ''}`;
 }
 
 function buildLandscape(sources, dependencySets) {
@@ -287,13 +304,14 @@ function buildLandscape(sources, dependencySets) {
 
   function addEdge(from, to, dependency) {
     const key = `${from}|${to}`;
-    if (!edgeMap.has(key)) edgeMap.set(key, { from, to, count: 0, operations: 0, technologies: new Set(), names: new Set() });
+    if (!edgeMap.has(key)) edgeMap.set(key, { from, to, count: 0, operations: 0, technologies: new Set(), names: new Set(), kinds: new Set() });
     const edge = edgeMap.get(key);
     edge.count += 1;
     edge.operations += dependency.operations?.length || 0;
     const kindLabel = dependency.kind === 'http-api' ? 'HTTP' : dependency.kind;
     [kindLabel, dependency.technology].filter(Boolean).forEach((value) => edge.technologies.add(value));
     edge.names.add(dependency.name);
+    if (dependency.kind) edge.kinds.add(dependency.kind);
   }
 
   const externalEntries = [];
@@ -304,7 +322,8 @@ function buildLandscape(sources, dependencySets) {
       if (canRelate(depTokens, ownTokens)) continue;
       const matchedSystem = sources.find((candidate) => candidate.id !== source.id && canRelate(depTokens, systemTokenMap.get(candidate.id)));
       if (matchedSystem) {
-        addEdge(`sys:${source.id}`, `sys:${matchedSystem.id}`, dependency);
+        const [from, to] = dependency.direction === 'inbound' ? [`sys:${matchedSystem.id}`, `sys:${source.id}`] : [`sys:${source.id}`, `sys:${matchedSystem.id}`];
+        addEdge(from, to, dependency);
         continue;
       }
       if (depTokens.size === 0) continue;
@@ -332,12 +351,15 @@ function buildLandscape(sources, dependencySets) {
   for (const members of clusters.values()) {
     const id = `ext:${extIndex++}`;
     const name = members.reduce((best, member) => (member.dependency.name.length > best.length ? member.dependency.name : best), members[0].dependency.name);
-    members.forEach((member) => addEdge(`sys:${member.source.id}`, id, member.dependency));
+    members.forEach((member) => {
+      const [from, to] = member.dependency.direction === 'inbound' ? [id, `sys:${member.source.id}`] : [`sys:${member.source.id}`, id];
+      addEdge(from, to, member.dependency);
+    });
     externals.push({ id, name, members });
   }
 
   const systems = sources.map((s) => ({ id: `sys:${s.id}`, sourceId: s.id, name: s.name, repository: s.repository }));
-  const edges = [...edgeMap.values()].map((edge) => ({ ...edge, technologies: [...edge.technologies], names: [...edge.names] }));
+  const edges = [...edgeMap.values()].map((edge) => ({ ...edge, technologies: [...edge.technologies], names: [...edge.names], kinds: [...edge.kinds] }));
   return { systems, externals, edges };
 }
 
@@ -548,9 +570,8 @@ async function loadLandscape() {
   state.selected = null;
   state.landscapePositions = null;
   try {
-    const withDeps = state.catalog.filter((source) => source.capabilities.dependencies);
-    const results = await Promise.all(withDeps.map((source) => getJson(`/api/sources/${encodeURIComponent(source.id)}/dependencies`)
-      .then((data) => ({ source, dependencies: data.dependencies || [] }))
+    const results = await Promise.all(state.catalog.map((source) => loadDependenciesFor(source)
+      .then((data) => (data.dependencies?.length ? { source, dependencies: data.dependencies } : null))
       .catch(() => null)));
     state.landscape = buildLandscape(state.catalog, results.filter(Boolean));
     renderLandscape();
@@ -566,7 +587,7 @@ function renderLandscape() {
     <div class="stat"><dt>Systems</dt><dd>${graph.systems.length}</dd></div>
     <div class="stat"><dt>External</dt><dd>${graph.externals.length}</dd></div>
     <div class="stat"><dt>Relationships</dt><dd>${graph.edges.length}</dd></div>`;
-  toolbar.innerHTML = `<span class="toolbar-meta">Inferred by matching each repository's outbound service dependencies against the catalogue and clustering the rest as external systems</span>`;
+  toolbar.innerHTML = `<span class="toolbar-meta">Inferred by matching each repository's outbound service dependencies and handled events/commands against the catalogue, clustering the rest as external systems</span>`;
   if (!allNodes.length) {
     content.innerHTML = '<div class="empty-state"><span class="empty-icon" aria-hidden="true">◇</span><h2>No dependency data available</h2><p>None of the cataloged repositories publish service-dependencies data.</p></div>';
     return;
