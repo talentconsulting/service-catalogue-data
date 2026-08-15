@@ -569,6 +569,7 @@ async function loadLandscape() {
   content.innerHTML = '<div class="loading">Reading catalogue data…</div>';
   state.selected = null;
   state.landscapePositions = null;
+  state.landscapeChecked = null;
   try {
     const results = await Promise.all(state.catalog.map((source) => loadDependenciesFor(source)
       .then((data) => (data.dependencies?.length ? { source, dependencies: data.dependencies } : null))
@@ -578,6 +579,15 @@ async function loadLandscape() {
   } catch (error) {
     content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
   }
+}
+
+function landscapeChecklistGroup(title, nodes, formatLabel) {
+  const checkedCount = nodes.filter((node) => state.landscapeChecked.has(node.id)).length;
+  return `<div class="checklist-group">
+    <h4>${escapeHtml(title)} <span class="count">${checkedCount}/${nodes.length}</span></h4>
+    <ul class="checklist">${nodes.map((node) => `
+      <li><label><input type="checkbox" data-landscape-toggle="${escapeHtml(node.id)}" ${state.landscapeChecked.has(node.id) ? 'checked' : ''}><span>${escapeHtml(formatLabel(node.name))}</span></label></li>`).join('') || '<li class="muted">None recorded.</li>'}</ul>
+  </div>`;
 }
 
 function renderLandscape() {
@@ -592,8 +602,25 @@ function renderLandscape() {
     content.innerHTML = '<div class="empty-state"><span class="empty-icon" aria-hidden="true">◇</span><h2>No dependency data available</h2><p>None of the cataloged repositories publish service-dependencies data.</p></div>';
     return;
   }
-  if (!state.selected || !allNodes.some((node) => node.id === state.selected)) state.selected = graph.systems[0]?.id || graph.externals[0]?.id;
+  if (!state.landscapeChecked) state.landscapeChecked = new Set(allNodes.map((node) => node.id));
+  const visibleNodes = allNodes.filter((node) => state.landscapeChecked.has(node.id));
+  if (!state.selected || !visibleNodes.some((node) => node.id === state.selected)) state.selected = visibleNodes[0]?.id || null;
   const selected = allNodes.find((node) => node.id === state.selected);
+
+  const checklistHtml = `<aside class="landscape-checklist" aria-label="Services to show">
+    <div class="checklist-controls">
+      <button id="landscape-select-all" type="button" class="plain-button">Select all</button>
+      <button id="landscape-deselect-all" type="button" class="plain-button">Deselect all</button>
+    </div>
+    ${landscapeChecklistGroup('Systems', graph.systems, titleCase)}
+    ${landscapeChecklistGroup('External systems', graph.externals, splitPascalCase)}
+  </aside>`;
+
+  if (!visibleNodes.length) {
+    content.innerHTML = `<div class="landscape-layout">${checklistHtml}<div class="empty-state"><h2>Nothing selected</h2><p>Check at least one service on the left to see it on the diagram.</p></div></div>`;
+    wireLandscapeChecklist(allNodes);
+    return;
+  }
 
   const VIEW_W = 1440, VIEW_H = 880;
   const center = { x: VIEW_W / 2, y: VIEW_H / 2 };
@@ -602,8 +629,11 @@ function renderLandscape() {
   const boundaryRx = systemsRx + nodeHalfW + pad;
   const boundaryRy = systemsRy + nodeHalfH + pad;
   const externalScale = 1.4;
-  const systemNodes = ringLayout(graph.systems, center, systemsRx, systemsRy, 0);
-  const externalNodes = ringLayout(graph.externals, center, boundaryRx * externalScale, boundaryRy * externalScale, graph.externals.length ? Math.PI / graph.externals.length : 0);
+  const systemNodes = ringLayout(graph.systems, center, systemsRx, systemsRy, 0)
+    .filter((node) => state.landscapeChecked.has(node.id));
+  const externalNodes = ringLayout(graph.externals, center, boundaryRx * externalScale, boundaryRy * externalScale, graph.externals.length ? Math.PI / graph.externals.length : 0)
+    .filter((node) => state.landscapeChecked.has(node.id));
+  const visibleEdges = graph.edges.filter((edge) => state.landscapeChecked.has(edge.from) && state.landscapeChecked.has(edge.to));
   if (!state.landscapePositions) state.landscapePositions = new Map();
   const positions = state.landscapePositions;
   [...systemNodes, ...externalNodes].forEach((node) => resolvedPosition(positions, node));
@@ -611,7 +641,9 @@ function renderLandscape() {
   const pct = (value, axis) => `${((value / (axis === 'x' ? VIEW_W : VIEW_H)) * 100).toFixed(2)}%`;
   const orgLabel = orgFromRepoUrl(graph.systems[0]?.repository);
 
-  content.innerHTML = `<div class="dependency-view">
+  content.innerHTML = `<div class="landscape-layout">
+    ${checklistHtml}
+    <div class="dependency-view">
     <div class="c4-legend">
       <span class="c4-legend-item"><span class="c4-swatch internal"></span>Software system (cataloged)</span>
       <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
@@ -625,7 +657,7 @@ function renderLandscape() {
         </defs>
         <ellipse class="c4-boundary" cx="${center.x}" cy="${center.y}" rx="${boundaryRx}" ry="${boundaryRy}"></ellipse>
         <text class="c4-boundary-label" x="${center.x - boundaryRx + 18}" y="${center.y - boundaryRy + 26}">${escapeHtml(orgLabel)}</text>
-        ${graph.edges.map((edge, index) => {
+        ${visibleEdges.map((edge, index) => {
           if (!positions.has(edge.from) || !positions.has(edge.to)) return '';
           const from = positions.get(edge.from);
           const to = positions.get(edge.to);
@@ -639,14 +671,30 @@ function renderLandscape() {
             <text id="${edgeId}-text" class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
         }).join('')}
       </svg>
-      ${systemNodes.map((node) => { const pos = posOf(node); return `<button class="dependency-node internal" type="button" data-node="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(node.name))}</strong><span class="c4-meta">${graph.edges.filter((edge) => edge.from === node.id || edge.to === node.id).length} relationship(s)</span></button>`; }).join('')}
+      ${systemNodes.map((node) => { const pos = posOf(node); return `<button class="dependency-node internal" type="button" data-node="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(node.name))}</strong><span class="c4-meta">${visibleEdges.filter((edge) => edge.from === node.id || edge.to === node.id).length} relationship(s)</span></button>`; }).join('')}
       ${externalNodes.map((node) => { const pos = posOf(node); return `<button class="dependency-node external" type="button" data-node="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')}"><span class="c4-type">External System</span><strong>${escapeHtml(splitPascalCase(node.name))}</strong><span class="c4-meta">${node.members.length} reference(s)</span></button>`; }).join('')}
     </div>
     ${landscapeDetail(selected, graph)}
+  </div>
   </div>`;
   makeDraggableGraph($('.dependency-graph'), positions, VIEW_W, VIEW_H);
   document.querySelectorAll('[data-node]').forEach((button) => { button.addEventListener('click', () => { state.selected = button.dataset.node; renderLandscape(); }); });
   document.querySelectorAll('[data-jump]').forEach((button) => { button.onclick = () => jumpToSource(button.dataset.jump); });
+  wireLandscapeChecklist(allNodes);
+}
+
+function wireLandscapeChecklist(allNodes) {
+  document.querySelectorAll('[data-landscape-toggle]').forEach((checkbox) => {
+    checkbox.addEventListener('change', () => {
+      const id = checkbox.dataset.landscapeToggle;
+      if (checkbox.checked) state.landscapeChecked.add(id); else state.landscapeChecked.delete(id);
+      renderLandscape();
+    });
+  });
+  const selectAll = $('#landscape-select-all');
+  if (selectAll) selectAll.onclick = () => { state.landscapeChecked = new Set(allNodes.map((node) => node.id)); renderLandscape(); };
+  const deselectAll = $('#landscape-deselect-all');
+  if (deselectAll) deselectAll.onclick = () => { state.landscapeChecked = new Set(); renderLandscape(); };
 }
 
 function landscapeDetail(node, graph) {
