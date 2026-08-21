@@ -244,66 +244,53 @@ function erNode(table) {
   return { ...table, id: table.name, width: 274, height };
 }
 
-function layoutErNodes(nodes, edges, viewWidth, viewHeight) {
+function layoutErNodes(nodes, edges, viewWidth) {
   const byName = new Map(nodes.map((node) => [node.name, node]));
-  const columns = Math.max(2, Math.ceil(Math.sqrt(nodes.length * 1.4)));
-  const rows = Math.ceil(nodes.length / columns);
-  const positions = new Map(nodes.map((node, index) => {
-    const column = index % columns;
-    const row = Math.floor(index / columns);
-    return [node.name, {
-      x: (column + 0.5) * viewWidth / columns,
-      y: (row + 0.5) * viewHeight / rows
-    }];
-  }));
-  const linked = edges.filter((edge) => byName.has(edge.from) && byName.has(edge.to));
-  const padding = 64;
-  for (let iteration = 0; iteration < 180; iteration++) {
-    const forces = new Map(nodes.map((node) => [node.name, { x: 0, y: 0 }]));
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const a = nodes[i], b = nodes[j];
-        const aPos = positions.get(a.name), bPos = positions.get(b.name);
-        let dx = bPos.x - aPos.x, dy = bPos.y - aPos.y;
-        let distance = Math.hypot(dx, dy);
-        if (!distance) { dx = i < j ? 1 : -1; dy = 1; distance = Math.SQRT2; }
-        const repel = 44000 / (distance * distance);
-        const xForce = dx / distance * repel;
-        const yForce = dy / distance * repel;
-        forces.get(a.name).x -= xForce; forces.get(a.name).y -= yForce;
-        forces.get(b.name).x += xForce; forces.get(b.name).y += yForce;
-        const overlapX = (a.width + b.width) / 2 + 48 - Math.abs(dx);
-        const overlapY = (a.height + b.height) / 2 + 56 - Math.abs(dy);
-        if (overlapX > 0 && overlapY > 0) {
-          const separation = Math.max(overlapX, overlapY) * 0.16;
-          if (overlapX < overlapY) {
-            const direction = dx < 0 ? -1 : 1;
-            forces.get(a.name).x -= direction * separation; forces.get(b.name).x += direction * separation;
-          } else {
-            const direction = dy < 0 ? -1 : 1;
-            forces.get(a.name).y -= direction * separation; forces.get(b.name).y += direction * separation;
-          }
-        }
-      }
-    }
-    linked.forEach((edge) => {
-      const from = positions.get(edge.from), to = positions.get(edge.to);
-      const dx = to.x - from.x, dy = to.y - from.y;
-      const distance = Math.max(1, Math.hypot(dx, dy));
-      const spring = (distance - 360) * 0.008;
-      const xForce = dx / distance * spring;
-      const yForce = dy / distance * spring;
-      forces.get(edge.from).x += xForce; forces.get(edge.from).y += yForce;
-      forces.get(edge.to).x -= xForce; forces.get(edge.to).y -= yForce;
+  const children = new Map(nodes.map((node) => [node.name, []]));
+  const incoming = new Map(nodes.map((node) => [node.name, 0]));
+  edges.forEach((edge) => {
+    if (!byName.has(edge.from) || !byName.has(edge.to) || edge.from === edge.to) return;
+    children.get(edge.to).push(edge.from);
+    incoming.set(edge.from, incoming.get(edge.from) + 1);
+  });
+  const levels = new Map(nodes.map((node) => [node.name, 0]));
+  const remaining = new Set(nodes.map((node) => node.name));
+  const queue = [...nodes].filter((node) => incoming.get(node.name) === 0).map((node) => node.name).sort();
+  while (remaining.size) {
+    if (!queue.length) queue.push([...remaining].sort()[0]); // Gracefully place cyclic foreign keys.
+    const name = queue.shift();
+    if (!remaining.delete(name)) continue;
+    children.get(name).forEach((child) => {
+      levels.set(child, Math.max(levels.get(child), levels.get(name) + 1));
+      incoming.set(child, incoming.get(child) - 1);
+      if (incoming.get(child) <= 0) queue.push(child);
     });
-    nodes.forEach((node) => {
-      const position = positions.get(node.name), force = forces.get(node.name);
-      const maxStep = 14;
-      position.x = Math.max(node.width / 2 + padding, Math.min(viewWidth - node.width / 2 - padding, position.x + Math.max(-maxStep, Math.min(maxStep, force.x))));
-      position.y = Math.max(node.height / 2 + padding, Math.min(viewHeight - node.height / 2 - padding, position.y + Math.max(-maxStep, Math.min(maxStep, force.y))));
-    });
+    queue.sort();
   }
+  const rows = new Map();
+  nodes.forEach((node) => {
+    const level = levels.get(node.name);
+    if (!rows.has(level)) rows.set(level, []);
+    rows.get(level).push(node);
+  });
+  const positions = new Map();
+  const rowEntries = [...rows.entries()].sort(([a], [b]) => a - b);
+  let y = 80;
+  rowEntries.forEach(([, row]) => {
+    row.sort((a, b) => a.name.localeCompare(b.name));
+    const rowHeight = Math.max(...row.map((node) => node.height));
+    row.forEach((node, index) => positions.set(node.name, {
+      x: (index + 0.5) * viewWidth / row.length,
+      y: y + rowHeight / 2
+    }));
+    y += rowHeight + 180;
+  });
   return nodes.map((node) => ({ ...node, ...positions.get(node.name) }));
+}
+
+function orthogonalPath(points) {
+  const middleY = (points.y1 + points.y2) / 2;
+  return `M ${points.x1} ${points.y1} L ${points.x1} ${middleY} L ${points.x2} ${middleY} L ${points.x2} ${points.y2}`;
 }
 
 function connectionPoints(from, to, fromWidth = 0, fromHeight = 0, toWidth = 0, toHeight = 0) {
@@ -328,12 +315,10 @@ function renderDatabaseDiagram(filtered, allEdges, isolatedCount) {
   }
   const ordered = orderTablesForLayout(filtered, edges);
   const nodes = ordered.map(erNode);
-  const columns = Math.max(2, Math.ceil(Math.sqrt(nodes.length * 1.4)));
-  const rows = Math.ceil(nodes.length / columns);
-  const maxHeight = Math.max(...nodes.map((node) => node.height));
-  const VIEW_W = Math.max(1100, columns * 380);
-  const VIEW_H = Math.max(720, rows * (maxHeight + 180));
-  const positioned = layoutErNodes(nodes, edges, VIEW_W, VIEW_H);
+  const levelEstimate = Math.max(2, Math.ceil(Math.sqrt(nodes.length)));
+  const VIEW_W = Math.max(1100, levelEstimate * 380);
+  const positioned = layoutErNodes(nodes, edges, VIEW_W);
+  const VIEW_H = Math.max(720, Math.ceil(Math.max(...positioned.map((node) => node.y + node.height / 2)) + 80));
   if (!state.schemaPositions) state.schemaPositions = new Map();
   const positions = state.schemaPositions;
   positioned.forEach((node) => resolvedPosition(positions, node));
@@ -353,14 +338,9 @@ function renderDatabaseDiagram(filtered, allEdges, isolatedCount) {
           const fromNode = positioned.find((node) => node.name === edge.from);
           const toNode = positioned.find((node) => node.name === edge.to);
           const points = connectionPoints(from, to, fromNode?.width, fromNode?.height, toNode?.width, toNode?.height);
-          const midX = (points.x1 + points.x2) / 2;
-          const midY = (points.y1 + points.y2) / 2;
-          const label = tableRelLabel(edge);
-          const halfWidth = label.length * 3.3;
           const edgeId = `schema-edge-${index}`;
-          return `<line id="${edgeId}" class="outbound" data-edge-id="${edgeId}" data-from="${escapeHtml(edge.from)}" data-to="${escapeHtml(edge.to)}" data-from-width="${fromNode?.width || 0}" data-from-height="${fromNode?.height || 0}" data-to-width="${toNode?.width || 0}" data-to-height="${toNode?.height || 0}" x1="${points.x1}" y1="${points.y1}" x2="${points.x2}" y2="${points.y2}" marker-end="url(#arrow-outbound)"></line>
-            <rect id="${edgeId}-bg" class="rel-label-bg" data-half-width="${halfWidth}" x="${midX - halfWidth}" y="${midY - 9}" width="${halfWidth * 2}" height="15" rx="4"></rect>
-            <text id="${edgeId}-text" class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
+          return `<path id="${edgeId}" class="outbound" data-edge-id="${edgeId}" data-from="${escapeHtml(edge.from)}" data-to="${escapeHtml(edge.to)}" data-from-width="${fromNode?.width || 0}" data-from-height="${fromNode?.height || 0}" data-to-width="${toNode?.width || 0}" data-to-height="${toNode?.height || 0}" d="${orthogonalPath(points)}" marker-end="url(#arrow-outbound)"></path>
+            `;
         }).join('')}
       </svg>
       ${positioned.map((node) => {
@@ -582,10 +562,13 @@ function redrawEdgeLine(graphEl, line, positions) {
   const to = positions.get(line.dataset.to);
   if (!from || !to) return;
   const points = connectionPoints(from, to, Number(line.dataset.fromWidth || 0), Number(line.dataset.fromHeight || 0), Number(line.dataset.toWidth || 0), Number(line.dataset.toHeight || 0));
-  line.setAttribute('x1', points.x1);
-  line.setAttribute('y1', points.y1);
-  line.setAttribute('x2', points.x2);
-  line.setAttribute('y2', points.y2);
+  if (line.tagName.toLowerCase() === 'path') line.setAttribute('d', orthogonalPath(points));
+  else {
+    line.setAttribute('x1', points.x1);
+    line.setAttribute('y1', points.y1);
+    line.setAttribute('x2', points.x2);
+    line.setAttribute('y2', points.y2);
+  }
   const midX = (points.x1 + points.x2) / 2;
   const midY = (points.y1 + points.y2) / 2;
   const bg = graphEl.querySelector(`#${line.dataset.edgeId}-bg`);
@@ -623,7 +606,7 @@ function makeDraggableGraph(graphEl, positions, viewW, viewH) {
       positions.set(drag.id, next);
       el.style.left = `${(next.x / viewW * 100).toFixed(2)}%`;
       el.style.top = `${(next.y / viewH * 100).toFixed(2)}%`;
-      graphEl.querySelectorAll(`line[data-from="${drag.id}"], line[data-to="${drag.id}"]`).forEach((line) => redrawEdgeLine(graphEl, line, positions));
+      graphEl.querySelectorAll(`[data-edge-id][data-from="${drag.id}"], [data-edge-id][data-to="${drag.id}"]`).forEach((line) => redrawEdgeLine(graphEl, line, positions));
     });
     el.addEventListener('pointerup', (event) => {
       if (!drag || drag.el !== el) return;
