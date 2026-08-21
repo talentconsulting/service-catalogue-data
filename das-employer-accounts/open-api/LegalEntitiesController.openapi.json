@@ -1,21 +1,22 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts API - LegalEntities",
+    "title": "Employer Accounts API",
     "version": "1.0.0"
   },
   "paths": {
     "/api/accounts/{accountId}/legalentities": {
       "get": {
         "operationId": "GetLegalEntities",
-        "summary": "Retrieve legal entities associated with an account.",
+        "summary": "Get all legal entities for an account.",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             },
             "description": "The ID of the account."
           },
@@ -24,15 +25,14 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean",
-              "default": false
+              "type": "boolean"
             },
-            "description": "Whether to include detailed legal entity information."
+            "description": "If true, include detailed information."
           }
         ],
         "responses": {
           "200": {
-            "description": "A list of resources or detailed legal entities.",
+            "description": "Successful response with legal entities.",
             "content": {
               "application/json": {
                 "schema": {
@@ -52,22 +52,28 @@
             }
           },
           "404": {
-            "description": "No legal entities found for the provided account ID."
+            "description": "No legal entities found."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadAllEmployerAccountBalances": []
+          }
+        ]
       }
     },
     "/api/accounts/{accountId}/legalentities/{legalEntityId}": {
       "get": {
         "operationId": "GetLegalEntity",
-        "summary": "Retrieve a specific legal entity by ID.",
+        "summary": "Get a specific legal entity for an account.",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             },
             "description": "The ID of the account."
           },
@@ -76,7 +82,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             },
             "description": "The ID of the legal entity."
           },
@@ -85,15 +92,14 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean",
-              "default": false
+              "type": "boolean"
             },
-            "description": "Whether to include all agreements for the legal entity."
+            "description": "If true, include all agreements associated with the legal entity."
           }
         ],
         "responses": {
           "200": {
-            "description": "Detailed information on the specified legal entity.",
+            "description": "Successful response with the legal entity.",
             "content": {
               "application/json": {
                 "schema": {
@@ -103,24 +109,35 @@
             }
           },
           "404": {
-            "description": "The specified legal entity was not found."
+            "description": "Legal entity not found."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadAllEmployerAccountBalances": []
+          }
+        ]
       }
     }
   },
   "components": {
     "schemas": {
+      "ResourceList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Resource"
+        }
+      },
       "Resource": {
         "type": "object",
         "properties": {
           "Id": {
             "type": "string",
-            "description": "The unique identifier for the resource."
+            "description": "The ID of the resource."
           },
           "Href": {
             "type": "string",
-            "description": "The hyperlink to the resource."
+            "description": "The URL to the resource."
           }
         },
         "required": [
@@ -128,15 +145,16 @@
           "Href"
         ]
       },
-      "ResourceList": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/Resource"
-        }
-      },
       "LegalEntity": {
         "type": "object",
-        "description": "A representation of a legal entity."
+        "description": "Schema for a legal entity.",
+        "additionalProperties": true
+      }
+    },
+    "securitySchemes": {
+      "ApiRoles.ReadAllEmployerAccountBalances": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

@@ -2,37 +2,42 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Accounts API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing Employer Accounts, including their associated legal entities."
   },
   "paths": {
     "/api/accountlegalentities": {
       "get": {
-        "summary": "Get account legal entities",
-        "operationId": "getAccountLegalEntities",
+        "summary": "Get Account Legal Entities",
+        "operationId": "GetAccountLegalEntities",
         "parameters": [
           {
             "name": "PageNumber",
             "in": "query",
-            "required": false,
+            "required": true,
+            "description": "Page number for pagination",
             "schema": {
               "type": "integer",
-              "minimum": 1
+              "minimum": 1,
+              "default": 1
             }
           },
           {
             "name": "PageSize",
             "in": "query",
-            "required": false,
+            "required": true,
+            "description": "Number of items per page",
             "schema": {
               "type": "integer",
               "minimum": 100,
-              "maximum": 10000
+              "maximum": 10000,
+              "default": 1000
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response containing account legal entities",
+            "description": "Legal entities retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -46,8 +51,8 @@
     },
     "/api/accountlegalentities/GetAll": {
       "post": {
-        "summary": "Get all account legal entities",
-        "operationId": "getAllAccountLegalEntities",
+        "summary": "Get All Legal Entities by Account IDs",
+        "operationId": "GetAllLegalEntities",
         "requestBody": {
           "required": true,
           "content": {
@@ -60,7 +65,7 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response containing all account legal entities",
+            "description": "Legal entities retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -70,10 +75,10 @@
             }
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Invalid request"
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error"
           }
         }
       }
@@ -86,14 +91,20 @@
         "properties": {
           "PageNumber": {
             "type": "integer",
-            "minimum": 1
+            "minimum": 1,
+            "default": 1
           },
           "PageSize": {
             "type": "integer",
             "minimum": 100,
-            "maximum": 10000
+            "maximum": 10000,
+            "default": 1000
           }
-        }
+        },
+        "required": [
+          "PageNumber",
+          "PageSize"
+        ]
       },
       "GetAccountLegalEntitiesResponse": {
         "type": "object",
@@ -101,7 +112,10 @@
           "AccountLegalEntities": {
             "$ref": "#/components/schemas/PagedApiResponse"
           }
-        }
+        },
+        "required": [
+          "AccountLegalEntities"
+        ]
       },
       "GetAllLegalEntitiesRequest": {
         "type": "object",
@@ -109,7 +123,8 @@
           "AccountIds": {
             "type": "array",
             "items": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             }
           },
           "SearchTerm": {
@@ -124,8 +139,7 @@
             "default": 10
           },
           "SortColumn": {
-            "type": "string",
-            "default": "Name"
+            "type": "string"
           },
           "IsAscending": {
             "type": "boolean",
@@ -148,39 +162,30 @@
               "$ref": "#/components/schemas/LegalEntity"
             }
           }
-        }
-      },
-      "PagedApiResponse": {
-        "type": "object",
-        "properties": {
-          "Data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AccountLegalEntity"
-            }
-          },
-          "Page": {
-            "type": "integer"
-          },
-          "TotalPages": {
-            "type": "integer"
-          }
-        }
+        },
+        "required": [
+          "PageInfo",
+          "LegalEntities"
+        ]
       },
       "PageInfo": {
         "type": "object",
         "properties": {
           "TotalCount": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "PageIndex": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "PageSize": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "TotalPages": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "HasPreviousPage": {
             "type": "boolean"
@@ -188,7 +193,15 @@
           "HasNextPage": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "TotalCount",
+          "PageIndex",
+          "PageSize",
+          "TotalPages",
+          "HasPreviousPage",
+          "HasNextPage"
+        ]
       },
       "LegalEntity": {
         "type": "object",
@@ -213,7 +226,8 @@
             "type": "string"
           },
           "LegalEntityId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "Name": {
             "type": "string"
@@ -228,13 +242,15 @@
             "type": "string"
           },
           "SourceNumeric": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int16"
           },
           "Status": {
             "type": "string"
           },
           "AccountLegalEntityId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "AccountLegalEntityPublicHashedId": {
             "type": "string"
@@ -244,31 +260,12 @@
           }
         }
       },
-      "AccountLegalEntity": {
-        "type": "object",
-        "properties": {
-          "AccountId": {
-            "type": "integer"
-          },
-          "AccountLegalEntityId": {
-            "type": "integer"
-          },
-          "AccountLegalEntityPublicHashedId": {
-            "type": "string"
-          },
-          "LegalEntityId": {
-            "type": "integer"
-          },
-          "Name": {
-            "type": "string"
-          }
-        }
-      },
       "Agreement": {
         "type": "object",
         "properties": {
           "Id": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "SignedDate": {
             "type": "string",
@@ -278,7 +275,8 @@
             "type": "string"
           },
           "SignedById": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "SignedByEmail": {
             "type": "string"
@@ -310,6 +308,28 @@
           "Levy",
           "Combined",
           "Unknown"
+        ]
+      },
+      "PagedApiResponse": {
+        "type": "object",
+        "properties": {
+          "Data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntity"
+            }
+          },
+          "Page": {
+            "type": "integer"
+          },
+          "TotalPages": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "Data",
+          "Page",
+          "TotalPages"
         ]
       }
     }

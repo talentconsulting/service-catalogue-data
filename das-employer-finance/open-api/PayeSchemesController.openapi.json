@@ -7,36 +7,40 @@
   "paths": {
     "/api/paye-schemes/last-submission-date": {
       "get": {
-        "summary": "Get last submission date for a PAYE scheme",
+        "summary": "Get the last submission date for a PAYE scheme",
         "operationId": "getLastSubmissionDate",
         "parameters": [
           {
             "name": "empRef",
             "in": "query",
-            "required": true,
+            "required": false,
+            "description": "The PAYE employer reference",
             "schema": {
               "type": "string"
-            },
-            "description": "The employer reference (EMPREF)."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "The last submission date for the PAYE scheme",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LastSubmissionDateResponse"
+                  "type": "object",
+                  "additionalProperties": true
                 }
               }
             }
           },
           "400": {
-            "description": "Validation error",
+            "description": "Invalid request parameters or validation errors",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ValidationErrorResponse"
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -44,50 +48,18 @@
         },
         "security": [
           {
-            "ApiRoles_ReadAllEmployerAccountBalances": []
+            "ApiKeyAuth": []
           }
         ]
       }
     }
   },
   "components": {
-    "schemas": {
-      "LastSubmissionDateResponse": {
-        "type": "object",
-        "properties": {
-          "date": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The last submission date for the PAYE scheme."
-          }
-        },
-        "additionalProperties": false
-      },
-      "ValidationErrorResponse": {
-        "type": "object",
-        "properties": {
-          "errors": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "A dictionary of validation errors, mapping fields to error messages."
-          }
-        },
-        "additionalProperties": false
-      }
-    },
     "securitySchemes": {
-      "ApiRoles_ReadAllEmployerAccountBalances": {
-        "type": "oauth2",
-        "flows": {
-          "implicit": {
-            "authorizationUrl": "https://example.com/auth",
-            "scopes": {
-              "ReadAllEmployerAccountBalances": "Access to read all employer account balances."
-            }
-          }
-        }
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
       }
     }
   }

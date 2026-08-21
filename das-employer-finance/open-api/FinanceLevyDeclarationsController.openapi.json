@@ -2,20 +2,21 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Finance API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing employer finance levy declarations."
   },
   "paths": {
     "/api/levy-declarations": {
       "post": {
         "summary": "Persist Levy Declarations",
-        "description": "Persists levy declaration data.",
         "operationId": "PersistLevyDeclarations",
         "security": [
           {
-            "ReadAllEmployerAccountBalances": []
+            "ApiRoles_ReadAllEmployerAccountBalances": []
           }
         ],
         "requestBody": {
+          "description": "Request payload for persisting levy declarations.",
           "required": true,
           "content": {
             "application/json": {
@@ -27,7 +28,7 @@
         },
         "responses": {
           "200": {
-            "description": "Levy declaration persisted successfully.",
+            "description": "Successfully persisted levy declarations.",
             "content": {
               "application/json": {
                 "schema": {
@@ -37,7 +38,7 @@
             }
           },
           "400": {
-            "description": "Validation errors or missing payload.",
+            "description": "Validation error or request payload is missing.",
             "content": {
               "application/json": {
                 "schema": {
@@ -54,12 +55,11 @@
     },
     "/api/levy-declarations/{empRef}/period-12-declarations": {
       "get": {
-        "summary": "Get Period 12 Declarations",
-        "description": "Retrieves existing Period 12 levy declarations for the specified employer reference.",
-        "operationId": "GetPeriod12Declarations",
+        "summary": "Get Period 12 Levy Declarations",
+        "operationId": "GetExistingPeriod12LevyDeclarations",
         "security": [
           {
-            "ReadAllEmployerAccountBalances": []
+            "ApiRoles_ReadAllEmployerAccountBalances": []
           }
         ],
         "parameters": [
@@ -75,7 +75,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Period 12 declarations retrieved successfully.",
+            "description": "Successfully retrieved period 12 levy declarations.",
             "content": {
               "application/json": {
                 "schema": {
@@ -90,11 +90,10 @@
     "/api/levy-declarations/{empRef}/submission-ids": {
       "get": {
         "summary": "Get Submission IDs",
-        "description": "Retrieves submission IDs for the specified employer reference.",
         "operationId": "GetSubmissionIds",
         "security": [
           {
-            "ReadAllEmployerAccountBalances": []
+            "ApiRoles_ReadAllEmployerAccountBalances": []
           }
         ],
         "parameters": [
@@ -110,7 +109,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Submission IDs retrieved successfully.",
+            "description": "Successfully retrieved submission IDs.",
             "content": {
               "application/json": {
                 "schema": {
@@ -128,11 +127,10 @@
     "/api/levy-declarations/{empRef}/last-submission-date": {
       "get": {
         "summary": "Get Last Submission Date",
-        "description": "Retrieves the last submission date for the specified employer reference.",
         "operationId": "GetLastSubmissionDate",
         "security": [
           {
-            "ReadAllEmployerAccountBalances": []
+            "ApiRoles_ReadAllEmployerAccountBalances": []
           }
         ],
         "parameters": [
@@ -148,7 +146,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Last submission date retrieved successfully.",
+            "description": "Successfully retrieved the last submission date.",
             "content": {
               "application/json": {
                 "schema": {
@@ -168,27 +166,23 @@
         "type": "object",
         "properties": {
           "CorrelationId": {
-            "type": "string",
-            "description": "Correlation ID for tracking."
+            "type": "string"
           },
           "AccountId": {
             "type": "integer",
-            "description": "The account ID associated with the levy declarations."
+            "format": "int64"
           },
           "EmpRef": {
-            "type": "string",
-            "description": "Employer reference."
+            "type": "string"
           },
           "Declarations": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/NormalizedLevyDeclaration"
-            },
-            "description": "List of levy declarations."
+            }
           },
           "GenerateTransactions": {
-            "type": "boolean",
-            "description": "Flag indicating whether transactions should be generated."
+            "type": "boolean"
           }
         },
         "required": [
@@ -203,67 +197,55 @@
         "type": "object",
         "properties": {
           "Id": {
-            "type": "string",
-            "description": "Unique identifier for the levy declaration."
+            "type": "string"
           },
           "LevyDueYtd": {
             "type": "number",
-            "format": "decimal",
-            "description": "Total levy due year-to-date."
+            "format": "decimal"
           },
           "SubmissionDate": {
             "type": "string",
-            "format": "date-time",
-            "description": "Date the submission was made."
+            "format": "date-time"
           },
           "SubmissionType": {
-            "type": "string",
-            "description": "Type of the submission."
+            "type": "string"
           },
           "LevyAllowanceForFullYear": {
             "type": "number",
-            "format": "decimal",
-            "description": "Annual levy allowance."
+            "format": "decimal"
           },
           "PayrollYear": {
-            "type": "string",
-            "description": "Payroll year."
+            "type": "string"
           },
           "PayrollMonth": {
             "type": "integer",
-            "description": "Payroll month."
+            "format": "int16"
           },
           "NoPaymentForPeriod": {
-            "type": "boolean",
-            "description": "Indicates whether there is no payment for the period."
+            "type": "boolean"
           },
           "DateCeased": {
             "type": "string",
-            "format": "date-time",
-            "description": "Date the account ceased."
+            "format": "date-time"
           },
           "InactiveFrom": {
             "type": "string",
-            "format": "date-time",
-            "description": "Start date of inactivity."
+            "format": "date-time"
           },
           "InactiveTo": {
             "type": "string",
-            "format": "date-time",
-            "description": "End date of inactivity."
+            "format": "date-time"
           },
           "EndOfYearAdjustment": {
-            "type": "boolean",
-            "description": "Indicates whether this is an end-of-year adjustment."
+            "type": "boolean"
           },
           "EndOfYearAdjustmentAmount": {
             "type": "number",
-            "format": "decimal",
-            "description": "Amount for the end-of-year adjustment."
+            "format": "decimal"
           },
           "SubmissionId": {
             "type": "integer",
-            "description": "Unique identifier for the submission."
+            "format": "int64"
           }
         },
         "required": [
@@ -280,17 +262,10 @@
       }
     },
     "securitySchemes": {
-      "ReadAllEmployerAccountBalances": {
-        "type": "oauth2",
-        "description": "Requires the ReadAllEmployerAccountBalances role.",
-        "flows": {
-          "clientCredentials": {
-            "tokenUrl": "https://example.com/token",
-            "scopes": {
-              "ReadAllEmployerAccountBalances": "Allows reading all employer account balances."
-            }
-          }
-        }
+      "ApiRoles_ReadAllEmployerAccountBalances": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }

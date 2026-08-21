@@ -1,14 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Finance API",
+    "title": "Payment Metadata API",
     "version": "1.0.0"
   },
   "paths": {
     "/api/payments/{paymentId}/metadata/staging": {
       "put": {
         "summary": "Update Payment Metadata Staging",
-        "operationId": "updatePaymentMetaDataStaging",
+        "description": "Updates the metadata associated with a specific payment in staging.",
         "parameters": [
           {
             "name": "paymentId",
@@ -18,7 +18,7 @@
               "type": "string",
               "format": "uuid"
             },
-            "description": "The ID of the payment."
+            "description": "The ID of the payment to update."
           }
         ],
         "requestBody": {
@@ -29,12 +29,11 @@
                 "$ref": "#/components/schemas/PaymentMetaDataStaging"
               }
             }
-          },
-          "description": "The metadata details to be updated."
+          }
         },
         "responses": {
           "200": {
-            "description": "Payment metadata updated successfully.",
+            "description": "Payment metadata was successfully updated.",
             "content": {
               "application/json": {
                 "schema": {
@@ -42,12 +41,12 @@
                   "properties": {
                     "upserted": {
                       "type": "boolean",
-                      "description": "Indicates if the record was inserted or updated."
+                      "description": "Indicates whether the metadata was upserted."
                     },
                     "metadataId": {
                       "type": "string",
                       "format": "uuid",
-                      "description": "The metadata ID of the updated record."
+                      "description": "The identifier of the updated metadata."
                     }
                   }
                 }
@@ -55,12 +54,12 @@
             }
           },
           "400": {
-            "description": "Invalid request body or validation errors.",
+            "description": "Bad request due to validation errors or missing body.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
+                  "type": "object",
+                  "additionalProperties": {
                     "type": "string"
                   }
                 }
@@ -68,15 +67,15 @@
             }
           },
           "404": {
-            "description": "Payment metadata not found."
+            "description": "The specified payment ID was not found."
           },
           "500": {
-            "description": "Server error occurred while updating metadata staging."
+            "description": "Internal server error. Could not update Payment Metadata Staging."
           }
         },
         "security": [
           {
-            "bearerAuth": []
+            "BearerAuth": []
           }
         ]
       }
@@ -89,102 +88,86 @@
         "properties": {
           "id": {
             "type": "integer",
-            "format": "int64",
-            "description": "The metadata ID."
+            "format": "int64"
           },
           "providerName": {
-            "type": "string",
-            "description": "The name of the provider."
+            "type": "string"
           },
           "standardCode": {
             "type": "integer",
             "format": "int64",
-            "nullable": true,
-            "description": "The standard code for the apprenticeship."
+            "nullable": true
           },
           "frameworkCode": {
             "type": "integer",
-            "nullable": true,
-            "description": "The framework code for the apprenticeship."
+            "format": "int32",
+            "nullable": true
           },
           "programmeType": {
             "type": "integer",
-            "nullable": true,
-            "description": "The programme type code."
+            "format": "int32",
+            "nullable": true
           },
           "pathwayCode": {
             "type": "integer",
-            "nullable": true,
-            "description": "The pathway code."
+            "format": "int32",
+            "nullable": true
           },
           "pathwayName": {
-            "type": "string",
-            "description": "The name of the pathway."
+            "type": "string"
           },
           "apprenticeshipCourseName": {
-            "type": "string",
-            "description": "The name of the apprenticeship course."
+            "type": "string"
           },
           "apprenticeshipCourseStartDate": {
             "type": "string",
-            "format": "date",
-            "nullable": true,
-            "description": "The start date of the apprenticeship course."
+            "format": "date-time",
+            "nullable": true
           },
           "apprenticeshipCourseLevel": {
             "type": "integer",
-            "nullable": true,
-            "description": "The level of the apprenticeship course."
+            "format": "int32",
+            "nullable": true
           },
           "apprenticeName": {
-            "type": "string",
-            "description": "The name of the apprentice."
+            "type": "string"
           },
           "apprenticeNINumber": {
-            "type": "string",
-            "description": "The National Insurance number of the apprentice."
+            "type": "string"
           },
           "isHistoricProviderName": {
-            "type": "boolean",
-            "description": "Indicates if the provider name is historic."
+            "type": "boolean"
           },
           "learningType": {
-            "type": "string",
-            "description": "The type of learning."
+            "type": "string"
           },
           "courseCode": {
-            "type": "string",
-            "description": "The code of the course."
+            "type": "string"
           },
           "cohortId": {
             "type": "integer",
             "format": "int64",
-            "nullable": true,
-            "description": "The cohort ID."
+            "nullable": true
           },
           "createdBy": {
-            "type": "string",
-            "description": "The user who created the metadata."
+            "type": "string"
           },
           "correlationId": {
             "type": "string",
             "format": "uuid",
-            "nullable": true,
-            "description": "Correlation ID for tracking the request."
+            "nullable": true
           },
           "paymentId": {
             "type": "string",
-            "format": "uuid",
-            "description": "The ID of the payment."
+            "format": "uuid"
           }
         }
       }
     },
     "securitySchemes": {
-      "bearerAuth": {
+      "BearerAuth": {
         "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+        "scheme": "bearer"
       }
     }
   }
