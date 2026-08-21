@@ -173,8 +173,9 @@ function renderDatabase(resetToolbar = true) {
   const columnCount = tables.reduce((sum, table) => sum + (table.columns?.length || 0), 0);
   if (!state.dbView) state.dbView = 'diagram';
   if (resetToolbar) {
-    toolbar.innerHTML = `${searchControl('Filter tables or columns')}<div class="segmented" role="group" aria-label="Schema view"><button data-db-view="diagram" aria-pressed="${state.dbView === 'diagram'}">Diagram</button><button data-db-view="grid" aria-pressed="${state.dbView === 'grid'}">Grid</button></div><span class="spacer"></span><span class="toolbar-meta">${tables.length} tables · ${columnCount} columns · ${relations} relationships</span>`;
+    toolbar.innerHTML = `${searchControl('Filter tables or columns')}<div class="segmented" role="group" aria-label="Schema view"><button data-db-view="diagram" aria-pressed="${state.dbView === 'diagram'}">Diagram</button><button data-db-view="grid" aria-pressed="${state.dbView === 'grid'}">Grid</button></div>${state.dbView === 'diagram' ? '<button id="auto-arrange" class="plain-button" type="button">Auto arrange</button>' : ''}<span class="spacer"></span><span class="toolbar-meta">${tables.length} tables · ${columnCount} columns · ${relations} relationships</span>`;
     document.querySelectorAll('[data-db-view]').forEach((button) => { button.onclick = () => { state.dbView = button.dataset.dbView; state.filter = ''; state.selected = null; renderDatabase(true); }; });
+    $('#auto-arrange')?.addEventListener('click', () => { state.schemaPositions = null; renderDatabase(false); });
   }
   const filtered = tables.filter((table) => `${table.schema} ${table.name} ${table.columns?.map((column) => column.name).join(' ')}`.toLowerCase().includes(state.filter));
   if (state.dbView === 'diagram') {
@@ -243,6 +244,68 @@ function erNode(table) {
   return { ...table, id: table.name, width: 274, height };
 }
 
+function layoutErNodes(nodes, edges, viewWidth, viewHeight) {
+  const byName = new Map(nodes.map((node) => [node.name, node]));
+  const columns = Math.max(2, Math.ceil(Math.sqrt(nodes.length * 1.4)));
+  const rows = Math.ceil(nodes.length / columns);
+  const positions = new Map(nodes.map((node, index) => {
+    const column = index % columns;
+    const row = Math.floor(index / columns);
+    return [node.name, {
+      x: (column + 0.5) * viewWidth / columns,
+      y: (row + 0.5) * viewHeight / rows
+    }];
+  }));
+  const linked = edges.filter((edge) => byName.has(edge.from) && byName.has(edge.to));
+  const padding = 64;
+  for (let iteration = 0; iteration < 180; iteration++) {
+    const forces = new Map(nodes.map((node) => [node.name, { x: 0, y: 0 }]));
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const aPos = positions.get(a.name), bPos = positions.get(b.name);
+        let dx = bPos.x - aPos.x, dy = bPos.y - aPos.y;
+        let distance = Math.hypot(dx, dy);
+        if (!distance) { dx = i < j ? 1 : -1; dy = 1; distance = Math.SQRT2; }
+        const repel = 44000 / (distance * distance);
+        const xForce = dx / distance * repel;
+        const yForce = dy / distance * repel;
+        forces.get(a.name).x -= xForce; forces.get(a.name).y -= yForce;
+        forces.get(b.name).x += xForce; forces.get(b.name).y += yForce;
+        const overlapX = (a.width + b.width) / 2 + 48 - Math.abs(dx);
+        const overlapY = (a.height + b.height) / 2 + 56 - Math.abs(dy);
+        if (overlapX > 0 && overlapY > 0) {
+          const separation = Math.max(overlapX, overlapY) * 0.16;
+          if (overlapX < overlapY) {
+            const direction = dx < 0 ? -1 : 1;
+            forces.get(a.name).x -= direction * separation; forces.get(b.name).x += direction * separation;
+          } else {
+            const direction = dy < 0 ? -1 : 1;
+            forces.get(a.name).y -= direction * separation; forces.get(b.name).y += direction * separation;
+          }
+        }
+      }
+    }
+    linked.forEach((edge) => {
+      const from = positions.get(edge.from), to = positions.get(edge.to);
+      const dx = to.x - from.x, dy = to.y - from.y;
+      const distance = Math.max(1, Math.hypot(dx, dy));
+      const spring = (distance - 360) * 0.008;
+      const xForce = dx / distance * spring;
+      const yForce = dy / distance * spring;
+      forces.get(edge.from).x += xForce; forces.get(edge.from).y += yForce;
+      forces.get(edge.to).x -= xForce; forces.get(edge.to).y -= yForce;
+    });
+    nodes.forEach((node) => {
+      const position = positions.get(node.name), force = forces.get(node.name);
+      const maxStep = 14;
+      position.x = Math.max(node.width / 2 + padding, Math.min(viewWidth - node.width / 2 - padding, position.x + Math.max(-maxStep, Math.min(maxStep, force.x))));
+      position.y = Math.max(node.height / 2 + padding, Math.min(viewHeight - node.height / 2 - padding, position.y + Math.max(-maxStep, Math.min(maxStep, force.y))));
+    });
+  }
+  return nodes.map((node) => ({ ...node, ...positions.get(node.name) }));
+}
+
 function connectionPoints(from, to, fromWidth = 0, fromHeight = 0, toWidth = 0, toHeight = 0) {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -265,15 +328,12 @@ function renderDatabaseDiagram(filtered, allEdges, isolatedCount) {
   }
   const ordered = orderTablesForLayout(filtered, edges);
   const nodes = ordered.map(erNode);
-  const nodeHalfW = 137;
-  const nodeHalfH = Math.max(...nodes.map((node) => node.height / 2));
-  const margin = 80;
-  const radiusX = Math.max(440, (330 * nodes.length) / (2 * Math.PI));
-  const radiusY = Math.max(280, radiusX * 0.62);
-  const VIEW_W = Math.round((radiusX + nodeHalfW + margin) * 2);
-  const VIEW_H = Math.round((radiusY + nodeHalfH + margin) * 2);
-  const center = { x: VIEW_W / 2, y: VIEW_H / 2 };
-  const positioned = ringLayout(nodes, center, radiusX, radiusY, 0);
+  const columns = Math.max(2, Math.ceil(Math.sqrt(nodes.length * 1.4)));
+  const rows = Math.ceil(nodes.length / columns);
+  const maxHeight = Math.max(...nodes.map((node) => node.height));
+  const VIEW_W = Math.max(1100, columns * 380);
+  const VIEW_H = Math.max(720, rows * (maxHeight + 180));
+  const positioned = layoutErNodes(nodes, edges, VIEW_W, VIEW_H);
   if (!state.schemaPositions) state.schemaPositions = new Map();
   const positions = state.schemaPositions;
   positioned.forEach((node) => resolvedPosition(positions, node));
