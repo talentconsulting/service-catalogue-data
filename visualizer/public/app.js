@@ -1,7 +1,7 @@
 const state = {
   catalog: [], source: null, view: 'database', data: null,
   filter: '', selected: null, messageType: 'all', apiFile: null,
-  mode: 'source', landscape: null, apiView: 'operations', selectedModel: null
+  mode: 'source', landscape: null, apiView: 'operations', selectedModel: null, dbView: 'diagram'
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -78,6 +78,7 @@ async function loadView() {
   state.selected = null;
   state.selectedModel = null;
   state.diagramPositions = null;
+  state.schemaPositions = null;
   try {
     if (state.view === 'dependencies') {
       state.data = await loadDependenciesFor(state.source);
@@ -169,11 +170,23 @@ function wireSearch() {
 function renderDatabase(resetToolbar = true) {
   const tables = state.data.tables || [];
   const relations = tables.reduce((sum, table) => sum + (table.relationships?.length || 0), 0);
-  const columns = tables.reduce((sum, table) => sum + (table.columns?.length || 0), 0);
+  const columnCount = tables.reduce((sum, table) => sum + (table.columns?.length || 0), 0);
+  if (!state.dbView) state.dbView = 'diagram';
   if (resetToolbar) {
-    toolbar.innerHTML = `${searchControl('Filter tables or columns')}<span class="spacer"></span><span class="toolbar-meta">${tables.length} tables · ${columns} columns · ${relations} relationships</span>`;
+    toolbar.innerHTML = `${searchControl('Filter tables or columns')}<div class="segmented" role="group" aria-label="Schema view"><button data-db-view="diagram" aria-pressed="${state.dbView === 'diagram'}">Diagram</button><button data-db-view="grid" aria-pressed="${state.dbView === 'grid'}">Grid</button></div><span class="spacer"></span><span class="toolbar-meta">${tables.length} tables · ${columnCount} columns · ${relations} relationships</span>`;
+    document.querySelectorAll('[data-db-view]').forEach((button) => { button.onclick = () => { state.dbView = button.dataset.dbView; state.filter = ''; state.selected = null; renderDatabase(true); }; });
   }
   const filtered = tables.filter((table) => `${table.schema} ${table.name} ${table.columns?.map((column) => column.name).join(' ')}`.toLowerCase().includes(state.filter));
+  if (state.dbView === 'diagram') {
+    const { edges, connectedTables, isolatedCount } = databaseGraph(tables);
+    renderDatabaseDiagram(connectedTables.filter((table) => filtered.includes(table)), edges, isolatedCount);
+  } else {
+    renderDatabaseGrid(filtered, tables);
+  }
+  wireSearch();
+}
+
+function renderDatabaseGrid(filtered, tables) {
   content.innerHTML = `<div class="schema-grid">${filtered.map((table) => {
     const outbound = table.relationships || [];
     return `<button class="schema-card" type="button" data-table="${escapeHtml(table.name)}">
@@ -183,8 +196,110 @@ function renderDatabase(resetToolbar = true) {
     </button>`;
   }).join('')}</div>`;
   if (!filtered.length) content.innerHTML = '<div class="empty-state"><h2>No matching tables</h2><p>Try a different search term.</p></div>';
-  wireSearch();
   document.querySelectorAll('[data-table]').forEach((button) => button.addEventListener('click', () => renderTableDetail(tables.find((table) => table.name === button.dataset.table))));
+}
+
+function databaseGraph(tables) {
+  const edges = [];
+  tables.forEach((table) => {
+    (table.relationships || []).forEach((rel) => {
+      edges.push({ from: table.name, to: rel.targetTable, fromColumns: rel.fromColumns || [], targetColumns: rel.targetColumns || [], name: rel.name });
+    });
+  });
+  const connectedNames = new Set(edges.flatMap((edge) => [edge.from, edge.to]));
+  const connectedTables = tables.filter((table) => connectedNames.has(table.name));
+  return { edges: edges.filter((edge) => connectedNames.has(edge.from) && connectedNames.has(edge.to)), connectedTables, isolatedCount: tables.length - connectedTables.length };
+}
+
+function orderTablesForLayout(tables, edges) {
+  const byName = new Map(tables.map((table) => [table.name, table]));
+  const adjacency = new Map(tables.map((table) => [table.name, new Set()]));
+  edges.forEach((edge) => { adjacency.get(edge.from)?.add(edge.to); adjacency.get(edge.to)?.add(edge.from); });
+  const degree = (name) => adjacency.get(name)?.size || 0;
+  const remaining = new Set(tables.map((table) => table.name));
+  const order = [];
+  while (remaining.size) {
+    const start = [...remaining].sort((a, b) => degree(b) - degree(a))[0];
+    const queue = [start];
+    remaining.delete(start);
+    while (queue.length) {
+      const current = queue.shift();
+      order.push(byName.get(current));
+      const neighbors = [...(adjacency.get(current) || [])].filter((name) => remaining.has(name)).sort((a, b) => degree(b) - degree(a));
+      neighbors.forEach((name) => { remaining.delete(name); queue.push(name); });
+    }
+  }
+  return order;
+}
+
+function tableRelLabel(edge) {
+  const from = edge.fromColumns.join(',');
+  const to = edge.targetColumns.join(',');
+  return from && to ? `${from} → ${to}` : (edge.name || 'FK');
+}
+
+function renderDatabaseDiagram(filtered, allEdges, isolatedCount) {
+  const edges = allEdges.filter((edge) => filtered.some((table) => table.name === edge.from) && filtered.some((table) => table.name === edge.to));
+  if (!filtered.length) {
+    content.innerHTML = '<div class="empty-state"><h2>No matching tables with relationships</h2><p>Try a different search term, or switch to Grid to see every table.</p></div>';
+    return;
+  }
+  const ordered = orderTablesForLayout(filtered, edges);
+  const nodeHalfW = 98, nodeHalfH = 48, margin = 60;
+  const radiusX = Math.max(300, (246 * ordered.length) / (2 * Math.PI));
+  const radiusY = radiusX * 0.62;
+  const VIEW_W = Math.round((radiusX + nodeHalfW + margin) * 2);
+  const VIEW_H = Math.round((radiusY + nodeHalfH + margin) * 2);
+  const center = { x: VIEW_W / 2, y: VIEW_H / 2 };
+  const positioned = ringLayout(ordered.map((table) => ({ ...table, id: table.name })), center, radiusX, radiusY, 0);
+  if (!state.schemaPositions) state.schemaPositions = new Map();
+  const positions = state.schemaPositions;
+  positioned.forEach((node) => resolvedPosition(positions, node));
+  const posOf = (node) => positions.get(node.id) || node;
+  const pct = (value, axis) => `${((value / (axis === 'x' ? VIEW_W : VIEW_H)) * 100).toFixed(2)}%`;
+  if (!state.selected || !filtered.some((table) => table.name === state.selected)) state.selected = positioned[0]?.name || null;
+  const selectedTable = filtered.find((table) => table.name === state.selected);
+
+  content.innerHTML = `<div class="dependency-view">
+    ${isolatedCount ? `<p class="toolbar-meta">${isolatedCount} table${isolatedCount === 1 ? '' : 's'} with no foreign keys — switch to Grid to browse them.</p>` : ''}
+    <div class="dependency-graph" role="group" aria-label="Database relationship diagram" style="min-height:${VIEW_H}px">
+      <svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+        <defs><marker id="arrow-outbound" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs>
+        ${edges.map((edge, index) => {
+          const from = posOf({ id: edge.from });
+          const to = posOf({ id: edge.to });
+          const midX = (from.x + to.x) / 2;
+          const midY = (from.y + to.y) / 2;
+          const label = tableRelLabel(edge);
+          const halfWidth = label.length * 3.3;
+          const edgeId = `schema-edge-${index}`;
+          return `<line id="${edgeId}" class="outbound" data-edge-id="${edgeId}" data-from="${escapeHtml(edge.from)}" data-to="${escapeHtml(edge.to)}" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" marker-end="url(#arrow-outbound)"></line>
+            <rect id="${edgeId}-bg" class="rel-label-bg" data-half-width="${halfWidth}" x="${midX - halfWidth}" y="${midY - 9}" width="${halfWidth * 2}" height="15" rx="4"></rect>
+            <text id="${edgeId}-text" class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
+        }).join('')}
+      </svg>
+      ${positioned.map((node) => {
+        const pos = posOf(node);
+        return `<button class="dependency-node internal" type="button" data-node="${escapeHtml(node.name)}" aria-pressed="${node.name === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')}"><span class="c4-type">${escapeHtml(node.schema)}</span><strong>${escapeHtml(node.name)}</strong><span class="c4-meta">${node.columns?.length || 0} cols · ${node.relationships?.length || 0} FK</span></button>`;
+      }).join('')}
+    </div>
+    ${selectedTable ? tableDetailInline(selectedTable) : ''}
+  </div>`;
+  makeDraggableGraph($('.dependency-graph'), positions, VIEW_W, VIEW_H);
+  document.querySelectorAll('[data-node]').forEach((button) => button.addEventListener('click', () => { state.selected = button.dataset.node; renderDatabase(false); }));
+}
+
+function tableDetailInline(table) {
+  const incoming = (state.data.tables || []).flatMap((candidate) => (candidate.relationships || [])
+    .filter((relation) => relation.targetTable === table.name)
+    .map((relation) => ({ ...relation, fromTable: candidate.name })));
+  return `<article class="dependency-detail">
+    <p class="eyebrow">${escapeHtml(table.schema)} schema</p><h2>${escapeHtml(table.name)}</h2>
+    <div class="badges"><span class="badge">${table.columns.length} columns</span><span class="badge blue">${table.indexes?.length || 0} indexes</span><span class="badge amber">${(table.relationships?.length || 0) + incoming.length} links</span></div>
+    <h3>Columns</h3>${columnsTable(table.columns)}
+    <h3>Relationships</h3>${relationshipsTable(table.relationships || [], incoming)}
+    <h3>Indexes</h3>${indexesTable(table.indexes || [])}
+  </article>`;
 }
 
 function renderTableDetail(table) {
