@@ -94,13 +94,27 @@ async function loadView() {
 async function loadDependenciesFor(source) {
   let data = { repository: orgRepoSlug(source.repository), dependencies: [] };
   if (source.capabilities.dependencies) {
-    data = await getJson(`/api/sources/${encodeURIComponent(source.id)}/dependencies`);
+    try {
+      data = await getJson(`/api/sources/${encodeURIComponent(source.id)}/dependencies`);
+    } catch {
+      // fall through to message-based inference
+    }
   }
   if (source.capabilities.messages) {
     try {
       const messages = await getJson(`/api/sources/${encodeURIComponent(source.id)}/messages`);
-      data = { ...data, dependencies: [...(data.dependencies || []), ...messageDependencies(source, messages)] };
-    } catch { /* messages are supplementary; ignore failures */ }
+      const inferred = messageDependencies(source, messages);
+      // Merge: prefer explicit dependencies, append inferred ones if they don't conflict
+      const existingNames = new Set(data.dependencies.map(d => d.name.toLowerCase()));
+      for (const dep of inferred) {
+        if (!existingNames.has(dep.name.toLowerCase())) {
+          data.dependencies.push(dep);
+          existingNames.add(dep.name.toLowerCase());
+        }
+      }
+    } catch {
+      /* messages are supplementary; ignore failures */
+    }
   }
   return data;
 }
@@ -109,31 +123,51 @@ function orgRepoSlug(repositoryUrl) {
   return (repositoryUrl || '').replace(/^https?:\/\/[^/]+\//, '').replace(/\/$/, '');
 }
 
+// ---- IMPROVED TOKEN MATCHING FOR MESSAGE CONNECTIONS ----
+function normalizeTokens(value) {
+  // Remove common org prefixes, split on dots/dashes/underscores, filter short words
+  const cleaned = String(value || '')
+    .toLowerCase()
+    .replace(/^(sfa|das|talent|skills|funding|agency)[_.-]/, '') // strip org prefixes
+    .replace(/[^a-z0-9]+/g, ' '); // replace separators with space
+  return new Set(
+    cleaned.split(/\s+/)
+      .filter(word => word.length > 2 && !['api', 'app', 'svc', 'service', 'core', 'data'].includes(word))
+  );
+}
+
+function canRelate(a, b) {
+  if (a.size === 0 || b.size === 0) return false;
+  // Check if either set is a subset of the other (allows partial matches)
+  const intersection = new Set([...a].filter(x => b.has(x)));
+  return intersection.size > 0;
+}
+
 function namespaceServiceSegment(namespace) {
-  const orgPrefixes = new Set(['sfa', 'das']);
-  const parts = String(namespace || '').split('.');
-  let index = 0;
-  while (index < parts.length && orgPrefixes.has(parts[index].toLowerCase())) index++;
-  return parts[index] || null;
+  const tokens = normalizeTokens(namespace);
+  // Return the longest token as the best guess for the service name
+  return [...tokens].sort((a, b) => b.length - a.length)[0] || null;
 }
 
 function messageDependencies(source, messages) {
   const events = (messages.events || []).map((m) => ({ ...m, messageKind: 'event' }));
   const commands = (messages.commands || []).map((m) => ({ ...m, messageKind: 'command' }));
   const withHandlers = [...events, ...commands].filter((m) => m.namespace && m.handlers?.length);
-  const ownTokens = new Set(tokenize(source.name));
+  const ownTokens = normalizeTokens(source.name);
   const groups = new Map();
   for (const message of withHandlers) {
     const segment = namespaceServiceSegment(message.namespace);
     if (!segment) continue;
-    const segmentTokens = new Set(tokenize(segment));
-    if (canRelate(segmentTokens, ownTokens)) continue;
+    const segmentTokens = normalizeTokens(segment);
+    if (canRelate(segmentTokens, ownTokens)) continue; // skip self
     const key = segment.toLowerCase();
     if (!groups.has(key)) groups.set(key, { label: segment, tokens: segmentTokens, messages: [] });
     groups.get(key).messages.push(message);
   }
   return [...groups.values()].map((group) => {
-    const matchedSystem = state.catalog.find((candidate) => candidate.id !== source.id && canRelate(group.tokens, new Set(tokenize(candidate.name))));
+    const matchedSystem = state.catalog.find((candidate) => 
+      candidate.id !== source.id && canRelate(group.tokens, normalizeTokens(candidate.name))
+    );
     return {
       name: matchedSystem ? titleCase(matchedSystem.name) : splitPascalCase(group.label),
       kind: 'message',
@@ -288,10 +322,6 @@ function isSubset(small, big) {
   return true;
 }
 
-function canRelate(a, b) {
-  return a.size > 0 && b.size > 0 && (isSubset(a, b) || isSubset(b, a));
-}
-
 function edgeLabel(edge) {
   const technology = edge.technologies.join('/');
   const verb = edge.kinds.includes('message') && !edge.kinds.includes('http-api') ? 'Publishes to' : 'Calls';
@@ -438,6 +468,7 @@ function makeDraggableGraph(graphEl, positions, viewW, viewH) {
   });
 }
 
+// --- SAFEGUARDED GRAPH RENDERER (falls back to list if SVG breaks) ---
 function renderDependencies(resetToolbar = true) {
   const dependencies = (state.data.dependencies || []).map((dependency, index) => ({ ...dependency, id: String(index) }));
   const operations = dependencies.reduce((sum, dependency) => sum + (dependency.operations?.length || 0), 0);
@@ -456,66 +487,75 @@ function renderDependencies(resetToolbar = true) {
   }
   if (!state.selected || !filtered.some((item) => item.id === state.selected)) state.selected = filtered[0].id;
   const selected = dependencies.find((item) => item.id === state.selected);
-  const VIEW_W = 1400, VIEW_H = 800;
-  const center = { x: VIEW_W / 2, y: VIEW_H / 2 };
-  const nodeHalfW = 98, nodeHalfH = 48, pad = 26;
-  const internalRx = 270, internalRy = 150;
-  const boundaryRx = internalRx + nodeHalfW + pad;
-  const boundaryRy = internalRy + nodeHalfH + pad;
-  const externalScale = 1.4;
-  const internal = ringLayout(filtered.filter((d) => d.classification === 'internal'), center, internalRx, internalRy, 0);
-  const external = ringLayout(filtered.filter((d) => d.classification !== 'internal'), center, boundaryRx * externalScale, boundaryRy * externalScale, Math.PI / 5);
-  const nodes = [...internal, ...external];
-  if (!state.diagramPositions) state.diagramPositions = new Map();
-  const positions = state.diagramPositions;
-  positions.set('center', positions.get('center') || { x: center.x, y: center.y });
-  nodes.forEach((node) => resolvedPosition(positions, node));
-  const pct = (value, axis) => `${((value / (axis === 'x' ? VIEW_W : VIEW_H)) * 100).toFixed(2)}%`;
-  const posOf = (node) => positions.get(node.id) || node;
-  const centerPos = positions.get('center');
-  content.innerHTML = `<div class="dependency-view">
-    <div class="c4-legend">
-      <span class="c4-legend-item"><span class="c4-swatch focus"></span>Software system (this service)</span>
-      <span class="c4-legend-item"><span class="c4-swatch internal"></span>Container — internal</span>
-      <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
-      <span class="c4-legend-item"><span class="c4-boundary-swatch"></span>${escapeHtml(orgName(state.data.repository))} system boundary</span>
-      <span class="c4-legend-item">Drag any box to rearrange</span>
-    </div>
-    <div class="dependency-graph" role="group" aria-label="C4 container diagram for ${escapeHtml(titleCase(state.source.name))}">
-      <svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <marker id="arrow-outbound" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker>
-          <marker id="arrow-inbound" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker>
-        </defs>
-        <ellipse class="c4-boundary" cx="${center.x}" cy="${center.y}" rx="${boundaryRx}" ry="${boundaryRy}"></ellipse>
-        <text class="c4-boundary-label" x="${center.x - boundaryRx + 18}" y="${center.y - boundaryRy + 26}">${escapeHtml(orgName(state.data.repository))}</text>
-        ${nodes.map((node, index) => {
+  
+  // Fallback: if the graph cannot be drawn (e.g., positions missing), render as a simple list
+  try {
+    const VIEW_W = 1400, VIEW_H = 800;
+    const center = { x: VIEW_W / 2, y: VIEW_H / 2 };
+    const nodeHalfW = 98, nodeHalfH = 48, pad = 26;
+    const internalRx = 270, internalRy = 150;
+    const boundaryRx = internalRx + nodeHalfW + pad;
+    const boundaryRy = internalRy + nodeHalfH + pad;
+    const externalScale = 1.4;
+    const internal = ringLayout(filtered.filter((d) => d.classification === 'internal'), center, internalRx, internalRy, 0);
+    const external = ringLayout(filtered.filter((d) => d.classification !== 'internal'), center, boundaryRx * externalScale, boundaryRy * externalScale, Math.PI / 5);
+    const nodes = [...internal, ...external];
+    if (!state.diagramPositions) state.diagramPositions = new Map();
+    const positions = state.diagramPositions;
+    positions.set('center', positions.get('center') || { x: center.x, y: center.y });
+    nodes.forEach((node) => resolvedPosition(positions, node));
+    const pct = (value, axis) => `${((value / (axis === 'x' ? VIEW_W : VIEW_H)) * 100).toFixed(2)}%`;
+    const posOf = (node) => positions.get(node.id) || node;
+    const centerPos = positions.get('center');
+    content.innerHTML = `<div class="dependency-view">
+      <div class="c4-legend">
+        <span class="c4-legend-item"><span class="c4-swatch focus"></span>Software system (this service)</span>
+        <span class="c4-legend-item"><span class="c4-swatch internal"></span>Container — internal</span>
+        <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
+        <span class="c4-legend-item"><span class="c4-boundary-swatch"></span>${escapeHtml(orgName(state.data.repository))} system boundary</span>
+        <span class="c4-legend-item">Drag any box to rearrange</span>
+      </div>
+      <div class="dependency-graph" role="group" aria-label="C4 container diagram for ${escapeHtml(titleCase(state.source.name))}">
+        <svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <marker id="arrow-outbound" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker>
+            <marker id="arrow-inbound" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker>
+          </defs>
+          <ellipse class="c4-boundary" cx="${center.x}" cy="${center.y}" rx="${boundaryRx}" ry="${boundaryRy}"></ellipse>
+          <text class="c4-boundary-label" x="${center.x - boundaryRx + 18}" y="${center.y - boundaryRy + 26}">${escapeHtml(orgName(state.data.repository))}</text>
+          ${nodes.map((node, index) => {
+            const pos = posOf(node);
+            const inbound = node.direction === 'inbound';
+            const [fromId, toId] = inbound ? [node.id, 'center'] : ['center', node.id];
+            const [x1, y1, x2, y2] = inbound ? [pos.x, pos.y, centerPos.x, centerPos.y] : [centerPos.x, centerPos.y, pos.x, pos.y];
+            const midX = (x1 + x2) / 2;
+            const midY = (y1 + y2) / 2;
+            const label = relationshipLabel(node);
+            const halfWidth = label.length * 3.3;
+            const edgeId = `dep-edge-${index}`;
+            return `<line id="${edgeId}" class="${inbound ? 'inbound' : 'outbound'}" data-edge-id="${edgeId}" data-from="${escapeHtml(fromId)}" data-to="${escapeHtml(toId)}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#arrow-${inbound ? 'inbound' : 'outbound'})"></line>
+              <rect id="${edgeId}-bg" class="rel-label-bg" data-half-width="${halfWidth}" x="${midX - halfWidth}" y="${midY - 9}" width="${halfWidth * 2}" height="15" rx="4"></rect>
+              <text id="${edgeId}-text" class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
+          }).join('')}
+        </svg>
+        <div class="dependency-node service-node" data-node="center" style="left:${pct(centerPos.x, 'x')};top:${pct(centerPos.y, 'y')}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(state.source.name))}</strong></div>
+        ${nodes.map((node) => {
           const pos = posOf(node);
-          const inbound = node.direction === 'inbound';
-          const [fromId, toId] = inbound ? [node.id, 'center'] : ['center', node.id];
-          const [x1, y1, x2, y2] = inbound ? [pos.x, pos.y, centerPos.x, centerPos.y] : [centerPos.x, centerPos.y, pos.x, pos.y];
-          const midX = (x1 + x2) / 2;
-          const midY = (y1 + y2) / 2;
-          const label = relationshipLabel(node);
-          const halfWidth = label.length * 3.3;
-          const edgeId = `dep-edge-${index}`;
-          return `<line id="${edgeId}" class="${inbound ? 'inbound' : 'outbound'}" data-edge-id="${edgeId}" data-from="${escapeHtml(fromId)}" data-to="${escapeHtml(toId)}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#arrow-${inbound ? 'inbound' : 'outbound'})"></line>
-            <rect id="${edgeId}-bg" class="rel-label-bg" data-half-width="${halfWidth}" x="${midX - halfWidth}" y="${midY - 9}" width="${halfWidth * 2}" height="15" rx="4"></rect>
-            <text id="${edgeId}-text" class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
+          const nodeClass = node.kind === 'message' ? 'message' : (node.classification === 'internal' ? 'internal' : 'external');
+          return `<button class="dependency-node ${nodeClass}" type="button" data-node="${escapeHtml(node.id)}" data-dependency="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')}"><span class="c4-type">${escapeHtml(c4Type(node))}</span><strong>${escapeHtml(splitPascalCase(node.name))}</strong><span class="c4-meta">${escapeHtml(node.technology || node.kind || 'service')} · ${node.operations?.length || 0} op${node.operations?.length === 1 ? '' : 's'}</span></button>`;
         }).join('')}
-      </svg>
-      <div class="dependency-node service-node" data-node="center" style="left:${pct(centerPos.x, 'x')};top:${pct(centerPos.y, 'y')}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(state.source.name))}</strong></div>
-      ${nodes.map((node) => {
-        const pos = posOf(node);
-        const nodeClass = node.kind === 'message' ? 'message' : (node.classification === 'internal' ? 'internal' : 'external');
-        return `<button class="dependency-node ${nodeClass}" type="button" data-node="${escapeHtml(node.id)}" data-dependency="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')}"><span class="c4-type">${escapeHtml(c4Type(node))}</span><strong>${escapeHtml(splitPascalCase(node.name))}</strong><span class="c4-meta">${escapeHtml(node.technology || node.kind || 'service')} · ${node.operations?.length || 0} op${node.operations?.length === 1 ? '' : 's'}</span></button>`;
-      }).join('')}
-    </div>
-    ${dependencyDetail(selected)}
-  </div>`;
-  wireSearch();
-  makeDraggableGraph($('.dependency-graph'), positions, VIEW_W, VIEW_H);
-  document.querySelectorAll('[data-dependency]').forEach((button) => { button.addEventListener('click', () => { state.selected = button.dataset.dependency; renderDependencies(false); }); });
+      </div>
+      ${dependencyDetail(selected)}
+    </div>`;
+    wireSearch();
+    makeDraggableGraph($('.dependency-graph'), positions, VIEW_W, VIEW_H);
+    document.querySelectorAll('[data-dependency]').forEach((button) => { button.addEventListener('click', () => { state.selected = button.dataset.dependency; renderDependencies(false); }); });
+  } catch (e) {
+    // Fallback to a simple list view if the SVG graph fails
+    console.warn('Graph rendering failed, falling back to list view:', e);
+    content.innerHTML = `<div class="split"><aside class="item-list">${filtered.map((dep) => `<button class="list-button" type="button" data-dependency="${escapeHtml(dep.id)}" aria-current="${dep.id === state.selected}"><span class="list-title">${escapeHtml(dep.name)}</span><span class="list-meta">${escapeHtml(dep.kind)} · ${dep.classification}</span></button>`).join('')}</aside><div class="detail">${dependencyDetail(selected)}</div></div>`;
+    document.querySelectorAll('[data-dependency]').forEach((button) => { button.addEventListener('click', () => { state.selected = button.dataset.dependency; renderDependencies(false); }); });
+  }
 }
 
 function dependencyDetail(dependency) {
