@@ -2,14 +2,13 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Accounts API",
-    "version": "1.0.0",
-    "description": "API for managing employer account PAYE schemes."
+    "version": "1.0.0"
   },
   "paths": {
     "/api/accounts/{accountId}/payeschemes": {
       "get": {
-        "summary": "Get PAYE schemes for an account",
         "operationId": "GetPayeSchemes",
+        "summary": "Retrieve PAYE schemes for a specific account.",
         "parameters": [
           {
             "name": "accountId",
@@ -19,12 +18,12 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "ID of the account to retrieve PAYE schemes for."
+            "description": "The ID of the account."
           }
         ],
         "responses": {
           "200": {
-            "description": "List of PAYE schemes.",
+            "description": "A list of PAYE schemes for the specified account.",
             "content": {
               "application/json": {
                 "schema": {
@@ -34,12 +33,12 @@
             }
           },
           "404": {
-            "description": "No PAYE schemes found for the specified account."
+            "description": "No PAYE schemes were found for the specified account."
           }
         },
         "security": [
           {
-            "ApiRolesAuth": [
+            "ApiRolesAuthorization": [
               "ReadAllEmployerAccountBalances"
             ]
           }
@@ -48,8 +47,8 @@
     },
     "/api/accounts/{accountId}/payeschemes/scheme": {
       "get": {
-        "summary": "Get details of a specific PAYE scheme",
         "operationId": "GetPayeScheme",
+        "summary": "Retrieve a specific PAYE scheme for an account.",
         "parameters": [
           {
             "name": "accountId",
@@ -59,7 +58,7 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "ID of the account to retrieve the PAYE scheme for."
+            "description": "The ID of the account."
           },
           {
             "name": "payeSchemeRef",
@@ -68,27 +67,28 @@
             "schema": {
               "type": "string"
             },
-            "description": "Reference of the PAYE scheme to retrieve."
+            "description": "The reference for the PAYE scheme (URL-encoded)."
           }
         ],
         "responses": {
           "200": {
-            "description": "Details of the PAYE scheme.",
+            "description": "Details of the specified PAYE scheme.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Resource"
+                  "type": "object",
+                  "additionalProperties": true
                 }
               }
             }
           },
           "404": {
-            "description": "PAYE scheme not found for the specified account."
+            "description": "The specified PAYE scheme was not found."
           }
         },
         "security": [
           {
-            "ApiRolesAuth": [
+            "ApiRolesAuthorization": [
               "ReadAllEmployerAccountBalances"
             ]
           }
@@ -102,12 +102,10 @@
         "type": "object",
         "properties": {
           "Id": {
-            "type": "string",
-            "description": "ID of the resource."
+            "type": "string"
           },
           "Href": {
-            "type": "string",
-            "description": "URL of the resource."
+            "type": "string"
           }
         },
         "required": [
@@ -119,16 +117,14 @@
         "type": "array",
         "items": {
           "$ref": "#/components/schemas/Resource"
-        },
-        "description": "A list of resource objects."
+        }
       }
     },
     "securitySchemes": {
-      "ApiRolesAuth": {
-        "type": "apiKey",
-        "name": "Authorization",
-        "in": "header",
-        "description": "Role-based authentication with API roles."
+      "ApiRolesAuthorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "API roles-based authorization."
       }
     }
   }

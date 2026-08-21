@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts API",
+    "title": "Employer Finance API",
     "version": "1.0.0"
   },
   "paths": {
@@ -11,7 +11,7 @@
         "operationId": "GetAccountBalances",
         "security": [
           {
-            "ApiRoles": []
+            "ReadAllEmployerAccountBalances": []
           }
         ],
         "requestBody": {
@@ -29,17 +29,10 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Account balances retrieved successfully"
           },
           "404": {
-            "description": "Not found"
+            "description": "Balances not found"
           }
         }
       }
@@ -50,7 +43,7 @@
         "operationId": "GetTransferAllowance",
         "security": [
           {
-            "ApiRoles": []
+            "ReadAllEmployerAccountBalances": []
           }
         ],
         "parameters": [
@@ -65,28 +58,21 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Transfer allowance retrieved successfully"
           },
           "404": {
-            "description": "Not found"
+            "description": "Transfer allowance not found"
           }
         }
       }
     },
     "/api/accounts/{accountId}/transferAllowanceByAccountId": {
       "get": {
-        "summary": "Get transfer allowance by account ID",
+        "summary": "Get transfer allowance by numeric account ID",
         "operationId": "GetTransferAllowanceByAccountId",
         "security": [
           {
-            "ApiRoles": []
+            "ReadAllEmployerAccountBalances": []
           }
         ],
         "parameters": [
@@ -102,28 +88,21 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Transfer allowance retrieved successfully"
           },
           "404": {
-            "description": "Not found"
+            "description": "Transfer allowance not found"
           }
         }
       }
     },
     "/api/accounts": {
       "get": {
-        "summary": "Get accounts",
+        "summary": "Get a list of accounts",
         "operationId": "GetAccounts",
         "security": [
           {
-            "ApiRoles": []
+            "ReadAllEmployerAccountBalances": []
           }
         ],
         "parameters": [
@@ -148,17 +127,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Accounts retrieved successfully"
           },
           "404": {
-            "description": "Not found"
+            "description": "Accounts not found"
           }
         }
       }
@@ -169,7 +141,7 @@
         "operationId": "GetAccountById",
         "security": [
           {
-            "ApiRoles": []
+            "ReadAllEmployerAccountBalances": []
           }
         ],
         "parameters": [
@@ -185,17 +157,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Account retrieved successfully"
           },
           "404": {
-            "description": "Not found"
+            "description": "Account not found"
           }
         }
       }
@@ -206,7 +171,7 @@
         "operationId": "GetAccountPaymentIds",
         "security": [
           {
-            "ApiRoles": []
+            "ReadAllEmployerAccountBalances": []
           }
         ],
         "parameters": [
@@ -240,28 +205,21 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Payment IDs retrieved successfully"
           },
           "404": {
-            "description": "Not found"
+            "description": "Payment IDs not found"
           }
         }
       }
     },
     "/api/accounts/{accountId}/paye-schemes": {
       "get": {
-        "summary": "Get PAYE schemes by account ID",
+        "summary": "Get PAYE schemes for an account",
         "operationId": "GetPayeSchemes",
         "security": [
           {
-            "ApiRoles": []
+            "ReadAllEmployerAccountBalances": []
           }
         ],
         "parameters": [
@@ -286,17 +244,50 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "PAYE schemes retrieved successfully"
           },
           "404": {
-            "description": "Not found"
+            "description": "PAYE schemes not found"
+          }
+        }
+      }
+    },
+    "/api/accounts/{accountId}/expire-funds": {
+      "post": {
+        "summary": "Expire funds for an account",
+        "operationId": "ExpireFunds",
+        "security": [
+          {
+            "ReadAllEmployerAccountBalances": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExpireFundsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Funds expired successfully"
+          },
+          "400": {
+            "description": "Invalid payload"
           }
         }
       }
@@ -304,20 +295,20 @@
   },
   "components": {
     "schemas": {
-      "MinimalObjectResponse": {
+      "ExpireFundsRequest": {
         "type": "object",
-        "description": "A placeholder for objects with no defined schema."
-      },
-      "MinimalArrayResponse": {
-        "type": "array",
-        "items": {
-          "type": "object"
+        "properties": {
+          "CorrelationId": {
+            "type": "string"
+          }
         },
-        "description": "A placeholder for arrays with no defined schema."
+        "required": [
+          "CorrelationId"
+        ]
       }
     },
     "securitySchemes": {
-      "ApiRoles": {
+      "ReadAllEmployerAccountBalances": {
         "type": "apiKey",
         "name": "Authorization",
         "in": "header"

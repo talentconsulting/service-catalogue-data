@@ -1,15 +1,18 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts Support API",
+    "title": "Support API",
+    "description": "API for managing support functionalities like changing roles, sending invitations, and resending invitations.",
     "version": "1.0.0"
   },
   "paths": {
     "/api/support/change-role": {
       "post": {
         "summary": "Change the role of a team member",
-        "description": "Allows modification of a team member's role within an account.",
-        "operationId": "changeRole",
+        "operationId": "ChangeRole",
+        "tags": [
+          "Support"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -22,24 +25,26 @@
         },
         "responses": {
           "200": {
-            "description": "Role successfully changed."
+            "description": "Role changed successfully."
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
           }
         },
         "security": [
           {
-            "defaultAuth": []
+            "ApiRolesReadUserAccounts": []
           }
         ]
       }
     },
     "/api/support/resend-invitation": {
       "post": {
-        "summary": "Resend an account invitation",
-        "description": "Resends an invitation to a team member.",
-        "operationId": "resendInvitation",
+        "summary": "Resend an invitation",
+        "operationId": "ResendInvitation",
+        "tags": [
+          "Support"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -52,24 +57,26 @@
         },
         "responses": {
           "200": {
-            "description": "Invitation successfully resent."
+            "description": "Invitation resent successfully."
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
           }
         },
         "security": [
           {
-            "defaultAuth": []
+            "ApiRolesReadUserAccounts": []
           }
         ]
       }
     },
     "/api/support/send-invitation": {
       "post": {
-        "summary": "Send a new account invitation",
-        "description": "Sends a new invitation to a prospective team member.",
-        "operationId": "sendInvitation",
+        "summary": "Send an invitation",
+        "operationId": "SendInvitation",
+        "tags": [
+          "Support"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -82,15 +89,15 @@
         },
         "responses": {
           "200": {
-            "description": "Invitation successfully sent."
+            "description": "Invitation sent successfully."
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
           }
         },
         "security": [
           {
-            "defaultAuth": []
+            "ApiRolesReadUserAccounts": []
           }
         ]
       }
@@ -105,7 +112,8 @@
             "type": "string"
           },
           "Email": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           },
           "Role": {
             "$ref": "#/components/schemas/Role"
@@ -115,6 +123,22 @@
           "HashedAccountId",
           "Email",
           "Role"
+        ]
+      },
+      "SupportResendInvitationCommand": {
+        "type": "object",
+        "properties": {
+          "Email": {
+            "type": "string",
+            "format": "email"
+          },
+          "HashedAccountId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Email",
+          "HashedAccountId"
         ]
       },
       "SupportCreateInvitationCommand": {
@@ -127,7 +151,8 @@
             "type": "string"
           },
           "EmailOfPersonBeingInvited": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           },
           "RoleOfPersonBeingInvited": {
             "$ref": "#/components/schemas/Role"
@@ -138,21 +163,6 @@
           "NameOfPersonBeingInvited",
           "EmailOfPersonBeingInvited",
           "RoleOfPersonBeingInvited"
-        ]
-      },
-      "SupportResendInvitationCommand": {
-        "type": "object",
-        "properties": {
-          "Email": {
-            "type": "string"
-          },
-          "HashedAccountId": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "Email",
-          "HashedAccountId"
         ]
       },
       "Role": {
@@ -166,9 +176,10 @@
       }
     },
     "securitySchemes": {
-      "defaultAuth": {
-        "type": "http",
-        "scheme": "bearer"
+      "ApiRolesReadUserAccounts": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
       }
     }
   }

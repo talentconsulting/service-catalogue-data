@@ -7,14 +7,14 @@
   "paths": {
     "/api/accounts/{accountId}/transfer/connections": {
       "get": {
-        "summary": "Get Transfers by Period End",
-        "description": "Fetch transfers for a specific account during a specified period end.",
+        "summary": "Get Transfers By Period End",
+        "operationId": "GetTransfersByPeriodEnd",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
-            "description": "Account ID",
+            "description": "The ID of the account.",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -24,7 +24,7 @@
             "name": "periodEnd",
             "in": "query",
             "required": true,
-            "description": "Period end identifier",
+            "description": "The period end for which the transfers are to be fetched.",
             "schema": {
               "type": "string"
             }
@@ -32,7 +32,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response containing account transfers.",
+            "description": "Successful response with the transfers fetched.",
             "content": {
               "application/json": {
                 "schema": {
@@ -42,21 +42,31 @@
             }
           },
           "400": {
-            "description": "Bad request when the periodEnd parameter is missing or invalid.",
+            "description": "Bad request if periodEnd query parameter is missing or invalid.",
             "content": {
-              "text/plain": {
+              "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
           },
           "404": {
-            "description": "Not found when no transfers exist for the given accountId and periodEnd.",
+            "description": "Not found if no transfers are found for the account and period.",
             "content": {
-              "text/plain": {
+              "application/json": {
                 "schema": {
-                  "type": "string"
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
@@ -64,7 +74,7 @@
         },
         "security": [
           {
-            "ApiRoles.ReadAllEmployerAccountBalances": []
+            "ApiKeyAuth": []
           }
         ]
       }
@@ -85,10 +95,10 @@
       }
     },
     "securitySchemes": {
-      "ApiRoles.ReadAllEmployerAccountBalances": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "Access token required to verify ReadAllEmployerAccountBalances policy."
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
       }
     }
   }

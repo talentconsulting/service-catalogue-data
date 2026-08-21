@@ -8,13 +8,8 @@
     "/api/english-fractions": {
       "post": {
         "summary": "Persist English Fractions",
+        "description": "Persists English fractions data.",
         "operationId": "persistEnglishFractions",
-        "description": "Persist English fractions for the given request payload.",
-        "security": [
-          {
-            "ApiRoles.ReadAllEmployerAccountBalances": []
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -27,29 +22,27 @@
         },
         "responses": {
           "200": {
-            "description": "Successfully persisted English fractions.",
+            "description": "English fractions persisted successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "additionalProperties": true
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request due to invalid payload or validation errors.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
+            "description": "Bad Request. Request payload is required."
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2": [
+              "ReadAllEmployerAccountBalances"
+            ]
+          }
+        ]
       }
     }
   },
@@ -60,7 +53,7 @@
         "properties": {
           "EmpRef": {
             "type": "string",
-            "description": "Employer reference."
+            "description": "The employer reference."
           },
           "UpdateRequired": {
             "type": "boolean",
@@ -92,12 +85,12 @@
           "DateCalculated": {
             "type": "string",
             "format": "date-time",
-            "description": "The date when this fraction was calculated."
+            "description": "The date when the fraction was calculated."
           },
           "Amount": {
             "type": "number",
             "format": "decimal",
-            "description": "The amount of the fraction."
+            "description": "The fraction amount."
           }
         },
         "required": [
@@ -107,10 +100,16 @@
       }
     },
     "securitySchemes": {
-      "ApiRoles.ReadAllEmployerAccountBalances": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "API role required to authorize actions related to employer account balances."
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "scopes": {
+              "ReadAllEmployerAccountBalances": "Access to read all employer account balances"
+            }
+          }
+        }
       }
     }
   }

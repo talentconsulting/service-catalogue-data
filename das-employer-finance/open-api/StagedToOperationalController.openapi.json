@@ -7,15 +7,10 @@
   "paths": {
     "/api/staging/staged-to-operational": {
       "post": {
-        "summary": "Transfer from staged to operational",
+        "summary": "Transfer staged data to operational",
         "description": "Transfers data from staged to operational.",
-        "security": [
-          {
-            "ReadAllEmployerAccountBalances": []
-          }
-        ],
+        "operationId": "StagedToOperational",
         "requestBody": {
-          "description": "Payload to transfer staged data to operational.",
           "required": true,
           "content": {
             "application/json": {
@@ -31,11 +26,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "error": {
-                      "type": "string"
-                    }
+                  "type": "array",
+                  "items": {
+                    "type": "string"
                   }
                 }
               }
@@ -49,8 +42,7 @@
                   "type": "object",
                   "properties": {
                     "isSuccess": {
-                      "type": "boolean",
-                      "example": false
+                      "type": "boolean"
                     },
                     "message": {
                       "type": "string"
@@ -58,7 +50,12 @@
                     "processedCount": {
                       "type": "integer"
                     }
-                  }
+                  },
+                  "required": [
+                    "isSuccess",
+                    "message",
+                    "processedCount"
+                  ]
                 }
               }
             }
@@ -71,8 +68,7 @@
                   "type": "object",
                   "properties": {
                     "isSuccess": {
-                      "type": "boolean",
-                      "example": true
+                      "type": "boolean"
                     },
                     "message": {
                       "type": "string"
@@ -80,12 +76,22 @@
                     "processedCount": {
                       "type": "integer"
                     }
-                  }
+                  },
+                  "required": [
+                    "isSuccess",
+                    "message",
+                    "processedCount"
+                  ]
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
       }
     }
   },
@@ -104,7 +110,7 @@
           },
           "CorrelationId": {
             "type": "string",
-            "description": "Correlation ID for tracking purposes."
+            "description": "Correlation ID for tracking requests."
           }
         },
         "required": [
@@ -115,11 +121,10 @@
       }
     },
     "securitySchemes": {
-      "ReadAllEmployerAccountBalances": {
+      "ApiKeyAuth": {
         "type": "apiKey",
-        "name": "Authorization",
         "in": "header",
-        "description": "Requires the ReadAllEmployerAccountBalances policy."
+        "name": "Authorization"
       }
     }
   }

@@ -1,0 +1,400 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Short Courses API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/shortCourses": {
+      "post": {
+        "summary": "Create Unapproved Short Course Learning",
+        "operationId": "CreateUnapprovedShortCourseLearning",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUnapprovedShortCourseLearningRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully created unapproved short course learning."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/fm99/{learningKey}/shortCourses": {
+      "get": {
+        "summary": "Get FM99 Short Course Earnings",
+        "operationId": "GetFm99ShortCourseEarnings",
+        "parameters": [
+          {
+            "name": "learningKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Learning key identifier."
+          },
+          {
+            "name": "ukprn",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "UKPRN number."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved FM99 short course earnings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/{learningKey}/shortCourses/{episodeKey}/on-programme": {
+      "put": {
+        "summary": "Update Short Course On Programme",
+        "operationId": "UpdateOnProgramme",
+        "parameters": [
+          {
+            "name": "learningKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Learning key identifier."
+          },
+          {
+            "name": "episodeKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Episode key identifier."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateShortCourseOnProgrammeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully updated Short Course On Programme.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/{learningKey}/shortCourses/{episodeKey}": {
+      "get": {
+        "summary": "Get Short Course",
+        "operationId": "GetShortCourse",
+        "parameters": [
+          {
+            "name": "learningKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Learning key identifier."
+          },
+          {
+            "name": "episodeKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Episode key identifier."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved short course.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove Short Course Learning",
+        "operationId": "RemoveShortCourseLearning",
+        "parameters": [
+          {
+            "name": "learningKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Learning key identifier."
+          },
+          {
+            "name": "episodeKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Episode key identifier."
+          },
+          {
+            "name": "learnerKey",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Learner key identifier."
+          },
+          {
+            "name": "learnerRef",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Learner reference."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully removed Short Course Learning.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateUnapprovedShortCourseLearningRequest": {
+        "type": "object",
+        "properties": {
+          "LearningKey": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "EpisodeKey": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Learner": {
+            "$ref": "#/components/schemas/Learner"
+          },
+          "LearningSupport": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LearningSupportItem"
+            }
+          },
+          "OnProgramme": {
+            "$ref": "#/components/schemas/OnProgramme"
+          }
+        },
+        "required": [
+          "LearningKey",
+          "EpisodeKey",
+          "Learner",
+          "LearningSupport",
+          "OnProgramme"
+        ]
+      },
+      "Learner": {
+        "type": "object",
+        "properties": {
+          "DateOfBirth": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Uln": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "DateOfBirth",
+          "Uln"
+        ]
+      },
+      "LearningSupportItem": {
+        "type": "object",
+        "properties": {
+          "StartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EndDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "StartDate",
+          "EndDate"
+        ]
+      },
+      "OnProgramme": {
+        "type": "object",
+        "properties": {
+          "CourseCode": {
+            "type": "string"
+          },
+          "Ukprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "WithdrawalDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "CompletionDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ExpectedEndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Milestones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Milestone"
+            }
+          },
+          "TotalPrice": {
+            "type": "number",
+            "format": "decimal"
+          }
+        },
+        "required": [
+          "CourseCode",
+          "Ukprn",
+          "StartDate",
+          "ExpectedEndDate",
+          "Milestones",
+          "TotalPrice"
+        ]
+      },
+      "Milestone": {
+        "type": "integer",
+        "enum": [
+          1,
+          2
+        ],
+        "description": "Milestone enumeration. 1: ThirtyPercentLearningComplete, 2: LearningComplete."
+      },
+      "UpdateShortCourseOnProgrammeRequest": {
+        "type": "object",
+        "properties": {
+          "WithdrawalDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "Milestones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Milestone"
+            }
+          },
+          "CompletionDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ExpectedEndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "LearnerKey": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "LearnerRef": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Milestones",
+          "StartDate",
+          "ExpectedEndDate",
+          "LearnerKey",
+          "LearnerRef"
+        ]
+      }
+    }
+  }
+}

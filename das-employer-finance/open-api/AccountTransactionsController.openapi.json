@@ -8,7 +8,7 @@
     "/api/accounts/{hashedAccountId}/transactions": {
       "get": {
         "operationId": "GetTransactionSummary",
-        "summary": "Retrieve a summary of account transactions.",
+        "summary": "Retrieve account transaction summary",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -23,7 +23,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int32"
             }
           },
           {
@@ -35,35 +36,35 @@
             }
           }
         ],
+        "security": [
+          {
+            "ReadAllEmployerAccountBalances": []
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Successful response with transaction summary.",
+            "description": "Transaction summary retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AccountTransactionSummary"
+                  "$ref": "#/components/schemas/TransactionSummary"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request. Missing required query parameters."
+            "description": "Bad request"
           },
           "404": {
-            "description": "Not found. Account transaction summary does not exist."
+            "description": "Summary not found"
           }
-        },
-        "security": [
-          {
-            "ReadAllEmployerAccountBalances": []
-          }
-        ]
+        }
       }
     },
     "/api/accounts/{hashedAccountId}/transactions/{year}/{month}": {
       "get": {
         "operationId": "GetTransactions",
-        "summary": "Retrieve specific account transactions for a given year and month.",
+        "summary": "Retrieve transactions for a specific year and month",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -78,7 +79,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int32"
             }
           },
           {
@@ -86,13 +88,19 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int32"
             }
+          }
+        ],
+        "security": [
+          {
+            "ReadAllEmployerAccountBalances": []
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with transactions data.",
+            "description": "Transactions retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -102,20 +110,15 @@
             }
           },
           "404": {
-            "description": "Not found. Transactions for the specified year and month do not exist."
+            "description": "Transactions not found"
           }
-        },
-        "security": [
-          {
-            "ReadAllEmployerAccountBalances": []
-          }
-        ]
+        }
       }
     },
     "/api/accounts/{hashedAccountId}/transactions/query": {
       "get": {
         "operationId": "QueryAccountTransactions",
-        "summary": "Query account transactions within a date range.",
+        "summary": "Query account transactions within a date range",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -144,9 +147,14 @@
             }
           }
         ],
+        "security": [
+          {
+            "ReadAllEmployerAccountBalances": []
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Successful response with queried transactions data.",
+            "description": "Transactions retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -156,36 +164,30 @@
             }
           },
           "400": {
-            "description": "Bad request. Missing necessary query parameters."
+            "description": "Bad request"
           },
           "404": {
-            "description": "Not found. No transactions found for the given date range."
+            "description": "Transactions not found"
           }
-        },
-        "security": [
-          {
-            "ReadAllEmployerAccountBalances": []
-          }
-        ]
+        }
       }
     }
   },
   "components": {
     "schemas": {
-      "AccountTransactionSummary": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "year": {
-              "type": "integer"
-            },
-            "month": {
-              "type": "integer"
-            },
-            "href": {
-              "type": "string"
-            }
+      "TransactionSummary": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "month": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "href": {
+            "type": "string"
           }
         }
       },
@@ -193,10 +195,12 @@
         "type": "object",
         "properties": {
           "year": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "month": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "hasPreviousTransactions": {
             "type": "boolean"
