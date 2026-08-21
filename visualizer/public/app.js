@@ -238,6 +238,25 @@ function tableRelLabel(edge) {
   return from && to ? `${from} → ${to}` : (edge.name || 'FK');
 }
 
+function erNode(table) {
+  const height = 48 + Math.max(1, table.columns?.length || 0) * 24;
+  return { ...table, id: table.name, width: 274, height };
+}
+
+function connectionPoints(from, to, fromWidth = 0, fromHeight = 0, toWidth = 0, toHeight = 0) {
+  const dx = to.x - from.x;
+  const dy = to.y - from.y;
+  if (!dx && !dy) return { x1: from.x, y1: from.y, x2: to.x, y2: to.y };
+  const pointAtEdge = (origin, horizontal, vertical, width, height) => {
+    if (!width || !height) return { x: origin.x, y: origin.y };
+    const scale = Math.min(width / 2 / Math.abs(horizontal || 1), height / 2 / Math.abs(vertical || 1));
+    return { x: origin.x + horizontal * scale, y: origin.y + vertical * scale };
+  };
+  const start = pointAtEdge(from, dx, dy, fromWidth, fromHeight);
+  const end = pointAtEdge(to, -dx, -dy, toWidth, toHeight);
+  return { x1: start.x, y1: start.y, x2: end.x, y2: end.y };
+}
+
 function renderDatabaseDiagram(filtered, allEdges, isolatedCount) {
   const edges = allEdges.filter((edge) => filtered.some((table) => table.name === edge.from) && filtered.some((table) => table.name === edge.to));
   if (!filtered.length) {
@@ -245,13 +264,16 @@ function renderDatabaseDiagram(filtered, allEdges, isolatedCount) {
     return;
   }
   const ordered = orderTablesForLayout(filtered, edges);
-  const nodeHalfW = 98, nodeHalfH = 48, margin = 60;
-  const radiusX = Math.max(300, (246 * ordered.length) / (2 * Math.PI));
-  const radiusY = radiusX * 0.62;
+  const nodes = ordered.map(erNode);
+  const nodeHalfW = 137;
+  const nodeHalfH = Math.max(...nodes.map((node) => node.height / 2));
+  const margin = 80;
+  const radiusX = Math.max(440, (330 * nodes.length) / (2 * Math.PI));
+  const radiusY = Math.max(280, radiusX * 0.62);
   const VIEW_W = Math.round((radiusX + nodeHalfW + margin) * 2);
   const VIEW_H = Math.round((radiusY + nodeHalfH + margin) * 2);
   const center = { x: VIEW_W / 2, y: VIEW_H / 2 };
-  const positioned = ringLayout(ordered.map((table) => ({ ...table, id: table.name })), center, radiusX, radiusY, 0);
+  const positioned = ringLayout(nodes, center, radiusX, radiusY, 0);
   if (!state.schemaPositions) state.schemaPositions = new Map();
   const positions = state.schemaPositions;
   positioned.forEach((node) => resolvedPosition(positions, node));
@@ -268,19 +290,23 @@ function renderDatabaseDiagram(filtered, allEdges, isolatedCount) {
         ${edges.map((edge, index) => {
           const from = posOf({ id: edge.from });
           const to = posOf({ id: edge.to });
-          const midX = (from.x + to.x) / 2;
-          const midY = (from.y + to.y) / 2;
+          const fromNode = positioned.find((node) => node.name === edge.from);
+          const toNode = positioned.find((node) => node.name === edge.to);
+          const points = connectionPoints(from, to, fromNode?.width, fromNode?.height, toNode?.width, toNode?.height);
+          const midX = (points.x1 + points.x2) / 2;
+          const midY = (points.y1 + points.y2) / 2;
           const label = tableRelLabel(edge);
           const halfWidth = label.length * 3.3;
           const edgeId = `schema-edge-${index}`;
-          return `<line id="${edgeId}" class="outbound" data-edge-id="${edgeId}" data-from="${escapeHtml(edge.from)}" data-to="${escapeHtml(edge.to)}" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" marker-end="url(#arrow-outbound)"></line>
+          return `<line id="${edgeId}" class="outbound" data-edge-id="${edgeId}" data-from="${escapeHtml(edge.from)}" data-to="${escapeHtml(edge.to)}" data-from-width="${fromNode?.width || 0}" data-from-height="${fromNode?.height || 0}" data-to-width="${toNode?.width || 0}" data-to-height="${toNode?.height || 0}" x1="${points.x1}" y1="${points.y1}" x2="${points.x2}" y2="${points.y2}" marker-end="url(#arrow-outbound)"></line>
             <rect id="${edgeId}-bg" class="rel-label-bg" data-half-width="${halfWidth}" x="${midX - halfWidth}" y="${midY - 9}" width="${halfWidth * 2}" height="15" rx="4"></rect>
             <text id="${edgeId}-text" class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
         }).join('')}
       </svg>
       ${positioned.map((node) => {
         const pos = posOf(node);
-        return `<button class="dependency-node internal" type="button" data-node="${escapeHtml(node.name)}" aria-pressed="${node.name === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')}"><span class="c4-type">${escapeHtml(node.schema)}</span><strong>${escapeHtml(node.name)}</strong><span class="c4-meta">${node.columns?.length || 0} cols · ${node.relationships?.length || 0} FK</span></button>`;
+        const foreignKeys = new Set((node.relationships || []).flatMap((relationship) => relationship.fromColumns || []));
+        return `<button class="er-node" type="button" data-node="${escapeHtml(node.name)}" aria-pressed="${node.name === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')};width:${node.width}px;height:${node.height}px"><span class="er-table"><span>${escapeHtml(node.schema)}</span>${escapeHtml(node.name)}</span><span class="er-columns">${(node.columns || []).map((column) => `<span class="er-column"><b>${column.primaryKey ? 'PK' : foreignKeys.has(column.name) ? 'FK' : ''}</b><code>${escapeHtml(column.name)}</code><em>${escapeHtml(column.type || '')}</em></span>`).join('') || '<span class="er-column muted">No columns recorded</span>'}</span></button>`;
       }).join('')}
     </div>
     ${selectedTable ? tableDetailInline(selectedTable) : ''}
@@ -495,12 +521,13 @@ function redrawEdgeLine(graphEl, line, positions) {
   const from = positions.get(line.dataset.from);
   const to = positions.get(line.dataset.to);
   if (!from || !to) return;
-  line.setAttribute('x1', from.x);
-  line.setAttribute('y1', from.y);
-  line.setAttribute('x2', to.x);
-  line.setAttribute('y2', to.y);
-  const midX = (from.x + to.x) / 2;
-  const midY = (from.y + to.y) / 2;
+  const points = connectionPoints(from, to, Number(line.dataset.fromWidth || 0), Number(line.dataset.fromHeight || 0), Number(line.dataset.toWidth || 0), Number(line.dataset.toHeight || 0));
+  line.setAttribute('x1', points.x1);
+  line.setAttribute('y1', points.y1);
+  line.setAttribute('x2', points.x2);
+  line.setAttribute('y2', points.y2);
+  const midX = (points.x1 + points.x2) / 2;
+  const midY = (points.y1 + points.y2) / 2;
   const bg = graphEl.querySelector(`#${line.dataset.edgeId}-bg`);
   const text = graphEl.querySelector(`#${line.dataset.edgeId}-text`);
   if (bg) {
