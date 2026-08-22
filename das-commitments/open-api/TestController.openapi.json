@@ -1,23 +1,23 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Funding Agency Commitments API",
-    "version": "1.0.0",
-    "description": "API for managing commitments."
+    "title": "SFA.DAS.CommitmentsV2 API",
+    "description": "API for managing commitments",
+    "version": "1.0.0"
   },
   "paths": {
-    "/api/test/provider": {
+    "/api/Test/provider": {
       "get": {
-        "summary": "Get Provider Endpoint",
+        "summary": "Get provider secure endpoint",
         "operationId": "GetProvider",
         "security": [
           {
-            "ProviderAuth": []
+            "Provider": []
           }
         ],
         "responses": {
           "200": {
-            "description": "Provider Secure Endpoint reached",
+            "description": "Provider secure endpoint reached",
             "content": {
               "text/plain": {
                 "schema": {
@@ -29,18 +29,18 @@
         }
       }
     },
-    "/api/test/employer": {
+    "/api/Test/employer": {
       "get": {
-        "summary": "Get Employer Endpoint",
+        "summary": "Get employer secure endpoint",
         "operationId": "GetEmployer",
         "security": [
           {
-            "EmployerAuth": []
+            "Employer": []
           }
         ],
         "responses": {
           "200": {
-            "description": "Employer Secure Endpoint reached",
+            "description": "Employer secure endpoint reached",
             "content": {
               "text/plain": {
                 "schema": {
@@ -52,28 +52,29 @@
         }
       }
     },
-    "/api/test/{id}": {
+    "/api/Test": {
       "get": {
-        "summary": "Get Secure Endpoint",
-        "operationId": "GetSecure",
-        "security": [
-          {
-            "DefaultAuth": []
-          }
-        ],
+        "summary": "Get secure endpoint",
+        "operationId": "Get",
         "parameters": [
           {
             "name": "id",
-            "in": "path",
+            "in": "query",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int32"
             }
+          }
+        ],
+        "security": [
+          {
+            "Authorization": []
           }
         ],
         "responses": {
           "200": {
-            "description": "Secure Endpoint reached",
+            "description": "Secure endpoint reached",
             "content": {
               "text/plain": {
                 "schema": {
@@ -87,137 +88,24 @@
     }
   },
   "components": {
-    "schemas": {
-      "Provider": {
-        "type": "object",
-        "properties": {
-          "Ukprn": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "Name": {
-            "type": "string"
-          }
-        }
-      },
-      "GetAllProvidersResponse": {
-        "type": "object",
-        "properties": {
-          "Providers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Provider"
-            }
-          }
-        }
-      },
-      "ChangeOfPartyRequest": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "ChangeOfPartyType": {
-            "type": "string",
-            "enum": [
-              "ChangeEmployer",
-              "ChangeProvider"
-            ]
-          },
-          "OriginatingParty": {
-            "type": "string",
-            "enum": [
-              "None",
-              "Employer",
-              "Provider",
-              "TransferSender"
-            ]
-          },
-          "Status": {
-            "type": "string",
-            "enum": [
-              "Pending",
-              "Approved",
-              "Rejected",
-              "Withdrawn"
-            ]
-          },
-          "EmployerName": {
-            "type": "string"
-          },
-          "StartDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "EndDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "Price": {
-            "type": "integer"
-          },
-          "CohortId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "WithParty": {
-            "type": "string",
-            "enum": [
-              "None",
-              "Employer",
-              "Provider",
-              "TransferSender"
-            ]
-          },
-          "NewApprenticeshipId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "ProviderId": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "GetChangeOfPartyRequestsResponse": {
-        "type": "object",
-        "properties": {
-          "ChangeOfPartyRequests": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ChangeOfPartyRequest"
-            }
-          }
-        }
-      },
-      "UserInfo": {
-        "type": "object",
-        "properties": {
-          "UserId": {
-            "type": "string"
-          },
-          "UserDisplayName": {
-            "type": "string"
-          },
-          "UserEmail": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "securitySchemes": {
-      "ProviderAuth": {
-        "type": "oauth2",
-        "description": "Authorization scope for Providers."
+      "Provider": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "Authorization token for Provider policies"
       },
-      "EmployerAuth": {
-        "type": "oauth2",
-        "description": "Authorization scope for Employers."
+      "Employer": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "Authorization token for Employer policies"
       },
-      "DefaultAuth": {
-        "type": "oauth2",
-        "description": "General authorization scope."
+      "Authorization": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "General authorization token"
       }
     }
   }

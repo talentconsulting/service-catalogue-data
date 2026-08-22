@@ -1,19 +1,21 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "CommitmentsV2 API",
+    "title": "Commitments V2 Approvals API",
+    "description": "API for managing approvals within the Commitments V2 project.",
     "version": "1.0.0"
   },
   "paths": {
     "/approvals/{learningKey}": {
       "post": {
         "summary": "Create an approval",
-        "operationId": "PostApprovals",
+        "description": "Creates an approval request based on the provided learningKey and approval details.",
         "parameters": [
           {
             "name": "learningKey",
             "in": "path",
             "required": true,
+            "description": "The unique key identifying the learning.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -45,30 +47,24 @@
             }
           },
           "400": {
-            "description": "LearningKey mismatch or bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Bad request, learningKey mismatch or validation error"
           }
         },
         "security": [
           {
-            "bearerAuth": []
+            "OAuth2": []
           }
         ]
       },
       "delete": {
         "summary": "Delete an approval",
-        "operationId": "DeleteApprovals",
+        "description": "Deletes an existing approval based on the learning key.",
         "parameters": [
           {
             "name": "learningKey",
             "in": "path",
             "required": true,
+            "description": "The unique key identifying the learning.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -86,8 +82,8 @@
               }
             }
           },
-          "404": {
-            "description": "Approval not found",
+          "400": {
+            "description": "Bad request, validation error.",
             "content": {
               "application/json": {
                 "schema": {
@@ -96,8 +92,8 @@
               }
             }
           },
-          "400": {
-            "description": "Invalid approval state",
+          "404": {
+            "description": "Approval not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -109,18 +105,19 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "OAuth2": []
           }
         ]
       },
       "put": {
         "summary": "Update an approval",
-        "operationId": "PutApprovals",
+        "description": "Updates an existing approval based on the provided learning key.",
         "parameters": [
           {
             "name": "learningKey",
             "in": "path",
             "required": true,
+            "description": "The unique key identifying the learning.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -152,29 +149,15 @@
             }
           },
           "404": {
-            "description": "Pending approval not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Approval not found."
           },
           "400": {
-            "description": "LearningKey mismatch or bad request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Bad request, validation error."
           }
         },
         "security": [
           {
-            "bearerAuth": []
+            "OAuth2": []
           }
         ]
       }
@@ -193,7 +176,7 @@
             "type": "integer"
           },
           "LearningType": {
-            "type": "string"
+            "$ref": "#/components/schemas/LearningType"
           },
           "UKPRN": {
             "type": "string"
@@ -202,8 +185,7 @@
             "type": "string"
           },
           "ApprovedUri": {
-            "type": "string",
-            "format": "uri"
+            "type": "string"
           },
           "Changes": {
             "type": "array",
@@ -211,7 +193,13 @@
               "$ref": "#/components/schemas/CocApprovalFieldChange"
             }
           }
-        }
+        },
+        "required": [
+          "LearningKey",
+          "ApprenticeshipId",
+          "LearningType",
+          "Changes"
+        ]
       },
       "CocApprovalFieldChange": {
         "type": "object",
@@ -222,7 +210,11 @@
           "Data": {
             "$ref": "#/components/schemas/CocData"
           }
-        }
+        },
+        "required": [
+          "ChangeType",
+          "Data"
+        ]
       },
       "CocData": {
         "type": "object",
@@ -252,13 +244,26 @@
             "type": "string"
           }
         }
+      },
+      "LearningType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "FoundationApprenticeship",
+          "ApprenticeshipUnit"
+        ]
       }
     },
     "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://auth.skillsfundingagency.gov.uk/oauth/authorize",
+            "tokenUrl": "https://auth.skillsfundingagency.gov.uk/oauth/token",
+            "scopes": {}
+          }
+        }
       }
     }
   }

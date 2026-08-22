@@ -2,52 +2,54 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Learner API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for retrieving learner data with support for batch processing.",
+    "license": {
+      "name": "Apache-2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    }
   },
   "paths": {
     "/api/learners": {
       "get": {
-        "summary": "Get all learners",
+        "summary": "Retrieve all learners in batches",
+        "description": "Returns a paginated list of learners. Supports optional filtering by a 'sinceTime' parameter to fetch learners modified since the given timestamp.",
         "operationId": "GetAllLearners",
         "parameters": [
           {
             "name": "sinceTime",
             "in": "query",
             "required": false,
+            "description": "Optional timestamp filter to return learners updated since this time.",
             "schema": {
               "type": "string",
               "format": "date-time"
-            },
-            "description": "Optional datetime to fetch learners modified since that time."
+            }
           },
           {
             "name": "batch_number",
             "in": "query",
             "required": false,
+            "description": "The batch number to retrieve. Defaults to 1.",
             "schema": {
               "type": "integer",
-              "format": "int32",
-              "default": 1,
               "minimum": 1
-            },
-            "description": "Batch number for paginated results."
+            }
           },
           {
             "name": "batch_size",
             "in": "query",
             "required": false,
+            "description": "The maximum number of learners to return in a single batch. Defaults to 1000.",
             "schema": {
               "type": "integer",
-              "format": "int32",
-              "default": 1000,
               "minimum": 1
-            },
-            "description": "Number of records per batch."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "A successful response with a list of learners.",
+            "description": "Successfully retrieved learners.",
             "content": {
               "application/json": {
                 "schema": {
@@ -55,12 +57,18 @@
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized. The request requires user authentication."
           }
         },
         "security": [
           {
-            "BearerAuth": []
+            "OAuth2": []
           }
+        ],
+        "tags": [
+          "Learners"
         ]
       }
     }
@@ -72,21 +80,22 @@
         "properties": {
           "BatchNumber": {
             "type": "integer",
-            "format": "int32"
+            "description": "The batch number of the learners being returned."
           },
           "BatchSize": {
             "type": "integer",
-            "format": "int32"
+            "description": "The total number of learners returned in this batch."
           },
           "TotalNumberOfBatches": {
             "type": "integer",
-            "format": "int32"
+            "description": "The total number of batches available."
           },
           "Learners": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Learner"
-            }
+            },
+            "description": "The list of learners in the current batch."
           }
         },
         "required": [
@@ -101,76 +110,93 @@
         "properties": {
           "ApprenticeshipId": {
             "type": "integer",
-            "format": "int64"
+            "description": "The unique identifier for the apprenticeship."
           },
           "FirstName": {
-            "type": "string"
+            "type": "string",
+            "description": "The learner's first name."
           },
           "LastName": {
-            "type": "string"
+            "type": "string",
+            "description": "The learner's last name."
           },
           "ULN": {
-            "type": "string"
+            "type": "string",
+            "description": "The learner's unique learner number."
           },
           "TrainingCode": {
-            "type": "string"
+            "type": "string",
+            "description": "The code of the training course the learner is enrolled in."
           },
           "TrainingCourseVersion": {
-            "type": "string"
+            "type": "string",
+            "description": "The version of the training course."
           },
           "TrainingCourseVersionConfirmed": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Indicates whether the training course version has been confirmed."
           },
           "TrainingCourseOption": {
-            "type": "string"
+            "type": "string",
+            "description": "The option of the training course if applicable."
           },
           "StandardUId": {
-            "type": "string"
+            "type": "string",
+            "description": "The unique identifier for the training standard."
           },
           "StartDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "The start date of the apprenticeship."
           },
           "EndDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "The end date of the apprenticeship."
           },
           "CreatedOn": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "The date when the learner record was created."
           },
           "UpdatedOn": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "The date when the learner record was last updated."
           },
           "StopDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "The date when the apprenticeship was stopped if applicable."
           },
           "PauseDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "The date when the apprenticeship was paused if applicable."
           },
           "CompletionDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "The date when the apprenticeship was completed if applicable."
           },
           "UKPRN": {
             "type": "integer",
-            "format": "int64"
+            "description": "The UK provider reference number associated with the apprenticeship."
           },
           "LearnRefNumber": {
-            "type": "string"
+            "type": "string",
+            "description": "The reference number of the learner."
           },
           "PaymentStatus": {
             "$ref": "#/components/schemas/PaymentStatus"
           },
           "EmployerAccountId": {
             "type": "integer",
-            "format": "int64"
+            "description": "The employer's account ID associated with the apprenticeship."
           },
           "EmployerName": {
-            "type": "string"
+            "type": "string",
+            "description": "The name of the employer associated with the apprenticeship."
           }
         },
         "required": [
@@ -181,28 +207,35 @@
           "TrainingCode",
           "TrainingCourseVersion",
           "TrainingCourseVersionConfirmed",
-          "CreatedOn",
           "UKPRN",
           "LearnRefNumber",
           "PaymentStatus",
           "EmployerAccountId",
-          "EmployerName"
+          "EmployerName",
+          "CreatedOn"
         ]
       },
       "PaymentStatus": {
-        "type": "string",
+        "type": "integer",
         "enum": [
-          "Active",
-          "Paused",
-          "Withdrawn",
-          "Completed"
-        ]
+          1,
+          2,
+          3,
+          4
+        ],
+        "description": "The payment status of the apprenticeship, corresponding to predefined statuses."
       }
     },
     "securitySchemes": {
-      "BearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "tokenUrl": "https://example.com/oauth/token",
+            "scopes": {}
+          }
+        }
       }
     }
   }
