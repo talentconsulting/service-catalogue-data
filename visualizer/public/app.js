@@ -62,7 +62,10 @@ function applyMode() {
 
 async function selectSource(id) {
   state.source = state.catalog.find((source) => source.id === id);
-  if (!state.source.capabilities[state.view]) state.view = defaultView();
+  const supportsView = state.view === 'dependencies'
+    ? state.source.capabilities.dependencies || state.source.capabilities.messages
+    : state.source.capabilities[state.view];
+  if (!supportsView) state.view = defaultView();
   state.filter = '';
   state.selected = null;
   state.apiFile = state.source.apiFiles[0] || null;
@@ -483,6 +486,7 @@ function edgeLabel(edge) {
 function buildLandscape(sources, dependencySets) {
   const systemTokenMap = new Map(sources.map((s) => [s.id, new Set(tokenize(s.name))]));
   const edgeMap = new Map();
+  const dependencyLinks = [];
 
   function addEdge(from, to, dependency) {
     const key = `${from}|${to}`;
@@ -499,7 +503,8 @@ function buildLandscape(sources, dependencySets) {
   const externalEntries = [];
   for (const { source, dependencies } of dependencySets) {
     const ownTokens = systemTokenMap.get(source.id);
-    for (const dependency of dependencies) {
+    for (const [dependencyIndex, dependency] of dependencies.entries()) {
+      dependencyLinks.push({ sourceId: source.id, sourceName: source.name, dependencyIndex, dependency });
       const depTokens = new Set(tokenize(dependency.name));
       if (canRelate(depTokens, ownTokens)) continue;
       const matchedSystem = sources.find((candidate) => candidate.id !== source.id && canRelate(depTokens, systemTokenMap.get(candidate.id)));
@@ -542,7 +547,7 @@ function buildLandscape(sources, dependencySets) {
 
   const systems = sources.map((s) => ({ id: `sys:${s.id}`, sourceId: s.id, name: s.name, repository: s.repository }));
   const edges = [...edgeMap.values()].map((edge) => ({ ...edge, technologies: [...edge.technologies], names: [...edge.names], kinds: [...edge.kinds] }));
-  return { systems, externals, edges };
+  return { systems, externals, edges, dependencyLinks };
 }
 
 function ringLayout(group, center, radiusX, radiusY, angleOffset = 0) {
@@ -776,6 +781,17 @@ function landscapeChecklistGroup(title, nodes, formatLabel) {
   </div>`;
 }
 
+function landscapeDependencyList(dependencies) {
+  const rows = dependencies
+    .sort((a, b) => `${a.sourceName}:${a.dependency.name}`.localeCompare(`${b.sourceName}:${b.dependency.name}`))
+    .map(({ sourceId, sourceName, dependencyIndex, dependency }) => `<li><button class="landscape-dependency-link" type="button" data-dependency-jump="${escapeHtml(sourceId)}" data-dependency-index="${dependencyIndex}"><span>${escapeHtml(splitPascalCase(dependency.name))}</span><small>${escapeHtml(titleCase(sourceName))} · ${escapeHtml(dependency.technology || dependency.kind || 'service')}</small></button></li>`)
+    .join('');
+  return `<section class="landscape-dependencies" aria-label="Dependencies">
+    <h4>Dependencies <span class="count">${dependencies.length}</span></h4>
+    <ul>${rows || '<li class="muted">None recorded.</li>'}</ul>
+  </section>`;
+}
+
 function renderLandscape() {
   const graph = state.landscape;
   const allNodes = [...graph.systems, ...graph.externals];
@@ -793,13 +809,16 @@ function renderLandscape() {
   if (!state.selected || !visibleNodes.some((node) => node.id === state.selected)) state.selected = visibleNodes[0]?.id || null;
   const selected = allNodes.find((node) => node.id === state.selected);
 
-  const checklistHtml = `<aside class="landscape-checklist" aria-label="Services to show">
+  const checklistHtml = `<aside class="landscape-sidebar" aria-label="Landscape controls">
+    <div class="landscape-checklist" aria-label="Services to show">
     <div class="checklist-controls">
       <button id="landscape-select-all" type="button" class="plain-button">Select all</button>
       <button id="landscape-deselect-all" type="button" class="plain-button">Deselect all</button>
     </div>
     ${landscapeChecklistGroup('Systems', graph.systems, titleCase)}
     ${landscapeChecklistGroup('External systems', graph.externals, splitPascalCase)}
+    </div>
+    ${landscapeDependencyList(graph.dependencyLinks || [])}
   </aside>`;
 
   if (!visibleNodes.length) {
@@ -866,6 +885,7 @@ function renderLandscape() {
   makeDraggableGraph($('.dependency-graph'), positions, VIEW_W, VIEW_H);
   document.querySelectorAll('[data-node]').forEach((button) => { button.addEventListener('click', () => { state.selected = button.dataset.node; renderLandscape(); }); });
   document.querySelectorAll('[data-jump]').forEach((button) => { button.onclick = () => jumpToSource(button.dataset.jump); });
+  document.querySelectorAll('[data-dependency-jump]').forEach((button) => { button.onclick = () => jumpToSource(button.dataset.dependencyJump, Number(button.dataset.dependencyIndex)); });
   wireLandscapeChecklist(allNodes);
 }
 
@@ -912,15 +932,16 @@ function landscapeDetail(node, graph) {
   </article>`;
 }
 
-async function jumpToSource(sourceId) {
+async function jumpToSource(sourceId, dependencyIndex = null) {
+  const target = state.catalog.find((source) => source.id === sourceId);
   state.mode = 'source';
   applyMode();
   sourceSelect.value = sourceId;
+  if (target && (target.capabilities.dependencies || target.capabilities.messages)) state.view = 'dependencies';
   await selectSource(sourceId);
-  if (state.source.capabilities.dependencies) {
-    state.view = 'dependencies';
-    renderTabs();
-    await loadView();
+  if (state.view === 'dependencies' && dependencyIndex !== null) {
+    state.selected = String(dependencyIndex);
+    renderDependencies(false);
   }
 }
 
