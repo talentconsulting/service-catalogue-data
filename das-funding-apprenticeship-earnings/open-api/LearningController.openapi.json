@@ -1,14 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Apprenticeship Learning API",
+    "title": "LearningController API",
     "version": "1.0.0"
   },
   "paths": {
     "/learning": {
       "post": {
-        "summary": "Create Unapproved Apprenticeship Learning",
         "operationId": "CreateUnapprovedApprenticeshipLearning",
+        "summary": "Create unapproved apprenticeship learning.",
         "requestBody": {
           "required": true,
           "content": {
@@ -21,18 +21,18 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successfully created unapproved apprenticeship learning."
           },
           "500": {
-            "description": "Error"
+            "description": "Error occurred while creating unapproved apprenticeship learning."
           }
         }
       }
     },
     "/learning/{learningKey}/learning-support": {
       "put": {
-        "summary": "Update Learning Support",
         "operationId": "UpdateLearningSupport",
+        "summary": "Update learning support for an apprenticeship.",
         "parameters": [
           {
             "name": "learningKey",
@@ -41,7 +41,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Unique identifier for the apprenticeship learning."
           }
         ],
         "requestBody": {
@@ -56,18 +57,18 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successfully updated learning support."
           },
           "500": {
-            "description": "Error"
+            "description": "Error occurred while updating learning support."
           }
         }
       }
     },
     "/learning/{learningKey}/english-and-maths": {
       "put": {
-        "summary": "Update English and Maths",
         "operationId": "SaveMathsAndEnglish",
+        "summary": "Update English and Maths for an apprenticeship.",
         "parameters": [
           {
             "name": "learningKey",
@@ -76,7 +77,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Unique identifier for the apprenticeship learning."
           }
         ],
         "requestBody": {
@@ -91,18 +93,18 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successfully updated English and Maths."
           },
           "500": {
-            "description": "Error"
+            "description": "Error occurred while updating English and Maths."
           }
         }
       }
     },
     "/learning/{learningKey}/on-programme": {
       "put": {
-        "summary": "Update On Program Learning",
         "operationId": "UpdateOnProgramme",
+        "summary": "Update on-programme information for an apprenticeship.",
         "parameters": [
           {
             "name": "learningKey",
@@ -111,7 +113,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Unique identifier for the apprenticeship learning."
           }
         ],
         "requestBody": {
@@ -126,18 +129,18 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successfully updated on-programme information."
           },
           "500": {
-            "description": "Error"
+            "description": "Error occurred while updating on-programme information."
           }
         }
       }
     },
     "/learning/{learningKey}": {
       "delete": {
-        "summary": "Remove Learner",
         "operationId": "RemoveLearner",
+        "summary": "Remove a learner from an apprenticeship.",
         "parameters": [
           {
             "name": "learningKey",
@@ -146,15 +149,16 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Unique identifier for the apprenticeship learning."
           }
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successfully removed learner."
           },
           "500": {
-            "description": "Error"
+            "description": "Error occurred while removing learner."
           }
         }
       }
@@ -185,19 +189,23 @@
           },
           "CompletionDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "WithdrawalDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "PauseDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "AchievementDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "Prices": {
             "type": "array",
@@ -223,7 +231,14 @@
               "$ref": "#/components/schemas/LearningSupportItem"
             }
           }
-        }
+        },
+        "required": [
+          "LearningKey",
+          "EpisodeKey",
+          "ApprovalsApprenticeshipId",
+          "Learner",
+          "OnProgramme"
+        ]
       },
       "DraftApprenticeshipLearner": {
         "type": "object",
@@ -238,7 +253,31 @@
           "Care": {
             "$ref": "#/components/schemas/DraftCare"
           }
-        }
+        },
+        "required": [
+          "DateOfBirth",
+          "Uln",
+          "Care"
+        ]
+      },
+      "DraftCare": {
+        "type": "object",
+        "properties": {
+          "HasEHCP": {
+            "type": "boolean"
+          },
+          "IsCareLeaver": {
+            "type": "boolean"
+          },
+          "CareLeaverEmployerConsentGiven": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "HasEHCP",
+          "IsCareLeaver",
+          "CareLeaverEmployerConsentGiven"
+        ]
       },
       "DraftApprenticeshipOnProgramme": {
         "type": "object",
@@ -256,7 +295,8 @@
           },
           "FundingEmployerAccountId": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "nullable": true
           },
           "LegalEntityName": {
             "type": "string"
@@ -266,32 +306,21 @@
           },
           "FundingBandMaximum": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "nullable": true
           }
-        }
-      },
-      "EmployerType": {
-        "type": "string",
-        "enum": [
-          "NonLevy",
-          "Levy"
+        },
+        "required": [
+          "TrainingCode",
+          "Ukprn",
+          "EmployerAccountId",
+          "LegalEntityName",
+          "EmployerType"
         ]
       },
-      "LearningSupportItem": {
-        "type": "object",
-        "properties": {
-          "StartDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "EndDate": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
       "LearningEpisodePrice": {
-        "type": "object"
+        "type": "object",
+        "additionalProperties": true
       },
       "ApprenticeshipPeriodInLearningItem": {
         "type": "object",
@@ -302,27 +331,18 @@
           },
           "EndDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "OriginalExpectedEndDate": {
             "type": "string",
             "format": "date-time"
           }
-        }
-      },
-      "DraftCare": {
-        "type": "object",
-        "properties": {
-          "HasEHCP": {
-            "type": "boolean"
-          },
-          "IsCareLeaver": {
-            "type": "boolean"
-          },
-          "CareLeaverEmployerConsentGiven": {
-            "type": "boolean"
-          }
-        }
+        },
+        "required": [
+          "StartDate",
+          "OriginalExpectedEndDate"
+        ]
       },
       "DraftEnglishAndMathsItem": {
         "type": "object",
@@ -347,19 +367,23 @@
           },
           "CombinedFundingAdjustmentPercentage": {
             "type": "number",
-            "format": "decimal"
+            "format": "decimal",
+            "nullable": true
           },
           "PauseDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "WithdrawalDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "CompletionDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "PeriodsInLearning": {
             "type": "array",
@@ -367,7 +391,38 @@
               "$ref": "#/components/schemas/ApprenticeshipPeriodInLearningItem"
             }
           }
-        }
+        },
+        "required": [
+          "StartDate",
+          "EndDate",
+          "Course",
+          "LearnAimRef",
+          "Amount"
+        ]
+      },
+      "LearningSupportItem": {
+        "type": "object",
+        "properties": {
+          "StartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EndDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "StartDate",
+          "EndDate"
+        ]
+      },
+      "EmployerType": {
+        "type": "string",
+        "enum": [
+          "NonLevy",
+          "Levy"
+        ]
       },
       "UpdateLearningSupportRequest": {
         "type": "object",
@@ -378,7 +433,10 @@
               "$ref": "#/components/schemas/LearningSupportItem"
             }
           }
-        }
+        },
+        "required": [
+          "LearningSupport"
+        ]
       },
       "UpdateEnglishAndMathsRequest": {
         "type": "object",
@@ -389,7 +447,10 @@
               "$ref": "#/components/schemas/EnglishAndMathsItem"
             }
           }
-        }
+        },
+        "required": [
+          "EnglishAndMaths"
+        ]
       },
       "EnglishAndMathsItem": {
         "type": "object",
@@ -414,19 +475,23 @@
           },
           "CombinedFundingAdjustmentPercentage": {
             "type": "number",
-            "format": "decimal"
+            "format": "decimal",
+            "nullable": true
           },
           "PauseDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "WithdrawalDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "CompletionDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "PeriodsInLearning": {
             "type": "array",
@@ -434,7 +499,14 @@
               "$ref": "#/components/schemas/PeriodInLearningItem"
             }
           }
-        }
+        },
+        "required": [
+          "StartDate",
+          "EndDate",
+          "Course",
+          "LearnAimRef",
+          "Amount"
+        ]
       },
       "PeriodInLearningItem": {
         "type": "object",
@@ -445,13 +517,18 @@
           },
           "EndDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "OriginalExpectedEndDate": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "StartDate",
+          "OriginalExpectedEndDate"
+        ]
       },
       "UpdateOnProgrammeRequest": {
         "type": "object",
@@ -462,19 +539,23 @@
           },
           "CompletionDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "WithdrawalDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "PauseDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "AchievementDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "DateOfBirth": {
             "type": "string",
@@ -482,7 +563,8 @@
           },
           "FundingBandMaximum": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "nullable": true
           },
           "IncludesFundingBandMaximumUpdate": {
             "type": "boolean"
@@ -502,7 +584,12 @@
           "Care": {
             "$ref": "#/components/schemas/Care"
           }
-        }
+        },
+        "required": [
+          "ApprenticeshipEpisodeKey",
+          "DateOfBirth",
+          "IncludesFundingBandMaximumUpdate"
+        ]
       },
       "Care": {
         "type": "object",
@@ -516,7 +603,12 @@
           "CareLeaverEmployerConsentGiven": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "HasEHCP",
+          "IsCareLeaver",
+          "CareLeaverEmployerConsentGiven"
+        ]
       }
     }
   }

@@ -2,14 +2,13 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Provider Earnings API",
-    "description": "API for retrieving FM36 earnings for providers.",
     "version": "1.0.0"
   },
   "paths": {
     "/{ukprn}/fm36/{collectionYear}/{collectionPeriod}": {
       "post": {
         "summary": "Gets the FM36 earnings for the provider",
-        "description": "Although this endpoint is a POST, it is used to retrieve data.",
+        "description": "Although this endpoint is a POST, it is used to retrieve FM36 data for a specified provider.",
         "parameters": [
           {
             "name": "ukprn",
@@ -19,7 +18,7 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "The UKPRN of the provider."
+            "description": "The UKPRN (UK Provider Reference Number) of the provider."
           },
           {
             "name": "collectionYear",
@@ -27,9 +26,9 @@
             "required": true,
             "schema": {
               "type": "integer",
-              "format": "int32"
+              "format": "int16"
             },
-            "description": "The collection year for the FM36 data."
+            "description": "The collection year for the requested data."
           },
           {
             "name": "collectionPeriod",
@@ -37,9 +36,9 @@
             "required": true,
             "schema": {
               "type": "integer",
-              "format": "int32"
+              "format": "int8"
             },
-            "description": "The collection period for the FM36 data."
+            "description": "The collection period for the requested data."
           }
         ],
         "requestBody": {
@@ -52,14 +51,14 @@
                   "type": "string",
                   "format": "uuid"
                 }
-              }
+              },
+              "description": "A list of learning keys (UUIDs) related to the provider's data."
             }
-          },
-          "description": "List of learning keys."
+          }
         },
         "responses": {
           "200": {
-            "description": "The FM36 earnings data for the provider.",
+            "description": "Successful response containing FM36 earnings data.",
             "content": {
               "application/json": {
                 "schema": {
@@ -76,8 +75,17 @@
     "schemas": {
       "GetFm36DataResponse": {
         "type": "object",
-        "description": "The response containing FM36 earnings data.",
-        "properties": {}
+        "description": "The response payload containing the FM36 earnings data.",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": false
       }
     }
   }
