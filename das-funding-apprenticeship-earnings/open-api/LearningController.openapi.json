@@ -1,14 +1,15 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Apprenticeship Learning API",
-    "version": "1.0.0"
+    "title": "LearningController API",
+    "version": "1.0.0",
+    "description": "API for managing apprenticeship learning and associated data"
   },
   "paths": {
     "/learning": {
       "post": {
-        "summary": "Create Unapproved Apprenticeship Learning",
-        "operationId": "CreateUnapprovedApprenticeshipLearning",
+        "operationId": "createUnapprovedApprenticeshipLearning",
+        "summary": "Create unapproved apprenticeship learning",
         "requestBody": {
           "required": true,
           "content": {
@@ -21,18 +22,18 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successfully created unapproved apprenticeship learning"
           },
           "500": {
-            "description": "Error"
+            "description": "Error creating unapproved apprenticeship learning"
           }
         }
       }
     },
     "/learning/{learningKey}/learning-support": {
       "put": {
-        "summary": "Update Learning Support",
-        "operationId": "UpdateLearningSupport",
+        "operationId": "updateLearningSupport",
+        "summary": "Update learning support for apprenticeship",
         "parameters": [
           {
             "name": "learningKey",
@@ -41,7 +42,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Unique key identifying the apprenticeship"
           }
         ],
         "requestBody": {
@@ -56,18 +58,18 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successfully updated learning support"
           },
           "500": {
-            "description": "Error"
+            "description": "Error updating learning support"
           }
         }
       }
     },
     "/learning/{learningKey}/english-and-maths": {
       "put": {
-        "summary": "Update English and Maths",
-        "operationId": "SaveMathsAndEnglish",
+        "operationId": "saveMathsAndEnglish",
+        "summary": "Update English and Maths for apprenticeship",
         "parameters": [
           {
             "name": "learningKey",
@@ -76,7 +78,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Unique key identifying the apprenticeship"
           }
         ],
         "requestBody": {
@@ -91,18 +94,18 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successfully updated English and Maths"
           },
           "500": {
-            "description": "Error"
+            "description": "Error updating English and Maths"
           }
         }
       }
     },
     "/learning/{learningKey}/on-programme": {
       "put": {
-        "summary": "Update On Program Learning",
-        "operationId": "UpdateOnProgramme",
+        "operationId": "updateOnProgramme",
+        "summary": "Update on-programme for apprenticeship",
         "parameters": [
           {
             "name": "learningKey",
@@ -111,7 +114,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Unique key identifying the apprenticeship"
           }
         ],
         "requestBody": {
@@ -126,18 +130,18 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successfully updated on-programme"
           },
           "500": {
-            "description": "Error"
+            "description": "Error updating on-programme"
           }
         }
       }
     },
     "/learning/{learningKey}": {
       "delete": {
-        "summary": "Remove Learner",
-        "operationId": "RemoveLearner",
+        "operationId": "removeLearner",
+        "summary": "Remove learner from apprenticeship",
         "parameters": [
           {
             "name": "learningKey",
@@ -146,15 +150,16 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Unique key identifying the apprenticeship"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successfully removed learner"
           },
           "500": {
-            "description": "Error"
+            "description": "Error removing learner"
           }
         }
       }
@@ -268,30 +273,32 @@
             "type": "integer",
             "format": "int32"
           }
-        }
-      },
-      "EmployerType": {
-        "type": "string",
-        "enum": [
-          "NonLevy",
-          "Levy"
+        },
+        "required": [
+          "TrainingCode",
+          "Ukprn",
+          "EmployerAccountId",
+          "LegalEntityName",
+          "EmployerType"
         ]
       },
-      "LearningSupportItem": {
+      "DraftCare": {
         "type": "object",
         "properties": {
-          "StartDate": {
-            "type": "string",
-            "format": "date-time"
+          "HasEHCP": {
+            "type": "boolean"
           },
-          "EndDate": {
-            "type": "string",
-            "format": "date-time"
+          "IsCareLeaver": {
+            "type": "boolean"
+          },
+          "CareLeaverEmployerConsentGiven": {
+            "type": "boolean"
           }
         }
       },
       "LearningEpisodePrice": {
-        "type": "object"
+        "type": "object",
+        "properties": {}
       },
       "ApprenticeshipPeriodInLearningItem": {
         "type": "object",
@@ -307,20 +314,6 @@
           "OriginalExpectedEndDate": {
             "type": "string",
             "format": "date-time"
-          }
-        }
-      },
-      "DraftCare": {
-        "type": "object",
-        "properties": {
-          "HasEHCP": {
-            "type": "boolean"
-          },
-          "IsCareLeaver": {
-            "type": "boolean"
-          },
-          "CareLeaverEmployerConsentGiven": {
-            "type": "boolean"
           }
         }
       },
@@ -368,6 +361,30 @@
             }
           }
         }
+      },
+      "LearningSupportItem": {
+        "type": "object",
+        "properties": {
+          "StartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EndDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "StartDate",
+          "EndDate"
+        ]
+      },
+      "EmployerType": {
+        "type": "string",
+        "enum": [
+          "NonLevy",
+          "Levy"
+        ]
       },
       "UpdateLearningSupportRequest": {
         "type": "object",
