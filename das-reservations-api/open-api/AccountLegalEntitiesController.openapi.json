@@ -2,11 +2,10 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Account Legal Entities API",
-    "version": "1.0.0",
-    "description": "API for managing account legal entities and their reservations."
+    "version": "1.0.0"
   },
   "paths": {
-    "/api/{accountId}/accountlegalentities": {
+    "/api/{accountId}/AccountLegalEntities": {
       "get": {
         "summary": "Get legal entities by account ID",
         "operationId": "GetByAccountId",
@@ -18,27 +17,64 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "The ID of the account."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "List of legal entities.",
+            "description": "Legal entities retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "additionalProperties": true
+                    "type": "object"
                   }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid account ID.",
+            "description": "Argument exception occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArgumentErrorViewModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/AccountLegalEntities/{legalEntityId}": {
+      "get": {
+        "summary": "Get legal entity by ID",
+        "operationId": "GetByAccountLegalEntityId",
+        "parameters": [
+          {
+            "name": "legalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Legal entity retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Argument exception occurred",
             "content": {
               "application/json": {
                 "schema": {
@@ -52,7 +88,7 @@
     },
     "/api/accounts/{accountId}/status": {
       "get": {
-        "summary": "Get account reservation status",
+        "summary": "Get reservation status by account ID",
         "operationId": "GetAccountReservationStatus",
         "parameters": [
           {
@@ -62,24 +98,22 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "The ID of the account."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Reservation status of the account.",
+            "description": "Reservation status retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                  "type": "object"
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid account ID.",
+            "description": "Argument exception occurred",
             "content": {
               "application/json": {
                 "schema": {
@@ -89,53 +123,12 @@
             }
           },
           "404": {
-            "description": "Account legal entity not found."
+            "description": "Entity not found"
           }
         }
       }
     },
-    "/api/accountlegalentities/{legalEntityId}": {
-      "get": {
-        "summary": "Get legal entity by ID",
-        "operationId": "GetByAccountLegalEntityId",
-        "parameters": [
-          {
-            "name": "legalEntityId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "The ID of the legal entity."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Details of the legal entity.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid legal entity ID.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ArgumentErrorViewModel"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/accountlegalentities/provider/{providerId}": {
+    "/api/AccountLegalEntities/provider/{providerId}": {
       "get": {
         "summary": "Get legal entities by provider ID",
         "operationId": "GetByProviderId",
@@ -147,27 +140,25 @@
             "schema": {
               "type": "integer",
               "format": "int32"
-            },
-            "description": "The ID of the provider."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "List of provider permissions.",
+            "description": "Provider permissions retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "additionalProperties": true
+                    "type": "object"
                   }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid provider ID.",
+            "description": "Argument exception occurred",
             "content": {
               "application/json": {
                 "schema": {
@@ -186,15 +177,16 @@
         "type": "object",
         "properties": {
           "Message": {
-            "type": "string",
-            "description": "Error message."
+            "type": "string"
           },
           "Params": {
-            "type": "string",
-            "description": "Relevant parameters causing the error."
+            "type": "string"
           }
         },
-        "additionalProperties": false
+        "required": [
+          "Message",
+          "Params"
+        ]
       }
     }
   }

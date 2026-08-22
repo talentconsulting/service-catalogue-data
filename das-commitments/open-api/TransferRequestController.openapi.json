@@ -1,14 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "CommitmentsV2 TransferRequest API",
+    "title": "Transfer Request API",
     "version": "1.0.0"
   },
   "paths": {
     "/api/accounts/{transferSenderId}/sender/transfers/{transferRequestId}": {
       "get": {
         "operationId": "GetTransferRequestForSender",
-        "summary": "Gets details of a transfer request for a sender",
         "parameters": [
           {
             "name": "transferSenderId",
@@ -31,7 +30,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Transfer request details returned",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -41,7 +40,7 @@
             }
           },
           "404": {
-            "description": "Transfer request not found"
+            "description": "Not Found"
           }
         }
       }
@@ -49,7 +48,6 @@
     "/api/accounts/{transferSenderId}/transfers/{transferRequestId}/approval/{cohortId}": {
       "post": {
         "operationId": "UpdateTransferApprovalForSender",
-        "summary": "Updates approval status for a transfer request for a sender",
         "parameters": [
           {
             "name": "transferSenderId",
@@ -91,7 +89,7 @@
         },
         "responses": {
           "200": {
-            "description": "Approval updated successfully"
+            "description": "Success"
           }
         }
       }
@@ -99,7 +97,6 @@
     "/api/accounts/{transferReceiverId}/receiver/transfers/{transferRequestId}": {
       "get": {
         "operationId": "GetTransferRequestForReceiver",
-        "summary": "Gets details of a transfer request for a receiver",
         "parameters": [
           {
             "name": "transferReceiverId",
@@ -122,7 +119,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Transfer request details returned",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -132,7 +129,7 @@
             }
           },
           "404": {
-            "description": "Transfer request not found"
+            "description": "Not Found"
           }
         }
       }
@@ -140,7 +137,6 @@
     "/api/accounts/{accountId}/transfers": {
       "get": {
         "operationId": "GetTransferRequests",
-        "summary": "Gets a summary of all transfer requests",
         "parameters": [
           {
             "name": "accountId",
@@ -162,7 +158,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Transfer requests summary returned",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -172,7 +168,7 @@
             }
           },
           "404": {
-            "description": "No transfer requests found"
+            "description": "Not Found"
           }
         }
       }
@@ -180,9 +176,35 @@
   },
   "components": {
     "schemas": {
-      "GetTransferRequestResponse": {
+      "TransferType": {
+        "type": "string",
+        "enum": [
+          "AsSender",
+          "AsReceiver"
+        ]
+      },
+      "TransferApprovalStatus": {
+        "type": "integer",
+        "enum": [
+          0,
+          1,
+          2
+        ],
+        "description": "0: Pending, 1: Approved, 2: Rejected"
+      },
+      "UserInfo": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "UserId": {
+            "type": "string"
+          },
+          "UserDisplayName": {
+            "type": "string"
+          },
+          "UserEmail": {
+            "type": "string"
+          }
+        }
       },
       "UpdateTransferApprovalForSenderRequest": {
         "type": "object",
@@ -209,53 +231,46 @@
           "UserInfo": {
             "$ref": "#/components/schemas/UserInfo"
           }
-        },
-        "required": [
-          "TransferSenderId",
-          "TransferRequestId",
-          "CohortId",
-          "TransferReceiverId",
-          "TransferApprovalStatus",
-          "UserInfo"
-        ]
+        }
       },
-      "TransferType": {
-        "type": "string",
-        "enum": [
-          "AsSender",
-          "AsReceiver"
-        ]
-      },
-      "TransferApprovalStatus": {
-        "type": "string",
-        "enum": [
-          "Pending",
-          "Approved",
-          "Rejected"
-        ]
-      },
-      "UserInfo": {
+      "GetTransferRequestResponse": {
         "type": "object",
         "properties": {
-          "UserId": {
-            "type": "string"
+          "TransferRequestId": {
+            "type": "integer",
+            "format": "int64"
           },
-          "UserDisplayName": {
-            "type": "string"
+          "TransferSenderId": {
+            "type": "integer",
+            "format": "int64"
           },
-          "UserEmail": {
-            "type": "string"
+          "TransferReceiverId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "CohortId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "TransferApprovalStatus": {
+            "$ref": "#/components/schemas/TransferApprovalStatus"
           }
-        },
-        "required": [
-          "UserId",
-          "UserDisplayName",
-          "UserEmail"
-        ]
+        }
       },
       "GetTransferRequestSummaryResponse": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Transfers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GetTransferRequestResponse"
+            }
+          }
+        }
       }
     }
   }

@@ -2,14 +2,12 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Reservations API",
-    "version": "1.0.0",
-    "description": "API for managing reservations."
+    "version": "1.0.0"
   },
   "paths": {
     "/api/reservations/accounts/Bulk-Create": {
       "post": {
-        "operationId": "bulkCreateReservations",
-        "parameters": [],
+        "operationId": "BulkCreateReservations",
         "requestBody": {
           "required": true,
           "content": {
@@ -22,48 +20,53 @@
         },
         "responses": {
           "200": {
-            "description": "Bulk reservations created successfully."
+            "description": "Successfully created reservations",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Reservations created"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid request."
+            "description": "Invalid request"
           }
         }
       }
     },
     "/api/accounts/{accountId}/reservations": {
       "get": {
-        "operationId": "getAccountReservations",
+        "operationId": "GetAllReservations",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Reservations retrieved successfully."
+            "description": "Reservations retrieved successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "reservations": []
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid request."
+            "description": "Invalid request"
           }
         }
       },
       "post": {
-        "operationId": "createAccountReservation",
-        "parameters": [
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
+        "operationId": "CreateReservation",
         "requestBody": {
           "required": true,
           "content": {
@@ -74,22 +77,40 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
         "responses": {
           "201": {
-            "description": "Reservation created successfully."
+            "description": "Reservation created successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "reservation": {}
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid request."
+            "description": "Invalid request"
           },
           "422": {
-            "description": "Unprocessable request."
+            "description": "Unprocessable entity"
           }
         }
       }
     },
     "/api/reservations/{id}": {
       "get": {
-        "operationId": "getReservation",
+        "operationId": "GetReservationById",
         "parameters": [
           {
             "name": "id",
@@ -103,18 +124,25 @@
         ],
         "responses": {
           "200": {
-            "description": "Reservation retrieved successfully."
+            "description": "Reservation retrieved successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "reservation": {}
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid request."
+            "description": "Invalid request"
           },
           "404": {
-            "description": "Reservation not found."
+            "description": "Reservation not found"
           }
         }
       },
       "delete": {
-        "operationId": "deleteReservation",
+        "operationId": "DeleteReservation",
         "parameters": [
           {
             "name": "id",
@@ -136,27 +164,28 @@
         ],
         "responses": {
           "204": {
-            "description": "Reservation deleted successfully."
+            "description": "Reservation deleted successfully"
           },
           "400": {
-            "description": "Invalid request."
+            "description": "Invalid request"
           },
           "410": {
-            "description": "Reservation permanently removed."
+            "description": "Reservation permanently gone"
           }
         }
       }
     },
     "/api/reservations/search": {
       "get": {
-        "operationId": "searchReservations",
+        "operationId": "SearchReservations",
         "parameters": [
           {
             "name": "providerId",
             "in": "query",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             }
           },
           {
@@ -221,20 +250,27 @@
         ],
         "responses": {
           "200": {
-            "description": "Search results returned successfully."
+            "description": "Reservations found successfully",
+            "content": {
+              "application/json": {
+                "example": {
+                  "reservations": []
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid request."
+            "description": "Invalid request"
           },
           "404": {
-            "description": "No search results found."
+            "description": "No reservations found"
           }
         }
       }
     },
     "/api/reservations/validate/{id}": {
       "get": {
-        "operationId": "validateReservation",
+        "operationId": "ValidateReservation",
         "parameters": [
           {
             "name": "id",
@@ -259,26 +295,75 @@
             "required": true,
             "schema": {
               "type": "string",
-              "format": "date"
+              "format": "date-time"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Reservation validation completed successfully."
+            "description": "Validation results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateReservationViewModel"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid request."
+            "description": "Invalid request"
           },
           "404": {
-            "description": "Reservation not found."
+            "description": "Reservation not found"
+          }
+        }
+      }
+    },
+    "/api/reservations/accounts/{accountLegalEntityId}/bulk-create": {
+      "post": {
+        "operationId": "BulkCreateReservationsForEntity",
+        "parameters": [
+          {
+            "name": "accountLegalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkReservation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Reservations created for entity successfully",
+            "content": {
+              "application/json": {
+                "example": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "404": {
+            "description": "Entity not found"
           }
         }
       }
     },
     "/api/reservations/{id}/change": {
       "post": {
-        "operationId": "changeReservation",
+        "operationId": "ChangeReservationParty",
         "parameters": [
           {
             "name": "id",
@@ -302,54 +387,24 @@
         },
         "responses": {
           "201": {
-            "description": "Reservation party changed successfully."
-          },
-          "400": {
-            "description": "Invalid request."
-          }
-        }
-      }
-    },
-    "/api/reservations/accounts/{accountLegalEntityId}/bulk-create": {
-      "post": {
-        "operationId": "bulkCreateReservationsWithDetails",
-        "parameters": [
-          {
-            "name": "accountLegalEntityId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkReservation"
+            "description": "Party changed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeOfPartyResponse"
+                }
               }
             }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Bulk reservations created successfully."
           },
           "400": {
-            "description": "Invalid request."
-          },
-          "404": {
-            "description": "Account legal entity not found."
+            "description": "Invalid request"
           }
         }
       }
     },
     "/api/reservations/accounts/bulk-validate": {
       "post": {
-        "operationId": "bulkValidateReservations",
-        "parameters": [],
+        "operationId": "BulkValidateReservations",
         "requestBody": {
           "required": true,
           "content": {
@@ -365,7 +420,14 @@
         },
         "responses": {
           "200": {
-            "description": "Bulk reservation validation completed successfully."
+            "description": "Bulk validation completed",
+            "content": {
+              "application/json": {
+                "example": {
+                  "message": "Validated successfully"
+                }
+              }
+            }
           }
         }
       }
@@ -373,62 +435,62 @@
   },
   "components": {
     "schemas": {
+      "ArgumentErrorViewModel": {
+        "type": "object",
+        "properties": {
+          "Message": {
+            "type": "string"
+          },
+          "Params": {
+            "type": "string"
+          }
+        }
+      },
       "BulkCreateReservationsRequest": {
         "type": "object",
         "properties": {
           "Reservations": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/BulkValidateReservationRequest"
+              "$ref": "#/components/schemas/BulkCreateReservation"
             }
           }
         }
       },
-      "Reservation": {
+      "BulkCreateReservation": {
         "type": "object",
         "properties": {
           "Id": {
             "type": "string",
             "format": "uuid"
           },
-          "AccountId": {
-            "type": "integer"
-          },
           "StartDate": {
             "type": "string",
-            "format": "date"
+            "format": "date-time"
           },
           "CourseId": {
             "type": "string"
           },
           "ProviderId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "AccountLegalEntityId": {
-            "type": "integer"
-          },
-          "AccountLegalEntityName": {
-            "type": "string"
-          },
-          "IsLevyAccount": {
-            "type": "boolean"
+            "type": "integer",
+            "format": "int64"
           },
           "TransferSenderAccountId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "UserId": {
             "type": "string",
             "format": "uuid"
-          }
-        }
-      },
-      "ChangeOfPartyRequest": {
-        "type": "object",
-        "properties": {
-          "AccountLegalEntityId": {
-            "type": "integer"
           },
-          "ProviderId": {
+          "ULN": {
+            "type": "string"
+          },
+          "RowNumber": {
             "type": "integer"
           }
         }
@@ -440,7 +502,8 @@
             "type": "integer"
           },
           "TransferSenderId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -453,19 +516,22 @@
           },
           "StartDate": {
             "type": "string",
-            "format": "date"
+            "format": "date-time"
           },
           "CourseId": {
             "type": "string"
           },
           "ProviderId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "AccountLegalEntityId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "TransferSenderAccountId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "UserId": {
             "type": "string",
@@ -476,6 +542,27 @@
           }
         }
       },
+      "ChangeOfPartyRequest": {
+        "type": "object",
+        "properties": {
+          "AccountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ProviderId": {
+            "type": "integer"
+          }
+        }
+      },
+      "ChangeOfPartyResponse": {
+        "type": "object",
+        "properties": {
+          "ReservationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
       "LearningType": {
         "type": "string",
         "enum": [
@@ -483,6 +570,70 @@
           "FoundationApprenticeship",
           "ApprenticeshipUnit"
         ]
+      },
+      "Reservation": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "CourseId": {
+            "type": "string"
+          },
+          "ProviderId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AccountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AccountLegalEntityName": {
+            "type": "string"
+          },
+          "IsLevyAccount": {
+            "type": "boolean"
+          },
+          "TransferSenderAccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "UserId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ValidateReservationViewModel": {
+        "type": "object",
+        "properties": {
+          "ValidationErrors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReservationValidationErrorViewModel"
+            }
+          }
+        }
+      },
+      "ReservationValidationErrorViewModel": {
+        "type": "object",
+        "properties": {
+          "PropertyName": {
+            "type": "string"
+          },
+          "Reason": {
+            "type": "string"
+          }
+        }
       }
     }
   }

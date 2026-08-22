@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "AccountLegalEntity API",
+    "title": "Account Legal Entity API",
     "version": "1.0.0"
   },
   "paths": {
@@ -14,16 +14,16 @@
             "name": "AccountLegalEntityId",
             "in": "path",
             "required": true,
+            "description": "The ID of the Account Legal Entity",
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "ID of the account legal entity."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Account legal entity details retrieved successfully.",
+            "description": "Successful response with account legal entity details",
             "content": {
               "application/json": {
                 "schema": {
@@ -33,15 +33,15 @@
             }
           },
           "400": {
-            "description": "Invalid request, validation error."
+            "description": "Bad Request - The request contains invalid data"
           },
           "404": {
-            "description": "Account legal entity not found."
+            "description": "Not Found - AccountLegalEntityId does not exist"
           }
         },
         "security": [
           {
-            "Authorization": []
+            "OAuth2": []
           }
         ]
       }
@@ -54,35 +54,49 @@
         "properties": {
           "AccountId": {
             "type": "integer",
-            "format": "int64",
-            "description": "ID of the account owning the legal entity."
+            "format": "int64"
           },
           "MaLegalEntityId": {
             "type": "integer",
-            "format": "int64",
-            "description": "ID of the legal entity."
+            "format": "int64"
           },
           "AccountName": {
-            "type": "string",
-            "description": "Name of the account owning the legal entity."
+            "type": "string"
           },
           "LegalEntityName": {
-            "type": "string",
-            "description": "Name of the legal entity."
+            "type": "string"
           },
           "LevyStatus": {
-            "$ref": "#/components/schemas/ApprenticeshipEmployerType",
-            "description": "Levy status of the legal entity."
+            "$ref": "#/components/schemas/ApprenticeshipEmployerType"
           }
-        }
+        },
+        "required": [
+          "AccountId",
+          "MaLegalEntityId",
+          "AccountName",
+          "LegalEntityName",
+          "LevyStatus"
+        ]
       },
       "ApprenticeshipEmployerType": {
         "type": "string",
-        "description": "Type of apprenticeship employer.",
         "enum": [
           "NonLevy",
           "Levy"
-        ]
+        ],
+        "description": "The type of apprenticeship employer. Can be 'NonLevy' or 'Levy'."
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "tokenUrl": "https://example.com/oauth/token",
+            "scopes": {}
+          }
+        }
       }
     }
   }

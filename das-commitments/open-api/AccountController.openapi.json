@@ -1,13 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "CommitmentsV2 Account API",
+    "title": "Account API",
     "version": "1.0.0"
   },
   "paths": {
     "/api/accounts/{accountId}": {
       "get": {
-        "summary": "Get Account Summary",
+        "summary": "Get account details",
         "parameters": [
           {
             "name": "accountId",
@@ -21,7 +21,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -30,12 +30,17 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/accounts/{accountId}/transfer-status": {
       "get": {
-        "summary": "Get Account Transfer Status",
+        "summary": "Get transfer status of an account",
         "parameters": [
           {
             "name": "accountId",
@@ -49,7 +54,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -58,12 +63,17 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/accounts/{accountId}/status": {
       "get": {
-        "summary": "Get Account Status",
+        "summary": "Get account status",
         "parameters": [
           {
             "name": "accountId",
@@ -79,8 +89,7 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "integer"
             }
           },
           {
@@ -88,8 +97,7 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "integer"
             }
           },
           {
@@ -97,14 +105,13 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -113,12 +120,17 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/accounts/{accountId}/providers/approved": {
       "get": {
-        "summary": "Get Approved Providers",
+        "summary": "Get approved providers for an account",
         "parameters": [
           {
             "name": "accountId",
@@ -132,7 +144,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -141,12 +153,17 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/accounts/{accountId}/provider-payments-priority": {
       "get": {
-        "summary": "Get Provider Payments Priority",
+        "summary": "Get provider payments priority for an account",
         "parameters": [
           {
             "name": "accountId",
@@ -160,19 +177,26 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "OK",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/GetProviderPaymentsPriorityResponse"
+                }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/accounts/{accountId}/summary": {
       "get": {
-        "summary": "Get Employer Account Summary",
+        "summary": "Get employer account summary",
         "parameters": [
           {
             "name": "accountId",
@@ -186,22 +210,29 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "OK",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/GetApprenticeshipStatusSummaryResponse"
+                }
               }
             }
           },
           "404": {
             "description": "Not Found"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/accounts/{accountId}/pending-apprentice-changes": {
       "get": {
-        "summary": "Get Pending Apprentice Changes",
+        "summary": "Get pending apprentice changes for an account",
         "parameters": [
           {
             "name": "accountId",
@@ -215,22 +246,65 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "OK",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/GetApprenticeshipUpdatesResponse"
+                }
               }
             }
           },
           "404": {
             "description": "Not Found"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/accounts/{accountId}/pending-learner-change-counts": {
+      "get": {
+        "summary": "Get pending learner change counts for an account",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPendingLearnerChangeCountsForEmployerQueryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     },
     "/api/accounts/{accountId}/update-provider-payments-priority": {
       "post": {
-        "summary": "Update Provider Payments Priority",
+        "summary": "Update provider payments priority for an account",
         "parameters": [
           {
             "name": "accountId",
@@ -254,9 +328,14 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "OK"
           }
-        }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     }
   },
@@ -358,6 +437,21 @@
           "ProviderIds"
         ]
       },
+      "GetPendingLearnerChangeCountsForEmployerQueryResponse": {
+        "type": "object",
+        "properties": {
+          "ManualPendingChangeCount": {
+            "type": "integer"
+          },
+          "IlrPendingChangeCount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ManualPendingChangeCount",
+          "IlrPendingChangeCount"
+        ]
+      },
       "UpdateProviderPaymentsPriorityRequest": {
         "type": "object",
         "properties": {
@@ -384,8 +478,7 @@
             "format": "int64"
           },
           "PriorityOrder": {
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         },
         "required": [
@@ -419,6 +512,13 @@
           "NonLevy",
           "Levy"
         ]
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }
