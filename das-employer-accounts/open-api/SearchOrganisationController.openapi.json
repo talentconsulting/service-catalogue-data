@@ -1,0 +1,208 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Accounts - Organisation Search API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/accounts/{hashedAccountId}/organisations/search": {
+      "get": {
+        "operationId": "searchForOrganisationGet",
+        "summary": "Render the organisation search view.",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed account ID of the employer."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The organisation search view rendered successfully."
+          }
+        }
+      },
+      "post": {
+        "operationId": "searchForOrganisationPost",
+        "summary": "Perform organisation search.",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed account ID of the employer."
+          },
+          {
+            "name": "searchTerm",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The search term used to find an organisation."
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirection to the organisation search results page."
+          },
+          "400": {
+            "description": "Validation error for missing search term."
+          }
+        }
+      }
+    },
+    "/accounts/{hashedAccountId}/organisations/search/results": {
+      "get": {
+        "operationId": "searchForOrganisationResults",
+        "summary": "Retrieve organisation search results.",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed account ID of the employer."
+          },
+          {
+            "name": "searchTerm",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The search term used to find organisations."
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "The page number for paginated results."
+          },
+          {
+            "name": "organisationType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrganisationType"
+            },
+            "description": "The type of the organisation."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results view rendered successfully."
+          },
+          "400": {
+            "description": "Validation error for missing search term."
+          }
+        }
+      }
+    },
+    "/accounts/{hashedAccountId}/organisations/search/confirm": {
+      "post": {
+        "operationId": "confirmOrganisation",
+        "summary": "Confirm the selected organisation.",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed account ID of the employer."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrganisationDetailsViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Organisation confirmation view rendered successfully."
+          },
+          "302": {
+            "description": "Redirection to an account summary or another page."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "OrganisationType": {
+        "type": "integer",
+        "description": "Type of organisation.",
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "example": 1
+      },
+      "OrganisationDetailsViewModel": {
+        "type": "object",
+        "properties": {
+          "hashedId": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/OrganisationType"
+          },
+          "publicSectorDataSource": {
+            "type": "integer",
+            "nullable": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "dateOfInception": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "referenceNumber": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "addedToAccount": {
+            "type": "boolean"
+          },
+          "sector": {
+            "type": "string"
+          },
+          "newSearch": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

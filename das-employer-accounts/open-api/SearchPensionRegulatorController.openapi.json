@@ -1,0 +1,290 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Search Pension Regulator API",
+    "version": "1.0.0",
+    "description": "API for managing and searching pension regulator organizations using PAYE and AORN."
+  },
+  "paths": {
+    "/accounts/{hashedAccountId}/pensionregulator": {
+      "get": {
+        "summary": "Search Pension Regulator",
+        "operationId": "SearchPensionRegulator",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "summary": "Submit Search Pension Regulator",
+        "operationId": "SubmitSearchPensionRegulator",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchPensionRegulatorResultsViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/accounts/pensionregulator": {
+      "get": {
+        "summary": "Search Pension Regulator for Account Creation",
+        "operationId": "SearchPensionRegulatorCreateAccount",
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "summary": "Submit Search Pension Regulator for Account Creation",
+        "operationId": "SubmitSearchPensionRegulatorCreateAccount",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchPensionRegulatorResultsViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/accounts/{hashedAccountId}/pensionregulator/aorn": {
+      "get": {
+        "summary": "Search Pension Regulator by PAYE and AORN",
+        "operationId": "SearchPensionRegulatorByAornForAccount",
+        "parameters": [
+          {
+            "name": "payeRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "aorn",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "summary": "Submit Search Pension Regulator by PAYE and AORN",
+        "operationId": "SubmitSearchPensionRegulatorByAornForAccount",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchPensionRegulatorByAornViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/accounts/pensionregulator/aorn": {
+      "get": {
+        "summary": "Search Pension Regulator by PAYE and AORN (No Account)",
+        "operationId": "SearchPensionRegulatorByAornNoAccount",
+        "parameters": [
+          {
+            "name": "payeRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "aorn",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "summary": "Submit Search Pension Regulator by PAYE and AORN (No Account)",
+        "operationId": "SubmitSearchPensionRegulatorByAornNoAccount",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchPensionRegulatorByAornViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SearchPensionRegulatorByAornViewModel": {
+        "type": "object",
+        "properties": {
+          "Aorn": {
+            "type": "string"
+          },
+          "PayeRef": {
+            "type": "string"
+          },
+          "RemainingAttempts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "AllowedAttempts": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "RemainingLock": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "IsLocked": {
+            "type": "boolean"
+          },
+          "AornError": {
+            "type": "string"
+          },
+          "PayeRefError": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchPensionRegulatorResultsViewModel": {
+        "type": "object",
+        "properties": {
+          "PayeRef": {
+            "type": "string"
+          },
+          "Aorn": {
+            "type": "string"
+          },
+          "Results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PensionRegulatorDetailsViewModel"
+            }
+          },
+          "IsExistingAccount": {
+            "type": "boolean"
+          },
+          "SelectedOrganisation": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        }
+      },
+      "PensionRegulatorDetailsViewModel": {
+        "type": "object",
+        "properties": {
+          "HashedId": {
+            "type": "string"
+          },
+          "Type": {
+            "$ref": "#/components/schemas/OrganisationType"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Address": {
+            "type": "string"
+          },
+          "ReferenceNumber": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Status": {
+            "type": "string"
+          }
+        }
+      },
+      "OrganisationType": {
+        "type": "integer",
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "description": "1: CompaniesHouse, 2: Charities, 3: PublicBodies, 4: Other, 5: PensionsRegulator"
+      }
+    }
+  }
+}

@@ -1,0 +1,281 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Accounts Invitations API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/invitations/invite": {
+      "get": {
+        "summary": "View Invitation Information",
+        "responses": {
+          "200": {
+            "description": "Renders a view of the invitation."
+          },
+          "302": {
+            "description": "Redirects to the Home page."
+          }
+        }
+      }
+    },
+    "/invitations/all": {
+      "get": {
+        "summary": "Get All Invitations of a User",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a list of all invitations for the user.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserInvitationsViewModel"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirects to the Home page."
+          }
+        }
+      }
+    },
+    "/invitations/view": {
+      "get": {
+        "summary": "View Invitation Details",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "invitationId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns details of the specific invitation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvitationView"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirects to the Home page."
+          }
+        }
+      }
+    },
+    "/invitations/accept": {
+      "post": {
+        "summary": "Accept Invitation",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "invitation",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "User invitation model",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInvitationsViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Accepts the invitation and redirects."
+          },
+          "302": {
+            "description": "Redirects to the Home page."
+          }
+        }
+      },
+      "get": {
+        "summary": "Redirect Existing User for Invitation Acceptance",
+        "responses": {
+          "302": {
+            "description": "Redirects to the Home page."
+          }
+        }
+      }
+    },
+    "/invitations/create": {
+      "post": {
+        "summary": "Create Invitation",
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "requestBody": {
+          "description": "Invitation creation payload",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteTeamMemberViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Creates an invitation and redirects."
+          },
+          "302": {
+            "description": "Redirects to the Home page."
+          }
+        }
+      }
+    },
+    "/invitations/register-and-accept": {
+      "get": {
+        "summary": "Redirect New User for Invitation Acceptance",
+        "responses": {
+          "302": {
+            "description": "Redirects to the Home page."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "InviteTeamMemberViewModel": {
+        "type": "object",
+        "properties": {
+          "HashedAccountId": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string",
+            "format": "email"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/Role"
+          }
+        },
+        "required": [
+          "HashedAccountId",
+          "Name",
+          "Email",
+          "Role"
+        ]
+      },
+      "UserInvitationsViewModel": {
+        "type": "object",
+        "properties": {
+          "Invitations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InvitationView"
+            }
+          },
+          "ShowBreadCrumbs": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Invitations"
+        ]
+      },
+      "InvitationView": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string",
+            "format": "email"
+          },
+          "Role": {
+            "$ref": "#/components/schemas/Role"
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AccountName": {
+            "type": "string"
+          },
+          "ExpiryDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/InvitationStatus"
+          },
+          "InternalUserId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ExternalUserId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "Id",
+          "Name",
+          "Email",
+          "Role",
+          "AccountId",
+          "AccountName",
+          "ExpiryDate",
+          "Status"
+        ]
+      },
+      "Role": {
+        "type": "string",
+        "enum": [
+          "None",
+          "Owner",
+          "Transactor",
+          "Viewer"
+        ]
+      },
+      "InvitationStatus": {
+        "type": "string",
+        "enum": [
+          "Pending",
+          "Accepted",
+          "Expired",
+          "Deleted"
+        ]
+      }
+    }
+  }
+}

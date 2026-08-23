@@ -1,0 +1,572 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Account PAYE Controller API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/accounts/{HashedAccountId}/schemes": {
+      "get": {
+        "operationId": "GetEmployerAccountSchemes",
+        "summary": "Get account schemes",
+        "description": "Retrieve details about account schemes for a specified hashed account ID.",
+        "parameters": [
+          {
+            "name": "HashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed identifier of the employer account."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with account schemes.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "FlashMessage": {
+                      "$ref": "#/components/schemas/FlashMessageViewModel"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{HashedAccountId}/schemes/next": {
+      "get": {
+        "operationId": "GetNextSteps",
+        "summary": "Get the next steps for account schemes",
+        "description": "Retrieve the next steps view model for an employer account.",
+        "parameters": [
+          {
+            "name": "HashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed identifier of the employer account."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with next steps information.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "FlashMessage": {
+                      "$ref": "#/components/schemas/FlashMessageViewModel"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostNextSteps",
+        "summary": "Post user's next step decision",
+        "description": "Process the selected user option for the next steps.",
+        "parameters": [
+          {
+            "name": "HashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed identifier of the employer account."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "choice": {
+                    "type": "integer",
+                    "format": "int32",
+                    "description": "The user's next step choice."
+                  }
+                },
+                "required": [
+                  "choice"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirection to the relevant next step page.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{HashedAccountId}/schemes/{empRef}/details": {
+      "get": {
+        "operationId": "GetSchemeDetails",
+        "summary": "Get PAYE scheme details",
+        "description": "Retrieve details of a specific PAYE scheme.",
+        "parameters": [
+          {
+            "name": "HashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed identifier of the employer account."
+          },
+          {
+            "name": "empRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The employer reference number of the PAYE scheme."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with PAYE scheme details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayeScheme"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{HashedAccountId}/schemes/gatewayInform": {
+      "get": {
+        "operationId": "GetGatewayInform",
+        "summary": "Inform gateway",
+        "description": "Check if the user is the owner of an account and redirect accordingly.",
+        "parameters": [
+          {
+            "name": "HashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed identifier of the employer account."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with gateway inform details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{HashedAccountId}/schemes/gateway": {
+      "get": {
+        "operationId": "GetGateway",
+        "summary": "Get PAYE gateway",
+        "description": "Retrieve the Gateway URL for adding a PAYE scheme.",
+        "parameters": [
+          {
+            "name": "HashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed identifier of the employer account."
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirection to the Gateway URL.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{HashedAccountId}/schemes/confirm": {
+      "get": {
+        "operationId": "GetConfirmPayeScheme",
+        "summary": "Confirm PAYE scheme",
+        "description": "Retrieve confirmation model for PAYE scheme addition.",
+        "parameters": [
+          {
+            "name": "HashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed identifier of the employer account."
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Code parameter from query string."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with confirmation for PAYE scheme.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddNewPayeSchemeViewModel"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "AddPayeScheme",
+        "summary": "Add a new PAYE scheme",
+        "description": "Add a new PAYE scheme to the employer's account.",
+        "parameters": [
+          {
+            "name": "HashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed identifier of the employer account."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddNewPayeSchemeViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "PAYE scheme added successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "FlashMessage": {
+                      "$ref": "#/components/schemas/FlashMessageViewModel"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{HashedAccountId}/schemes/{empRef}/remove": {
+      "get": {
+        "operationId": "GetRemoveScheme",
+        "summary": "Get PAYE scheme removal details",
+        "description": "Retrieve the model for removing the specified PAYE scheme.",
+        "parameters": [
+          {
+            "name": "HashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed identifier of the employer account."
+          },
+          {
+            "name": "empRef",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The employer reference number of the PAYE scheme."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with scheme removal details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemovePayeSchemeViewModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{HashedAccountId}/schemes/remove": {
+      "post": {
+        "operationId": "RemovePayeScheme",
+        "summary": "Remove a PAYE scheme",
+        "description": "Remove a specified PAYE scheme from the employer's account.",
+        "parameters": [
+          {
+            "name": "HashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed identifier of the employer account."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemovePayeSchemeViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirection to the account schemes page after removing the scheme.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddNewPayeSchemeViewModel": {
+        "type": "object",
+        "properties": {
+          "PayeScheme": {
+            "type": "string"
+          },
+          "LegalEntities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntity"
+            }
+          },
+          "AccessToken": {
+            "type": "string"
+          },
+          "RefreshToken": {
+            "type": "string"
+          },
+          "HashedAccountId": {
+            "type": "string"
+          },
+          "EmprefNotFound": {
+            "type": "boolean"
+          },
+          "PayeName": {
+            "type": "string"
+          }
+        }
+      },
+      "RemovePayeSchemeViewModel": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          },
+          "HashedAccountId": {
+            "type": "string"
+          },
+          "PayeRef": {
+            "type": "string"
+          },
+          "PayeSchemeName": {
+            "type": "string"
+          },
+          "AccountName": {
+            "type": "string"
+          },
+          "RemoveScheme": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FlashMessageViewModel": {
+        "type": "object",
+        "properties": {
+          "Severity": {
+            "type": "string"
+          },
+          "Headline": {
+            "type": "string"
+          },
+          "HiddenFlashMessageInformation": {
+            "type": "string"
+          }
+        }
+      },
+      "LegalEntity": {
+        "type": "object",
+        "properties": {
+          "Agreements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Agreement"
+            }
+          },
+          "Code": {
+            "type": "string"
+          },
+          "DasAccountId": {
+            "type": "string"
+          },
+          "DateOfInception": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Address": {
+            "type": "string"
+          },
+          "LegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "PublicSectorDataSource": {
+            "type": "string"
+          },
+          "Sector": {
+            "type": "string"
+          },
+          "Source": {
+            "type": "string"
+          },
+          "SourceNumeric": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Status": {
+            "type": "string"
+          },
+          "AccountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AccountLegalEntityPublicHashedId": {
+            "type": "string"
+          },
+          "AccountName": {
+            "type": "string"
+          }
+        }
+      },
+      "PayeScheme": {
+        "type": "object",
+        "properties": {
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Ref": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "AddedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "RemovedDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Agreement": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "SignedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "SignedByName": {
+            "type": "string"
+          },
+          "SignedById": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "SignedByEmail": {
+            "type": "string"
+          },
+          "Status": {
+            "type": "string"
+          },
+          "TemplateVersionNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "AgreementType": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

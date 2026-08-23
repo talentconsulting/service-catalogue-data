@@ -1,0 +1,206 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "EmployerAccounts API",
+    "description": "API for managing employer accounts and agreements",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/accounts/{hashedAccountId}/legalEntities/{hashedlegalEntityId}/agreements/{agreementId}": {
+      "get": {
+        "operationId": "GetAgreement",
+        "summary": "Retrieve a specific agreement by ID",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed ID of the account"
+          },
+          {
+            "name": "hashedlegalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed ID of the legal entity"
+          },
+          {
+            "name": "agreementId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the agreement"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agreement found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Agreement not found"
+          }
+        },
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadAllEmployerAgreements"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/accounts/internal/{accountId}/minimum-signed-agreement-version": {
+      "get": {
+        "operationId": "GetMinimumSignedAgreementVersionInternal",
+        "summary": "Retrieve the minimum signed agreement version for an account",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "The numerical ID of the account"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Minimum signed agreement version retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadAllEmployerAgreements"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/accounts/{hashedAccountId}/signed-agreement-version": {
+      "get": {
+        "operationId": "GetMinimumSignedAgreementVersionByHashedId",
+        "summary": "Retrieve the minimum signed agreement version using a hashed account ID",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed account ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Minimum signed agreement version retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MinimumSignedAgreementResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadAllEmployerAgreements"
+            ]
+          }
+        ]
+      }
+    },
+    "/api/accounts/{accountId}/agreements": {
+      "get": {
+        "operationId": "GetAgreements",
+        "summary": "Retrieve all agreements for a specific account ID",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "The numerical ID of the account"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agreements retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadAllEmployerAgreements"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "MinimumSignedAgreementResponse": {
+        "type": "object",
+        "properties": {
+          "MinimumSignedAgreementVersion": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The minimum signed agreement version"
+          }
+        },
+        "required": [
+          "MinimumSignedAgreementVersion"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "ApiRoles": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "API Roles for authorization"
+      }
+    }
+  }
+}
