@@ -492,7 +492,7 @@ function buildLandscape(sources, dependencySets) {
 
   function addEdge(from, to, dependency, reference) {
     const key = `${from}|${to}`;
-    if (!edgeMap.has(key)) edgeMap.set(key, { from, to, count: 0, operations: 0, technologies: new Set(), names: new Set(), kinds: new Set(), references: [] });
+    if (!edgeMap.has(key)) edgeMap.set(key, { from, to, count: 0, operations: 0, technologies: new Set(), names: new Set(), kinds: new Set(), references: [], isRedis: false });
     const edge = edgeMap.get(key);
     edge.count += 1;
     edge.operations += dependency.operations?.length || 0;
@@ -501,6 +501,7 @@ function buildLandscape(sources, dependencySets) {
     edge.names.add(dependency.name);
     if (dependency.kind) edge.kinds.add(dependency.kind);
     if (reference) edge.references.push(reference);
+    if (usesRedis(dependency)) edge.isRedis = true;
   }
 
   const externalEntries = [];
@@ -540,11 +541,12 @@ function buildLandscape(sources, dependencySets) {
   for (const members of clusters.values()) {
     const id = `ext:${extIndex++}`;
     const name = members.reduce((best, member) => (member.dependency.name.length > best.length ? member.dependency.name : best), members[0].dependency.name);
+    const isRedis = members.some((member) => usesRedis(member.dependency));
     members.forEach((member) => {
       const [from, to] = member.dependency.direction === 'inbound' ? [id, `sys:${member.source.id}`] : [`sys:${member.source.id}`, id];
       addEdge(from, to, member.dependency, { sourceId: member.source.id, dependencyIndex: member.dependencyIndex });
     });
-    externals.push({ id, name, members });
+    externals.push({ id, name, members, isRedis });
   }
 
   const systems = sources.map((s) => ({ id: `sys:${s.id}`, sourceId: s.id, name: s.name, repository: s.repository }));
@@ -586,7 +588,8 @@ const CY_STYLE = [
       'text-background-color': '#08110f', 'text-background-opacity': 0.9, 'text-background-padding': '3px', 'text-background-shape': 'roundrectangle'
   } },
   { selector: 'edge.inbound', style: { 'line-color': '#7db7ff', 'target-arrow-color': '#7db7ff' } },
-  { selector: 'edge.jumpable', style: { 'line-style': 'solid', 'width': 2.5 } }
+  { selector: 'edge.jumpable', style: { 'line-style': 'solid', 'width': 2.5 } },
+  { selector: 'edge.redis', style: { 'line-color': '#ff8f8f', 'target-arrow-color': '#ff8f8f' } }
 ];
 
 function mountCy({ container, elements, layout, htmlLabels, onTapNode, onTapEdge, onDragFree }) {
@@ -846,11 +849,12 @@ function landscapeChecklistGroup(title, nodes, formatLabel) {
 function renderLandscape() {
   const graph = state.landscape;
   const allNodes = [...graph.systems, ...graph.externals];
+  const redisExternalCount = graph.externals.filter((node) => node.isRedis).length;
   $('#source-stats').innerHTML = `
     <div class="stat"><dt>Systems</dt><dd>${graph.systems.length}</dd></div>
     <div class="stat"><dt>External</dt><dd>${graph.externals.length}</dd></div>
     <div class="stat"><dt>Relationships</dt><dd>${graph.edges.length}</dd></div>`;
-  toolbar.innerHTML = `${diagramControlsHtml()}<span class="spacer"></span><span class="toolbar-meta">Inferred by matching each repository's outbound service dependencies and handled events/commands against the catalogue, clustering the rest as external systems</span>`;
+  toolbar.innerHTML = `${diagramControlsHtml()}<span class="spacer"></span><span class="toolbar-meta">Inferred by matching each repository's outbound service dependencies and handled events/commands against the catalogue, clustering the rest as external systems${redisExternalCount ? ` · ${redisExternalCount} using Redis` : ''}</span>`;
   if (!allNodes.length) {
     destroyCy();
     content.innerHTML = '<div class="empty-state"><span class="empty-icon" aria-hidden="true">◇</span><h2>No dependency data available</h2><p>None of the cataloged repositories publish service-dependencies data.</p></div>';
@@ -900,12 +904,12 @@ function renderLandscape() {
       position: positions.get(node.id)
     })),
     ...externalNodes.map((node) => ({
-      data: { id: node.id, isLeaf: true, width: 196, height: 96, name: node.name, memberCount: node.members.length },
+      data: { id: node.id, isLeaf: true, width: 196, height: 96, name: node.name, memberCount: node.members.length, isRedis: node.isRedis },
       position: positions.get(node.id)
     })),
     ...visibleEdges.map((edge, index) => {
       const reference = edge.references[0];
-      return { data: { id: `land-edge-${index}`, source: edge.from, target: edge.to, label: edgeLabel(edge), jumpSourceId: reference?.sourceId || '', jumpIndex: reference?.dependencyIndex ?? '' }, classes: reference ? 'jumpable' : '' };
+      return { data: { id: `land-edge-${index}`, source: edge.from, target: edge.to, label: edgeLabel(edge), jumpSourceId: reference?.sourceId || '', jumpIndex: reference?.dependencyIndex ?? '' }, classes: [reference ? 'jumpable' : '', edge.isRedis ? 'redis' : ''].filter(Boolean).join(' ') };
     })
   ];
 
@@ -915,6 +919,7 @@ function renderLandscape() {
       <div class="c4-legend">
         <span class="c4-legend-item"><span class="c4-swatch internal"></span>Software system (cataloged)</span>
         <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
+        <span class="c4-legend-item"><span class="c4-swatch cache"></span>Uses Redis</span>
         <span class="c4-legend-item"><span class="c4-boundary-swatch"></span>${escapeHtml(orgLabel)} system boundary</span>
         <span class="c4-legend-item">Click a relationship line to open its dependency</span>
       </div>
@@ -932,7 +937,8 @@ function renderLandscape() {
       halign: 'center', valign: 'center', halignBox: 'center', valignBox: 'center',
       tpl: (data) => {
         if (data.parent === 'boundary') return `<div class="cy-node internal" data-node-id="${escapeHtml(data.id)}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(data.name))}</strong><span class="c4-meta">${data.relCount} relationship(s)</span></div>`;
-        return `<div class="cy-node external" data-node-id="${escapeHtml(data.id)}"><span class="c4-type">External System</span><strong>${escapeHtml(splitPascalCase(data.name))}</strong><span class="c4-meta">${data.memberCount} reference(s)</span></div>`;
+        const nodeClass = data.isRedis ? 'cache' : 'external';
+        return `<div class="cy-node ${nodeClass}" data-node-id="${escapeHtml(data.id)}"><span class="c4-type">${data.isRedis ? 'Redis' : 'External System'}</span><strong>${escapeHtml(splitPascalCase(data.name))}</strong><span class="c4-meta">${data.memberCount} reference(s)</span></div>`;
       }
     }],
     onTapNode: (node) => {
