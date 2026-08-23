@@ -597,6 +597,60 @@ function markCySelection(containerEl, selectedId) {
   });
 }
 
+function wireNodeHoverTooltip(cy, container, buildContent) {
+  if (!cy || !container) return;
+  let tooltip = null;
+  let hideTimer = null;
+
+  function ensureTooltip() {
+    if (tooltip) return tooltip;
+    tooltip = document.createElement('div');
+    tooltip.className = 'node-tooltip';
+    tooltip.addEventListener('mouseenter', () => clearTimeout(hideTimer));
+    tooltip.addEventListener('mouseleave', scheduleHide);
+    document.body.appendChild(tooltip);
+    return tooltip;
+  }
+
+  function positionTooltip(node) {
+    const rect = container.getBoundingClientRect();
+    const pos = node.renderedPosition();
+    const halfHeight = (node.renderedHeight ? node.renderedHeight() : 48) / 2;
+    const spaceAbove = rect.top + pos.y - halfHeight;
+    tooltip.style.left = `${rect.left + pos.x}px`;
+    if (spaceAbove < 160) {
+      tooltip.style.top = `${rect.top + pos.y + halfHeight + 10}px`;
+      tooltip.style.transform = 'translate(-50%, 0)';
+    } else {
+      tooltip.style.top = `${spaceAbove - 10}px`;
+      tooltip.style.transform = 'translate(-50%, -100%)';
+    }
+  }
+
+  function scheduleHide() {
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(() => { if (tooltip) tooltip.style.display = 'none'; }, 150);
+  }
+
+  cy.on('mouseover', 'node', (event) => {
+    const node = event.target;
+    if (node.isParent()) return;
+    const html = buildContent(node);
+    if (!html) return;
+    clearTimeout(hideTimer);
+    ensureTooltip().innerHTML = html;
+    positionTooltip(node);
+    tooltip.style.display = 'block';
+  });
+  cy.on('mouseout', 'node', scheduleHide);
+  cy.on('pan zoom drag', () => { if (tooltip) tooltip.style.display = 'none'; });
+  cy.on('destroy', () => { tooltip?.remove(); tooltip = null; });
+  // Cytoscape's synthetic node mouseout doesn't reliably fire when the pointer leaves the
+  // canvas entirely (only when moving to another node or empty canvas space), so back it
+  // with a native DOM listener on the container itself.
+  container.addEventListener('mouseleave', scheduleHide);
+}
+
 function diagramControlsHtml() {
   return `<button id="auto-arrange" class="plain-button" type="button">Auto arrange</button><div class="diagram-zoom" role="group" aria-label="Diagram zoom"><button id="zoom-out" type="button" aria-label="Zoom out">−</button><button id="zoom-fit" type="button">Fit</button><button id="zoom-in" type="button" aria-label="Zoom in">+</button></div>`;
 }
@@ -673,7 +727,7 @@ function renderDependencies(resetToolbar = true) {
   </div>`;
   wireSearch();
 
-  mountCy({
+  const cy = mountCy({
     container: $('#dep-cy'),
     elements,
     layout: { name: 'preset' },
@@ -697,6 +751,11 @@ function renderDependencies(resetToolbar = true) {
   });
   markCySelection($('#dep-cy'), state.selected);
   wireDiagramControls(() => { positions.clear(); renderDependencies(false); });
+  wireNodeHoverTooltip(cy, $('#dep-cy'), (node) => {
+    if (node.id() === 'center') return null;
+    const dependency = dependencies.find((item) => item.id === node.id());
+    return dependency ? dependencyTooltipContent(dependency) : null;
+  });
 }
 
 function dependencyDetail(dependency) {
@@ -938,12 +997,30 @@ async function jumpToSource(sourceId, dependencyIndex = null) {
   }
 }
 
-function sourceLink(path, scanKind = 'eventcatalog') {
-  if (!path) return '<span class="muted">Not recorded</span>';
+function githubFileUrl(path, scanKind = 'eventcatalog') {
+  if (!path) return null;
   const revision = state.source.scans[scanKind]?.['last-commit-hash-scanned'] || state.data.ref || 'HEAD';
   const encodedPath = path.split('/').map(encodeURIComponent).join('/');
-  const url = `${state.source.repository.replace(/\/$/, '')}/blob/${encodeURIComponent(revision)}/${encodedPath}`;
+  return `${state.source.repository.replace(/\/$/, '')}/blob/${encodeURIComponent(revision)}/${encodedPath}`;
+}
+
+function sourceLink(path, scanKind = 'eventcatalog') {
+  const url = githubFileUrl(path, scanKind);
+  if (!url) return '<span class="muted">Not recorded</span>';
   return `<a class="source-link" href="${escapeHtml(url)}" target="_blank" rel="noreferrer"><code>${escapeHtml(path)}</code><span aria-hidden="true"> ↗</span><span class="sr-only"> (opens on GitHub)</span></a>`;
+}
+
+function dependencyTooltipContent(dependency) {
+  const ops = dependency.operations || [];
+  const title = `<div class="node-tooltip-title">${escapeHtml(splitPascalCase(dependency.name))}</div>`;
+  if (!ops.length) return `${title}<p class="node-tooltip-empty">No operations recorded — click the box for full details.</p>`;
+  const scanKind = dependency.kind === 'message' ? 'eventcatalog' : 'service-dependencies';
+  const shown = ops.slice(0, 8);
+  return `${title}<ul class="node-tooltip-list">${shown.map((operation) => {
+    const url = githubFileUrl(operation.sourceFile, scanKind);
+    const label = operation.path && operation.path !== 'Not resolved' ? operation.path : (operation.method || 'operation');
+    return `<li><span class="method ${escapeHtml((operation.method || '').toLowerCase())}">${escapeHtml(operation.method || '—')}</span>${url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>` : `<span class="muted">${escapeHtml(label)}</span>`}</li>`;
+  }).join('')}</ul>${ops.length > shown.length ? `<p class="node-tooltip-more">+${ops.length - shown.length} more — click the box for full details</p>` : ''}`;
 }
 
 function operations(spec) {
