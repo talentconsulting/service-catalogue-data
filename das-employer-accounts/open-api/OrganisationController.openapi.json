@@ -1,22 +1,16 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Organisation API",
-    "version": "1.0.0"
+    "title": "Organisation Management API",
+    "version": "1.0.0",
+    "description": "API for managing organisations in the SFA DAS Employer Accounts system"
   },
   "paths": {
     "/accounts/{hashedAccountId}/organisations/nextStep": {
       "post": {
-        "summary": "Process the next steps for the organisation",
+        "summary": "Handle next steps selection for an organisation",
+        "operationId": "GoToNextStep",
         "parameters": [
-          {
-            "name": "nextStep",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "hashedAccountId",
             "in": "path",
@@ -24,47 +18,59 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "organisationName",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "hashedAgreementId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nextStep": {
+                    "type": "string"
+                  },
+                  "organisationName": {
+                    "type": "string"
+                  },
+                  "hashedAgreementId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "nextStep"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
+          "302": {
+            "description": "Redirects to the selected next step"
+          },
           "200": {
-            "description": "Successful response"
+            "description": "Error selection response"
           }
         }
       }
     },
     "/accounts/{hashedAccountId}/organisations/nextStepSearch": {
       "get": {
-        "summary": "Get next steps for organisation added during search",
+        "summary": "Search for organisation added next steps",
+        "operationId": "OrganisationAddedNextStepsSearch",
         "parameters": [
           {
-            "name": "organisationName",
-            "in": "query",
-            "required": false,
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "hashedAccountId",
-            "in": "path",
-            "required": true,
+            "name": "organisationName",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -87,7 +93,8 @@
     },
     "/accounts/{hashedAccountId}/organisations/confirm": {
       "post": {
-        "summary": "Confirm the addition of a legal entity to an account",
+        "summary": "Confirm organisation details to create a new legal entity",
+        "operationId": "Confirm",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -109,27 +116,20 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Successful response"
+          "302": {
+            "description": "Redirects to the next step after successful organisation confirmation"
           },
           "401": {
-            "description": "Unauthorized access"
+            "description": "Unauthorized response"
           }
         }
       }
     },
     "/accounts/{hashedAccountId}/organisations/review": {
-      "post": {
-        "summary": "Process review selection for organisation details",
+      "get": {
+        "summary": "Review organisation details",
+        "operationId": "Review",
         "parameters": [
-          {
-            "name": "updateChoice",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "hashedAccountId",
             "in": "path",
@@ -141,30 +141,6 @@
           {
             "name": "accountLegalEntityPublicHashedId",
             "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "organisationName",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "organisationAddress",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "dataSourceFriendlyName",
-            "in": "query",
             "required": false,
             "schema": {
               "type": "string"
@@ -173,23 +149,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Returns details for organisation review"
           }
         }
-      }
-    },
-    "/accounts/{hashedAccountId}/organisations/PostUpdateSelection": {
+      },
       "post": {
-        "summary": "Handle post-update selection for organisations",
+        "summary": "Process organisation review selection",
+        "operationId": "ProcessReviewSelection",
         "parameters": [
-          {
-            "name": "nextStep",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
           {
             "name": "hashedAccountId",
             "in": "path",
@@ -199,9 +166,85 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "updateChoice": {
+                    "type": "string"
+                  },
+                  "accountLegalEntityPublicHashedId": {
+                    "type": "string"
+                  },
+                  "organisationName": {
+                    "type": "string"
+                  },
+                  "organisationAddress": {
+                    "type": "string"
+                  },
+                  "dataSourceFriendlyName": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "updateChoice",
+                  "accountLegalEntityPublicHashedId"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "Returns the selected review outcome"
+          },
+          "302": {
+            "description": "Redirects to the default organisation agreement details"
+          }
+        }
+      }
+    },
+    "/accounts/{hashedAccountId}/organisations/PostUpdateSelection": {
+      "post": {
+        "summary": "Handle post-update selection for organisation",
+        "operationId": "GoToPostUpdateSelection",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nextStep": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "nextStep"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirects to the selected post-update step"
+          },
+          "200": {
+            "description": "Error selection response"
           }
         }
       }
@@ -212,16 +255,16 @@
       "FlashMessageViewModel": {
         "type": "object",
         "properties": {
-          "Headline": {
+          "headline": {
             "type": "string"
           },
-          "Message": {
+          "message": {
             "type": "string"
           },
-          "SubMessage": {
+          "subMessage": {
             "type": "string"
           },
-          "Severity": {
+          "severity": {
             "type": "string",
             "enum": [
               "Complete",
@@ -233,52 +276,19 @@
               "Okay"
             ]
           },
-          "ErrorMessages": {
+          "severityCssClass": {
+            "type": "string"
+          },
+          "errorMessages": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
             }
           },
-          "RedirectButtonMessage": {
+          "redirectButtonMessage": {
             "type": "string"
           },
-          "HiddenFlashMessageInformation": {
-            "type": "string"
-          }
-        }
-      },
-      "OrganisationAddedNextStepsViewModel": {
-        "type": "object",
-        "properties": {
-          "ErrorMessage": {
-            "type": "string"
-          },
-          "OrganisationName": {
-            "type": "string"
-          },
-          "ShowWizard": {
-            "type": "boolean"
-          },
-          "HashedAgreementId": {
-            "type": "string"
-          }
-        }
-      },
-      "IncorrectOrganisationDetailsViewModel": {
-        "type": "object",
-        "properties": {
-          "DataSourceFriendlyName": {
-            "type": "string"
-          }
-        }
-      },
-      "OrganisationUpdatedNextStepsViewModel": {
-        "type": "object",
-        "properties": {
-          "HashedAccountId": {
-            "type": "string"
-          },
-          "ErrorMessage": {
+          "hiddenFlashMessageInformation": {
             "type": "string"
           }
         }
@@ -286,60 +296,36 @@
       "CreateNewLegalEntityViewModel": {
         "type": "object",
         "properties": {
-          "HashedAccountId": {
+          "hashedAccountId": {
             "type": "string"
           },
-          "Name": {
+          "name": {
             "type": "string"
           },
-          "Code": {
+          "code": {
             "type": "string"
           },
-          "Address": {
-            "$ref": "#/components/schemas/Address"
+          "address": {
+            "type": "string"
           },
-          "IncorporatedDate": {
+          "incorporatedDate": {
             "type": "string",
             "format": "date"
           },
-          "ExternalUserId": {
+          "externalUserId": {
             "type": "string"
           },
-          "LegalEntityStatus": {
-            "type": "string",
-            "nullable": true
+          "legalEntityStatus": {
+            "type": "string"
           },
-          "Source": {
+          "source": {
             "$ref": "#/components/schemas/OrganisationType"
           },
-          "PublicSectorDataSource": {
+          "publicSectorDataSource": {
             "type": "integer",
-            "nullable": true
+            "format": "int32"
           },
-          "Sector": {
-            "type": "string"
-          }
-        }
-      },
-      "Address": {
-        "type": "object",
-        "properties": {
-          "Line1": {
-            "type": "string"
-          },
-          "Line2": {
-            "type": "string"
-          },
-          "Line3": {
-            "type": "string"
-          },
-          "Line4": {
-            "type": "string"
-          },
-          "Line5": {
-            "type": "string"
-          },
-          "Postcode": {
+          "sector": {
             "type": "string"
           }
         }
@@ -353,6 +339,131 @@
           "Other",
           "PensionsRegulator"
         ]
+      },
+      "OrganisationAddedNextStepsViewModel": {
+        "type": "object",
+        "properties": {
+          "errorMessage": {
+            "type": "string"
+          },
+          "organisationName": {
+            "type": "string"
+          },
+          "showWizard": {
+            "type": "boolean"
+          },
+          "hashedAgreementId": {
+            "type": "string"
+          }
+        }
+      },
+      "OrganisationUpdatedNextStepsViewModel": {
+        "type": "object",
+        "properties": {
+          "hashedAccountId": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          }
+        }
+      },
+      "IncorrectOrganisationDetailsViewModel": {
+        "type": "object",
+        "properties": {
+          "dataSourceFriendlyName": {
+            "type": "string"
+          }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "line1": {
+            "type": "string"
+          },
+          "line2": {
+            "type": "string"
+          },
+          "line3": {
+            "type": "string"
+          },
+          "line4": {
+            "type": "string"
+          },
+          "line5": {
+            "type": "string"
+          },
+          "postcode": {
+            "type": "string",
+            "format": "postcode"
+          }
+        }
+      },
+      "OrganisationStatus": {
+        "type": "string",
+        "enum": [
+          "None",
+          "Active",
+          "Dissolved",
+          "Liquidation",
+          "Receivership",
+          "Administration",
+          "VoluntaryArrangement",
+          "ConvertedClosed",
+          "InsolvencyProceedings"
+        ]
+      },
+      "OrchestratorResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "exception": {
+            "type": "string"
+          },
+          "flashMessage": {
+            "$ref": "#/components/schemas/FlashMessageViewModel"
+          },
+          "redirectUrl": {
+            "type": "string"
+          },
+          "redirectButtonMessage": {
+            "type": "string"
+          }
+        }
+      },
+      "OrchestratorResponse_OrganisationAddedNextStepsViewModel": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/OrganisationAddedNextStepsViewModel"
+          },
+          "flashMessage": {
+            "$ref": "#/components/schemas/FlashMessageViewModel"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "OrchestratorResponse_OrganisationUpdatedNextStepsViewModel": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/OrganisationUpdatedNextStepsViewModel"
+          },
+          "flashMessage": {
+            "$ref": "#/components/schemas/FlashMessageViewModel"
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
       }
     }
   }

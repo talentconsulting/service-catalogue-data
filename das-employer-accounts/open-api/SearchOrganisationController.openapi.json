@@ -1,77 +1,149 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts - Organisation Search API",
-    "version": "1.0.0"
+    "title": "Search Organisation API",
+    "version": "1.0.0",
+    "description": "API documentation for the Search Organisation functionality of the Employer Accounts Web application."
   },
   "paths": {
-    "/accounts/{hashedAccountId}/organisations/search": {
+    "/accounts/{HashedAccountId}/organisations/search": {
       "get": {
-        "operationId": "searchForOrganisationGet",
-        "summary": "Render the organisation search view.",
+        "summary": "Search for an organisation.",
         "parameters": [
           {
-            "name": "hashedAccountId",
+            "name": "HashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "The hashed account ID of the employer."
+            "description": "The hashed account ID."
           }
         ],
         "responses": {
           "200": {
-            "description": "The organisation search view rendered successfully."
+            "description": "The search view page.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "example": {
+                    "value": "HTML view rendered for organisation search."
+                  }
+                }
+              }
+            }
           }
         }
       },
       "post": {
-        "operationId": "searchForOrganisationPost",
-        "summary": "Perform organisation search.",
+        "summary": "Perform a search for an organisation.",
         "parameters": [
           {
-            "name": "hashedAccountId",
+            "name": "HashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "The hashed account ID of the employer."
+            "description": "The hashed account ID."
           },
           {
             "name": "searchTerm",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "The search term used to find an organisation."
+            "description": "Search term for organisation name."
           }
         ],
         "responses": {
           "302": {
-            "description": "Redirection to the organisation search results page."
+            "description": "Redirected to search results page."
           },
           "400": {
-            "description": "Validation error for missing search term."
+            "description": "Bad request due to missing or invalid search term.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "example": {
+                    "value": {
+                      "status": "BadRequest",
+                      "flashMessage": "Enter organisation name"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
-    "/accounts/{hashedAccountId}/organisations/search/results": {
+    "/accounts/organisations/search": {
       "get": {
-        "operationId": "searchForOrganisationResults",
-        "summary": "Retrieve organisation search results.",
+        "summary": "Search for an organisation. No account ID supplied.",
+        "responses": {
+          "200": {
+            "description": "The search view page.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "example": {
+                    "value": "HTML view rendered for organisation search."
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Perform a search for an organisation. No account ID supplied.",
         "parameters": [
           {
-            "name": "hashedAccountId",
+            "name": "searchTerm",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term for organisation name."
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirected to search results page."
+          },
+          "400": {
+            "description": "Bad request due to missing or invalid search term.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "example": {
+                    "value": {
+                      "status": "BadRequest",
+                      "flashMessage": "Enter organisation name"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{HashedAccountId}/organisations/search/results": {
+      "get": {
+        "summary": "View organisation search results.",
+        "parameters": [
+          {
+            "name": "HashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "The hashed account ID of the employer."
+            "description": "The hashed account ID."
           },
           {
             "name": "searchTerm",
@@ -80,7 +152,7 @@
             "schema": {
               "type": "string"
             },
-            "description": "The search term used to find organisations."
+            "description": "Search term for organisation name."
           },
           {
             "name": "pageNumber",
@@ -90,7 +162,7 @@
               "type": "integer",
               "default": 1
             },
-            "description": "The page number for paginated results."
+            "description": "The page number of the results."
           },
           {
             "name": "organisationType",
@@ -99,32 +171,112 @@
             "schema": {
               "$ref": "#/components/schemas/OrganisationType"
             },
-            "description": "The type of the organisation."
+            "description": "The type of organisation to filter results by."
           }
         ],
         "responses": {
           "200": {
-            "description": "Search results view rendered successfully."
+            "description": "Results of the organisation search.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrganisationResultsViewModel"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Validation error for missing search term."
+            "description": "Bad request due to missing or invalid search term.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "example": {
+                    "value": {
+                      "status": "BadRequest",
+                      "flashMessage": "Enter organisation name"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
-    "/accounts/{hashedAccountId}/organisations/search/confirm": {
-      "post": {
-        "operationId": "confirmOrganisation",
-        "summary": "Confirm the selected organisation.",
+    "/accounts/organisations/search/results": {
+      "get": {
+        "summary": "View organisation search results. No account ID supplied.",
         "parameters": [
           {
-            "name": "hashedAccountId",
+            "name": "searchTerm",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term for organisation name."
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "The page number of the results."
+          },
+          {
+            "name": "organisationType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/OrganisationType"
+            },
+            "description": "The type of organisation to filter results by."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Results of the organisation search.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchOrganisationResultsViewModel"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to missing or invalid search term.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "example": {
+                    "value": {
+                      "status": "BadRequest",
+                      "flashMessage": "Enter organisation name"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{HashedAccountId}/organisations/search/confirm": {
+      "post": {
+        "summary": "Confirm the selected organisation details.",
+        "parameters": [
+          {
+            "name": "HashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "The hashed account ID of the employer."
+            "description": "The hashed account ID."
           }
         ],
         "requestBody": {
@@ -139,10 +291,51 @@
         },
         "responses": {
           "200": {
-            "description": "Organisation confirmation view rendered successfully."
+            "description": "The confirmation page for organisation details.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "example": {
+                    "value": "HTML view rendered for confirming organisation details."
+                  }
+                }
+              }
+            }
           },
           "302": {
-            "description": "Redirection to an account summary or another page."
+            "description": "Redirected due to missing account ID."
+          }
+        }
+      }
+    },
+    "/accounts/organisations/search/confirm": {
+      "post": {
+        "summary": "Confirm the selected organisation details. No account ID supplied.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrganisationDetailsViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The confirmation page for organisation details.",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "example": {
+                    "value": "HTML view rendered for confirming organisation details."
+                  }
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirected due to missing account ID."
           }
         }
       }
@@ -150,55 +343,93 @@
   },
   "components": {
     "schemas": {
-      "OrganisationType": {
-        "type": "integer",
-        "description": "Type of organisation.",
-        "enum": [
-          1,
-          2,
-          3,
-          4,
-          5
-        ],
-        "example": 1
-      },
       "OrganisationDetailsViewModel": {
         "type": "object",
         "properties": {
-          "hashedId": {
+          "HashedId": {
             "type": "string"
           },
-          "type": {
+          "Type": {
             "$ref": "#/components/schemas/OrganisationType"
           },
-          "publicSectorDataSource": {
+          "PublicSectorDataSource": {
             "type": "integer",
             "nullable": true
           },
-          "name": {
+          "Name": {
             "type": "string"
           },
-          "address": {
-            "type": "string"
+          "Address": {
+            "$ref": "#/components/schemas/Address"
           },
-          "dateOfInception": {
+          "DateOfInception": {
             "type": "string",
             "format": "date-time",
             "nullable": true
           },
-          "referenceNumber": {
+          "ReferenceNumber": {
             "type": "string"
           },
-          "status": {
+          "Status": {
             "type": "string"
           },
-          "addedToAccount": {
+          "AddedToAccount": {
             "type": "boolean"
           },
-          "sector": {
+          "NameError": {
             "type": "string"
           },
-          "newSearch": {
+          "Sector": {
+            "type": "string"
+          },
+          "NewSearch": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OrganisationType": {
+        "type": "string",
+        "enum": [
+          "CompaniesHouse",
+          "Charities",
+          "PublicBodies",
+          "Other",
+          "PensionsRegulator"
+        ]
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "Line1": {
+            "type": "string"
+          },
+          "Line2": {
+            "type": "string"
+          },
+          "Line3": {
+            "type": "string"
+          },
+          "Line4": {
+            "type": "string"
+          },
+          "Line5": {
+            "type": "string"
+          },
+          "Postcode": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchOrganisationResultsViewModel": {
+        "type": "object",
+        "properties": {
+          "Results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganisationDetailsViewModel"
+            }
+          },
+          "IsExistingAccount": {
             "type": "boolean"
           }
         }

@@ -1,34 +1,36 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts Invitations API",
+    "title": "Invitation API",
     "version": "1.0.0"
   },
   "paths": {
     "/invitations/invite": {
       "get": {
-        "summary": "View Invitation Information",
+        "summary": "Redirect or display invitation view.",
+        "operationId": "invite",
         "responses": {
           "200": {
-            "description": "Renders a view of the invitation."
+            "description": "OK"
           },
           "302": {
-            "description": "Redirects to the Home page."
+            "description": "Redirects to the home page."
           }
         }
       }
     },
     "/invitations/all": {
       "get": {
-        "summary": "Get All Invitations of a User",
+        "summary": "Get all invitations for current user.",
+        "operationId": "getAllInvitations",
         "security": [
           {
-            "Authorization": []
+            "authorization": []
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns a list of all invitations for the user.",
+            "description": "A list of invitations.",
             "content": {
               "application/json": {
                 "schema": {
@@ -38,19 +40,15 @@
             }
           },
           "302": {
-            "description": "Redirects to the Home page."
+            "description": "Redirects to the home page."
           }
         }
       }
     },
     "/invitations/view": {
       "get": {
-        "summary": "View Invitation Details",
-        "security": [
-          {
-            "Authorization": []
-          }
-        ],
+        "summary": "Get details for a specific invitation.",
+        "operationId": "getInvitationDetails",
         "parameters": [
           {
             "name": "invitationId",
@@ -61,9 +59,14 @@
             }
           }
         ],
+        "security": [
+          {
+            "authorization": []
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Returns details of the specific invitation.",
+            "description": "Returns the invitation details.",
             "content": {
               "application/json": {
                 "schema": {
@@ -73,19 +76,15 @@
             }
           },
           "302": {
-            "description": "Redirects to the Home page."
+            "description": "Redirects to the home page."
           }
         }
       }
     },
     "/invitations/accept": {
       "post": {
-        "summary": "Accept Invitation",
-        "security": [
-          {
-            "Authorization": []
-          }
-        ],
+        "summary": "Accept an invitation.",
+        "operationId": "acceptInvitation",
         "parameters": [
           {
             "name": "invitation",
@@ -98,7 +97,7 @@
           }
         ],
         "requestBody": {
-          "description": "User invitation model",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -107,34 +106,44 @@
             }
           }
         },
+        "security": [
+          {
+            "authorization": []
+          }
+        ],
         "responses": {
-          "200": {
-            "description": "Accepts the invitation and redirects."
-          },
           "302": {
-            "description": "Redirects to the Home page."
+            "description": "Redirects to the home page."
           }
         }
       },
       "get": {
-        "summary": "Redirect Existing User for Invitation Acceptance",
+        "summary": "Redirects existing users to accept an invitation.",
+        "operationId": "acceptInvitationExistingUser",
         "responses": {
           "302": {
-            "description": "Redirects to the Home page."
+            "description": "Redirects to the home page."
+          }
+        }
+      }
+    },
+    "/invitations/register-and-accept": {
+      "get": {
+        "summary": "Redirects new users to register and accept an invitation.",
+        "operationId": "acceptInvitationNewUser",
+        "responses": {
+          "302": {
+            "description": "Redirects to the home page."
           }
         }
       }
     },
     "/invitations/create": {
       "post": {
-        "summary": "Create Invitation",
-        "security": [
-          {
-            "Authorization": []
-          }
-        ],
+        "summary": "Create a team member invitation.",
+        "operationId": "createInvitation",
         "requestBody": {
-          "description": "Invitation creation payload",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -143,22 +152,14 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "Creates an invitation and redirects."
-          },
-          "302": {
-            "description": "Redirects to the Home page."
+        "security": [
+          {
+            "authorization": []
           }
-        }
-      }
-    },
-    "/invitations/register-and-accept": {
-      "get": {
-        "summary": "Redirect New User for Invitation Acceptance",
+        ],
         "responses": {
           "302": {
-            "description": "Redirects to the Home page."
+            "description": "Redirects to the home page."
           }
         }
       }
@@ -202,10 +203,7 @@
           "ShowBreadCrumbs": {
             "type": "boolean"
           }
-        },
-        "required": [
-          "Invitations"
-        ]
+        }
       },
       "InvitationView": {
         "type": "object",
@@ -246,17 +244,7 @@
             "type": "string",
             "format": "uuid"
           }
-        },
-        "required": [
-          "Id",
-          "Name",
-          "Email",
-          "Role",
-          "AccountId",
-          "AccountName",
-          "ExpiryDate",
-          "Status"
-        ]
+        }
       },
       "Role": {
         "type": "string",

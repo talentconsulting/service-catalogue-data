@@ -2,74 +2,28 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Accounts API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing employer accounts, their legal entities, users, and associated operations."
   },
   "paths": {
     "/api/accounts": {
-      "get": {
-        "operationId": "GetAccounts",
-        "parameters": [
-          {
-            "name": "toDate",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "format": "date-time",
-              "nullable": true
-            }
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "default": 1000
-            }
-          },
-          {
-            "name": "pageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Accounts"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "ApiRoles": [
-              "ReadAllEmployerAccountBalances"
-            ]
-          }
-        ]
-      },
       "post": {
-        "operationId": "CreateEmployerAccountViaProviderRequest",
+        "summary": "Create a new employer account via provider request",
+        "operationId": "createEmployerAccountViaProviderRequest",
         "requestBody": {
+          "required": true,
+          "description": "Payload to create an employer account via provider request",
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/CreateEmployerAccountViaProviderRequestModel"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "201": {
-            "description": "Account created",
+            "description": "Employer account created successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -80,301 +34,263 @@
           },
           "500": {
             "description": "Internal server error"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
           {
-            "ApiRoles": []
+            "Authorization": []
           }
+        ],
+        "tags": [
+          "Accounts"
         ]
       }
     },
     "/api/accounts/{accountId}": {
       "get": {
-        "operationId": "GetAccount",
+        "summary": "Retrieve an account by accountId",
+        "operationId": "getAccountById",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "description": "Unique account identifier"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Account retrieved",
+            "description": "Successful response",
             "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Account"
-                }
-              }
+              "application/json": {}
             }
           },
           "404": {
             "description": "Account not found"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
           {
-            "ApiRoles": [
-              "ReadAllAccountUsers"
-            ]
+            "Authorization": []
           }
+        ],
+        "tags": [
+          "Accounts"
         ]
       }
     },
     "/api/accounts/{hashedAccountId}": {
       "get": {
-        "operationId": "GetAccountByHashedAccountId",
+        "summary": "Retrieve an account by hashedAccountId",
+        "operationId": "getAccount",
         "parameters": [
           {
             "name": "hashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "Unique hashed account identifier"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Account retrieved successfully",
+            "description": "Successful response",
             "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Account"
-                }
-              }
+              "application/json": {}
             }
           },
           "404": {
             "description": "Account not found"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
           {
-            "ApiRoles": [
-              "ReadAllEmployerAccountBalances"
-            ]
+            "Authorization": []
           }
+        ],
+        "tags": [
+          "Accounts"
         ]
       }
     },
     "/api/accounts/{hashedAccountId}/users": {
       "get": {
-        "operationId": "GetAccountUsers",
+        "summary": "Retrieve users of an account by hashedAccountId",
+        "operationId": "getAccountUsers",
         "parameters": [
           {
             "name": "hashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "Unique hashed account identifier"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Account users retrieved",
+            "description": "Successful response",
             "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
-                  }
-                }
-              }
+              "application/json": {}
             }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
           {
-            "ApiRoles": [
-              "ReadAllAccountUsers"
-            ]
+            "Authorization": []
           }
+        ],
+        "tags": [
+          "Users"
         ]
       }
     },
-    "/api/accounts/internal/{accountId}/users/which-receive-notifications": {
+    "/api/accounts/internal/{accountId}/users": {
       "get": {
-        "operationId": "GetAccountUsersWhichReceiveNotifications",
+        "summary": "Retrieve users of an account by internal accountId",
+        "operationId": "getAccountUsersByInternalAccountId",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "description": "Unique internal account identifier"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Users who receive notifications retrieved",
+            "description": "Successful response",
             "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/User"
-                  }
-                }
-              }
+              "application/json": {}
             }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
           {
-            "ApiRoles": [
-              "ReadAllAccountUsers"
-            ]
+            "Authorization": []
           }
+        ],
+        "tags": [
+          "Users"
+        ]
+      }
+    },
+    "/api/accounts/internal/{accountId}/users/which-receive-notifications": {
+      "get": {
+        "summary": "Retrieve users who receive notifications for an account by internal accountId",
+        "operationId": "getAccountUsersWhichReceiveNotifications",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "description": "Unique internal account identifier"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "tags": [
+          "Users"
         ]
       }
     },
     "/api/accounts/acknowledge-training-provider-task": {
       "patch": {
-        "operationId": "AcknowledgeTrainingProviderTask",
+        "summary": "Acknowledge training provider task for an account",
+        "operationId": "acknowledgeTrainingProviderTask",
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/AcknowledgeTrainingProviderTaskCommand"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
-            "description": "Acknowledged successfully"
+            "description": "Task acknowledged successfully",
+            "content": {
+              "application/json": {}
+            }
           },
           "500": {
             "description": "Internal server error"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
           {
-            "ApiRoles": [
-              "ReadAllAccountUsers"
-            ]
-          }
-        ]
-      }
-    },
-    "/api/accounts/updated": {
-      "get": {
-        "operationId": "GetAccountsUpdated",
-        "parameters": [
-          {
-            "name": "sinceDate",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "date-time"
-            }
-          },
-          {
-            "name": "pageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "default": 1
-            }
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "default": 1000
-            }
+            "Authorization": []
           }
         ],
-        "responses": {
-          "200": {
-            "description": "List of updated accounts",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Accounts"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid Request"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        },
-        "security": [
-          {
-            "ApiRoles": [
-              "ReadAllAccountUsers"
-            ]
-          }
-        ]
-      }
-    },
-    "/api/accounts/search": {
-      "get": {
-        "operationId": "SearchAccounts",
-        "parameters": [
-          {
-            "name": "employerName",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Search results",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Accounts"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid employer name"
-          }
-        },
-        "security": [
-          {
-            "ApiRoles": []
-          }
+        "tags": [
+          "Accounts"
         ]
       }
     },
     "/api/accounts/queries": {
       "post": {
-        "operationId": "QueryAccounts",
+        "summary": "Query accounts with filters",
+        "operationId": "queryAccounts",
         "requestBody": {
+          "required": true,
+          "description": "Filter and query options",
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/AccountsQueryRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
-            "description": "Query results",
+            "description": "Query result",
             "content": {
               "application/json": {
                 "schema": {
@@ -384,158 +300,140 @@
             }
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         },
         "security": [
           {
-            "ApiRoles": [
-              "ReadAllAccountUsers"
-            ]
+            "Authorization": []
           }
+        ],
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
+    "/api/accounts/search": {
+      "get": {
+        "summary": "Search accounts by employerName",
+        "operationId": "searchAccounts",
+        "parameters": [
+          {
+            "name": "employerName",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "Employer name to search"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search result",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "tags": [
+          "Accounts"
+        ]
+      }
+    },
+    "/api/accounts/updated": {
+      "get": {
+        "summary": "Retrieve accounts updated since a specific date",
+        "operationId": "getAccountsUpdated",
+        "parameters": [
+          {
+            "name": "sinceDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "description": "Date from which accounts have been updated"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "description": "Page number to retrieve"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1000,
+              "description": "Number of accounts per page"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Updated accounts retrieved successfully",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Invalid request"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "Authorization": []
+          }
+        ],
+        "tags": [
+          "Accounts"
         ]
       }
     }
   },
   "components": {
     "schemas": {
-      "Accounts": {
-        "type": "object",
-        "properties": {
-          "accountsCount": {
-            "type": "integer"
-          },
-          "accountList": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Account"
-            }
-          }
-        }
-      },
-      "Account": {
-        "type": "object",
-        "properties": {
-          "accountName": {
-            "type": "string"
-          },
-          "hashedAccountId": {
-            "type": "string"
-          },
-          "publicAccountHashId": {
-            "type": "string"
-          },
-          "accountId": {
-            "type": "integer"
-          },
-          "href": {
-            "type": "string"
-          },
-          "apprenticeshipEmployerType": {
-            "$ref": "#/components/schemas/ApprenticeshipEmployerType"
-          },
-          "accountAgreementType": {
-            "$ref": "#/components/schemas/AccountAgreementType"
-          }
-        }
-      },
-      "CreateEmployerAccountViaProviderRequestModel": {
-        "type": "object",
-        "properties": {
-          "requestId": {
-            "type": "string"
-          },
-          "userRef": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "email": {
-            "type": "string",
-            "format": "email"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "employerOrganisationName": {
-            "type": "string"
-          },
-          "employerPaye": {
-            "type": "string"
-          },
-          "employerAorn": {
-            "type": "string"
-          },
-          "employerAddress": {
-            "type": "string"
-          },
-          "employerOrganisationReferenceNumber": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "requestId",
-          "userRef",
-          "firstName",
-          "lastName",
-          "email",
-          "employerOrganisationName"
-        ]
-      },
-      "CreateEmployerAccountViaProviderResponseModel": {
-        "type": "object",
-        "properties": {
-          "accountId": {
-            "type": "integer"
-          },
-          "accountLegalEntityId": {
-            "type": "integer"
-          }
-        }
-      },
-      "User": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "userRef": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          }
-        }
-      },
-      "AcknowledgeTrainingProviderTaskCommand": {
-        "type": "object",
-        "properties": {
-          "accountId": {
-            "type": "integer"
-          }
-        }
-      },
       "AccountsQueryRequest": {
         "type": "object",
         "properties": {
-          "filter": {
+          "Filter": {
             "$ref": "#/components/schemas/AccountsQueryFilter"
           },
-          "select": {
+          "Select": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
-          "include": {
+          "Include": {
             "type": "array",
             "items": {
               "type": "string"
@@ -546,7 +444,7 @@
       "AccountsQueryFilter": {
         "type": "object",
         "properties": {
-          "accountIds": {
+          "AccountIds": {
             "type": "array",
             "items": {
               "type": "integer"
@@ -554,10 +452,91 @@
           }
         }
       },
+      "AcknowledgeTrainingProviderTaskCommand": {
+        "type": "object",
+        "required": [
+          "AccountId"
+        ],
+        "properties": {
+          "AccountId": {
+            "type": "integer",
+            "description": "Unique identifier for the account"
+          }
+        }
+      },
+      "CreateEmployerAccountViaProviderRequestModel": {
+        "type": "object",
+        "required": [
+          "RequestId",
+          "UserRef",
+          "Email",
+          "FirstName",
+          "LastName",
+          "EmployerOrganisationName",
+          "EmployerPaye",
+          "EmployerAddress"
+        ],
+        "properties": {
+          "RequestId": {
+            "type": "string",
+            "description": "Correlation ID for the request"
+          },
+          "UserRef": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the user"
+          },
+          "Email": {
+            "type": "string",
+            "description": "Email address of the user"
+          },
+          "FirstName": {
+            "type": "string",
+            "description": "First name of the user"
+          },
+          "LastName": {
+            "type": "string",
+            "description": "Last name of the user"
+          },
+          "EmployerOrganisationName": {
+            "type": "string",
+            "description": "Name of the employer organisation"
+          },
+          "EmployerPaye": {
+            "type": "string",
+            "description": "PAYE reference for the employer"
+          },
+          "EmployerAorn": {
+            "type": "string",
+            "description": "Accident/Incident reference number for the employer"
+          },
+          "EmployerAddress": {
+            "type": "string",
+            "description": "Address of the employer"
+          },
+          "EmployerOrganisationReferenceNumber": {
+            "type": "string",
+            "description": "Reference number for the employer organisation"
+          }
+        }
+      },
+      "CreateEmployerAccountViaProviderResponseModel": {
+        "type": "object",
+        "properties": {
+          "AccountId": {
+            "type": "integer",
+            "description": "Unique ID of the created account"
+          },
+          "AccountLegalEntityId": {
+            "type": "integer",
+            "description": "Unique ID of the account legal entity"
+          }
+        }
+      },
       "AccountsQueryResponse": {
         "type": "object",
         "properties": {
-          "accounts": {
+          "Accounts": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AccountQueryResult"
@@ -568,13 +547,15 @@
       "AccountQueryResult": {
         "type": "object",
         "properties": {
-          "accountId": {
-            "type": "integer"
+          "AccountId": {
+            "type": "integer",
+            "description": "Unique identifier of the account"
           },
-          "apprenticeshipEmployerType": {
-            "type": "string"
+          "ApprenticeshipEmployerType": {
+            "type": "string",
+            "description": "Type of employer apprenticeship"
           },
-          "legalEntities": {
+          "LegalEntities": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AccountQueryLegalEntityResult"
@@ -585,33 +566,17 @@
       "AccountQueryLegalEntityResult": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
+          "Id": {
+            "type": "string",
+            "description": "Unique identifier for the legal entity"
           }
         }
-      },
-      "ApprenticeshipEmployerType": {
-        "type": "string",
-        "enum": [
-          "Levy",
-          "NonLevy",
-          "Unknown"
-        ]
-      },
-      "AccountAgreementType": {
-        "type": "string",
-        "enum": [
-          "Levy",
-          "Combined",
-          "Unknown"
-        ]
       }
     },
     "securitySchemes": {
-      "ApiRoles": {
-        "type": "apiKey",
-        "name": "Authorization",
-        "in": "header"
+      "Authorization": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

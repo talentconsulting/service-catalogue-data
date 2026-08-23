@@ -2,41 +2,49 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Search Pension Regulator API",
-    "version": "1.0.0",
-    "description": "API for managing and searching pension regulator organizations using PAYE and AORN."
+    "version": "1.0.0"
   },
   "paths": {
-    "/accounts/{hashedAccountId}/pensionregulator": {
+    "/accounts/{HashedAccountId}/pensionregulator": {
       "get": {
+        "operationId": "GetSearchPensionRegulator",
         "summary": "Search Pension Regulator",
-        "operationId": "SearchPensionRegulator",
         "parameters": [
           {
-            "name": "hashedAccountId",
+            "name": "HashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Hashed account ID"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Pension regulator search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchPensionRegulatorResultsViewModel"
+                }
+              }
+            }
           }
         }
       },
       "post": {
+        "operationId": "PostSearchPensionRegulator",
         "summary": "Submit Search Pension Regulator",
-        "operationId": "SubmitSearchPensionRegulator",
         "parameters": [
           {
-            "name": "hashedAccountId",
+            "name": "HashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Hashed account ID"
           }
         ],
         "requestBody": {
@@ -51,24 +59,34 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successful submission of pension regulator organisation data for a specific account."
+          },
+          "400": {
+            "description": "Validation error."
           }
         }
       }
     },
     "/accounts/pensionregulator": {
       "get": {
-        "summary": "Search Pension Regulator for Account Creation",
-        "operationId": "SearchPensionRegulatorCreateAccount",
+        "operationId": "GetSearchPensionRegulatorWithoutAccountId",
+        "summary": "Search Pension Regulator without Account ID",
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Pension regulator search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchPensionRegulatorResultsViewModel"
+                }
+              }
+            }
           }
         }
       },
       "post": {
-        "summary": "Submit Search Pension Regulator for Account Creation",
-        "operationId": "SubmitSearchPensionRegulatorCreateAccount",
+        "operationId": "PostSearchPensionRegulatorWithoutAccountId",
+        "summary": "Submit Search Pension Regulator without Account ID",
         "requestBody": {
           "required": true,
           "content": {
@@ -81,23 +99,36 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successful submission of pension regulator organisation data without specific account."
+          },
+          "400": {
+            "description": "Validation error."
           }
         }
       }
     },
-    "/accounts/{hashedAccountId}/pensionregulator/aorn": {
+    "/accounts/{HashedAccountId}/pensionregulator/aorn": {
       "get": {
-        "summary": "Search Pension Regulator by PAYE and AORN",
-        "operationId": "SearchPensionRegulatorByAornForAccount",
+        "operationId": "GetSearchPensionRegulatorByAorn",
+        "summary": "Search Pension Regulator by AORN",
         "parameters": [
+          {
+            "name": "HashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Hashed account ID"
+          },
           {
             "name": "payeRef",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "PAYE reference"
           },
           {
             "name": "aorn",
@@ -105,26 +136,26 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "hashedAccountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+            },
+            "description": "Accounts Office Reference Number (AORN)"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Pension regulator AORN search results.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchPensionRegulatorByAornViewModel"
+                }
+              }
+            }
           }
         }
       },
       "post": {
-        "summary": "Submit Search Pension Regulator by PAYE and AORN",
-        "operationId": "SubmitSearchPensionRegulatorByAornForAccount",
+        "operationId": "PostSearchPensionRegulatorByAorn",
+        "summary": "Submit Search Pension Regulator by AORN",
         "requestBody": {
           "required": true,
           "content": {
@@ -137,15 +168,18 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successful submission of pension regulator AORN organisation data."
+          },
+          "400": {
+            "description": "Validation error."
           }
         }
       }
     },
     "/accounts/pensionregulator/aorn": {
       "get": {
-        "summary": "Search Pension Regulator by PAYE and AORN (No Account)",
-        "operationId": "SearchPensionRegulatorByAornNoAccount",
+        "operationId": "GetSearchPensionRegulatorByAornWithoutAccountId",
+        "summary": "Search Pension Regulator by AORN without Account ID",
         "parameters": [
           {
             "name": "payeRef",
@@ -153,7 +187,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "PAYE reference"
           },
           {
             "name": "aorn",
@@ -161,18 +196,26 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Accounts Office Reference Number (AORN)"
           }
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Pension regulator AORN search results.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchPensionRegulatorByAornViewModel"
+                }
+              }
+            }
           }
         }
       },
       "post": {
-        "summary": "Submit Search Pension Regulator by PAYE and AORN (No Account)",
-        "operationId": "SubmitSearchPensionRegulatorByAornNoAccount",
+        "operationId": "PostSearchPensionRegulatorByAornWithoutAccountId",
+        "summary": "Submit Search Pension Regulator by AORN without Account ID",
         "requestBody": {
           "required": true,
           "content": {
@@ -185,7 +228,10 @@
         },
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successful submission of pension regulator AORN organisation data without specific account."
+          },
+          "400": {
+            "description": "Validation error."
           }
         }
       }
@@ -197,31 +243,36 @@
         "type": "object",
         "properties": {
           "Aorn": {
-            "type": "string"
+            "type": "string",
+            "description": "Accounts Office Reference Number (AORN)."
           },
           "PayeRef": {
-            "type": "string"
+            "type": "string",
+            "description": "PAYE reference."
           },
           "RemainingAttempts": {
             "type": "integer",
-            "format": "int32"
+            "description": "Remaining attempts for AORN validation."
           },
           "AllowedAttempts": {
             "type": "integer",
-            "format": "int32"
+            "description": "Total allowed attempts."
           },
           "RemainingLock": {
             "type": "integer",
-            "format": "int32"
+            "description": "Remaining lock time in seconds."
           },
           "IsLocked": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Indicates if the account is locked."
           },
           "AornError": {
-            "type": "string"
+            "type": "string",
+            "description": "Error message for AORN validation."
           },
           "PayeRefError": {
-            "type": "string"
+            "type": "string",
+            "description": "Error message for PAYE reference validation."
           }
         }
       },
@@ -229,24 +280,28 @@
         "type": "object",
         "properties": {
           "PayeRef": {
-            "type": "string"
+            "type": "string",
+            "description": "PAYE reference."
           },
           "Aorn": {
-            "type": "string"
+            "type": "string",
+            "description": "Accounts Office Reference Number (AORN)."
           },
           "Results": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PensionRegulatorDetailsViewModel"
-            }
+            },
+            "description": "List of organisation results."
           },
           "IsExistingAccount": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Flag indicating if the account already exists."
           },
           "SelectedOrganisation": {
             "type": "integer",
-            "format": "int64",
-            "nullable": true
+            "nullable": true,
+            "description": "Selected organisation identifier."
           }
         }
       },
@@ -254,36 +309,70 @@
         "type": "object",
         "properties": {
           "HashedId": {
-            "type": "string"
-          },
-          "Type": {
-            "$ref": "#/components/schemas/OrganisationType"
+            "type": "string",
+            "description": "Hashed identifier for the organisation."
           },
           "Name": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the organisation."
+          },
+          "Type": {
+            "$ref": "#/components/schemas/OrganisationType",
+            "description": "Type of the organisation."
           },
           "Address": {
-            "type": "string"
+            "$ref": "#/components/schemas/OrganisationAddress",
+            "description": "Address of the organisation."
           },
           "ReferenceNumber": {
             "type": "integer",
-            "format": "int64"
+            "description": "Reference number of the organisation."
           },
           "Status": {
-            "type": "string"
+            "type": "string",
+            "description": "Status of the organisation."
           }
         }
       },
       "OrganisationType": {
-        "type": "integer",
+        "type": "string",
         "enum": [
-          1,
-          2,
-          3,
-          4,
-          5
+          "CompaniesHouse",
+          "Charities",
+          "PublicBodies",
+          "Other",
+          "PensionsRegulator"
         ],
-        "description": "1: CompaniesHouse, 2: Charities, 3: PublicBodies, 4: Other, 5: PensionsRegulator"
+        "description": "Represents the type of an organisation."
+      },
+      "OrganisationAddress": {
+        "type": "object",
+        "properties": {
+          "Line1": {
+            "type": "string",
+            "description": "Address Line 1."
+          },
+          "Line2": {
+            "type": "string",
+            "description": "Address Line 2."
+          },
+          "Line3": {
+            "type": "string",
+            "description": "Address Line 3."
+          },
+          "Line4": {
+            "type": "string",
+            "description": "Address Line 4."
+          },
+          "Line5": {
+            "type": "string",
+            "description": "Address Line 5."
+          },
+          "Postcode": {
+            "type": "string",
+            "description": "Postcode of the address."
+          }
+        }
       }
     }
   }

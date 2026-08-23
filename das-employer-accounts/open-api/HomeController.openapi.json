@@ -2,14 +2,14 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Accounts API",
-    "description": "API for managing employer accounts",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing employer accounts and related functionalities."
   },
   "paths": {
-    "/service/": {
+    "/": {
       "get": {
-        "operationId": "HomeController_Index",
-        "summary": "Redirect or render the main page",
+        "operationId": "getIndex",
+        "summary": "Default Index Page",
         "parameters": [
           {
             "name": "redirectUri",
@@ -22,31 +22,34 @@
         ],
         "responses": {
           "200": {
-            "description": "Redirects or returns main page view"
+            "description": "Successful operation"
+          },
+          "302": {
+            "description": "Redirects to another URI"
           }
         }
       }
     },
-    "/service/termsAndConditions/overview": {
+    "/termsAndConditions/overview": {
       "get": {
-        "operationId": "HomeController_TermsAndConditionsOverview",
-        "summary": "Retrieve terms and conditions overview",
+        "operationId": "getTermsAndConditionsOverview",
+        "summary": "View Terms and Conditions Overview",
         "responses": {
           "200": {
-            "description": "Renders the terms and conditions overview page"
+            "description": "Successful operation"
           }
         }
       }
     },
-    "/service/termsAndConditions": {
+    "/termsAndConditions": {
       "get": {
-        "operationId": "HomeController_TermsAndConditions_Get",
-        "summary": "Retrieve terms and conditions page.",
+        "operationId": "getTermsAndConditions",
+        "summary": "View Terms and Conditions",
         "parameters": [
           {
             "name": "returnUrl",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -54,7 +57,7 @@
           {
             "name": "hashedAccountId",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             }
@@ -62,18 +65,20 @@
         ],
         "responses": {
           "200": {
-            "description": "Renders the terms and conditions page with view model"
+            "description": "Successful operation"
           }
         },
         "security": [
           {
-            "HasEmployerViewerTransactorOwnerAccount": []
+            "policyNames": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
           }
         ]
       },
       "post": {
-        "operationId": "HomeController_TermsAndConditions_Post",
-        "summary": "Accept terms and conditions",
+        "operationId": "postTermsAndConditions",
+        "summary": "Accept Terms and Conditions",
         "requestBody": {
           "required": true,
           "content": {
@@ -85,48 +90,94 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Redirects to next appropriate action"
-          }
-        },
-        "security": [
-          {
-            "HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ]
-      }
-    },
-    "/service/accounts": {
-      "get": {
-        "operationId": "HomeController_ViewAccounts",
-        "summary": "View user accounts",
-        "responses": {
-          "200": {
-            "description": "Renders accounts overview page"
-          }
-        },
-        "security": [
-          {
-            "HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ]
-      }
-    },
-    "/service/register": {
-      "get": {
-        "operationId": "HomeController_RegisterUser",
-        "summary": "Redirect user to registration page",
-        "responses": {
+          "204": {
+            "description": "Terms and conditions accepted"
+          },
           "302": {
-            "description": "Redirects to add user details"
+            "description": "Redirects based on the return URL"
+          }
+        },
+        "security": [
+          {
+            "policyNames": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
+          }
+        ]
+      }
+    },
+    "/accessibility-statement": {
+      "get": {
+        "operationId": "getAccessibilityStatement",
+        "summary": "Accessibility Statement",
+        "responses": {
+          "200": {
+            "description": "Successful operation"
           }
         }
       }
     },
-    "/service/password/change": {
+    "/accounts": {
       "get": {
-        "operationId": "HomeController_HandlePasswordChanged",
-        "summary": "Handle password change event",
+        "operationId": "getViewAccounts",
+        "summary": "View employer accounts",
+        "responses": {
+          "200": {
+            "description": "Returns the accounts view"
+          }
+        },
+        "security": [
+          {
+            "policyNames": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
+          }
+        ]
+      }
+    },
+    "/register/new/{correlationId}": {
+      "get": {
+        "operationId": "getHandleNewRegistration",
+        "summary": "Handle new registration",
+        "parameters": [
+          {
+            "name": "correlationId",
+            "in": "path",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to index page"
+          }
+        },
+        "security": [
+          {
+            "policyNames": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
+          }
+        ]
+      }
+    },
+    "/register": {
+      "get": {
+        "operationId": "getRegisterUser",
+        "summary": "Register user",
+        "responses": {
+          "302": {
+            "description": "Redirects to user registration"
+          }
+        }
+      }
+    },
+    "/password/change": {
+      "get": {
+        "operationId": "getHandlePasswordChanged",
+        "summary": "Handle password change",
         "parameters": [
           {
             "name": "userCancelled",
@@ -139,20 +190,22 @@
         ],
         "responses": {
           "302": {
-            "description": "Redirects back to index page"
+            "description": "Redirects to index page"
           }
         },
         "security": [
           {
-            "HasEmployerViewerTransactorOwnerAccount": []
+            "policyNames": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
           }
         ]
       }
     },
-    "/service/email/change": {
+    "/email/change": {
       "get": {
-        "operationId": "HomeController_HandleEmailChanged",
-        "summary": "Handle email change event",
+        "operationId": "getHandleEmailChanged",
+        "summary": "Handle email change",
         "parameters": [
           {
             "name": "userCancelled",
@@ -165,31 +218,33 @@
         ],
         "responses": {
           "302": {
-            "description": "Redirects back to index page after email change"
+            "description": "Redirects to index page"
           }
         },
         "security": [
           {
-            "HasEmployerViewerTransactorOwnerAccount": []
+            "policyNames": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
           }
         ]
       }
     },
-    "/service/accessibility-statement": {
+    "/signIn": {
       "get": {
-        "operationId": "HomeController_AccessibilityStatement",
-        "summary": "View accessibility statement",
+        "operationId": "getSignIn",
+        "summary": "Redirect to sign-in",
         "responses": {
-          "200": {
-            "description": "Renders the accessibility statement page"
+          "302": {
+            "description": "Redirects to index page"
           }
         }
       }
     },
-    "/service/signout": {
-      "post": {
-        "operationId": "HomeController_SignOutUser",
-        "summary": "Sign out the user",
+    "/signout": {
+      "get": {
+        "operationId": "signOutUser",
+        "summary": "Sign out user",
         "parameters": [
           {
             "name": "autoSignOut",
@@ -202,51 +257,40 @@
         ],
         "responses": {
           "302": {
-            "description": "Redirects after signing the user out"
+            "description": "Redirects user to signed out page"
           }
         }
       }
     },
-    "/service/signed-out": {
+    "/signoutcleanup": {
       "get": {
-        "operationId": "HomeController_SignedOut",
-        "summary": "Handle signed-out view",
+        "operationId": "signOutCleanup",
+        "summary": "Sign out cleanup",
+        "responses": {
+          "204": {
+            "description": "Successfully signed out"
+          }
+        }
+      }
+    },
+    "/signed-out": {
+      "get": {
+        "operationId": "getSignedOut",
+        "summary": "View signed out page",
         "responses": {
           "200": {
-            "description": "Renders signed-out or auto-sign-out views"
+            "description": "View signed out page"
           }
         }
       }
     },
-    "/service/help": {
+    "/{hashedAccountId}/privacy": {
       "get": {
-        "operationId": "HomeController_Help",
-        "summary": "Redirects to help center",
-        "responses": {
-          "301": {
-            "description": "Permanent redirection to help center URL"
-          }
-        }
-      }
-    },
-    "/service/start": {
-      "get": {
-        "operationId": "HomeController_ServiceStartPage",
-        "summary": "View the service start page",
-        "responses": {
-          "200": {
-            "description": "Renders the service start page"
-          }
-        }
-      }
-    },
-    "/service/{HashedAccountId}/privacy": {
-      "get": {
-        "operationId": "HomeController_Privacy_HashedAccountId",
-        "summary": "Privacy page for a specific account",
+        "operationId": "getPrivacyForAccount",
+        "summary": "Privacy policy",
         "parameters": [
           {
-            "name": "HashedAccountId",
+            "name": "hashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
@@ -256,18 +300,40 @@
         ],
         "responses": {
           "200": {
-            "description": "Renders the privacy page"
+            "description": "Returns privacy policy"
           }
         }
       }
     },
-    "/service/privacy": {
+    "/privacy": {
       "get": {
-        "operationId": "HomeController_Privacy",
-        "summary": "Privacy policy page",
+        "operationId": "getPrivacy",
+        "summary": "Privacy policy",
         "responses": {
           "200": {
-            "description": "Renders the privacy policy page"
+            "description": "Returns privacy policy"
+          }
+        }
+      }
+    },
+    "/help": {
+      "get": {
+        "operationId": "getHelp",
+        "summary": "Help page",
+        "responses": {
+          "308": {
+            "description": "Redirects to external help center"
+          }
+        }
+      }
+    },
+    "/start": {
+      "get": {
+        "operationId": "getServiceStartPage",
+        "summary": "Service start page",
+        "responses": {
+          "200": {
+            "description": "Returns the service start page"
           }
         }
       }
@@ -284,15 +350,18 @@
           "HashedAccountId": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "ReturnUrl",
+          "HashedAccountId"
+        ]
       }
     },
     "securitySchemes": {
-      "HasEmployerViewerTransactorOwnerAccount": {
+      "policyNames": {
         "type": "apiKey",
-        "name": "Authorization",
-        "in": "header",
-        "description": "The policy requiring authenticated user with viewer, transactor, or owner role in an employer account"
+        "name": "PolicyNames",
+        "in": "header"
       }
     }
   }

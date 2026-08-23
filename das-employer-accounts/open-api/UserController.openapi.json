@@ -1,14 +1,15 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts User API",
-    "version": "1.0.0",
-    "description": "API for managing user accounts in the Employer Accounts system."
+    "title": "User API",
+    "description": "API for managing user accounts in the system.",
+    "version": "1.0.0"
   },
   "paths": {
     "/api/user": {
       "get": {
-        "summary": "Get user information by email",
+        "summary": "Get user by email",
+        "operationId": "GetUserByEmail",
         "parameters": [
           {
             "name": "email",
@@ -17,42 +18,36 @@
             "schema": {
               "type": "string",
               "format": "email"
-            },
-            "description": "The email address of the user to retrieve."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with user data",
+            "description": "User retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {
-                    "user": {
-                      "type": "object"
-                    }
-                  }
+                  "properties": {}
                 }
               }
             }
           },
           "404": {
-            "description": "User not found"
+            "description": "User not found."
           }
         },
         "security": [
           {
-            "oauth2": [
-              "ReadUserAccounts"
-            ]
+            "ApiRoles.ReadUserAccounts": []
           }
         ]
       }
     },
     "/api/user/by-ref/{userRef}": {
       "get": {
-        "summary": "Get user information by reference",
+        "summary": "Get user by reference",
+        "operationId": "GetUserByRef",
         "parameters": [
           {
             "name": "userRef",
@@ -60,42 +55,36 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "The unique reference of the user to retrieve."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with user data",
+            "description": "User retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "properties": {
-                    "user": {
-                      "type": "object"
-                    }
-                  }
+                  "properties": {}
                 }
               }
             }
           },
           "404": {
-            "description": "User not found"
+            "description": "User not found."
           }
         },
         "security": [
           {
-            "oauth2": [
-              "ReadUserAccounts"
-            ]
+            "ApiRoles.ReadUserAccounts": []
           }
         ]
       }
     },
     "/api/user/upsert": {
       "put": {
-        "summary": "Upsert user information",
+        "summary": "Upsert a registered user",
+        "operationId": "UpsertRegisteredUser",
         "requestBody": {
           "required": true,
           "content": {
@@ -108,17 +97,15 @@
         },
         "responses": {
           "200": {
-            "description": "Successful operation"
+            "description": "User registered or updated successfully."
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal Server Error."
           }
         },
         "security": [
           {
-            "oauth2": [
-              "ReadUserAccounts"
-            ]
+            "ApiRoles.ReadUserAccounts": []
           }
         ]
       }
@@ -130,25 +117,20 @@
         "type": "object",
         "properties": {
           "UserRef": {
-            "type": "string",
-            "description": "The unique reference of the user."
+            "type": "string"
           },
           "FirstName": {
-            "type": "string",
-            "description": "The first name of the user."
+            "type": "string"
           },
           "LastName": {
-            "type": "string",
-            "description": "The last name of the user."
+            "type": "string"
           },
           "EmailAddress": {
             "type": "string",
-            "format": "email",
-            "description": "The email address of the user."
+            "format": "email"
           },
           "CorrelationId": {
-            "type": "string",
-            "description": "A correlation identifier for tracking purposes."
+            "type": "string"
           }
         },
         "required": [
@@ -161,16 +143,11 @@
       }
     },
     "securitySchemes": {
-      "oauth2": {
-        "type": "oauth2",
-        "flows": {
-          "implicit": {
-            "authorizationUrl": "https://example.com/oauth/authorize",
-            "scopes": {
-              "ReadUserAccounts": "Read access to user accounts"
-            }
-          }
-        }
+      "ApiRoles.ReadUserAccounts": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "Authorization based on the ApiRoles.ReadUserAccounts policy"
       }
     }
   }
