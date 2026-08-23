@@ -4,32 +4,25 @@
   "path": "src",
   "dependencies": [
     {
-      "name": "ReservationsApiClient",
-      "kind": "grpc-service",
-      "classification": "internal",
+      "name": "AccountApiClient",
+      "kind": "http-api",
+      "classification": "unknown",
       "direction": "outbound",
-      "client": "ReservationsApiClient",
+      "client": "IAccountApiClient",
       "technology": null,
       "configurationKeys": [
-        "ReservationsClientApiConfiguration.ClientId",
-        "ReservationsClientApiConfiguration.ClientSecret",
-        "ReservationsClientApiConfiguration.Tenant",
-        "ReservationsClientApiConfiguration.UseStub"
+        "AccountApiConfiguration:BaseUrl"
       ],
       "authentication": {
-        "type": "OAuth",
-        "configurationKeys": [
-          "ReservationsClientApiConfiguration.ClientId",
-          "ReservationsClientApiConfiguration.ClientSecret",
-          "ReservationsClientApiConfiguration.Tenant"
-        ]
+        "type": null,
+        "configurationKeys": []
       },
       "operations": [],
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.ReservationsV2.Api.Client/ReservationsApiClientFactory.cs",
-          "reason": "Factory method creates client with dependency injection and OAuth credentials."
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Shared/DependencyInjection/ServiceRegistrationExtensions.cs",
+          "reason": "Dependency registered with custom factory function using AccountApiConfiguration."
         }
       ],
       "confidence": "high"
@@ -37,90 +30,85 @@
     {
       "name": "ApprovalsOuterApiClient",
       "kind": "http-api",
-      "classification": "internal",
+      "classification": "unknown",
       "direction": "outbound",
-      "client": "ApprovalsOuterApiClient",
+      "client": "IApprovalsOuterApiClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "ApprovalsOuterApiConfiguration.BaseUrl",
-        "ApprovalsOuterApiConfiguration.Key"
+        "ApprovalsOuterApiConfiguration:BaseUrl"
       ],
       "authentication": {
-        "type": "header",
-        "configurationKeys": [
-          "ApprovalsOuterApiConfiguration.Key"
-        ]
+        "type": null,
+        "configurationKeys": []
       },
       "operations": [
         {
           "method": "GET",
-          "path": "/test-url/get",
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.UnitTests/Infrastructure/Api/WhenCallingGet.cs"
+          "path": null,
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/ApprovalsOuterApiClient.cs"
         },
         {
           "method": "POST",
-          "path": "/api/post-endpoint",
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.UnitTests/Infrastructure/Api/WhenCallingPost.cs"
+          "path": null,
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/ApprovalsOuterApiClient.cs"
         }
       ],
       "resources": [],
       "evidence": [
         {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/DependencyResolution/ServiceRegistrationExtensions.cs",
+          "reason": "Default client registration found."
+        },
+        {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/ApprovalsOuterApiClient.cs",
-          "reason": "HttpClient-based implementation with outbound API calls."
-        },
-        {
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.UnitTests/Infrastructure/Api/WhenCallingGet.cs",
-          "reason": "Test confirming use of HTTP GET with authentication headers."
-        },
-        {
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.UnitTests/Infrastructure/Api/WhenCallingPost.cs",
-          "reason": "Test confirming use of HTTP POST with authentication headers."
+          "reason": "HttpClient construction and API interaction found."
         }
       ],
       "confidence": "high"
     },
     {
-      "name": "LevyTransferMatchingApiClient",
+      "name": "CommitmentsApiClient",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
-      "client": "LevyTransferMatchingClient",
+      "client": "ICommitmentsApiClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "CommitmentsConfigurationKeys.LevyTransferMatchingApiConfiguration"
+        "CommitmentsClientApiConfiguration:BaseUrl"
       ],
       "authentication": {
-        "type": "unknown",
+        "type": null,
         "configurationKeys": []
       },
       "operations": [],
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/DependencyResolution/ServiceRegistrationExtensions.cs",
-          "reason": "Service dependency highlighted in method registration."
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api.Client/CommitmentsApiClientFactory.cs",
+          "reason": "Commitments API client constructed using configuration."
         },
         {
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/Configuration/ServiceCollectionExtensions.cs",
-          "reason": "Service registered via AddHttpClient in dependency injection."
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Shared/DependencyInjection/ServiceRegistrationExtensions.cs",
+          "reason": "Dependency registered using factory method."
         }
       ],
-      "confidence": "medium"
+      "confidence": "high"
     },
     {
       "name": "LevyTransferMatchingClient",
       "kind": "http-api",
-      "classification": "internal",
+      "classification": "unknown",
       "direction": "outbound",
-      "client": "LevyTransferMatchingClient",
+      "client": "ILevyTransferMatchingApiClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "LevyTransferMatchingApiConfiguration.BaseUrl"
+        "LevyTransferMatchingApiConfiguration:BaseUrl"
       ],
       "authentication": {
-        "type": "Bearer",
-        "configurationKeys": []
+        "type": "bearer",
+        "configurationKeys": [
+          "accessToken"
+        ]
       },
       "operations": [
         {
@@ -132,8 +120,12 @@
       "resources": [],
       "evidence": [
         {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/Configuration/ServiceCollectionExtensions.cs",
+          "reason": "Dependency registration via AddHttpClient."
+        },
+        {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/LevyTransferMatchingClient.cs",
-          "reason": "HttpClient-based implementation with outbound API calls and bearer authentication."
+          "reason": "HttpClient construction and API interaction found."
         }
       ],
       "confidence": "high"
@@ -143,15 +135,15 @@
       "kind": "http-api",
       "classification": "unknown",
       "direction": "outbound",
-      "client": null,
+      "client": "IProviderRelationshipsApiClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "ProviderRelationshipsApi.ApiBaseUrl"
+        "ProviderRelationshipsApi:ApiBaseUrl"
       ],
       "authentication": {
-        "type": "ManagedIdentity",
+        "type": "bearer",
         "configurationKeys": [
-          "ProviderRelationshipsApiConfiguration"
+          "ProviderRelationshipsApiConfiguration:ManagedIdentity"
         ]
       },
       "operations": [],
@@ -159,7 +151,39 @@
       "evidence": [
         {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Shared/ProviderRelationshipsApiClient/AddProviderRelationshipsApiClientExtension.cs",
-          "reason": "API client registered with base URL and managed identity authentication."
+          "reason": "HttpClient registration with base address and authentication handlers found."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/DependencyResolution/ServiceRegistrationExtensions.cs",
+          "reason": "Stub or default client registration found."
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "ReservationsApiClient",
+      "kind": "http-api",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "IReservationsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ReservationsClientApiConfiguration:BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/DependencyResolution/ServiceRegistrationExtensions.cs",
+          "reason": "Dependency registered via custom factory."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.ReservationsV2.Api.Client/ReservationsApiClientFactory.cs",
+          "reason": "HttpClient construction and API client setup found."
         }
       ],
       "confidence": "high"
