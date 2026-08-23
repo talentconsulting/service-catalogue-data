@@ -1,0 +1,198 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Settings API",
+    "description": "API for managing user notification settings in the Employer Accounts system.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/settings/notifications": {
+      "get": {
+        "summary": "Get notification settings",
+        "description": "Retrieve the user's notification settings.",
+        "operationId": "getNotificationSettings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A view model containing the user's notification settings.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettingsViewModel"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Update notification settings",
+        "description": "Update the user's notification settings.",
+        "operationId": "updateNotificationSettings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationSettingsViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to the notification settings page after update."
+          }
+        },
+        "security": [
+          {
+            "HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ]
+      }
+    },
+    "/settings/notifications/unsubscribe/{hashedAccountId}": {
+      "get": {
+        "summary": "Unsubscribe from notifications",
+        "description": "Allows a user to unsubscribe from notifications for a specific account.",
+        "operationId": "unsubscribeFromNotifications",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "description": "The hashed ID of the account to unsubscribe from.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns a view model confirming the unsubscription.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ViewModelBase"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "NotificationSettingsViewModel": {
+        "type": "object",
+        "properties": {
+          "HashedId": {
+            "type": "string",
+            "description": "The hashed ID associated with the user."
+          },
+          "NotificationSettings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserNotificationSetting"
+            },
+            "description": "A list of notification settings for the user."
+          },
+          "PublicHashedAccountId": {
+            "type": "string",
+            "description": "The hashed ID associated with the public account."
+          },
+          "UserId": {
+            "type": "integer",
+            "description": "The ID of the user."
+          },
+          "Valid": {
+            "type": "boolean",
+            "description": "Indicates if the view model is valid."
+          },
+          "ErrorDictionary": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "A dictionary containing validation errors."
+          },
+          "FlashMessage": {
+            "type": "object",
+            "description": "A flash message displayed after an action."
+          }
+        }
+      },
+      "UserNotificationSetting": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "description": "The ID of the notification setting."
+          },
+          "AccountId": {
+            "type": "integer",
+            "description": "The ID of the associated account."
+          },
+          "HashedAccountId": {
+            "type": "string",
+            "description": "The hashed ID of the associated account."
+          },
+          "UserId": {
+            "type": "integer",
+            "description": "The ID of the user associated with the setting."
+          },
+          "Name": {
+            "type": "string",
+            "description": "The name of the notification setting."
+          },
+          "ReceiveNotifications": {
+            "type": "boolean",
+            "description": "Whether the user receives notifications."
+          }
+        }
+      },
+      "ViewModelBase": {
+        "type": "object",
+        "properties": {
+          "PublicHashedAccountId": {
+            "type": "string",
+            "description": "The hashed ID of the public account."
+          },
+          "UserId": {
+            "type": "integer",
+            "description": "The ID of the user."
+          },
+          "Valid": {
+            "type": "boolean",
+            "description": "Indicates if the view model is valid."
+          },
+          "ErrorDictionary": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "A dictionary containing validation errors."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "HasEmployerViewerTransactorOwnerAccount": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authentication scheme requiring a specific employer account policy."
+      }
+    }
+  }
+}

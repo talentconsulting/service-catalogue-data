@@ -1,18 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Support API",
-    "description": "API for managing support functionalities like changing roles, sending invitations, and resending invitations.",
+    "title": "Employer Accounts Support API",
     "version": "1.0.0"
   },
   "paths": {
     "/api/support/change-role": {
       "post": {
-        "summary": "Change the role of a team member",
-        "operationId": "ChangeRole",
-        "tags": [
-          "Support"
-        ],
+        "summary": "Change Team Member Role",
+        "description": "Change the role of a team member for a given account.",
         "requestBody": {
           "required": true,
           "content": {
@@ -28,23 +24,20 @@
             "description": "Role changed successfully."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
           }
         },
         "security": [
           {
-            "ApiRolesReadUserAccounts": []
+            "ApiRoles_ReadUserAccounts": []
           }
         ]
       }
     },
     "/api/support/resend-invitation": {
       "post": {
-        "summary": "Resend an invitation",
-        "operationId": "ResendInvitation",
-        "tags": [
-          "Support"
-        ],
+        "summary": "Resend Invitation",
+        "description": "Resend an invitation to a specific email for a given account.",
         "requestBody": {
           "required": true,
           "content": {
@@ -60,23 +53,20 @@
             "description": "Invitation resent successfully."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
           }
         },
         "security": [
           {
-            "ApiRolesReadUserAccounts": []
+            "ApiRoles_ReadUserAccounts": []
           }
         ]
       }
     },
     "/api/support/send-invitation": {
       "post": {
-        "summary": "Send an invitation",
-        "operationId": "SendInvitation",
-        "tags": [
-          "Support"
-        ],
+        "summary": "Send Invitation",
+        "description": "Send an invitation to a new team member for a given account.",
         "requestBody": {
           "required": true,
           "content": {
@@ -92,12 +82,12 @@
             "description": "Invitation sent successfully."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal Server Error."
           }
         },
         "security": [
           {
-            "ApiRolesReadUserAccounts": []
+            "ApiRoles_ReadUserAccounts": []
           }
         ]
       }
@@ -128,17 +118,17 @@
       "SupportResendInvitationCommand": {
         "type": "object",
         "properties": {
+          "HashedAccountId": {
+            "type": "string"
+          },
           "Email": {
             "type": "string",
             "format": "email"
-          },
-          "HashedAccountId": {
-            "type": "string"
           }
         },
         "required": [
-          "Email",
-          "HashedAccountId"
+          "HashedAccountId",
+          "Email"
         ]
       },
       "SupportCreateInvitationCommand": {
@@ -172,14 +162,16 @@
           "Owner",
           "Transactor",
           "Viewer"
-        ]
+        ],
+        "description": "The role of the team member, with predefined values: None, Owner, Transactor, Viewer."
       }
     },
     "securitySchemes": {
-      "ApiRolesReadUserAccounts": {
+      "ApiRoles_ReadUserAccounts": {
         "type": "apiKey",
         "name": "Authorization",
-        "in": "header"
+        "in": "header",
+        "description": "Requires the 'ReadUserAccounts' policy for authorization."
       }
     }
   }
