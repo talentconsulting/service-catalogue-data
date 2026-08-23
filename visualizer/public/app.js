@@ -431,6 +431,15 @@ function c4Type(dependency) {
   return dependency.classification === 'internal' ? 'Container' : 'External System';
 }
 
+function usesRedis(dependency) {
+  const haystack = [
+    dependency.name, dependency.technology, dependency.client, dependency.kind,
+    ...(dependency.configurationKeys || []),
+    ...((dependency.resources || []).flatMap((resource) => [resource.type, resource.name, resource.kind]))
+  ].filter(Boolean).join(' ').toLowerCase();
+  return haystack.includes('redis');
+}
+
 function orgName(repository) {
   return (repository || '').split('/')[0] || 'System';
 }
@@ -668,7 +677,8 @@ function renderDependencies(resetToolbar = true) {
   const operations = dependencies.reduce((sum, dependency) => sum + (dependency.operations?.length || 0), 0);
   const internalCount = dependencies.filter((dependency) => dependency.classification === 'internal').length;
   const messageCount = dependencies.filter((dependency) => dependency.kind === 'message').length;
-  if (resetToolbar) toolbar.innerHTML = `${searchControl('Filter dependencies')}${diagramControlsHtml()}<span class="spacer"></span><span class="toolbar-meta">${dependencies.length} dependencies · ${internalCount} internal · ${dependencies.length - internalCount} external · ${messageCount} message-based · ${operations} operations</span>`;
+  const redisCount = dependencies.filter(usesRedis).length;
+  if (resetToolbar) toolbar.innerHTML = `${searchControl('Filter dependencies')}${diagramControlsHtml()}<span class="spacer"></span><span class="toolbar-meta">${dependencies.length} dependencies · ${internalCount} internal · ${dependencies.length - internalCount} external · ${messageCount} message-based${redisCount ? ` · ${redisCount} using Redis` : ''} · ${operations} operations</span>`;
   const filtered = dependencies.filter((dependency) => `${dependency.name} ${dependency.kind} ${dependency.classification} ${dependency.direction} ${dependency.client} ${dependency.technology}`.toLowerCase().includes(state.filter));
   if (!dependencies.length) {
     content.innerHTML = '<div class="empty-state"><span class="empty-icon" aria-hidden="true">◇</span><h2>No service dependencies recorded</h2><p>The generated dependency catalogue is empty.</p></div>';
@@ -704,7 +714,7 @@ function renderDependencies(resetToolbar = true) {
         id: node.id, isLeaf: true, width: 196, height: 96,
         ...(node.classification === 'internal' ? { parent: 'boundary' } : {}),
         kind: node.kind, classification: node.classification, name: node.name,
-        technology: node.technology, opsCount: node.operations?.length || 0
+        technology: node.technology, opsCount: node.operations?.length || 0, isRedis: usesRedis(node)
       },
       position: positions.get(node.id)
     })),
@@ -719,6 +729,7 @@ function renderDependencies(resetToolbar = true) {
       <span class="c4-legend-item"><span class="c4-swatch focus"></span>Software system (this service)</span>
       <span class="c4-legend-item"><span class="c4-swatch internal"></span>Container — internal</span>
       <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
+      <span class="c4-legend-item"><span class="c4-swatch cache"></span>Uses Redis</span>
       <span class="c4-legend-item"><span class="c4-boundary-swatch"></span>${escapeHtml(orgLabel)} system boundary</span>
       <span class="c4-legend-item">Drag to rearrange · scroll to zoom · drag background to pan</span>
     </div>
@@ -736,9 +747,10 @@ function renderDependencies(resetToolbar = true) {
       halign: 'center', valign: 'center', halignBox: 'center', valignBox: 'center',
       tpl: (data) => {
         if (data.isCenter) return `<div class="cy-node service-node" data-node-id="center"><span class="c4-type">Software System</span><strong>${escapeHtml(data.label)}</strong></div>`;
-        const nodeClass = data.kind === 'message' ? 'message' : (data.classification === 'internal' ? 'internal' : 'external');
+        const nodeClass = data.isRedis ? 'cache' : (data.kind === 'message' ? 'message' : (data.classification === 'internal' ? 'internal' : 'external'));
         const typeLabel = data.classification === 'internal' ? 'Container' : 'External System';
-        return `<div class="cy-node ${nodeClass}" data-node-id="${escapeHtml(data.id)}"><span class="c4-type">${escapeHtml(typeLabel)}</span><strong>${escapeHtml(splitPascalCase(data.name))}</strong><span class="c4-meta">${escapeHtml(data.technology || data.kind || 'service')} · ${data.opsCount} op${data.opsCount === 1 ? '' : 's'}</span></div>`;
+        const alreadyMentionsRedis = (data.technology || '').toLowerCase().includes('redis');
+        return `<div class="cy-node ${nodeClass}" data-node-id="${escapeHtml(data.id)}"><span class="c4-type">${escapeHtml(typeLabel)}</span><strong>${escapeHtml(splitPascalCase(data.name))}</strong><span class="c4-meta">${escapeHtml(data.technology || data.kind || 'service')} · ${data.opsCount} op${data.opsCount === 1 ? '' : 's'}${data.isRedis && !alreadyMentionsRedis ? ' · Redis' : ''}</span></div>`;
       }
     }],
     onTapNode: (node) => {
@@ -771,7 +783,7 @@ function dependencyDetail(dependency) {
   return `<article class="dependency-detail">
     <p class="eyebrow">${escapeHtml(dependency.direction || 'Unknown')} dependency</p>
     <h2>${escapeHtml(dependency.name)}</h2>
-    <div class="badges"><span class="badge blue">${escapeHtml(dependency.kind || 'service')}</span><span class="badge ${dependency.classification === 'unknown' ? 'amber' : ''}">${escapeHtml(dependency.classification || 'unknown')}</span></div>
+    <div class="badges"><span class="badge blue">${escapeHtml(dependency.kind || 'service')}</span><span class="badge ${dependency.classification === 'unknown' ? 'amber' : ''}">${escapeHtml(dependency.classification || 'unknown')}</span>${usesRedis(dependency) ? '<span class="badge danger">Redis</span>' : ''}</div>
     <dl class="dependency-facts">${facts.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(value || 'Not recorded')}</dd></div>`).join('')}</dl>
     <h3>Operations</h3>${dependencyOperations(dependency.operations || [], scanKind)}
     <h3>Configuration</h3>${dependencyKeys([...(dependency.configurationKeys || []), ...(authentication.configurationKeys || [])])}
@@ -1012,7 +1024,7 @@ function sourceLink(path, scanKind = 'eventcatalog') {
 
 function dependencyTooltipContent(dependency) {
   const ops = dependency.operations || [];
-  const title = `<div class="node-tooltip-title">${escapeHtml(splitPascalCase(dependency.name))}</div>`;
+  const title = `<div class="node-tooltip-title">${escapeHtml(splitPascalCase(dependency.name))}${usesRedis(dependency) ? ' <span class="badge danger">Redis</span>' : ''}</div>`;
   if (!ops.length) return `${title}<p class="node-tooltip-empty">No operations recorded — click the box for full details.</p>`;
   const scanKind = dependency.kind === 'message' ? 'eventcatalog' : 'service-dependencies';
   const shown = ops.slice(0, 8);
