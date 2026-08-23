@@ -2,19 +2,24 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Settings API",
-    "description": "API for managing user notification settings in the Employer Accounts system.",
     "version": "1.0.0"
   },
   "paths": {
     "/settings/notifications": {
       "get": {
-        "summary": "Get notification settings",
-        "description": "Retrieve the user's notification settings.",
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Get notification settings for the authenticated user.",
         "operationId": "getNotificationSettings",
-        "parameters": [],
+        "security": [
+          {
+            "HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ],
         "responses": {
           "200": {
-            "description": "A view model containing the user's notification settings.",
+            "description": "Notification settings retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -23,17 +28,19 @@
               }
             }
           }
-        },
+        }
+      },
+      "post": {
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Update notification settings for the authenticated user.",
+        "operationId": "updateNotificationSettings",
         "security": [
           {
             "HasEmployerViewerTransactorOwnerAccount": []
           }
-        ]
-      },
-      "post": {
-        "summary": "Update notification settings",
-        "description": "Update the user's notification settings.",
-        "operationId": "updateNotificationSettings",
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -46,49 +53,47 @@
         },
         "responses": {
           "302": {
-            "description": "Redirect to the notification settings page after update."
+            "description": "Redirected to the notification settings page."
           }
-        },
-        "security": [
-          {
-            "HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ]
+        }
       }
     },
     "/settings/notifications/unsubscribe/{hashedAccountId}": {
       "get": {
-        "summary": "Unsubscribe from notifications",
-        "description": "Allows a user to unsubscribe from notifications for a specific account.",
-        "operationId": "unsubscribeFromNotifications",
+        "tags": [
+          "Settings"
+        ],
+        "summary": "Unsubscribe from notifications for a specific account.",
+        "operationId": "unsubscribeNotification",
+        "security": [
+          {
+            "HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ],
         "parameters": [
           {
             "name": "hashedAccountId",
             "in": "path",
             "required": true,
-            "description": "The hashed ID of the account to unsubscribe from.",
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The hashed account ID to unsubscribe from notifications."
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns a view model confirming the unsubscription.",
+            "description": "Unsubscribed successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ViewModelBase"
+                  "type": "object",
+                  "additionalProperties": true
                 }
               }
             }
           }
-        },
-        "security": [
-          {
-            "HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ]
+        }
       }
     }
   },
@@ -99,99 +104,71 @@
         "properties": {
           "HashedId": {
             "type": "string",
-            "description": "The hashed ID associated with the user."
+            "nullable": true
           },
           "NotificationSettings": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UserNotificationSetting"
             },
-            "description": "A list of notification settings for the user."
+            "nullable": true
           },
           "PublicHashedAccountId": {
             "type": "string",
-            "description": "The hashed ID associated with the public account."
+            "nullable": true
           },
           "UserId": {
             "type": "integer",
-            "description": "The ID of the user."
+            "format": "int64"
           },
           "Valid": {
-            "type": "boolean",
-            "description": "Indicates if the view model is valid."
+            "type": "boolean"
           },
           "ErrorDictionary": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            },
-            "description": "A dictionary containing validation errors."
-          },
-          "FlashMessage": {
-            "type": "object",
-            "description": "A flash message displayed after an action."
+            }
           }
-        }
+        },
+        "required": []
       },
       "UserNotificationSetting": {
         "type": "object",
         "properties": {
           "Id": {
             "type": "integer",
-            "description": "The ID of the notification setting."
+            "format": "int64"
           },
           "AccountId": {
             "type": "integer",
-            "description": "The ID of the associated account."
+            "format": "int64"
           },
           "HashedAccountId": {
             "type": "string",
-            "description": "The hashed ID of the associated account."
+            "nullable": true
           },
           "UserId": {
             "type": "integer",
-            "description": "The ID of the user associated with the setting."
+            "format": "int64"
           },
           "Name": {
             "type": "string",
-            "description": "The name of the notification setting."
+            "nullable": true
           },
           "ReceiveNotifications": {
-            "type": "boolean",
-            "description": "Whether the user receives notifications."
+            "type": "boolean"
           }
-        }
-      },
-      "ViewModelBase": {
-        "type": "object",
-        "properties": {
-          "PublicHashedAccountId": {
-            "type": "string",
-            "description": "The hashed ID of the public account."
-          },
-          "UserId": {
-            "type": "integer",
-            "description": "The ID of the user."
-          },
-          "Valid": {
-            "type": "boolean",
-            "description": "Indicates if the view model is valid."
-          },
-          "ErrorDictionary": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "A dictionary containing validation errors."
-          }
-        }
+        },
+        "required": []
       }
     },
     "securitySchemes": {
       "HasEmployerViewerTransactorOwnerAccount": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "Authentication scheme requiring a specific employer account policy."
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "API key for accessing restricted resources."
       }
     }
   }

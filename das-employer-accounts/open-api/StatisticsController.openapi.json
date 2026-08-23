@@ -1,18 +1,17 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts API",
+    "title": "SFA DAS Employer Accounts API",
     "version": "1.0.0"
   },
   "paths": {
     "/api/statistics": {
       "get": {
-        "summary": "Get statistics",
-        "operationId": "GetStatistics",
-        "description": "Retrieves statistical information.",
+        "operationId": "getStatistics",
+        "summary": "Retrieve platform statistics",
         "responses": {
           "200": {
-            "description": "Successful response containing statistics.",
+            "description": "Statistics retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -24,7 +23,7 @@
         },
         "security": [
           {
-            "ApiRoles.ReadUserAccounts": []
+            "oauth2": []
           }
         ]
       }
@@ -34,15 +33,21 @@
     "schemas": {
       "Statistics": {
         "type": "object",
-        "description": "Represents statistical data.",
+        "description": "Represents platform statistical data",
         "additionalProperties": true
       }
     },
     "securitySchemes": {
-      "ApiRoles.ReadUserAccounts": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "Bearer token with ReadUserAccounts role."
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://example.com/oauth2/authorize",
+            "scopes": {
+              "ApiRoles.ReadUserAccounts": "Access to read statistics."
+            }
+          }
+        }
       }
     }
   }
