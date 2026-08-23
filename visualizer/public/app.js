@@ -782,7 +782,7 @@ function dependencyDetail(dependency) {
 
 function dependencyOperations(operations, scanKind = 'service-dependencies') {
   if (!operations.length) return '<p class="muted">No operations recorded.</p>';
-  return `<div class="table-wrap"><table class="data-table"><thead><tr><th>Method</th><th>Path</th><th>Source</th></tr></thead><tbody>${operations.map((operation) => `<tr><td><span class="method ${escapeHtml((operation.method || '').toLowerCase())}">${escapeHtml(operation.method || '—')}</span></td><td><code>${escapeHtml(operation.path || 'Not resolved')}</code></td><td>${sourceLink(operation.sourceFile, scanKind)}</td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="table-wrap"><table class="data-table"><thead><tr><th>Method</th><th>Path</th><th>Source</th></tr></thead><tbody>${operations.map((operation) => `<tr><td><span class="method ${escapeHtml((operation.method || '').toLowerCase())}">${escapeHtml(operation.methodName || operation.method || '—')}</span></td><td><code>${escapeHtml(operation.path || 'Not resolved')}</code></td><td>${sourceLink(operation.sourceFile, scanKind)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 function dependencyKeys(keys) {
@@ -1018,8 +1018,8 @@ function dependencyTooltipContent(dependency) {
   const shown = ops.slice(0, 8);
   return `${title}<ul class="node-tooltip-list">${shown.map((operation) => {
     const url = githubFileUrl(operation.sourceFile, scanKind);
-    const label = operation.path && operation.path !== 'Not resolved' ? operation.path : (operation.method || 'operation');
-    return `<li><span class="method ${escapeHtml((operation.method || '').toLowerCase())}">${escapeHtml(operation.method || '—')}</span>${url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>` : `<span class="muted">${escapeHtml(label)}</span>`}</li>`;
+    const label = operation.path && operation.path !== 'Not resolved' ? operation.path : (operation.methodName || operation.method || 'operation');
+    return `<li><span class="method ${escapeHtml((operation.method || '').toLowerCase())}">${escapeHtml(operation.methodName || operation.method || '—')}</span>${url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>` : `<span class="muted">${escapeHtml(label)}</span>`}</li>`;
   }).join('')}</ul>${ops.length > shown.length ? `<p class="node-tooltip-more">+${ops.length - shown.length} more — click the box for full details</p>` : ''}`;
 }
 
