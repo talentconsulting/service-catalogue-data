@@ -7,8 +7,7 @@
   "paths": {
     "/accounts/signout": {
       "get": {
-        "operationId": "signOutEmployer",
-        "summary": "Sign out employer account",
+        "operationId": "employerSignOut",
         "parameters": [
           {
             "name": "autoSignOut",
@@ -20,16 +19,15 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Successful sign-out operation"
+          "204": {
+            "description": "Successfully signed out"
           }
         }
       }
     },
     "/signout": {
       "get": {
-        "operationId": "signOutProvider",
-        "summary": "Sign out provider account",
+        "operationId": "providerSignOut",
         "parameters": [
           {
             "name": "autoSignOut",
@@ -41,8 +39,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Successful sign-out operation"
+          "204": {
+            "description": "Successfully signed out"
           }
         }
       }
@@ -50,7 +48,6 @@
     "/service/signout": {
       "get": {
         "operationId": "serviceSignOut",
-        "summary": "Sign out from service",
         "parameters": [
           {
             "name": "autoSignOut",
@@ -62,8 +59,8 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Successful sign-out operation"
+          "204": {
+            "description": "Successfully signed out"
           }
         }
       }
@@ -71,29 +68,33 @@
     "/p-signed-out": {
       "get": {
         "operationId": "providerSignedOut",
-        "summary": "Provider signed out page",
         "responses": {
           "200": {
-            "description": "Signed out or redirected to dashboard"
+            "description": "Provider signed out screen or redirect",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
     },
     "/signoutcleanup": {
-      "post": {
+      "get": {
         "operationId": "signOutCleanup",
-        "summary": "Cleanup after sign out",
         "responses": {
           "204": {
-            "description": "Sign-out cleanup completed"
+            "description": "Cookies cleaned up"
           }
         }
       }
     },
     "/{employerAccountId}/service/password/change": {
       "get": {
-        "operationId": "changePassword",
-        "summary": "Redirect for employer password change",
+        "operationId": "employerChangePassword",
         "parameters": [
           {
             "name": "employerAccountId",
@@ -114,15 +115,14 @@
         ],
         "responses": {
           "302": {
-            "description": "Redirects to employer index"
+            "description": "Redirect to employer index"
           }
         }
       }
     },
     "/{employerAccountId}/service/email/change": {
       "get": {
-        "operationId": "changeEmail",
-        "summary": "Redirect for employer email change",
+        "operationId": "employerChangeEmail",
         "parameters": [
           {
             "name": "employerAccountId",
@@ -143,7 +143,7 @@
         ],
         "responses": {
           "302": {
-            "description": "Redirects to employer index"
+            "description": "Redirect to employer index"
           }
         }
       }
@@ -151,7 +151,6 @@
     "/{ukPrn}/notAvailable": {
       "get": {
         "operationId": "providerFeatureNotAvailable",
-        "summary": "Feature not available for provider",
         "parameters": [
           {
             "name": "ukPrn",
@@ -164,7 +163,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Displays feature not available page"
+            "description": "Provider feature not available view",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
@@ -172,7 +178,6 @@
     "/accounts/{employerAccountId}/notAvailable": {
       "get": {
         "operationId": "employerFeatureNotAvailable",
-        "summary": "Feature not available for employer",
         "parameters": [
           {
             "name": "employerAccountId",
@@ -185,17 +190,23 @@
         ],
         "responses": {
           "200": {
-            "description": "Displays feature not available page"
+            "description": "Employer feature not available view",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
     },
     "/dashboard": {
       "get": {
-        "operationId": "dashboardRedirect",
-        "summary": "Redirect to dashboard",
+        "operationId": "getDashboard",
         "responses": {
-          "301": {
+          "308": {
             "description": "Permanent redirect to dashboard URL"
           }
         }
@@ -203,31 +214,45 @@
     },
     "/SignIn-Stub": {
       "get": {
-        "operationId": "signinStubPage",
-        "summary": "Displays a stub sign-in page in debug mode",
+        "description": "Available only in DEBUG mode",
+        "operationId": "signinStubGet",
         "responses": {
           "200": {
-            "description": "Debug stub sign-in view loaded"
+            "description": "Stub sign-in view",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       },
       "post": {
-        "operationId": "signinStub",
-        "summary": "Handles stub sign-in in debug mode",
+        "description": "Available only in DEBUG mode",
+        "operationId": "signinStubPost",
         "responses": {
           "302": {
-            "description": "Redirects after stub sign-in"
+            "description": "Redirect to signed-in stub route"
           }
         }
       }
     },
     "/signed-in-stub": {
       "get": {
+        "description": "Requires authorization. Available only in DEBUG mode.",
         "operationId": "signedInStub",
-        "summary": "Displays signed-in stub in debug mode",
         "responses": {
           "200": {
-            "description": "Signed-in stub view loaded"
+            "description": "Signed-in stub view",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
@@ -235,44 +260,27 @@
   },
   "components": {
     "schemas": {
-      "ReservationsRouteModel": {
+      "AutoSignOutViewModel": {
         "type": "object",
         "properties": {
-          "employerAccountId": {
+          "DashboardUrl": {
             "type": "string"
           }
-        },
-        "required": [
-          "employerAccountId"
-        ]
+        }
+      },
+      "ReservationsRouteModel": {
+        "type": "object"
       },
       "StubAuthUserDetails": {
         "type": "object",
         "properties": {
           "Email": {
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           "Id": {
             "type": "string"
           }
-        },
-        "required": [
-          "Email",
-          "Id"
-        ]
-      },
-      "AutoSignOutViewModel": {
-        "type": "object",
-        "properties": {
-          "DashboardUrl": {
-            "type": "string",
-            "format": "uri"
-          }
-        },
-        "required": [
-          "DashboardUrl"
-        ]
+        }
       }
     }
   }
