@@ -4,12 +4,12 @@
   "path": "src",
   "dependencies": [
     {
-      "name": "RedisCache",
+      "name": "AddStackExchangeRedisCache",
       "kind": "cache",
       "classification": "internal",
       "direction": "outbound",
       "client": null,
-      "technology": "Redis",
+      "technology": "redis",
       "configurationKeys": [
         "CommitmentsConfigurationKeys.RedisConnectionString"
       ],
@@ -22,20 +22,20 @@
       "evidence": [
         {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Caching/ServiceCollectionExtensions.cs",
-          "reason": "AddDasDistributedMemoryCache method optionally configures StackExchangeRedisCache using connection string from CommitmentsConfigurationKeys.RedisConnectionString."
+          "reason": "Redis configuration detected in AddDasDistributedMemoryCache."
         }
       ],
       "confidence": "high"
     },
     {
-      "name": "ApprovalsOuterApiClient",
+      "name": "IApprovalsOuterApiClient",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
-      "client": "IApprovalsOuterApiClient",
-      "technology": "HttpClient",
+      "client": "ApprovalsOuterApiClient",
+      "technology": null,
       "configurationKeys": [
-        "ApprovalsOuterApiConfiguration.BaseUrl"
+        "ApprovalsOuterApiConfiguration"
       ],
       "authentication": {
         "type": null,
@@ -49,46 +49,37 @@
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/ApprovalsOuterApiClient.cs"
         },
         {
-          "method": "GET",
-          "methodName": "GetWithRetry",
-          "path": "{GetUrl}",
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/ApprovalsOuterApiClient.cs"
-        },
-        {
           "method": "POST",
           "methodName": "PostWithResponseCode",
           "path": "{PostUrl}",
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/ApprovalsOuterApiClient.cs"
         }
       ],
-      "resources": [
-        {
-          "type": "configuration",
-          "name": "ApprovalsOuterApiConfiguration",
-          "direction": "unknown",
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/ApprovalsOuterApiClient.cs"
-        }
-      ],
+      "resources": [],
       "evidence": [
         {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/ApprovalsOuterApiClient.cs",
-          "reason": "ApprovalsOuterApiClient uses HttpClient and explicitly sets BaseAddress using ApprovalsOuterApiConfiguration."
+          "reason": "HttpClient creation and operations for ApprovalsOuterApiClient."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/DependencyResolution/ServiceRegistrationExtensions.cs",
+          "reason": "Service registration for IApprovalsOuterApiClient."
         }
       ],
       "confidence": "high"
     },
     {
-      "name": "CommitmentsApiClient",
+      "name": "ICommitmentsApiClient",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
-      "client": "ICommitmentsApiClient",
-      "technology": "HttpClient",
+      "client": "CommitmentsApiClient",
+      "technology": null,
       "configurationKeys": [
         "CommitmentsClientApiConfiguration"
       ],
       "authentication": {
-        "type": "managed-identity",
+        "type": null,
         "configurationKeys": []
       },
       "operations": [],
@@ -96,27 +87,23 @@
       "evidence": [
         {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api.Client/CommitmentsApiClientFactory.cs",
-          "reason": "CommitmentsApiClientFactory explicitly constructs a CommitmentsApiClient with ManagedIdentityHttpClientFactory using CommitmentsClientApiConfiguration."
-        },
-        {
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Shared/DependencyInjection/ServiceRegistrationExtensions.cs",
-          "reason": "CommitmentsApiClientFactory is registered as a service via AddSharedServices."
+          "reason": "HttpClient creation for CommitmentsApiClient."
         }
       ],
       "confidence": "high"
     },
     {
-      "name": "LevyTransferMatchingClient",
+      "name": "ILevyTransferMatchingApiClient",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
-      "client": "ILevyTransferMatchingApiClient",
-      "technology": "HttpClient",
+      "client": "LevyTransferMatchingClient",
+      "technology": null,
       "configurationKeys": [
-        "LevyTransferMatchingApiConfiguration.BaseUrl"
+        "LevyTransferMatchingApiConfiguration"
       ],
       "authentication": {
-        "type": "bearer-token",
+        "type": "bearer",
         "configurationKeys": []
       },
       "operations": [
@@ -127,38 +114,33 @@
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/LevyTransferMatchingClient.cs"
         }
       ],
-      "resources": [
-        {
-          "type": "configuration",
-          "name": "LevyTransferMatchingApiConfiguration",
-          "direction": "unknown",
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/LevyTransferMatchingClient.cs"
-        }
-      ],
+      "resources": [],
       "evidence": [
         {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/LevyTransferMatchingClient.cs",
-          "reason": "LevyTransferMatchingClient uses HttpClient with base address and bearer token authentication via LevyTransferMatchingApiConfiguration."
+          "reason": "HttpClient creation and API call evidence in GetPledgeApplication method."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/Configuration/ServiceCollectionExtensions.cs",
+          "reason": "HttpClient registered for ILevyTransferMatchingApiClient."
         }
       ],
       "confidence": "high"
     },
     {
-      "name": "ProviderRelationshipsApiClient",
+      "name": "IProviderRelationshipsApiClient",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
-      "client": "IProviderRelationshipsApiClient",
-      "technology": "HttpClient",
+      "client": "ProviderRelationshipsApiClient",
+      "technology": null,
       "configurationKeys": [
-        "ProviderRelationshipsApi.ApiBaseUrl"
+        "ProviderRelationshipsApi"
       ],
       "authentication": {
-        "type": "custom",
+        "type": "managed-identity",
         "configurationKeys": [
-          "ProviderRelationshipsApi.ClientId",
-          "ProviderRelationshipsApi.ClientSecret",
-          "ProviderRelationshipsApi.Tenant"
+          "ManagedIdentityTokenGenerator"
         ]
       },
       "operations": [],
@@ -166,42 +148,35 @@
       "evidence": [
         {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Shared/ProviderRelationshipsApiClient/AddProviderRelationshipsApiClientExtension.cs",
-          "reason": "AddProviderRelationshipsApiClient method registers IProviderRelationshipsApiClient with configuration and authentication handlers."
+          "reason": "HttpClient registration for IProviderRelationshipsApiClient using ProviderRelationshipsApi configuration."
         }
       ],
       "confidence": "high"
     },
     {
-      "name": "ReservationsApiClient",
+      "name": "IReservationsApiClient",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
-      "client": "IReservationsApiClient",
+      "client": "ReservationsApiClient",
       "technology": null,
       "configurationKeys": [
         "ReservationsClientApiConfiguration"
       ],
       "authentication": {
-        "type": "custom",
-        "configurationKeys": [
-          "ReservationsClientApiConfiguration.ClientId",
-          "ReservationsClientApiConfiguration.ClientSecret",
-          "ReservationsClientApiConfiguration.Tenant"
-        ]
+        "type": "managed-identity",
+        "configurationKeys": []
       },
       "operations": [],
-      "resources": [
-        {
-          "type": "configuration",
-          "name": "ReservationsClientApiConfiguration",
-          "direction": "unknown",
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.ReservationsV2.Api.Client/ReservationsApiClientFactory.cs"
-        }
-      ],
+      "resources": [],
       "evidence": [
         {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.ReservationsV2.Api.Client/ReservationsApiClientFactory.cs",
-          "reason": "ReservationsApiClientFactory explicitly constructs a ReservationsApiClient and uses ReservationsClientApiConfiguration for setup."
+          "reason": "HttpClient creation and ReservationsApiClient instantiation."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/DependencyResolution/ServiceRegistrationExtensions.cs",
+          "reason": "Service creation and registration for IReservationsApiClient."
         }
       ],
       "confidence": "high"
