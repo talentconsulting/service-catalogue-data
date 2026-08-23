@@ -999,7 +999,7 @@ async function jumpToSource(sourceId, dependencyIndex = null) {
 
 function githubFileUrl(path, scanKind = 'eventcatalog') {
   if (!path) return null;
-  const revision = state.source.scans[scanKind]?.['last-commit-hash-scanned'] || state.data.ref || 'HEAD';
+  const revision = state.data?.ref || state.source.scans[scanKind]?.['last-commit-hash-scanned'] || 'HEAD';
   const encodedPath = path.split('/').map(encodeURIComponent).join('/');
   return `${state.source.repository.replace(/\/$/, '')}/blob/${encodeURIComponent(revision)}/${encodedPath}`;
 }
