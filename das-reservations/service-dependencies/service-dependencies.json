@@ -4,23 +4,20 @@
   "path": "src",
   "dependencies": [
     {
-      "name": "ReservationsApi",
+      "name": "IApiClient",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
-      "client": "IApiClient",
+      "client": "ApiClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "ReservationsApiConfiguration.Id",
-        "ReservationsApiConfiguration.Identifier",
-        "ReservationsApiConfiguration.Secret",
-        "ReservationsApiConfiguration.Tenant",
         "ReservationsApiConfiguration.Url"
       ],
       "authentication": {
-        "type": "bearer",
+        "type": "OAuth",
         "configurationKeys": [
           "ReservationsApiConfiguration.Id",
+          "ReservationsApiConfiguration.Identifier",
           "ReservationsApiConfiguration.Secret",
           "ReservationsApiConfiguration.Tenant"
         ]
@@ -50,26 +47,22 @@
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
-          "reason": "ApiClient registration in DI container"
-        },
-        {
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs",
-          "reason": "HTTP client usage with ReservationsApiConfiguration.Url"
+          "reason": "Instantiates HttpClient and makes HTTP requests."
         },
         {
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs",
-          "reason": "Use of HttpClient to interact with API endpoints"
+          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
+          "reason": "Registers IApiClient interface with ApiClient implementation."
         }
       ],
       "confidence": "high"
     },
     {
-      "name": "ReservationsOuterApiClient",
+      "name": "IReservationsOuterApiClient",
       "kind": "http-api",
       "classification": "unknown",
       "direction": "outbound",
-      "client": "IReservationsOuterApiClient",
+      "client": "ReservationsOuterApiClient",
       "technology": "HttpClient",
       "configurationKeys": [],
       "authentication": {
@@ -81,7 +74,7 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
-          "reason": "IReservationsOuterApiClient registered with ReservationsOuterApiClient implementation"
+          "reason": "Registers IReservationsOuterApiClient interface with ReservationsOuterApiClient implementation."
         }
       ],
       "confidence": "medium"
