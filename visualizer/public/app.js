@@ -56,8 +56,7 @@ function defaultView() {
 function applyMode() {
   const isLandscape = state.mode === 'landscape';
   document.querySelector('main').classList.toggle('landscape-mode', isLandscape);
-  landscapeToggle.setAttribute('aria-pressed', String(isLandscape));
-  landscapeToggle.textContent = isLandscape ? '← Back to source' : 'System landscape';
+  landscapeToggle.toggleAttribute('aria-current', isLandscape);
 }
 
 async function selectSource(id) {
@@ -189,6 +188,7 @@ function renderDatabase(resetToolbar = true) {
     const { edges, connectedTables, isolatedCount } = databaseGraph(tables);
     renderDatabaseDiagram(connectedTables.filter((table) => filtered.includes(table)), edges, isolatedCount);
   } else {
+    state.erdResizeObserver?.disconnect();
     renderDatabaseGrid(filtered, tables);
   }
   wireSearch();
@@ -307,6 +307,12 @@ function zoomedDiagramPosition(position, viewWidth, viewHeight, zoom) {
   };
 }
 
+function syncErdScale(graphEl, viewWidth, viewHeight) {
+  if (!graphEl) return;
+  graphEl.style.setProperty('--erd-scale-x', graphEl.clientWidth / viewWidth);
+  graphEl.style.setProperty('--erd-scale-y', graphEl.clientHeight / viewHeight);
+}
+
 function connectionPoints(from, to, fromWidth = 0, fromHeight = 0, toWidth = 0, toHeight = 0) {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -345,7 +351,7 @@ function renderDatabaseDiagram(filtered, allEdges, isolatedCount) {
   content.innerHTML = `<div class="dependency-view">
     ${isolatedCount ? `<p class="toolbar-meta">${isolatedCount} table${isolatedCount === 1 ? '' : 's'} with no foreign keys — switch to Grid to browse them.</p>` : ''}
     <div class="dependency-graph er-diagram" role="group" aria-label="Database relationship diagram" style="min-height:${VIEW_H}px">
-      <svg viewBox="${VIEW_W / 2 - VIEW_W / (2 * erdZoom)} ${VIEW_H / 2 - VIEW_H / (2 * erdZoom)} ${VIEW_W / erdZoom} ${VIEW_H / erdZoom}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+      <svg viewBox="${VIEW_W / 2 - VIEW_W / (2 * erdZoom)} ${VIEW_H / 2 - VIEW_H / (2 * erdZoom)} ${VIEW_W / erdZoom} ${VIEW_H / erdZoom}" aria-hidden="true" preserveAspectRatio="none">
         <defs><marker id="schema-arrow-outbound" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs>
         ${edges.map((edge, index) => {
           const from = posOf({ id: edge.from });
@@ -366,7 +372,14 @@ function renderDatabaseDiagram(filtered, allEdges, isolatedCount) {
     </div>
     ${selectedTable ? tableDetailInline(selectedTable) : ''}
   </div>`;
-  makeDraggableGraph($('.dependency-graph'), positions, VIEW_W, VIEW_H, erdZoom);
+  const graphEl = $('.er-diagram');
+  syncErdScale(graphEl, VIEW_W, VIEW_H);
+  state.erdResizeObserver?.disconnect();
+  if (typeof ResizeObserver !== 'undefined' && graphEl) {
+    state.erdResizeObserver = new ResizeObserver(() => syncErdScale(graphEl, VIEW_W, VIEW_H));
+    state.erdResizeObserver.observe(graphEl);
+  }
+  makeDraggableGraph(graphEl, positions, VIEW_W, VIEW_H, erdZoom, true);
   document.querySelectorAll('[data-node]').forEach((button) => button.addEventListener('click', () => { state.selected = button.dataset.node; renderDatabase(false); }));
 }
 
@@ -600,7 +613,7 @@ function redrawEdgeLine(graphEl, line, positions) {
   }
 }
 
-function makeDraggableGraph(graphEl, positions, viewW, viewH, zoom = 1) {
+function makeDraggableGraph(graphEl, positions, viewW, viewH, zoom = 1, nonUniformScale = false) {
   if (!graphEl || window.matchMedia('(max-width: 760px)').matches) return;
   let drag = null;
   graphEl.querySelectorAll('[data-node]').forEach((el) => {
@@ -609,14 +622,15 @@ function makeDraggableGraph(graphEl, positions, viewW, viewH, zoom = 1) {
       const pos = positions.get(el.dataset.node);
       if (!pos) return;
       const rect = graphEl.getBoundingClientRect();
-      const scale = (Math.min(rect.width / viewW, rect.height / viewH) || 1) * zoom;
-      drag = { id: el.dataset.node, el, startX: event.clientX, startY: event.clientY, originX: pos.x, originY: pos.y, scale, moved: false };
+      const scaleX = (nonUniformScale ? rect.width / viewW : Math.min(rect.width / viewW, rect.height / viewH)) * zoom || 1;
+      const scaleY = (nonUniformScale ? rect.height / viewH : Math.min(rect.width / viewW, rect.height / viewH)) * zoom || 1;
+      drag = { id: el.dataset.node, el, startX: event.clientX, startY: event.clientY, originX: pos.x, originY: pos.y, scaleX, scaleY, moved: false };
       el.setPointerCapture(event.pointerId);
     });
     el.addEventListener('pointermove', (event) => {
       if (!drag || drag.el !== el) return;
-      const dx = (event.clientX - drag.startX) / drag.scale;
-      const dy = (event.clientY - drag.startY) / drag.scale;
+      const dx = (event.clientX - drag.startX) / drag.scaleX;
+      const dy = (event.clientY - drag.startY) / drag.scaleY;
       if (Math.abs(dx) > 3 || Math.abs(dy) > 3) drag.moved = true;
       const next = { x: drag.originX + dx, y: drag.originY + dy };
       positions.set(drag.id, next);
@@ -940,6 +954,7 @@ function landscapeDetail(node, graph) {
 async function jumpToSource(sourceId, dependencyIndex = null) {
   const target = state.catalog.find((source) => source.id === sourceId);
   state.mode = 'source';
+  history.pushState({}, '', '/');
   applyMode();
   sourceSelect.value = sourceId;
   if (target && (target.capabilities.dependencies || target.capabilities.messages)) state.view = 'dependencies';
@@ -1131,14 +1146,30 @@ tabs.addEventListener('click', async (event) => {
 });
 
 sourceSelect.addEventListener('change', async () => {
-  if (state.mode === 'landscape') { state.mode = 'source'; applyMode(); }
+  if (state.mode === 'landscape') {
+    state.mode = 'source';
+    history.pushState({}, '', '/');
+    applyMode();
+  }
   await selectSource(sourceSelect.value);
 });
 
-landscapeToggle.addEventListener('click', async () => {
-  state.mode = state.mode === 'landscape' ? 'source' : 'landscape';
+landscapeToggle.addEventListener('click', async (event) => {
+  if (state.mode === 'landscape') return;
+  event.preventDefault();
+  state.mode = 'landscape';
+  history.pushState({}, '', '/landscape');
   applyMode();
-  if (state.mode === 'landscape') {
+  setLandscapeHero();
+  await loadLandscape();
+});
+
+window.addEventListener('popstate', async () => {
+  const landscape = window.location.pathname === '/landscape';
+  if (landscape === (state.mode === 'landscape')) return;
+  state.mode = landscape ? 'landscape' : 'source';
+  applyMode();
+  if (landscape) {
     setLandscapeHero();
     await loadLandscape();
   } else {
@@ -1154,8 +1185,13 @@ async function init() {
     state.catalog = catalog.sources;
     if (!state.catalog.length) throw new Error('The manifest does not contain any sources.');
     sourceSelect.innerHTML = state.catalog.map((source) => `<option value="${source.id}">${escapeHtml(titleCase(source.name))}</option>`).join('');
+    state.mode = window.location.pathname === '/landscape' ? 'landscape' : 'source';
     applyMode();
     await selectSource(state.catalog[0].id);
+    if (state.mode === 'landscape') {
+      setLandscapeHero();
+      await loadLandscape();
+    }
   } catch (error) {
     content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
   }

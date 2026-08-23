@@ -112,7 +112,7 @@ async function handleApi(request, response, url) {
 }
 
 async function serveStatic(response, pathname) {
-  const requested = pathname === '/' ? 'index.html' : decodeURIComponent(pathname.slice(1));
+  const requested = pathname === '/' || pathname === '/landscape' ? 'index.html' : decodeURIComponent(pathname.slice(1));
   const file = safeChild(publicDir, normalize(requested));
   if (!await exists(file)) {
     response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });
