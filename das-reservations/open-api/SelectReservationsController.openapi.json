@@ -1,86 +1,47 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Select Reservations API",
-    "version": "1.0.0",
-    "description": "API for selecting reservations for employers and providers, supporting various operations related to reservations."
+    "title": "Reservations API",
+    "version": "1.0.0"
   },
   "paths": {
     "/{ukPrn}/reservations/{accountLegalEntityPublicHashedId}/select": {
       "get": {
-        "summary": "Get reservation selection for providers",
-        "operationId": "getProviderReservationSelection",
-        "security": [
-          {
-            "HasProviderOrEmployerAccount": []
-          }
+        "tags": [
+          "Reservations"
         ],
+        "summary": "Select a reservation",
+        "description": "Endpoint to select a reservation for providers.",
         "parameters": [
           {
             "name": "ukPrn",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "accountLegalEntityPublicHashedId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "cohortReference",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "providerId",
-            "in": "query",
-            "required": false,
+            "description": "The unique identifier for the provider.",
             "schema": {
               "type": "integer",
               "format": "int32"
             }
           },
           {
-            "name": "journeyData",
-            "in": "query",
-            "required": false,
+            "name": "accountLegalEntityPublicHashedId",
+            "in": "path",
+            "required": true,
+            "description": "The hashed ID of the account legal entity.",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "useLearnerData",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with reservation selection details.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SelectReservationViewModel"
-                }
-              }
-            }
+            "description": "Reservation selection page content"
           },
           "403": {
-            "description": "Forbidden: access denied."
+            "description": "Forbidden due to lack of permissions."
+          },
+          "404": {
+            "description": "Not found."
           },
           "500": {
             "description": "Internal server error."
@@ -88,68 +49,33 @@
         }
       },
       "post": {
-        "summary": "Post reservation selection for providers",
-        "operationId": "postProviderReservationSelection",
-        "security": [
-          {
-            "HasProviderOrEmployerAccount": []
-          }
+        "tags": [
+          "Reservations"
         ],
+        "summary": "Submit a selected reservation",
+        "description": "Endpoint to submit the selected reservation for providers.",
         "parameters": [
           {
             "name": "ukPrn",
             "in": "path",
             "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "nullable": true
-            }
-          },
-          {
-            "name": "accountLegalEntityPublicHashedId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "cohortReference",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "providerId",
-            "in": "query",
-            "required": false,
+            "description": "The unique identifier for the provider.",
             "schema": {
               "type": "integer",
               "format": "int32"
             }
           },
           {
-            "name": "journeyData",
-            "in": "query",
-            "required": false,
+            "name": "accountLegalEntityPublicHashedId",
+            "in": "path",
+            "required": true,
+            "description": "The hashed ID of the account legal entity.",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "useLearnerData",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
         "requestBody": {
-          "description": "Reservation selection and details",
           "required": true,
           "content": {
             "application/json": {
@@ -161,10 +87,13 @@
         },
         "responses": {
           "200": {
-            "description": "Successfully processed reservation selection."
+            "description": "Successfully submitted reservation selection."
+          },
+          "400": {
+            "description": "Invalid request."
           },
           "403": {
-            "description": "Forbidden: access denied."
+            "description": "Forbidden due to lack of permissions."
           },
           "500": {
             "description": "Internal server error."
@@ -174,18 +103,17 @@
     },
     "/accounts/{employerAccountId}/reservations/{accountLegalEntityPublicHashedId}/select": {
       "get": {
-        "summary": "Get reservation selection for employers",
-        "operationId": "getEmployerReservationSelection",
-        "security": [
-          {
-            "HasProviderOrEmployerAccount": []
-          }
+        "tags": [
+          "Reservations"
         ],
+        "summary": "Select a reservation",
+        "description": "Endpoint to select a reservation for employers.",
         "parameters": [
           {
             "name": "employerAccountId",
             "in": "path",
             "required": true,
+            "description": "The unique identifier for the employer account.",
             "schema": {
               "type": "string"
             }
@@ -194,57 +122,21 @@
             "name": "accountLegalEntityPublicHashedId",
             "in": "path",
             "required": true,
+            "description": "The hashed ID of the account legal entity.",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "cohortReference",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "providerId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "journeyData",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "useLearnerData",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with reservation selection details.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SelectReservationViewModel"
-                }
-              }
-            }
+            "description": "Reservation selection page content"
           },
           "403": {
-            "description": "Forbidden: access denied."
+            "description": "Forbidden due to lack of permissions."
+          },
+          "404": {
+            "description": "Not found."
           },
           "500": {
             "description": "Internal server error."
@@ -252,18 +144,17 @@
         }
       },
       "post": {
-        "summary": "Post reservation selection for employers",
-        "operationId": "postEmployerReservationSelection",
-        "security": [
-          {
-            "HasProviderOrEmployerAccount": []
-          }
+        "tags": [
+          "Reservations"
         ],
+        "summary": "Submit a selected reservation",
+        "description": "Endpoint to submit the selected reservation for employers.",
         "parameters": [
           {
             "name": "employerAccountId",
             "in": "path",
             "required": true,
+            "description": "The unique identifier for the employer account.",
             "schema": {
               "type": "string"
             }
@@ -272,46 +163,13 @@
             "name": "accountLegalEntityPublicHashedId",
             "in": "path",
             "required": true,
+            "description": "The hashed ID of the account legal entity.",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "cohortReference",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "providerId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "journeyData",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "useLearnerData",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
             }
           }
         ],
         "requestBody": {
-          "description": "Reservation selection and details",
           "required": true,
           "content": {
             "application/json": {
@@ -323,10 +181,13 @@
         },
         "responses": {
           "200": {
-            "description": "Successfully processed reservation selection."
+            "description": "Successfully submitted reservation selection."
+          },
+          "400": {
+            "description": "Invalid request."
           },
           "403": {
-            "description": "Forbidden: access denied."
+            "description": "Forbidden due to lack of permissions."
           },
           "500": {
             "description": "Internal server error."
@@ -337,124 +198,59 @@
   },
   "components": {
     "schemas": {
-      "ReservationsRouteModel": {
-        "type": "object",
-        "properties": {
-          "ukPrn": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "employerAccountId": {
-            "type": "string"
-          },
-          "publicHashedEmployerAccountId": {
-            "type": "string"
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "accountLegalEntityPublicHashedId": {
-            "type": "string"
-          },
-          "fromReview": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "isFromManage": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "isFromSelect": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "previousPage": {
-            "type": "string"
-          },
-          "cohortReference": {
-            "type": "string",
-            "nullable": true
-          },
-          "providerId": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "journeyData": {
-            "type": "string",
-            "nullable": true
-          },
-          "searchTerm": {
-            "type": "string",
-            "nullable": true
-          },
-          "sortField": {
-            "type": "string",
-            "nullable": true
-          },
-          "reverseSort": {
-            "type": "boolean"
-          },
-          "useLearnerData": {
-            "type": "boolean",
-            "nullable": true
-          }
-        }
-      },
       "SelectReservationViewModel": {
         "type": "object",
         "properties": {
-          "cohortReference": {
+          "CohortReference": {
             "type": "string",
             "nullable": true
           },
-          "transferSenderId": {
+          "TransferSenderId": {
             "type": "string",
             "nullable": true
           },
-          "encodedPledgeApplicationId": {
+          "EncodedPledgeApplicationId": {
             "type": "string",
             "nullable": true
           },
-          "journeyData": {
+          "JourneyData": {
             "type": "string",
             "nullable": true
           },
-          "selectedReservationId": {
+          "SelectedReservationId": {
             "type": "string",
             "format": "uuid",
             "nullable": true
           },
-          "availableReservations": {
+          "AvailableReservations": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AvailableReservationViewModel"
-            }
+            },
+            "nullable": true
           },
-          "accountId": {
+          "AccountId": {
             "type": "integer",
             "format": "int64"
           },
-          "backLink": {
-            "type": "string"
+          "BackLink": {
+            "type": "string",
+            "nullable": true
           },
-          "providerId": {
+          "ProviderId": {
             "type": "integer",
             "format": "int32",
             "nullable": true
           },
-          "moreReservationsAvailable": {
+          "MoreReservationsAvailable": {
             "type": "boolean"
           },
-          "apprenticeshipSessionKey": {
+          "ApprenticeshipSessionKey": {
             "type": "string",
             "format": "uuid",
             "nullable": true
           },
-          "beforeProviderSelected": {
+          "BeforeProviderSelected": {
             "type": "boolean",
             "nullable": true
           }
@@ -463,27 +259,23 @@
       "AvailableReservationViewModel": {
         "type": "object",
         "properties": {
-          "reservationId": {
+          "ReservationId": {
             "type": "string",
             "format": "uuid"
           },
-          "courseDescription": {
-            "type": "string"
+          "CourseDescription": {
+            "type": "string",
+            "nullable": true
           },
-          "trainingDateDescription": {
-            "type": "string"
+          "TrainingDateDescription": {
+            "type": "string",
+            "nullable": true
           },
-          "createdDateDescription": {
-            "type": "string"
+          "CreatedDateDescription": {
+            "type": "string",
+            "nullable": true
           }
         }
-      }
-    },
-    "securitySchemes": {
-      "HasProviderOrEmployerAccount": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
       }
     }
   }
