@@ -1,7 +1,7 @@
 const state = {
   catalog: [], source: null, view: 'database', data: null,
   filter: '', selected: null, messageType: 'all', apiFile: null,
-  mode: 'source', landscape: null, apiView: 'operations', selectedModel: null, dbView: 'diagram', erdZoom: 1
+  mode: 'source', landscape: null, apiView: 'operations', selectedModel: null, dbView: 'diagram', cy: null
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -74,6 +74,7 @@ async function selectSource(id) {
 }
 
 async function loadView() {
+  destroyCy();
   toolbar.innerHTML = '';
   content.innerHTML = '<div class="loading">Reading catalogue data…</div>';
   state.filter = '';
@@ -81,7 +82,6 @@ async function loadView() {
   state.selectedModel = null;
   state.diagramPositions = null;
   state.schemaPositions = null;
-  state.erdZoom = 1;
   try {
     if (state.view === 'dependencies') {
       state.data = await loadDependenciesFor(state.source);
@@ -176,19 +176,15 @@ function renderDatabase(resetToolbar = true) {
   const columnCount = tables.reduce((sum, table) => sum + (table.columns?.length || 0), 0);
   if (!state.dbView) state.dbView = 'diagram';
   if (resetToolbar) {
-    toolbar.innerHTML = `${searchControl('Filter tables or columns')}<div class="segmented" role="group" aria-label="Schema view"><button data-db-view="diagram" aria-pressed="${state.dbView === 'diagram'}">Diagram</button><button data-db-view="grid" aria-pressed="${state.dbView === 'grid'}">Grid</button></div>${state.dbView === 'diagram' ? '<button id="auto-arrange" class="plain-button" type="button">Auto arrange</button><div class="diagram-zoom" role="group" aria-label="Diagram zoom"><button id="zoom-out" type="button" aria-label="Zoom out">−</button><button id="zoom-fit" type="button">Fit</button><button id="zoom-in" type="button" aria-label="Zoom in">+</button></div>' : ''}<span class="spacer"></span><span class="toolbar-meta">${tables.length} tables · ${columnCount} columns · ${relations} relationships</span>`;
+    toolbar.innerHTML = `${searchControl('Filter tables or columns')}<div class="segmented" role="group" aria-label="Schema view"><button data-db-view="diagram" aria-pressed="${state.dbView === 'diagram'}">Diagram</button><button data-db-view="grid" aria-pressed="${state.dbView === 'grid'}">Grid</button></div>${state.dbView === 'diagram' ? diagramControlsHtml() : ''}<span class="spacer"></span><span class="toolbar-meta">${tables.length} tables · ${columnCount} columns · ${relations} relationships</span>`;
     document.querySelectorAll('[data-db-view]').forEach((button) => { button.onclick = () => { state.dbView = button.dataset.dbView; state.filter = ''; state.selected = null; renderDatabase(true); }; });
-    $('#auto-arrange')?.addEventListener('click', () => { state.schemaPositions = null; renderDatabase(false); });
-    $('#zoom-out')?.addEventListener('click', () => { state.erdZoom = Math.max(0.5, state.erdZoom / 1.25); renderDatabase(false); });
-    $('#zoom-in')?.addEventListener('click', () => { state.erdZoom = Math.min(2.5, state.erdZoom * 1.25); renderDatabase(false); });
-    $('#zoom-fit')?.addEventListener('click', () => { state.erdZoom = 1; renderDatabase(false); });
   }
   const filtered = tables.filter((table) => `${table.schema} ${table.name} ${table.columns?.map((column) => column.name).join(' ')}`.toLowerCase().includes(state.filter));
   if (state.dbView === 'diagram') {
     const { edges, connectedTables, isolatedCount } = databaseGraph(tables);
     renderDatabaseDiagram(connectedTables.filter((table) => filtered.includes(table)), edges, isolatedCount);
   } else {
-    state.erdResizeObserver?.disconnect();
+    destroyCy();
     renderDatabaseGrid(filtered, tables);
   }
   wireSearch();
@@ -295,92 +291,65 @@ function layoutErNodes(nodes, edges, viewWidth) {
   return nodes.map((node) => ({ ...node, ...positions.get(node.name) }));
 }
 
-function orthogonalPath(points) {
-  const middleY = (points.y1 + points.y2) / 2;
-  return `M ${points.x1} ${points.y1} L ${points.x1} ${middleY} L ${points.x2} ${middleY} L ${points.x2} ${points.y2}`;
-}
-
-function zoomedDiagramPosition(position, viewWidth, viewHeight, zoom) {
-  return {
-    x: viewWidth / 2 + (position.x - viewWidth / 2) * zoom,
-    y: viewHeight / 2 + (position.y - viewHeight / 2) * zoom
-  };
-}
-
-function syncErdScale(graphEl, viewWidth, viewHeight) {
-  if (!graphEl) return;
-  graphEl.style.setProperty('--erd-scale-x', graphEl.clientWidth / viewWidth);
-  graphEl.style.setProperty('--erd-scale-y', graphEl.clientHeight / viewHeight);
-}
-
-function connectionPoints(from, to, fromWidth = 0, fromHeight = 0, toWidth = 0, toHeight = 0) {
-  const dx = to.x - from.x;
-  const dy = to.y - from.y;
-  if (!dx && !dy) return { x1: from.x, y1: from.y, x2: to.x, y2: to.y };
-  const pointAtEdge = (origin, horizontal, vertical, width, height) => {
-    if (!width || !height) return { x: origin.x, y: origin.y };
-    const scale = Math.min(width / 2 / Math.abs(horizontal || 1), height / 2 / Math.abs(vertical || 1));
-    return { x: origin.x + horizontal * scale, y: origin.y + vertical * scale };
-  };
-  const start = pointAtEdge(from, dx, dy, fromWidth, fromHeight);
-  const end = pointAtEdge(to, -dx, -dy, toWidth, toHeight);
-  return { x1: start.x, y1: start.y, x2: end.x, y2: end.y };
-}
-
 function renderDatabaseDiagram(filtered, allEdges, isolatedCount) {
   const edges = allEdges.filter((edge) => filtered.some((table) => table.name === edge.from) && filtered.some((table) => table.name === edge.to));
   if (!filtered.length) {
+    destroyCy();
     content.innerHTML = '<div class="empty-state"><h2>No matching tables with relationships</h2><p>Try a different search term, or switch to Grid to see every table.</p></div>';
     return;
   }
   const ordered = orderTablesForLayout(filtered, edges);
   const nodes = ordered.map(erNode);
   const levelEstimate = Math.max(2, Math.ceil(Math.sqrt(nodes.length)));
-  const VIEW_W = Math.max(1100, levelEstimate * 380);
-  const positioned = layoutErNodes(nodes, edges, VIEW_W);
-  const VIEW_H = Math.max(720, Math.ceil(Math.max(...positioned.map((node) => node.y + node.height / 2)) + 80));
+  const viewWidth = Math.max(1100, levelEstimate * 380);
+  const positioned = layoutErNodes(nodes, edges, viewWidth);
   if (!state.schemaPositions) state.schemaPositions = new Map();
   const positions = state.schemaPositions;
-  positioned.forEach((node) => resolvedPosition(positions, node));
-  const posOf = (node) => positions.get(node.id) || node;
-  const erdZoom = state.erdZoom || 1;
-  const pct = (value, axis) => `${((value / (axis === 'x' ? VIEW_W : VIEW_H)) * 100).toFixed(2)}%`;
+  positioned.forEach((node) => positionFor(positions, node.name, node));
   if (!state.selected || !filtered.some((table) => table.name === state.selected)) state.selected = positioned[0]?.name || null;
   const selectedTable = filtered.find((table) => table.name === state.selected);
 
+  const elements = [
+    ...positioned.map((node) => {
+      const foreignKeys = new Set((node.relationships || []).flatMap((relationship) => relationship.fromColumns || []));
+      return {
+        data: {
+          id: node.name, isLeaf: true, width: node.width, height: node.height, schema: node.schema, name: node.name,
+          columns: (node.columns || []).map((column) => ({ name: column.name, type: column.type || '', flag: column.primaryKey ? 'PK' : (foreignKeys.has(column.name) ? 'FK' : '') }))
+        },
+        position: positions.get(node.name)
+      };
+    }),
+    ...edges.map((edge, index) => ({ data: { id: `schema-edge-${index}`, source: edge.from, target: edge.to, label: tableRelLabel(edge) } }))
+  ];
+
   content.innerHTML = `<div class="dependency-view">
     ${isolatedCount ? `<p class="toolbar-meta">${isolatedCount} table${isolatedCount === 1 ? '' : 's'} with no foreign keys — switch to Grid to browse them.</p>` : ''}
-    <div class="dependency-graph er-diagram" role="group" aria-label="Database relationship diagram" style="min-height:${VIEW_H}px">
-      <svg viewBox="${VIEW_W / 2 - VIEW_W / (2 * erdZoom)} ${VIEW_H / 2 - VIEW_H / (2 * erdZoom)} ${VIEW_W / erdZoom} ${VIEW_H / erdZoom}" aria-hidden="true" preserveAspectRatio="none">
-        <defs><marker id="schema-arrow-outbound" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs>
-        ${edges.map((edge, index) => {
-          const from = posOf({ id: edge.from });
-          const to = posOf({ id: edge.to });
-          const fromNode = positioned.find((node) => node.name === edge.from);
-          const toNode = positioned.find((node) => node.name === edge.to);
-          const points = connectionPoints(from, to, fromNode?.width, fromNode?.height, toNode?.width, toNode?.height);
-          const edgeId = `schema-edge-${index}`;
-          return `<path id="${edgeId}" class="outbound" data-edge-id="${edgeId}" data-from="${escapeHtml(edge.from)}" data-to="${escapeHtml(edge.to)}" data-from-width="${fromNode?.width || 0}" data-from-height="${fromNode?.height || 0}" data-to-width="${toNode?.width || 0}" data-to-height="${toNode?.height || 0}" d="${orthogonalPath(points)}" marker-end="url(#schema-arrow-outbound)"></path>
-            `;
-        }).join('')}
-      </svg>
-      ${positioned.map((node) => {
-        const pos = zoomedDiagramPosition(posOf(node), VIEW_W, VIEW_H, erdZoom);
-        const foreignKeys = new Set((node.relationships || []).flatMap((relationship) => relationship.fromColumns || []));
-        return `<button class="er-node" type="button" data-node="${escapeHtml(node.name)}" aria-pressed="${node.name === state.selected}" style="--erd-zoom:${erdZoom};left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')};width:${node.width}px;height:${node.height}px"><span class="er-table"><span>${escapeHtml(node.schema)}</span>${escapeHtml(node.name)}</span><span class="er-columns">${(node.columns || []).map((column) => `<span class="er-column"><b>${column.primaryKey ? 'PK' : foreignKeys.has(column.name) ? 'FK' : ''}</b><code>${escapeHtml(column.name)}</code><em>${escapeHtml(column.type || '')}</em></span>`).join('') || '<span class="er-column muted">No columns recorded</span>'}</span></button>`;
-      }).join('')}
-    </div>
-    ${selectedTable ? tableDetailInline(selectedTable) : ''}
+    <div id="erd-cy" class="cy-container" role="group" aria-label="Database relationship diagram"></div>
+    <div id="erd-detail">${selectedTable ? tableDetailInline(selectedTable) : ''}</div>
   </div>`;
-  const graphEl = $('.er-diagram');
-  syncErdScale(graphEl, VIEW_W, VIEW_H);
-  state.erdResizeObserver?.disconnect();
-  if (typeof ResizeObserver !== 'undefined' && graphEl) {
-    state.erdResizeObserver = new ResizeObserver(() => syncErdScale(graphEl, VIEW_W, VIEW_H));
-    state.erdResizeObserver.observe(graphEl);
-  }
-  makeDraggableGraph(graphEl, positions, VIEW_W, VIEW_H, erdZoom, true);
-  document.querySelectorAll('[data-node]').forEach((button) => button.addEventListener('click', () => { state.selected = button.dataset.node; renderDatabase(false); }));
+
+  mountCy({
+    container: $('#erd-cy'),
+    elements,
+    layout: { name: 'preset' },
+    htmlLabels: [{
+      query: 'node[?isLeaf]',
+      halign: 'center', valign: 'center', halignBox: 'center', valignBox: 'center',
+      tpl: (data) => `<div class="cy-er-node" data-node-id="${escapeHtml(data.id)}">
+        <span class="er-table"><span>${escapeHtml(data.schema)}</span>${escapeHtml(data.name)}</span>
+        <span class="er-columns">${(data.columns || []).map((column) => `<span class="er-column"><b>${escapeHtml(column.flag)}</b><code>${escapeHtml(column.name)}</code><em>${escapeHtml(column.type)}</em></span>`).join('') || '<span class="er-column muted">No columns recorded</span>'}</span>
+      </div>`
+    }],
+    onTapNode: (node) => {
+      state.selected = node.id();
+      markCySelection($('#erd-cy'), state.selected);
+      $('#erd-detail').innerHTML = tableDetailInline(filtered.find((table) => table.name === state.selected));
+    },
+    onDragFree: (node) => { positions.set(node.id(), node.position()); }
+  });
+  markCySelection($('#erd-cy'), state.selected);
+  wireDiagramControls(() => { positions.clear(); renderDatabase(false); });
 }
 
 function tableDetailInline(table) {
@@ -581,78 +550,63 @@ function ringLayout(group, center, radiusX, radiusY, angleOffset = 0) {
   });
 }
 
-function resolvedPosition(positions, node) {
-  if (!positions.has(node.id)) positions.set(node.id, { x: node.x, y: node.y });
-  return positions.get(node.id);
+function positionFor(positions, id, computed) {
+  if (!positions.has(id)) positions.set(id, { x: computed.x, y: computed.y });
+  return positions.get(id);
 }
 
-function redrawEdgeLine(graphEl, line, positions) {
-  const from = positions.get(line.dataset.from);
-  const to = positions.get(line.dataset.to);
-  if (!from || !to) return;
-  const points = connectionPoints(from, to, Number(line.dataset.fromWidth || 0), Number(line.dataset.fromHeight || 0), Number(line.dataset.toWidth || 0), Number(line.dataset.toHeight || 0));
-  if (line.tagName.toLowerCase() === 'path') line.setAttribute('d', orthogonalPath(points));
-  else {
-    line.setAttribute('x1', points.x1);
-    line.setAttribute('y1', points.y1);
-    line.setAttribute('x2', points.x2);
-    line.setAttribute('y2', points.y2);
-  }
-  const midX = (points.x1 + points.x2) / 2;
-  const midY = (points.y1 + points.y2) / 2;
-  const bg = graphEl.querySelector(`#${line.dataset.edgeId}-bg`);
-  const text = graphEl.querySelector(`#${line.dataset.edgeId}-text`);
-  if (bg) {
-    const halfWidth = Number(bg.dataset.halfWidth || 0);
-    bg.setAttribute('x', midX - halfWidth);
-    bg.setAttribute('y', midY - 9);
-  }
-  if (text) {
-    text.setAttribute('x', midX);
-    text.setAttribute('y', midY + 2);
+function destroyCy() {
+  if (state.cy) {
+    try { state.cy.destroy(); } catch { /* already gone */ }
+    state.cy = null;
   }
 }
 
-function makeDraggableGraph(graphEl, positions, viewW, viewH, zoom = 1, nonUniformScale = false) {
-  if (!graphEl || window.matchMedia('(max-width: 760px)').matches) return;
-  let drag = null;
-  graphEl.querySelectorAll('[data-node]').forEach((el) => {
-    el.addEventListener('pointerdown', (event) => {
-      if (event.button !== 0) return;
-      const pos = positions.get(el.dataset.node);
-      if (!pos) return;
-      const rect = graphEl.getBoundingClientRect();
-      const scaleX = (nonUniformScale ? rect.width / viewW : Math.min(rect.width / viewW, rect.height / viewH)) * zoom || 1;
-      const scaleY = (nonUniformScale ? rect.height / viewH : Math.min(rect.width / viewW, rect.height / viewH)) * zoom || 1;
-      drag = { id: el.dataset.node, el, startX: event.clientX, startY: event.clientY, originX: pos.x, originY: pos.y, scaleX, scaleY, moved: false };
-      el.setPointerCapture(event.pointerId);
-    });
-    el.addEventListener('pointermove', (event) => {
-      if (!drag || drag.el !== el) return;
-      const dx = (event.clientX - drag.startX) / drag.scaleX;
-      const dy = (event.clientY - drag.startY) / drag.scaleY;
-      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) drag.moved = true;
-      const next = { x: drag.originX + dx, y: drag.originY + dy };
-      positions.set(drag.id, next);
-      const displayPosition = zoomedDiagramPosition(next, viewW, viewH, zoom);
-      el.style.left = `${(displayPosition.x / viewW * 100).toFixed(2)}%`;
-      el.style.top = `${(displayPosition.y / viewH * 100).toFixed(2)}%`;
-      graphEl.querySelectorAll(`[data-edge-id][data-from="${drag.id}"], [data-edge-id][data-to="${drag.id}"]`).forEach((line) => redrawEdgeLine(graphEl, line, positions));
-    });
-    el.addEventListener('pointerup', (event) => {
-      if (!drag || drag.el !== el) return;
-      el.releasePointerCapture(event.pointerId);
-      if (drag.moved) el.dataset.justDragged = 'true';
-      drag = null;
-    });
-    el.addEventListener('click', (event) => {
-      if (el.dataset.justDragged === 'true') {
-        delete el.dataset.justDragged;
-        event.stopPropagation();
-        event.preventDefault();
-      }
-    }, true);
+const CY_STYLE = [
+  { selector: 'node', style: { 'background-opacity': 0, 'border-width': 0, 'label': '', 'shape': 'round-rectangle', 'width': 'data(width)', 'height': 'data(height)' } },
+  { selector: 'node:parent', style: {
+      'background-color': '#5ce1b9', 'background-opacity': 0.06,
+      'border-width': 1.5, 'border-style': 'dashed', 'border-color': '#56645f', 'border-opacity': 1,
+      'label': 'data(label)', 'color': '#8fa69d', 'text-valign': 'top', 'text-halign': 'left',
+      'font-size': 11, 'text-margin-y': -10, 'text-margin-x': 10, 'padding': '46px'
+  } },
+  { selector: 'edge', style: {
+      'width': 2, 'line-color': '#42685b', 'target-arrow-color': '#42685b', 'target-arrow-shape': 'triangle',
+      'arrow-scale': 1.1, 'curve-style': 'bezier', 'text-rotation': 'autorotate',
+      'label': 'data(label)', 'font-size': 10, 'color': '#8fa69d',
+      'text-background-color': '#08110f', 'text-background-opacity': 0.9, 'text-background-padding': '3px', 'text-background-shape': 'roundrectangle'
+  } },
+  { selector: 'edge.inbound', style: { 'line-color': '#7db7ff', 'target-arrow-color': '#7db7ff' } },
+  { selector: 'edge.jumpable', style: { 'line-style': 'solid', 'width': 2.5 } }
+];
+
+function mountCy({ container, elements, layout, htmlLabels, onTapNode, onTapEdge, onDragFree }) {
+  destroyCy();
+  const cy = cytoscape({ container, elements, style: CY_STYLE, layout, wheelSensitivity: 0.25, minZoom: 0.15, maxZoom: 3 });
+  if (htmlLabels) cy.nodeHtmlLabel(htmlLabels);
+  if (onTapNode) cy.on('tap', 'node', (event) => { if (!event.target.isParent()) onTapNode(event.target); });
+  if (onTapEdge) cy.on('tap', 'edge', (event) => onTapEdge(event.target));
+  if (onDragFree) cy.on('dragfree', 'node', (event) => onDragFree(event.target));
+  state.cy = cy;
+  return cy;
+}
+
+function markCySelection(containerEl, selectedId) {
+  containerEl?.querySelectorAll('[data-node-id]').forEach((el) => {
+    el.classList.toggle('selected', el.dataset.nodeId === selectedId);
   });
+}
+
+function diagramControlsHtml() {
+  return `<button id="auto-arrange" class="plain-button" type="button">Auto arrange</button><div class="diagram-zoom" role="group" aria-label="Diagram zoom"><button id="zoom-out" type="button" aria-label="Zoom out">−</button><button id="zoom-fit" type="button">Fit</button><button id="zoom-in" type="button" aria-label="Zoom in">+</button></div>`;
+}
+
+function wireDiagramControls(onAutoArrange) {
+  const zoomOut = $('#zoom-out'), zoomIn = $('#zoom-in'), zoomFit = $('#zoom-fit'), autoArrange = $('#auto-arrange');
+  if (zoomOut) zoomOut.onclick = () => { const cy = state.cy; if (cy) cy.zoom({ level: Math.max(cy.minZoom(), cy.zoom() / 1.25), renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } }); };
+  if (zoomIn) zoomIn.onclick = () => { const cy = state.cy; if (cy) cy.zoom({ level: Math.min(cy.maxZoom(), cy.zoom() * 1.25), renderedPosition: { x: cy.width() / 2, y: cy.height() / 2 } }); };
+  if (zoomFit) zoomFit.onclick = () => { state.cy?.fit(undefined, 40); };
+  if (autoArrange) autoArrange.onclick = () => onAutoArrange();
 }
 
 function renderDependencies(resetToolbar = true) {
@@ -660,7 +614,7 @@ function renderDependencies(resetToolbar = true) {
   const operations = dependencies.reduce((sum, dependency) => sum + (dependency.operations?.length || 0), 0);
   const internalCount = dependencies.filter((dependency) => dependency.classification === 'internal').length;
   const messageCount = dependencies.filter((dependency) => dependency.kind === 'message').length;
-  if (resetToolbar) toolbar.innerHTML = `${searchControl('Filter dependencies')}<span class="spacer"></span><span class="toolbar-meta">${dependencies.length} dependencies · ${internalCount} internal · ${dependencies.length - internalCount} external · ${messageCount} message-based · ${operations} operations</span>`;
+  if (resetToolbar) toolbar.innerHTML = `${searchControl('Filter dependencies')}${diagramControlsHtml()}<span class="spacer"></span><span class="toolbar-meta">${dependencies.length} dependencies · ${internalCount} internal · ${dependencies.length - internalCount} external · ${messageCount} message-based · ${operations} operations</span>`;
   const filtered = dependencies.filter((dependency) => `${dependency.name} ${dependency.kind} ${dependency.classification} ${dependency.direction} ${dependency.client} ${dependency.technology}`.toLowerCase().includes(state.filter));
   if (!dependencies.length) {
     content.innerHTML = '<div class="empty-state"><span class="empty-icon" aria-hidden="true">◇</span><h2>No service dependencies recorded</h2><p>The generated dependency catalogue is empty.</p></div>';
@@ -672,7 +626,6 @@ function renderDependencies(resetToolbar = true) {
     return;
   }
   if (!state.selected || !filtered.some((item) => item.id === state.selected)) state.selected = filtered[0].id;
-  const selected = dependencies.find((item) => item.id === state.selected);
   const VIEW_W = 1400, VIEW_H = 800;
   const center = { x: VIEW_W / 2, y: VIEW_H / 2 };
   const nodeHalfW = 98, nodeHalfH = 48, pad = 26;
@@ -685,54 +638,65 @@ function renderDependencies(resetToolbar = true) {
   const nodes = [...internal, ...external];
   if (!state.diagramPositions) state.diagramPositions = new Map();
   const positions = state.diagramPositions;
-  positions.set('center', positions.get('center') || { x: center.x, y: center.y });
-  nodes.forEach((node) => resolvedPosition(positions, node));
-  const pct = (value, axis) => `${((value / (axis === 'x' ? VIEW_W : VIEW_H)) * 100).toFixed(2)}%`;
-  const posOf = (node) => positions.get(node.id) || node;
-  const centerPos = positions.get('center');
+  const centerPos = positionFor(positions, 'center', center);
+  nodes.forEach((node) => positionFor(positions, node.id, node));
+
+  const orgLabel = orgName(state.data.repository);
+  const elements = [
+    { data: { id: 'boundary', label: orgLabel.toUpperCase() } },
+    { data: { id: 'center', parent: 'boundary', isLeaf: true, isCenter: true, width: 210, height: 98, label: titleCase(state.source.name) }, position: centerPos },
+    ...nodes.map((node) => ({
+      data: {
+        id: node.id, isLeaf: true, width: 196, height: 96,
+        ...(node.classification === 'internal' ? { parent: 'boundary' } : {}),
+        kind: node.kind, classification: node.classification, name: node.name,
+        technology: node.technology, opsCount: node.operations?.length || 0
+      },
+      position: positions.get(node.id)
+    })),
+    ...nodes.map((node) => {
+      const inbound = node.direction === 'inbound';
+      return { data: { id: `edge-${node.id}`, source: inbound ? node.id : 'center', target: inbound ? 'center' : node.id, label: relationshipLabel(node) }, classes: inbound ? 'inbound' : '' };
+    })
+  ];
+
   content.innerHTML = `<div class="dependency-view">
     <div class="c4-legend">
       <span class="c4-legend-item"><span class="c4-swatch focus"></span>Software system (this service)</span>
       <span class="c4-legend-item"><span class="c4-swatch internal"></span>Container — internal</span>
       <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
-      <span class="c4-legend-item"><span class="c4-boundary-swatch"></span>${escapeHtml(orgName(state.data.repository))} system boundary</span>
-      <span class="c4-legend-item">Drag any box to rearrange</span>
+      <span class="c4-legend-item"><span class="c4-boundary-swatch"></span>${escapeHtml(orgLabel)} system boundary</span>
+      <span class="c4-legend-item">Drag to rearrange · scroll to zoom · drag background to pan</span>
     </div>
-    <div class="dependency-graph" role="group" aria-label="C4 container diagram for ${escapeHtml(titleCase(state.source.name))}">
-      <svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <marker id="arrow-outbound" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker>
-          <marker id="arrow-inbound" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker>
-        </defs>
-        <ellipse class="c4-boundary" cx="${center.x}" cy="${center.y}" rx="${boundaryRx}" ry="${boundaryRy}"></ellipse>
-        <text class="c4-boundary-label" x="${center.x - boundaryRx + 18}" y="${center.y - boundaryRy + 26}">${escapeHtml(orgName(state.data.repository))}</text>
-        ${nodes.map((node, index) => {
-          const pos = posOf(node);
-          const inbound = node.direction === 'inbound';
-          const [fromId, toId] = inbound ? [node.id, 'center'] : ['center', node.id];
-          const [x1, y1, x2, y2] = inbound ? [pos.x, pos.y, centerPos.x, centerPos.y] : [centerPos.x, centerPos.y, pos.x, pos.y];
-          const midX = (x1 + x2) / 2;
-          const midY = (y1 + y2) / 2;
-          const label = relationshipLabel(node);
-          const halfWidth = label.length * 3.3;
-          const edgeId = `dep-edge-${index}`;
-          return `<line id="${edgeId}" class="${inbound ? 'inbound' : 'outbound'}" data-edge-id="${edgeId}" data-from="${escapeHtml(fromId)}" data-to="${escapeHtml(toId)}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" marker-end="url(#arrow-${inbound ? 'inbound' : 'outbound'})"></line>
-            <rect id="${edgeId}-bg" class="rel-label-bg" data-half-width="${halfWidth}" x="${midX - halfWidth}" y="${midY - 9}" width="${halfWidth * 2}" height="15" rx="4"></rect>
-            <text id="${edgeId}-text" class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
-        }).join('')}
-      </svg>
-      <div class="dependency-node service-node" data-node="center" style="left:${pct(centerPos.x, 'x')};top:${pct(centerPos.y, 'y')}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(state.source.name))}</strong></div>
-      ${nodes.map((node) => {
-        const pos = posOf(node);
-        const nodeClass = node.kind === 'message' ? 'message' : (node.classification === 'internal' ? 'internal' : 'external');
-        return `<button class="dependency-node ${nodeClass}" type="button" data-node="${escapeHtml(node.id)}" data-dependency="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')}"><span class="c4-type">${escapeHtml(c4Type(node))}</span><strong>${escapeHtml(splitPascalCase(node.name))}</strong><span class="c4-meta">${escapeHtml(node.technology || node.kind || 'service')} · ${node.operations?.length || 0} op${node.operations?.length === 1 ? '' : 's'}</span></button>`;
-      }).join('')}
-    </div>
-    ${dependencyDetail(selected)}
+    <div id="dep-cy" class="cy-container" role="group" aria-label="C4 container diagram for ${escapeHtml(titleCase(state.source.name))}"></div>
+    <div id="dep-detail">${dependencyDetail(dependencies.find((item) => item.id === state.selected))}</div>
   </div>`;
   wireSearch();
-  makeDraggableGraph($('.dependency-graph'), positions, VIEW_W, VIEW_H);
-  document.querySelectorAll('[data-dependency]').forEach((button) => { button.addEventListener('click', () => { state.selected = button.dataset.dependency; renderDependencies(false); }); });
+
+  mountCy({
+    container: $('#dep-cy'),
+    elements,
+    layout: { name: 'preset' },
+    htmlLabels: [{
+      query: 'node[?isLeaf]',
+      halign: 'center', valign: 'center', halignBox: 'center', valignBox: 'center',
+      tpl: (data) => {
+        if (data.isCenter) return `<div class="cy-node service-node" data-node-id="center"><span class="c4-type">Software System</span><strong>${escapeHtml(data.label)}</strong></div>`;
+        const nodeClass = data.kind === 'message' ? 'message' : (data.classification === 'internal' ? 'internal' : 'external');
+        const typeLabel = data.classification === 'internal' ? 'Container' : 'External System';
+        return `<div class="cy-node ${nodeClass}" data-node-id="${escapeHtml(data.id)}"><span class="c4-type">${escapeHtml(typeLabel)}</span><strong>${escapeHtml(splitPascalCase(data.name))}</strong><span class="c4-meta">${escapeHtml(data.technology || data.kind || 'service')} · ${data.opsCount} op${data.opsCount === 1 ? '' : 's'}</span></div>`;
+      }
+    }],
+    onTapNode: (node) => {
+      if (node.id() === 'center') return;
+      state.selected = node.id();
+      markCySelection($('#dep-cy'), state.selected);
+      $('#dep-detail').innerHTML = dependencyDetail(dependencies.find((item) => item.id === state.selected));
+    },
+    onDragFree: (node) => { positions.set(node.id(), node.position()); }
+  });
+  markCySelection($('#dep-cy'), state.selected);
+  wireDiagramControls(() => { positions.clear(); renderDependencies(false); });
 }
 
 function dependencyDetail(dependency) {
@@ -782,6 +746,7 @@ function setLandscapeHero() {
 }
 
 async function loadLandscape() {
+  destroyCy();
   toolbar.innerHTML = '';
   content.innerHTML = '<div class="loading">Reading catalogue data…</div>';
   state.selected = null;
@@ -814,15 +779,15 @@ function renderLandscape() {
     <div class="stat"><dt>Systems</dt><dd>${graph.systems.length}</dd></div>
     <div class="stat"><dt>External</dt><dd>${graph.externals.length}</dd></div>
     <div class="stat"><dt>Relationships</dt><dd>${graph.edges.length}</dd></div>`;
-  toolbar.innerHTML = `<span class="toolbar-meta">Inferred by matching each repository's outbound service dependencies and handled events/commands against the catalogue, clustering the rest as external systems</span>`;
+  toolbar.innerHTML = `${diagramControlsHtml()}<span class="spacer"></span><span class="toolbar-meta">Inferred by matching each repository's outbound service dependencies and handled events/commands against the catalogue, clustering the rest as external systems</span>`;
   if (!allNodes.length) {
+    destroyCy();
     content.innerHTML = '<div class="empty-state"><span class="empty-icon" aria-hidden="true">◇</span><h2>No dependency data available</h2><p>None of the cataloged repositories publish service-dependencies data.</p></div>';
     return;
   }
   if (!state.landscapeChecked) state.landscapeChecked = new Set(allNodes.map((node) => node.id));
   const visibleNodes = allNodes.filter((node) => state.landscapeChecked.has(node.id));
   if (!state.selected || !visibleNodes.some((node) => node.id === state.selected)) state.selected = visibleNodes[0]?.id || null;
-  const selected = allNodes.find((node) => node.id === state.selected);
 
   const checklistHtml = `<aside class="landscape-checklist" aria-label="Services to show">
     <div class="checklist-controls">
@@ -834,6 +799,7 @@ function renderLandscape() {
   </aside>`;
 
   if (!visibleNodes.length) {
+    destroyCy();
     content.innerHTML = `<div class="landscape-layout">${checklistHtml}<div class="empty-state"><h2>Nothing selected</h2><p>Check at least one service on the left to see it on the diagram.</p></div></div>`;
     wireLandscapeChecklist(allNodes);
     return;
@@ -853,58 +819,65 @@ function renderLandscape() {
   const visibleEdges = graph.edges.filter((edge) => state.landscapeChecked.has(edge.from) && state.landscapeChecked.has(edge.to));
   if (!state.landscapePositions) state.landscapePositions = new Map();
   const positions = state.landscapePositions;
-  [...systemNodes, ...externalNodes].forEach((node) => resolvedPosition(positions, node));
-  const posOf = (node) => positions.get(node.id) || node;
-  const pct = (value, axis) => `${((value / (axis === 'x' ? VIEW_W : VIEW_H)) * 100).toFixed(2)}%`;
+  [...systemNodes, ...externalNodes].forEach((node) => positionFor(positions, node.id, node));
   const orgLabel = orgFromRepoUrl(graph.systems[0]?.repository);
+
+  const elements = [
+    { data: { id: 'boundary', label: orgLabel.toUpperCase() } },
+    ...systemNodes.map((node) => ({
+      data: { id: node.id, parent: 'boundary', isLeaf: true, width: 210, height: 98, name: node.name, relCount: visibleEdges.filter((edge) => edge.from === node.id || edge.to === node.id).length },
+      position: positions.get(node.id)
+    })),
+    ...externalNodes.map((node) => ({
+      data: { id: node.id, isLeaf: true, width: 196, height: 96, name: node.name, memberCount: node.members.length },
+      position: positions.get(node.id)
+    })),
+    ...visibleEdges.map((edge, index) => {
+      const reference = edge.references[0];
+      return { data: { id: `land-edge-${index}`, source: edge.from, target: edge.to, label: edgeLabel(edge), jumpSourceId: reference?.sourceId || '', jumpIndex: reference?.dependencyIndex ?? '' }, classes: reference ? 'jumpable' : '' };
+    })
+  ];
 
   content.innerHTML = `<div class="landscape-layout">
     ${checklistHtml}
     <div class="dependency-view">
-    <div class="c4-legend">
-      <span class="c4-legend-item"><span class="c4-swatch internal"></span>Software system (cataloged)</span>
-      <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
-      <span class="c4-legend-item"><span class="c4-boundary-swatch"></span>${escapeHtml(orgLabel)} system boundary</span>
-      <span class="c4-legend-item">Drag any box to rearrange</span>
+      <div class="c4-legend">
+        <span class="c4-legend-item"><span class="c4-swatch internal"></span>Software system (cataloged)</span>
+        <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
+        <span class="c4-legend-item"><span class="c4-boundary-swatch"></span>${escapeHtml(orgLabel)} system boundary</span>
+        <span class="c4-legend-item">Click a relationship line to open its dependency</span>
+      </div>
+      <div id="land-cy" class="cy-container" role="group" aria-label="C4 system landscape diagram"></div>
+      <div id="land-detail">${landscapeDetail(allNodes.find((node) => node.id === state.selected), graph)}</div>
     </div>
-    <div class="dependency-graph" role="group" aria-label="C4 system landscape diagram">
-      <svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-        <defs>
-          <marker id="arrow-outbound" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker>
-        </defs>
-        <ellipse class="c4-boundary" cx="${center.x}" cy="${center.y}" rx="${boundaryRx}" ry="${boundaryRy}"></ellipse>
-        <text class="c4-boundary-label" x="${center.x - boundaryRx + 18}" y="${center.y - boundaryRy + 26}">${escapeHtml(orgLabel)}</text>
-        ${visibleEdges.map((edge, index) => {
-          if (!positions.has(edge.from) || !positions.has(edge.to)) return '';
-          const from = positions.get(edge.from);
-          const to = positions.get(edge.to);
-          const midX = (from.x + to.x) / 2;
-          const midY = (from.y + to.y) / 2;
-          const label = edgeLabel(edge);
-          const halfWidth = label.length * 3.3;
-          const edgeId = `land-edge-${index}`;
-          const reference = edge.references[0];
-          return `<line id="${edgeId}" class="outbound landscape-edge-link" data-edge-id="${edgeId}" data-from="${escapeHtml(edge.from)}" data-to="${escapeHtml(edge.to)}" data-dependency-jump="${escapeHtml(reference?.sourceId || '')}" data-dependency-index="${reference?.dependencyIndex ?? ''}" role="link" tabindex="0" aria-label="Open ${escapeHtml(label)} dependency details" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" marker-end="url(#arrow-outbound)"></line>
-            <rect id="${edgeId}-bg" class="rel-label-bg" data-half-width="${halfWidth}" x="${midX - halfWidth}" y="${midY - 9}" width="${halfWidth * 2}" height="15" rx="4"></rect>
-            <text id="${edgeId}-text" class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
-        }).join('')}
-      </svg>
-      ${systemNodes.map((node) => { const pos = posOf(node); return `<button class="dependency-node internal" type="button" data-node="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(node.name))}</strong><span class="c4-meta">${visibleEdges.filter((edge) => edge.from === node.id || edge.to === node.id).length} relationship(s)</span></button>`; }).join('')}
-      ${externalNodes.map((node) => { const pos = posOf(node); return `<button class="dependency-node external" type="button" data-node="${escapeHtml(node.id)}" aria-pressed="${node.id === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')}"><span class="c4-type">External System</span><strong>${escapeHtml(splitPascalCase(node.name))}</strong><span class="c4-meta">${node.members.length} reference(s)</span></button>`; }).join('')}
-    </div>
-    ${landscapeDetail(selected, graph)}
-  </div>
   </div>`;
-  makeDraggableGraph($('.dependency-graph'), positions, VIEW_W, VIEW_H);
-  document.querySelectorAll('[data-node]').forEach((button) => { button.addEventListener('click', () => { state.selected = button.dataset.node; renderLandscape(); }); });
-  document.querySelectorAll('[data-jump]').forEach((button) => { button.onclick = () => jumpToSource(button.dataset.jump); });
-  document.querySelectorAll('.landscape-edge-link').forEach((edge) => {
-    const openDependency = () => jumpToSource(edge.dataset.dependencyJump, Number(edge.dataset.dependencyIndex));
-    edge.addEventListener('click', openDependency);
-    edge.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openDependency(); }
-    });
+
+  mountCy({
+    container: $('#land-cy'),
+    elements,
+    layout: { name: 'preset' },
+    htmlLabels: [{
+      query: 'node[?isLeaf]',
+      halign: 'center', valign: 'center', halignBox: 'center', valignBox: 'center',
+      tpl: (data) => {
+        if (data.parent === 'boundary') return `<div class="cy-node internal" data-node-id="${escapeHtml(data.id)}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(data.name))}</strong><span class="c4-meta">${data.relCount} relationship(s)</span></div>`;
+        return `<div class="cy-node external" data-node-id="${escapeHtml(data.id)}"><span class="c4-type">External System</span><strong>${escapeHtml(splitPascalCase(data.name))}</strong><span class="c4-meta">${data.memberCount} reference(s)</span></div>`;
+      }
+    }],
+    onTapNode: (node) => {
+      state.selected = node.id();
+      markCySelection($('#land-cy'), state.selected);
+      $('#land-detail').innerHTML = landscapeDetail(allNodes.find((item) => item.id === state.selected), graph);
+    },
+    onTapEdge: (edge) => {
+      const sourceId = edge.data('jumpSourceId');
+      if (sourceId) jumpToSource(sourceId, edge.data('jumpIndex'));
+    },
+    onDragFree: (node) => { positions.set(node.id(), node.position()); }
   });
+  markCySelection($('#land-cy'), state.selected);
+  document.querySelectorAll('[data-jump]').forEach((button) => { button.onclick = () => jumpToSource(button.dataset.jump); });
+  wireDiagramControls(() => { positions.clear(); renderLandscape(); });
   wireLandscapeChecklist(allNodes);
 }
 
