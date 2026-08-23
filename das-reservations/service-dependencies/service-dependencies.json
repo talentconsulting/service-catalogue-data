@@ -4,34 +4,6 @@
   "path": "src",
   "dependencies": [
     {
-      "name": "Azure Active Directory",
-      "kind": "http-api",
-      "classification": "third-party",
-      "direction": "outbound",
-      "client": null,
-      "technology": "HttpClient",
-      "configurationKeys": [],
-      "authentication": {
-        "type": "Bearer",
-        "configurationKeys": []
-      },
-      "operations": [
-        {
-          "method": "POST",
-          "path": "/{tenant}/oauth2/token",
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs"
-        }
-      ],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs",
-          "reason": "Usage of GetClientCredentialAuthenticationResult method targeting Azure Active Directory token endpoint."
-        }
-      ],
-      "confidence": "high"
-    },
-    {
       "name": "ReservationsApi",
       "kind": "http-api",
       "classification": "internal",
@@ -39,10 +11,14 @@
       "client": "ApiClient",
       "technology": "HttpClient",
       "configurationKeys": [
+        "ReservationsApiConfiguration.Id",
+        "ReservationsApiConfiguration.Identifier",
+        "ReservationsApiConfiguration.Secret",
+        "ReservationsApiConfiguration.Tenant",
         "ReservationsApiConfiguration.Url"
       ],
       "authentication": {
-        "type": "Bearer",
+        "type": "bearer",
         "configurationKeys": [
           "ReservationsApiConfiguration.Id",
           "ReservationsApiConfiguration.Identifier",
@@ -53,34 +29,38 @@
       "operations": [
         {
           "method": "DELETE",
-          "path": "{dynamic}",
+          "path": null,
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
         },
         {
           "method": "GET",
-          "path": "/ping",
+          "path": "ping",
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs"
         },
         {
           "method": "GET",
-          "path": "{dynamic}",
+          "path": null,
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
         },
         {
           "method": "POST",
-          "path": "{dynamic}",
+          "path": null,
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
         }
       ],
       "resources": [],
       "evidence": [
         {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
+          "reason": "ApiClient registration in DI container"
+        },
+        {
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs",
-          "reason": "Usage of ReservationsApiConfiguration.Url and HttpClient for making requests."
+          "reason": "HTTP client usage with ReservationsApiConfiguration.Url"
         },
         {
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs",
-          "reason": "Use of HttpClient for making HTTP requests and dynamic URLs."
+          "reason": "Use of HttpClient to interact with API endpoints"
         }
       ],
       "confidence": "high"
