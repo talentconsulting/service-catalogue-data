@@ -4,9 +4,9 @@
   "path": "src",
   "dependencies": [
     {
-      "name": "IApiClient",
+      "name": "ApiClient",
       "kind": "http-api",
-      "classification": "internal",
+      "classification": "unknown",
       "direction": "outbound",
       "client": "ApiClient",
       "technology": "HttpClient",
@@ -18,53 +18,36 @@
         "ReservationsApiConfiguration.Url"
       ],
       "authentication": {
-        "type": "Bearer Token",
+        "type": "token-based",
         "configurationKeys": [
           "ReservationsApiConfiguration.Id",
-          "ReservationsApiConfiguration.Secret"
+          "ReservationsApiConfiguration.Identifier",
+          "ReservationsApiConfiguration.Secret",
+          "ReservationsApiConfiguration.Tenant"
         ]
       },
       "operations": [
         {
-          "method": "DELETE",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
-        },
-        {
           "method": "GET",
-          "path": "/ping",
+          "path": "ping",
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs"
-        },
-        {
-          "method": "GET",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
-        },
-        {
-          "method": "POST",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
         }
       ],
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs",
-          "reason": "HttpClient used directly to make GET, POST, DELETE calls"
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs",
+          "reason": "HttpClient usage to make outbound HTTP calls."
         },
         {
           "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
-          "reason": "IApiClient registered with ApiClient implementation"
-        },
-        {
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs",
-          "reason": "Instances of HttpClient used to make outbound calls with URLs constructed from ReservationsApiConfiguration.Url"
+          "reason": "IApiClient service registration."
         }
       ],
       "confidence": "high"
     },
     {
-      "name": "IReservationsOuterApiClient",
+      "name": "ReservationsOuterApiClient",
       "kind": "http-api",
       "classification": "unknown",
       "direction": "outbound",
@@ -80,10 +63,10 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
-          "reason": "IReservationsOuterApiClient registered with ReservationsOuterApiClient implementation; client probably uses HttpClient"
+          "reason": "Explicit registration of IReservationsOuterApiClient."
         }
       ],
-      "confidence": "medium"
+      "confidence": "high"
     }
   ]
 }
