@@ -4,15 +4,54 @@
   "path": "src",
   "dependencies": [
     {
-      "name": "LevyTransferMatchingApiClient",
+      "name": "ApprovalsOuterApiClient",
       "kind": "http-api",
-      "classification": "unknown",
+      "classification": "internal",
       "direction": "outbound",
-      "client": "ILevyTransferMatchingApiClient",
+      "client": "ApprovalsOuterApiClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "CommitmentsV2:LevyTransferMatchingApiConfiguration"
+        "CommitmentsV2:ApprovalsOuterApi"
       ],
+      "authentication": {
+        "type": "key-header",
+        "configurationKeys": [
+          "ApprovalsOuterApiConfiguration.Key"
+        ]
+      },
+      "operations": [
+        {
+          "method": "GET",
+          "path": "/test-url/get",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.UnitTests/Infrastructure/Api/WhenCallingGet.cs"
+        },
+        {
+          "method": "POST",
+          "path": "/api/post-endpoint",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.UnitTests/Infrastructure/Api/WhenCallingPost.cs"
+        }
+      ],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.UnitTests/Infrastructure/Api/WhenCallingGet.cs",
+          "reason": "ApprovalsOuterApiClient is tested with HTTP GET and POST requests"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/ApprovalsOuterApiClient.cs",
+          "reason": "Implementation of HTTP client ApprovalsOuterApiClient"
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "CommitmentsRestHttpClient",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "CommitmentsRestHttpClient",
+      "technology": "HttpClient",
+      "configurationKeys": [],
       "authentication": {
         "type": null,
         "configurationKeys": []
@@ -21,32 +60,99 @@
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/Configuration/ServiceCollectionExtensions.cs",
-          "reason": "AddHttpClient was registered for ILevyTransferMatchingApiClient."
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api.Client/CommitmentsApiClientFactory.cs",
+          "reason": "CommitmentsRestHttpClient instantiated in CommitmentsApiClientFactory"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api.Client.UnitTests/Http/CommitmentsRestClientTests.cs",
+          "reason": "Usage of CommitmentsRestHttpClient in unit tests"
         }
       ],
       "confidence": "high"
     },
     {
-      "name": "ProviderRelationshipsApi",
+      "name": "LevyTransferMatchingApiClient",
       "kind": "http-api",
-      "classification": "unknown",
+      "classification": "internal",
       "direction": "outbound",
-      "client": "IProviderRelationshipsApiClient",
+      "client": "LevyTransferMatchingClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "ProviderRelationshipsApi"
+        "CommitmentsV2:LevyTransferMatchingApiConfiguration"
       ],
       "authentication": {
-        "type": "ManagedIdentity",
-        "configurationKeys": []
+        "type": "bearer-token",
+        "configurationKeys": [
+          "LevyTransferMatchingApiConfiguration.BaseUrl"
+        ]
+      },
+      "operations": [
+        {
+          "method": "GET",
+          "path": "applications/{id}",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/LevyTransferMatchingClient.cs"
+        }
+      ],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/LevyTransferMatchingClient.cs",
+          "reason": "LevyTransferMatchingClient calls external API with HTTP GET and uses bearer token authentication"
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "ProviderRelationshipsApiClient",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ProviderRelationshipsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ProviderRelationshipsApi.ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "bearer-token",
+        "configurationKeys": [
+          "ProviderRelationshipsApiConfiguration"
+        ]
       },
       "operations": [],
       "resources": [],
       "evidence": [
         {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Shared/ProviderRelationshipsApiClient/AddProviderRelationshipsApiClientExtension.cs",
-          "reason": "AddHttpClient was registered for IProviderRelationshipsApiClient with ManagedIdentity token handling."
+          "reason": "AddProviderRelationshipsApiClientExtension configures HTTP client and bearer token authentication for ProviderRelationshipsApiClient"
+        }
+      ],
+      "confidence": "high"
+    },
+    {
+      "name": "ReservationsApiClient",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ReservationsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ReservationsClientApiConfiguration"
+      ],
+      "authentication": {
+        "type": "bearer-token-or-key",
+        "configurationKeys": [
+          "ReservationsClientApiConfiguration.ApiBaseUrl",
+          "ReservationsClientApiConfiguration.ClientId",
+          "ReservationsClientApiConfiguration.ClientSecret",
+          "ReservationsClientApiConfiguration.Tenant"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.ReservationsV2.Api.Client/ReservationsApiClientFactory.cs",
+          "reason": "ReservationsApiClientFactory configures ReservationsApiClient with optional client credentials or managed identity for authentication"
         }
       ],
       "confidence": "high"
