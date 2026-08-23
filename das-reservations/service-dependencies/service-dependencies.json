@@ -4,14 +4,14 @@
   "path": "src",
   "dependencies": [
     {
-      "name": "RedisCache",
+      "name": "StackExchangeRedisCache",
       "kind": "cache",
-      "classification": "third-party",
+      "classification": "internal",
       "direction": "outbound",
       "client": null,
-      "technology": "Redis",
+      "technology": "StackExchange.Redis",
       "configurationKeys": [
-        "ReservationsWeb.RedisCacheConnectionString"
+        "ReservationsWeb:RedisCacheConnectionString"
       ],
       "authentication": {
         "type": null,
@@ -22,47 +22,51 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Reservations.Web/Startup.cs",
-          "reason": "AddStackExchangeRedisCache called for distributed caching."
+          "reason": "AddStackExchangeRedisCache registered with configuration from ReservationsWeb:RedisCacheConnectionString."
         }
       ],
       "confidence": "high"
     },
     {
-      "name": "ReservationsApiClient",
+      "name": "IApiClient",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
-      "client": "IApiClient",
+      "client": "ApiClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "ReservationsApiConfiguration.Url"
+        "ReservationsApiConfiguration:Id",
+        "ReservationsApiConfiguration:Identifier",
+        "ReservationsApiConfiguration:Secret",
+        "ReservationsApiConfiguration:Tenant",
+        "ReservationsApiConfiguration:Url"
       ],
       "authentication": {
         "type": "bearer",
         "configurationKeys": [
-          "ReservationsApiConfiguration.Id",
-          "ReservationsApiConfiguration.Identifier",
-          "ReservationsApiConfiguration.Secret",
-          "ReservationsApiConfiguration.Tenant"
+          "ReservationsApiConfiguration:Id",
+          "ReservationsApiConfiguration:Identifier",
+          "ReservationsApiConfiguration:Secret",
+          "ReservationsApiConfiguration:Tenant"
         ]
       },
       "operations": [
         {
           "method": "DELETE",
           "methodName": "Delete",
-          "path": "provided via IDeleteApiRequest.DeleteUrl",
+          "path": null,
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
         },
         {
           "method": "GET",
           "methodName": "Get",
-          "path": "provided via IGetApiRequest.GetUrl",
+          "path": null,
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
         },
         {
           "method": "GET",
           "methodName": "GetAll",
-          "path": "provided via IGetAllApiRequest.GetAllUrl",
+          "path": null,
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
         },
         {
@@ -74,13 +78,13 @@
         {
           "method": "GET",
           "methodName": "Search",
-          "path": "provided via ISearchApiRequest.SearchUrl",
+          "path": null,
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
         },
         {
           "method": "POST",
           "methodName": "Create",
-          "path": "provided via IPostApiRequest.CreateUrl",
+          "path": null,
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
         }
       ],
@@ -88,40 +92,18 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs",
-          "reason": "Base class handling HTTP operations with HttpClient and access token usage."
+          "reason": "Base class for ApiClient making HTTP calls."
         },
         {
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs",
-          "reason": "IApiClient implementation with HTTP operations and authorization logic."
+          "reason": "IApiClient implemented by ApiClient and uses HTTP calls."
         },
         {
           "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
-          "reason": "IApiClient registered in the service container."
+          "reason": "IApiClient is registered with ApiClient implementation as Singleton."
         }
       ],
       "confidence": "high"
-    },
-    {
-      "name": "ReservationsOuterApiClient",
-      "kind": "http-api",
-      "classification": "internal",
-      "direction": "outbound",
-      "client": "IReservationsOuterApiClient",
-      "technology": "HttpClient",
-      "configurationKeys": [],
-      "authentication": {
-        "type": null,
-        "configurationKeys": []
-      },
-      "operations": [],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
-          "reason": "IReservationsOuterApiClient registered in the service container as an outbound dependency."
-        }
-      ],
-      "confidence": "low"
     }
   ]
 }
