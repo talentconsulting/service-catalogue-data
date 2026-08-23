@@ -63,6 +63,10 @@ h1 { margin: 0; font-size: clamp(30px, 4vw, 48px); line-height: 1.05; letter-spa
 .toolbar-meta { color: var(--muted); font-size: 13px; }
 .plain-button { appearance: none; border: 0; background: transparent; padding: 9px 0; color: var(--accent); cursor: pointer; }
 .plain-button:hover { text-decoration: underline; }
+.diagram-zoom { display: flex; overflow: hidden; border: 1px solid var(--line); border-radius: 8px; }
+.diagram-zoom button { border: 0; border-right: 1px solid var(--line); background: var(--surface); padding: 8px 11px; color: var(--muted); cursor: pointer; }
+.diagram-zoom button:last-child { border-right: 0; }
+.diagram-zoom button:hover { color: var(--accent); background: var(--surface-hover); }
 
 .content { min-height: 420px; }
 .loading, .empty-state, .error { min-height: 360px; display: grid; place-content: center; text-align: center; color: var(--muted); }
@@ -145,7 +149,12 @@ pre { max-height: 480px; overflow: auto; padding: 16px; border: 1px solid var(--
 .dependency-graph { position: relative; min-height: 800px; border: 1px solid var(--line); border-radius: 12px; background: radial-gradient(circle at center, var(--accent-soft), transparent 42%), var(--surface); overflow: hidden; }
 .dependency-graph svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .dependency-graph line { stroke: #42685b; stroke-width: 2; }
+.dependency-graph .landscape-edge-link { cursor: pointer; pointer-events: stroke; }
+.dependency-graph .landscape-edge-link:hover, .dependency-graph .landscape-edge-link:focus { stroke: var(--accent); stroke-width: 4; outline: none; }
 .dependency-graph path.outbound { fill: none; stroke: #42685b; stroke-width: 2; }
+.er-diagram svg { z-index: 3; pointer-events: none; }
+.er-diagram path.outbound { stroke-linecap: round; stroke-linejoin: round; }
+.er-diagram .er-node { z-index: 2; }
 .dependency-graph line.inbound { stroke: var(--blue); }
 .dependency-graph marker path { fill: var(--accent); }
 .dependency-graph marker#arrow-inbound path { fill: var(--blue); }
@@ -168,7 +177,7 @@ pre { max-height: 480px; overflow: auto; padding: 16px; border: 1px solid var(--
 .dependency-node.external:hover { border-color: #7a8a83; background: var(--surface-hover); }
 .dependency-node.message { border-color: #b98a3f; background: var(--amber-solid); }
 .dependency-node.message:hover { border-color: #dba85e; }
-.er-node { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; padding: 0; border: 1px solid #3f6cae; border-radius: 9px; background: var(--blue-solid); color: var(--text); text-align: left; cursor: grab; touch-action: none; user-select: none; box-shadow: 0 10px 30px rgba(0,0,0,.25); overflow: hidden; }
+.er-node { position: absolute; transform: translate(-50%, -50%) scale(var(--erd-zoom, 1)); display: flex; flex-direction: column; padding: 0; border: 1px solid #3f6cae; border-radius: 9px; background: var(--blue-solid); color: var(--text); text-align: left; cursor: grab; touch-action: none; user-select: none; box-shadow: 0 10px 30px rgba(0,0,0,.25); overflow: hidden; }
 .er-node:active { cursor: grabbing; }
 .er-node:hover { border-color: #6a97dd; background: #1c3552; }
 .er-node[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
@@ -201,8 +210,7 @@ main.landscape-mode #view-tabs, main.landscape-mode #repo-link { display: none; 
 .evidence-list p { margin: 0 0 6px; }
 
 .landscape-layout { display: grid; grid-template-columns: minmax(220px, 260px) minmax(0, 1fr); gap: 16px; align-items: start; }
-.landscape-sidebar { position: sticky; top: 84px; display: grid; gap: 12px; max-height: calc(100vh - 120px); overflow: auto; }
-.landscape-checklist, .landscape-dependencies { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 16px; }
+.landscape-checklist { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 16px; position: sticky; top: 84px; max-height: calc(100vh - 120px); overflow: auto; }
 .checklist-controls { display: flex; gap: 14px; margin-bottom: 14px; }
 .checklist-group h4 { margin: 18px 0 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; }
 .checklist-group:first-of-type h4 { margin-top: 0; }
@@ -210,13 +218,6 @@ main.landscape-mode #view-tabs, main.landscape-mode #repo-link { display: none; 
 .checklist li { padding: 3px 0; }
 .checklist label { display: flex; align-items: center; gap: 9px; cursor: pointer; overflow-wrap: anywhere; }
 .checklist input[type="checkbox"] { width: 15px; height: 15px; flex: none; accent-color: var(--accent); }
-.landscape-dependencies h4 { margin: 0 0 8px; display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; }
-.landscape-dependencies ul { margin: 0; padding: 0; list-style: none; }
-.landscape-dependencies li + li { border-top: 1px solid var(--line); }
-.landscape-dependency-link { display: grid; width: 100%; gap: 3px; border: 0; background: transparent; padding: 9px 0; color: var(--text); text-align: left; cursor: pointer; }
-.landscape-dependency-link:hover span { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
-.landscape-dependency-link span, .landscape-dependency-link small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.landscape-dependency-link small { color: var(--muted); font-size: 11px; }
 
 @media (max-width: 760px) {
   .topbar { height: auto; min-height: 64px; padding: 12px 16px; align-items: flex-start; }
@@ -236,5 +237,5 @@ main.landscape-mode #view-tabs, main.landscape-mode #repo-link { display: none; 
   .er-node { position: static; width: 100% !important; height: auto !important; min-height: 72px; transform: none; }
   .dependency-detail { padding: 18px; overflow-x: auto; }
   .landscape-layout { grid-template-columns: 1fr; }
-  .landscape-sidebar { position: static; max-height: none; }
+  .landscape-checklist { position: static; max-height: none; }
 }

@@ -1,7 +1,7 @@
 const state = {
   catalog: [], source: null, view: 'database', data: null,
   filter: '', selected: null, messageType: 'all', apiFile: null,
-  mode: 'source', landscape: null, apiView: 'operations', selectedModel: null, dbView: 'diagram'
+  mode: 'source', landscape: null, apiView: 'operations', selectedModel: null, dbView: 'diagram', erdZoom: 1
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -82,6 +82,7 @@ async function loadView() {
   state.selectedModel = null;
   state.diagramPositions = null;
   state.schemaPositions = null;
+  state.erdZoom = 1;
   try {
     if (state.view === 'dependencies') {
       state.data = await loadDependenciesFor(state.source);
@@ -176,9 +177,12 @@ function renderDatabase(resetToolbar = true) {
   const columnCount = tables.reduce((sum, table) => sum + (table.columns?.length || 0), 0);
   if (!state.dbView) state.dbView = 'diagram';
   if (resetToolbar) {
-    toolbar.innerHTML = `${searchControl('Filter tables or columns')}<div class="segmented" role="group" aria-label="Schema view"><button data-db-view="diagram" aria-pressed="${state.dbView === 'diagram'}">Diagram</button><button data-db-view="grid" aria-pressed="${state.dbView === 'grid'}">Grid</button></div>${state.dbView === 'diagram' ? '<button id="auto-arrange" class="plain-button" type="button">Auto arrange</button>' : ''}<span class="spacer"></span><span class="toolbar-meta">${tables.length} tables · ${columnCount} columns · ${relations} relationships</span>`;
+    toolbar.innerHTML = `${searchControl('Filter tables or columns')}<div class="segmented" role="group" aria-label="Schema view"><button data-db-view="diagram" aria-pressed="${state.dbView === 'diagram'}">Diagram</button><button data-db-view="grid" aria-pressed="${state.dbView === 'grid'}">Grid</button></div>${state.dbView === 'diagram' ? '<button id="auto-arrange" class="plain-button" type="button">Auto arrange</button><div class="diagram-zoom" role="group" aria-label="Diagram zoom"><button id="zoom-out" type="button" aria-label="Zoom out">−</button><button id="zoom-fit" type="button">Fit</button><button id="zoom-in" type="button" aria-label="Zoom in">+</button></div>' : ''}<span class="spacer"></span><span class="toolbar-meta">${tables.length} tables · ${columnCount} columns · ${relations} relationships</span>`;
     document.querySelectorAll('[data-db-view]').forEach((button) => { button.onclick = () => { state.dbView = button.dataset.dbView; state.filter = ''; state.selected = null; renderDatabase(true); }; });
     $('#auto-arrange')?.addEventListener('click', () => { state.schemaPositions = null; renderDatabase(false); });
+    $('#zoom-out')?.addEventListener('click', () => { state.erdZoom = Math.max(0.5, state.erdZoom / 1.25); renderDatabase(false); });
+    $('#zoom-in')?.addEventListener('click', () => { state.erdZoom = Math.min(2.5, state.erdZoom * 1.25); renderDatabase(false); });
+    $('#zoom-fit')?.addEventListener('click', () => { state.erdZoom = 1; renderDatabase(false); });
   }
   const filtered = tables.filter((table) => `${table.schema} ${table.name} ${table.columns?.map((column) => column.name).join(' ')}`.toLowerCase().includes(state.filter));
   if (state.dbView === 'diagram') {
@@ -296,6 +300,13 @@ function orthogonalPath(points) {
   return `M ${points.x1} ${points.y1} L ${points.x1} ${middleY} L ${points.x2} ${middleY} L ${points.x2} ${points.y2}`;
 }
 
+function zoomedDiagramPosition(position, viewWidth, viewHeight, zoom) {
+  return {
+    x: viewWidth / 2 + (position.x - viewWidth / 2) * zoom,
+    y: viewHeight / 2 + (position.y - viewHeight / 2) * zoom
+  };
+}
+
 function connectionPoints(from, to, fromWidth = 0, fromHeight = 0, toWidth = 0, toHeight = 0) {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -326,15 +337,16 @@ function renderDatabaseDiagram(filtered, allEdges, isolatedCount) {
   const positions = state.schemaPositions;
   positioned.forEach((node) => resolvedPosition(positions, node));
   const posOf = (node) => positions.get(node.id) || node;
+  const erdZoom = state.erdZoom || 1;
   const pct = (value, axis) => `${((value / (axis === 'x' ? VIEW_W : VIEW_H)) * 100).toFixed(2)}%`;
   if (!state.selected || !filtered.some((table) => table.name === state.selected)) state.selected = positioned[0]?.name || null;
   const selectedTable = filtered.find((table) => table.name === state.selected);
 
   content.innerHTML = `<div class="dependency-view">
     ${isolatedCount ? `<p class="toolbar-meta">${isolatedCount} table${isolatedCount === 1 ? '' : 's'} with no foreign keys — switch to Grid to browse them.</p>` : ''}
-    <div class="dependency-graph" role="group" aria-label="Database relationship diagram" style="min-height:${VIEW_H}px">
-      <svg viewBox="0 0 ${VIEW_W} ${VIEW_H}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
-        <defs><marker id="arrow-outbound" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs>
+    <div class="dependency-graph er-diagram" role="group" aria-label="Database relationship diagram" style="min-height:${VIEW_H}px">
+      <svg viewBox="${VIEW_W / 2 - VIEW_W / (2 * erdZoom)} ${VIEW_H / 2 - VIEW_H / (2 * erdZoom)} ${VIEW_W / erdZoom} ${VIEW_H / erdZoom}" aria-hidden="true" preserveAspectRatio="xMidYMid meet">
+        <defs><marker id="schema-arrow-outbound" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z"></path></marker></defs>
         ${edges.map((edge, index) => {
           const from = posOf({ id: edge.from });
           const to = posOf({ id: edge.to });
@@ -342,19 +354,19 @@ function renderDatabaseDiagram(filtered, allEdges, isolatedCount) {
           const toNode = positioned.find((node) => node.name === edge.to);
           const points = connectionPoints(from, to, fromNode?.width, fromNode?.height, toNode?.width, toNode?.height);
           const edgeId = `schema-edge-${index}`;
-          return `<path id="${edgeId}" class="outbound" data-edge-id="${edgeId}" data-from="${escapeHtml(edge.from)}" data-to="${escapeHtml(edge.to)}" data-from-width="${fromNode?.width || 0}" data-from-height="${fromNode?.height || 0}" data-to-width="${toNode?.width || 0}" data-to-height="${toNode?.height || 0}" d="${orthogonalPath(points)}" marker-end="url(#arrow-outbound)"></path>
+          return `<path id="${edgeId}" class="outbound" data-edge-id="${edgeId}" data-from="${escapeHtml(edge.from)}" data-to="${escapeHtml(edge.to)}" data-from-width="${fromNode?.width || 0}" data-from-height="${fromNode?.height || 0}" data-to-width="${toNode?.width || 0}" data-to-height="${toNode?.height || 0}" d="${orthogonalPath(points)}" marker-end="url(#schema-arrow-outbound)"></path>
             `;
         }).join('')}
       </svg>
       ${positioned.map((node) => {
-        const pos = posOf(node);
+        const pos = zoomedDiagramPosition(posOf(node), VIEW_W, VIEW_H, erdZoom);
         const foreignKeys = new Set((node.relationships || []).flatMap((relationship) => relationship.fromColumns || []));
-        return `<button class="er-node" type="button" data-node="${escapeHtml(node.name)}" aria-pressed="${node.name === state.selected}" style="left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')};width:${node.width}px;height:${node.height}px"><span class="er-table"><span>${escapeHtml(node.schema)}</span>${escapeHtml(node.name)}</span><span class="er-columns">${(node.columns || []).map((column) => `<span class="er-column"><b>${column.primaryKey ? 'PK' : foreignKeys.has(column.name) ? 'FK' : ''}</b><code>${escapeHtml(column.name)}</code><em>${escapeHtml(column.type || '')}</em></span>`).join('') || '<span class="er-column muted">No columns recorded</span>'}</span></button>`;
+        return `<button class="er-node" type="button" data-node="${escapeHtml(node.name)}" aria-pressed="${node.name === state.selected}" style="--erd-zoom:${erdZoom};left:${pct(pos.x, 'x')};top:${pct(pos.y, 'y')};width:${node.width}px;height:${node.height}px"><span class="er-table"><span>${escapeHtml(node.schema)}</span>${escapeHtml(node.name)}</span><span class="er-columns">${(node.columns || []).map((column) => `<span class="er-column"><b>${column.primaryKey ? 'PK' : foreignKeys.has(column.name) ? 'FK' : ''}</b><code>${escapeHtml(column.name)}</code><em>${escapeHtml(column.type || '')}</em></span>`).join('') || '<span class="er-column muted">No columns recorded</span>'}</span></button>`;
       }).join('')}
     </div>
     ${selectedTable ? tableDetailInline(selectedTable) : ''}
   </div>`;
-  makeDraggableGraph($('.dependency-graph'), positions, VIEW_W, VIEW_H);
+  makeDraggableGraph($('.dependency-graph'), positions, VIEW_W, VIEW_H, erdZoom);
   document.querySelectorAll('[data-node]').forEach((button) => button.addEventListener('click', () => { state.selected = button.dataset.node; renderDatabase(false); }));
 }
 
@@ -486,11 +498,10 @@ function edgeLabel(edge) {
 function buildLandscape(sources, dependencySets) {
   const systemTokenMap = new Map(sources.map((s) => [s.id, new Set(tokenize(s.name))]));
   const edgeMap = new Map();
-  const dependencyLinks = [];
 
-  function addEdge(from, to, dependency) {
+  function addEdge(from, to, dependency, reference) {
     const key = `${from}|${to}`;
-    if (!edgeMap.has(key)) edgeMap.set(key, { from, to, count: 0, operations: 0, technologies: new Set(), names: new Set(), kinds: new Set() });
+    if (!edgeMap.has(key)) edgeMap.set(key, { from, to, count: 0, operations: 0, technologies: new Set(), names: new Set(), kinds: new Set(), references: [] });
     const edge = edgeMap.get(key);
     edge.count += 1;
     edge.operations += dependency.operations?.length || 0;
@@ -498,23 +509,23 @@ function buildLandscape(sources, dependencySets) {
     [kindLabel, dependency.technology].filter(Boolean).forEach((value) => edge.technologies.add(value));
     edge.names.add(dependency.name);
     if (dependency.kind) edge.kinds.add(dependency.kind);
+    if (reference) edge.references.push(reference);
   }
 
   const externalEntries = [];
   for (const { source, dependencies } of dependencySets) {
     const ownTokens = systemTokenMap.get(source.id);
     for (const [dependencyIndex, dependency] of dependencies.entries()) {
-      dependencyLinks.push({ sourceId: source.id, sourceName: source.name, dependencyIndex, dependency });
       const depTokens = new Set(tokenize(dependency.name));
       if (canRelate(depTokens, ownTokens)) continue;
       const matchedSystem = sources.find((candidate) => candidate.id !== source.id && canRelate(depTokens, systemTokenMap.get(candidate.id)));
       if (matchedSystem) {
         const [from, to] = dependency.direction === 'inbound' ? [`sys:${matchedSystem.id}`, `sys:${source.id}`] : [`sys:${source.id}`, `sys:${matchedSystem.id}`];
-        addEdge(from, to, dependency);
+        addEdge(from, to, dependency, { sourceId: source.id, dependencyIndex });
         continue;
       }
       if (depTokens.size === 0) continue;
-      externalEntries.push({ source, dependency, tokens: depTokens });
+      externalEntries.push({ source, dependency, dependencyIndex, tokens: depTokens });
     }
   }
 
@@ -540,14 +551,14 @@ function buildLandscape(sources, dependencySets) {
     const name = members.reduce((best, member) => (member.dependency.name.length > best.length ? member.dependency.name : best), members[0].dependency.name);
     members.forEach((member) => {
       const [from, to] = member.dependency.direction === 'inbound' ? [id, `sys:${member.source.id}`] : [`sys:${member.source.id}`, id];
-      addEdge(from, to, member.dependency);
+      addEdge(from, to, member.dependency, { sourceId: member.source.id, dependencyIndex: member.dependencyIndex });
     });
     externals.push({ id, name, members });
   }
 
   const systems = sources.map((s) => ({ id: `sys:${s.id}`, sourceId: s.id, name: s.name, repository: s.repository }));
   const edges = [...edgeMap.values()].map((edge) => ({ ...edge, technologies: [...edge.technologies], names: [...edge.names], kinds: [...edge.kinds] }));
-  return { systems, externals, edges, dependencyLinks };
+  return { systems, externals, edges };
 }
 
 function ringLayout(group, center, radiusX, radiusY, angleOffset = 0) {
@@ -589,7 +600,7 @@ function redrawEdgeLine(graphEl, line, positions) {
   }
 }
 
-function makeDraggableGraph(graphEl, positions, viewW, viewH) {
+function makeDraggableGraph(graphEl, positions, viewW, viewH, zoom = 1) {
   if (!graphEl || window.matchMedia('(max-width: 760px)').matches) return;
   let drag = null;
   graphEl.querySelectorAll('[data-node]').forEach((el) => {
@@ -598,7 +609,7 @@ function makeDraggableGraph(graphEl, positions, viewW, viewH) {
       const pos = positions.get(el.dataset.node);
       if (!pos) return;
       const rect = graphEl.getBoundingClientRect();
-      const scale = Math.min(rect.width / viewW, rect.height / viewH) || 1;
+      const scale = (Math.min(rect.width / viewW, rect.height / viewH) || 1) * zoom;
       drag = { id: el.dataset.node, el, startX: event.clientX, startY: event.clientY, originX: pos.x, originY: pos.y, scale, moved: false };
       el.setPointerCapture(event.pointerId);
     });
@@ -609,8 +620,9 @@ function makeDraggableGraph(graphEl, positions, viewW, viewH) {
       if (Math.abs(dx) > 3 || Math.abs(dy) > 3) drag.moved = true;
       const next = { x: drag.originX + dx, y: drag.originY + dy };
       positions.set(drag.id, next);
-      el.style.left = `${(next.x / viewW * 100).toFixed(2)}%`;
-      el.style.top = `${(next.y / viewH * 100).toFixed(2)}%`;
+      const displayPosition = zoomedDiagramPosition(next, viewW, viewH, zoom);
+      el.style.left = `${(displayPosition.x / viewW * 100).toFixed(2)}%`;
+      el.style.top = `${(displayPosition.y / viewH * 100).toFixed(2)}%`;
       graphEl.querySelectorAll(`[data-edge-id][data-from="${drag.id}"], [data-edge-id][data-to="${drag.id}"]`).forEach((line) => redrawEdgeLine(graphEl, line, positions));
     });
     el.addEventListener('pointerup', (event) => {
@@ -781,17 +793,6 @@ function landscapeChecklistGroup(title, nodes, formatLabel) {
   </div>`;
 }
 
-function landscapeDependencyList(dependencies) {
-  const rows = dependencies
-    .sort((a, b) => `${a.sourceName}:${a.dependency.name}`.localeCompare(`${b.sourceName}:${b.dependency.name}`))
-    .map(({ sourceId, sourceName, dependencyIndex, dependency }) => `<li><button class="landscape-dependency-link" type="button" data-dependency-jump="${escapeHtml(sourceId)}" data-dependency-index="${dependencyIndex}"><span>${escapeHtml(splitPascalCase(dependency.name))}</span><small>${escapeHtml(titleCase(sourceName))} · ${escapeHtml(dependency.technology || dependency.kind || 'service')}</small></button></li>`)
-    .join('');
-  return `<section class="landscape-dependencies" aria-label="Dependencies">
-    <h4>Dependencies <span class="count">${dependencies.length}</span></h4>
-    <ul>${rows || '<li class="muted">None recorded.</li>'}</ul>
-  </section>`;
-}
-
 function renderLandscape() {
   const graph = state.landscape;
   const allNodes = [...graph.systems, ...graph.externals];
@@ -809,16 +810,13 @@ function renderLandscape() {
   if (!state.selected || !visibleNodes.some((node) => node.id === state.selected)) state.selected = visibleNodes[0]?.id || null;
   const selected = allNodes.find((node) => node.id === state.selected);
 
-  const checklistHtml = `<aside class="landscape-sidebar" aria-label="Landscape controls">
-    <div class="landscape-checklist" aria-label="Services to show">
+  const checklistHtml = `<aside class="landscape-checklist" aria-label="Services to show">
     <div class="checklist-controls">
       <button id="landscape-select-all" type="button" class="plain-button">Select all</button>
       <button id="landscape-deselect-all" type="button" class="plain-button">Deselect all</button>
     </div>
     ${landscapeChecklistGroup('Systems', graph.systems, titleCase)}
     ${landscapeChecklistGroup('External systems', graph.externals, splitPascalCase)}
-    </div>
-    ${landscapeDependencyList(graph.dependencyLinks || [])}
   </aside>`;
 
   if (!visibleNodes.length) {
@@ -871,7 +869,8 @@ function renderLandscape() {
           const label = edgeLabel(edge);
           const halfWidth = label.length * 3.3;
           const edgeId = `land-edge-${index}`;
-          return `<line id="${edgeId}" class="outbound" data-edge-id="${edgeId}" data-from="${escapeHtml(edge.from)}" data-to="${escapeHtml(edge.to)}" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" marker-end="url(#arrow-outbound)"></line>
+          const reference = edge.references[0];
+          return `<line id="${edgeId}" class="outbound landscape-edge-link" data-edge-id="${edgeId}" data-from="${escapeHtml(edge.from)}" data-to="${escapeHtml(edge.to)}" data-dependency-jump="${escapeHtml(reference?.sourceId || '')}" data-dependency-index="${reference?.dependencyIndex ?? ''}" role="link" tabindex="0" aria-label="Open ${escapeHtml(label)} dependency details" x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" marker-end="url(#arrow-outbound)"></line>
             <rect id="${edgeId}-bg" class="rel-label-bg" data-half-width="${halfWidth}" x="${midX - halfWidth}" y="${midY - 9}" width="${halfWidth * 2}" height="15" rx="4"></rect>
             <text id="${edgeId}-text" class="rel-label" x="${midX}" y="${midY + 2}" text-anchor="middle">${escapeHtml(label)}</text>`;
         }).join('')}
@@ -885,7 +884,13 @@ function renderLandscape() {
   makeDraggableGraph($('.dependency-graph'), positions, VIEW_W, VIEW_H);
   document.querySelectorAll('[data-node]').forEach((button) => { button.addEventListener('click', () => { state.selected = button.dataset.node; renderLandscape(); }); });
   document.querySelectorAll('[data-jump]').forEach((button) => { button.onclick = () => jumpToSource(button.dataset.jump); });
-  document.querySelectorAll('[data-dependency-jump]').forEach((button) => { button.onclick = () => jumpToSource(button.dataset.dependencyJump, Number(button.dataset.dependencyIndex)); });
+  document.querySelectorAll('.landscape-edge-link').forEach((edge) => {
+    const openDependency = () => jumpToSource(edge.dataset.dependencyJump, Number(edge.dataset.dependencyIndex));
+    edge.addEventListener('click', openDependency);
+    edge.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openDependency(); }
+    });
+  });
   wireLandscapeChecklist(allNodes);
 }
 
