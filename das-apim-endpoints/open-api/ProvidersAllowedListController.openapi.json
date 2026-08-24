@@ -2,51 +2,57 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Providers Allowed List API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing the providers allowed list."
   },
   "paths": {
     "/providers/allowedlist": {
       "get": {
-        "operationId": "getAllowedList",
-        "summary": "Get Allowed List",
-        "description": "Retrieve the list of allowed providers.",
+        "operationId": "GetAllowedList",
+        "summary": "Retrieve the list of allowed providers.",
         "parameters": [
           {
             "name": "sortColumn",
             "in": "query",
+            "description": "Column to sort the results on.",
             "required": false,
             "schema": {
               "type": "string"
-            },
-            "description": "The column to sort results by."
+            }
           },
           {
             "name": "sortOrder",
             "in": "query",
+            "description": "Order of sorting (ascending or descending).",
             "required": false,
             "schema": {
               "type": "string"
-            },
-            "description": "The order to sort results (e.g., 'Ascending' or 'Descending')."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with allowed providers list.",
+            "description": "Allowed providers list retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetProvidersAllowedListQueryResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetProvidersAllowedListQueryResponse"
+                  }
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid request parameters.",
+            "description": "Bad request due to invalid parameters.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
                 }
               }
             }
@@ -60,7 +66,7 @@
       "GetProvidersAllowedListQueryResponse": {
         "type": "object",
         "properties": {
-          "providers": {
+          "Providers": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AllowedProvider"
@@ -71,38 +77,25 @@
       "AllowedProvider": {
         "type": "object",
         "properties": {
-          "ukprn": {
+          "Ukprn": {
             "type": "integer",
-            "description": "The UK Provider Reference Number."
+            "description": "Unique identifier for the provider."
           },
-          "startDateTime": {
+          "StartDateTime": {
             "type": "string",
             "format": "date-time",
-            "description": "The start date and time for the provider."
+            "description": "Start date and time for the provider."
           },
-          "endDateTime": {
+          "EndDateTime": {
             "type": "string",
             "format": "date-time",
-            "description": "The end date and time for the provider."
+            "description": "End date and time for the provider."
           },
-          "addedDateTime": {
+          "AddedDateTime": {
             "type": "string",
             "format": "date-time",
-            "description": "The date and time when the provider was added.",
+            "description": "Date and time when the provider was added to the list.",
             "nullable": true
-          }
-        }
-      },
-      "ErrorResponse": {
-        "type": "object",
-        "properties": {
-          "errorCode": {
-            "type": "string",
-            "description": "A code that indicates the type of error."
-          },
-          "errorMessage": {
-            "type": "string",
-            "description": "A descriptive error message."
           }
         }
       }
