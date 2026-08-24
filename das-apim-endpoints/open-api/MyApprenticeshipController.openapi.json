@@ -1,74 +1,38 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "My Apprenticeship API",
-    "version": "1.0.0",
-    "description": "API for managing apprentice data related to their apprenticeship journey."
+    "title": "ApprenticePortal API - MyApprenticeshipController",
+    "version": "1.0.0"
   },
   "paths": {
-    "/MyApprenticeship/{apprenticeId}": {
-      "get": {
-        "summary": "Get My Apprenticeship",
-        "description": "Retrieves apprenticeship data for a given apprentice ID.",
-        "operationId": "getMyApprenticeship",
+    "/apprentices/{id}/my-apprenticeship": {
+      "post": {
+        "operationId": "PostMyApprenticeship",
         "parameters": [
           {
-            "name": "apprenticeId",
+            "name": "id",
             "in": "path",
             "required": true,
-            "description": "Unique identifier for the apprentice.",
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The unique identifier of the apprentice."
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved apprenticeship data.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetMyApprenticeshipQueryResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Apprenticeship data not found."
-          }
-        }
-      }
-    },
-    "/MyApprenticeship": {
-      "post": {
-        "summary": "Try Create My Apprenticeship",
-        "description": "Attempts to create apprenticeship data for an apprentice using provided details.",
-        "operationId": "tryCreateMyApprenticeship",
         "requestBody": {
-          "description": "Details for creating an apprenticeship.",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TryCreateMyApprenticeshipRequestModel"
+                "$ref": "#/components/schemas/MyApprenticeshipConfirmedRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Successfully retrieved or created apprenticeship data.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetMyApprenticeshipQueryResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Failed to find or create apprenticeship data."
+            "description": "Request was successful."
           }
         }
       }
@@ -76,108 +40,23 @@
   },
   "components": {
     "schemas": {
-      "GetMyApprenticeshipQueryResult": {
+      "MyApprenticeshipConfirmedRequest": {
         "type": "object",
         "properties": {
-          "uln": {
+          "CommitmentsApprenticeshipId": {
             "type": "integer",
-            "nullable": true,
-            "description": "Unique Learner Number."
+            "format": "int64",
+            "description": "The identifier for the apprenticeship in the commitments system."
           },
-          "apprenticeshipId": {
-            "type": "integer",
-            "nullable": true,
-            "description": "Identifier for the apprenticeship."
-          },
-          "employerName": {
-            "type": "string",
-            "nullable": true,
-            "description": "Name of the employer."
-          },
-          "startDate": {
+          "ApprovedOn": {
             "type": "string",
             "format": "date-time",
-            "nullable": true,
-            "description": "Start date of the apprenticeship."
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true,
-            "description": "End date of the apprenticeship."
-          },
-          "trainingProviderId": {
-            "type": "integer",
-            "nullable": true,
-            "description": "Identifier for the training provider."
-          },
-          "trainingProviderName": {
-            "type": "string",
-            "nullable": true,
-            "description": "Name of the training provider."
-          },
-          "trainingCourse": {
-            "$ref": "#/components/schemas/TrainingCourse"
-          }
-        }
-      },
-      "TrainingCourse": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "nullable": true,
-            "description": "Name of the training course."
-          },
-          "level": {
-            "type": "integer",
-            "description": "Level of the training course."
-          },
-          "duration": {
-            "type": "integer",
-            "nullable": true,
-            "description": "Duration of the training course in months."
-          },
-          "sector": {
-            "type": "string",
-            "nullable": true,
-            "description": "Sector of the training course."
-          }
-        }
-      },
-      "TryCreateMyApprenticeshipRequestModel": {
-        "type": "object",
-        "properties": {
-          "apprenticeId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Unique identifier for the apprentice."
-          },
-          "firstName": {
-            "type": "string",
-            "description": "First name of the apprentice."
-          },
-          "lastName": {
-            "type": "string",
-            "description": "Last name of the apprentice."
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "description": "Email address of the apprentice."
-          },
-          "dateOfBirth": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Date of birth of the apprentice."
+            "description": "The date when the apprenticeship was approved."
           }
         },
         "required": [
-          "apprenticeId",
-          "firstName",
-          "lastName",
-          "email",
-          "dateOfBirth"
+          "CommitmentsApprenticeshipId",
+          "ApprovedOn"
         ]
       }
     }

@@ -1,201 +1,110 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Request Apprentice Training API",
+    "title": "SFA.DAS.Approvals.Api",
     "version": "1.0.0"
   },
   "paths": {
-    "/accounts/{accountId}/standard/{standardReference}/employer-request/existing": {
+    "/Accounts/{hashedAccountId}": {
       "get": {
-        "summary": "Check for existing employer request",
+        "operationId": "GetAccount",
         "parameters": [
           {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "standardReference",
+            "name": "hashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The hashed ID of the account."
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns whether an employer request exists",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "boolean"
+                  "type": "object",
+                  "additionalProperties": true
                 }
               }
             }
           },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/accounts/{accountId}/employer-requests": {
-      "post": {
-        "summary": "Submit employer request",
-        "parameters": [
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SubmitEmployerRequestRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Returns the employer request ID",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+          "404": {
+            "description": "Not Found"
           },
           "400": {
-            "description": "Bad request due to invalid location or other errors"
-          },
-          "500": {
-            "description": "Internal Server Error"
+            "description": "Bad Request"
           }
-        }
+        },
+        "tags": [
+          "Accounts"
+        ]
       }
     },
-    "/accounts/{accountId}/dashboard": {
+    "/Accounts/{hashedAccountId}/users": {
       "get": {
-        "summary": "Get employer dashboard details",
+        "operationId": "GetAccountUsers",
         "parameters": [
           {
-            "name": "accountId",
+            "name": "hashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+              "type": "string"
+            },
+            "description": "The hashed ID of the account."
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns dashboard details",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Dashboard"
+                  "type": "object",
+                  "additionalProperties": true
                 }
               }
             }
           },
-          "500": {
-            "description": "Internal Server Error"
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request"
           }
-        }
+        },
+        "tags": [
+          "Accounts"
+        ]
       }
     }
   },
   "components": {
     "schemas": {
-      "SubmitEmployerRequestRequest": {
+      "GetAccountQuery": {
         "type": "object",
         "properties": {
-          "OriginalLocation": {
-            "type": "string"
-          },
-          "RequestType": {
-            "type": "string",
-            "enum": [
-              "Shortlist",
-              "CourseDetail",
-              "Providers"
-            ]
-          },
-          "StandardReference": {
-            "type": "string"
-          },
-          "NumberOfApprentices": {
-            "type": "integer"
-          },
-          "SameLocation": {
-            "type": "string"
-          },
-          "SingleLocation": {
-            "type": "string"
-          },
-          "MultipleLocations": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "AtApprenticesWorkplace": {
-            "type": "boolean"
-          },
-          "DayRelease": {
-            "type": "boolean"
-          },
-          "BlockRelease": {
-            "type": "boolean"
-          },
-          "RequestedBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "ModifiedBy": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "DashboardUrl": {
+          "HashedAccountId": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "HashedAccountId"
+        ]
       },
-      "Dashboard": {
+      "GetAccountUsersQuery": {
         "type": "object",
         "properties": {
-          "AggregatedEmployerRequests": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AggregatedEmployerRequest"
-            }
-          },
-          "ExpiryAfterMonths": {
-            "type": "integer"
-          },
-          "RemovedAfterExpiryMonths": {
-            "type": "integer"
+          "HashedAccountId": {
+            "type": "string"
           }
-        }
-      },
-      "AggregatedEmployerRequest": {
-        "type": "object",
-        "properties": {}
+        },
+        "required": [
+          "HashedAccountId"
+        ]
       }
     }
   }

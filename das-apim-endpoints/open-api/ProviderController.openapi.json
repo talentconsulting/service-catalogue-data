@@ -1,25 +1,21 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Provider API",
-    "version": "1.0.0",
-    "description": "API for managing providers and their active standards."
+    "title": "Apprentice App API",
+    "version": "1.0.0"
   },
   "paths": {
     "/providers/registeredProviders": {
       "get": {
         "operationId": "GetRegisteredProviders",
-        "summary": "Retrieve a list of registered providers",
-        "tags": [
-          "Providers"
-        ],
+        "summary": "Retrieves registered providers",
         "responses": {
           "200": {
-            "description": "Successful response with a list of registered providers",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UkrlpProvidersResponse"
+                  "$ref": "#/components/schemas/GetRegisteredProvidersResponse"
                 }
               }
             }
@@ -30,20 +26,14 @@
     "/providers/activeStandards": {
       "get": {
         "operationId": "GetActiveStandards",
-        "summary": "Retrieve a list of active standards",
-        "tags": [
-          "Providers"
-        ],
+        "summary": "Retrieves active standards",
         "responses": {
           "200": {
-            "description": "Successful response with a list of active standards",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Standard"
-                  }
+                  "$ref": "#/components/schemas/GetActiveStandardsResponse"
                 }
               }
             }
@@ -54,139 +44,119 @@
   },
   "components": {
     "schemas": {
-      "UkrlpProvidersResponse": {
+      "GetRegisteredProvidersResponse": {
         "type": "object",
         "properties": {
           "providers": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/UkrlpProviderModel"
+              "type": "object",
+              "properties": {
+                "Ukprn": {
+                  "type": "integer"
+                },
+                "LegalName": {
+                  "type": "string"
+                },
+                "TradingName": {
+                  "type": "string"
+                },
+                "ContactDetails": {
+                  "type": "object",
+                  "properties": {
+                    "Title": {
+                      "type": "string"
+                    },
+                    "FirstName": {
+                      "type": "string"
+                    },
+                    "LastName": {
+                      "type": "string"
+                    },
+                    "Email": {
+                      "type": "string"
+                    },
+                    "Telephone": {
+                      "type": "string"
+                    },
+                    "Website": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "LegalAddress": {
+                  "type": "object",
+                  "properties": {
+                    "Address1": {
+                      "type": "string"
+                    },
+                    "Address2": {
+                      "type": "string"
+                    },
+                    "Address3": {
+                      "type": "string"
+                    },
+                    "Address4": {
+                      "type": "string"
+                    },
+                    "Town": {
+                      "type": "string"
+                    },
+                    "County": {
+                      "type": "string"
+                    },
+                    "Postcode": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "VerificationDetails": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "VerificationAuthority": {
+                        "type": "string"
+                      },
+                      "VerificationId": {
+                        "type": "string"
+                      },
+                      "PrimaryVerificationSource": {
+                        "type": "boolean"
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }
       },
-      "UkrlpProviderModel": {
+      "GetActiveStandardsResponse": {
         "type": "object",
         "properties": {
-          "ukprn": {
-            "type": "integer",
-            "example": 12345678
-          },
-          "legalName": {
-            "type": "string",
-            "example": "Legal Name"
-          },
-          "tradingName": {
-            "type": "string",
-            "example": "Trading Name"
-          },
-          "contactDetails": {
-            "$ref": "#/components/schemas/ProviderContactModel"
-          },
-          "legalAddress": {
-            "$ref": "#/components/schemas/Address"
-          },
-          "verificationDetails": {
+          "courses": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/VerificationInfo"
+              "type": "object",
+              "properties": {
+                "StandardId": {
+                  "type": "string"
+                },
+                "Title": {
+                  "type": "string"
+                },
+                "Level": {
+                  "type": "integer"
+                },
+                "DurationMonths": {
+                  "type": "integer"
+                },
+                "MaxFunding": {
+                  "type": "integer"
+                }
+              }
             }
-          }
-        }
-      },
-      "ProviderContactModel": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "example": "Dr."
-          },
-          "firstName": {
-            "type": "string",
-            "example": "John"
-          },
-          "lastName": {
-            "type": "string",
-            "example": "Doe"
-          },
-          "email": {
-            "type": "string",
-            "example": "johndoe@example.com"
-          },
-          "telephone": {
-            "type": "string",
-            "example": "01234 567890"
-          },
-          "website": {
-            "type": "string",
-            "example": "http://example.com"
-          }
-        }
-      },
-      "Address": {
-        "type": "object",
-        "properties": {
-          "address1": {
-            "type": "string",
-            "example": "123 Street Lane"
-          },
-          "address2": {
-            "type": "string",
-            "example": "Suite 456"
-          },
-          "address3": {
-            "type": "string",
-            "example": "Building 7"
-          },
-          "address4": {
-            "type": "string",
-            "example": "Business Park"
-          },
-          "town": {
-            "type": "string",
-            "example": "Townsville"
-          },
-          "county": {
-            "type": "string",
-            "example": "Countyshire"
-          },
-          "postcode": {
-            "type": "string",
-            "example": "AB12 3CD"
-          }
-        }
-      },
-      "VerificationInfo": {
-        "type": "object",
-        "properties": {
-          "verificationAuthority": {
-            "type": "string",
-            "example": "Authority Name"
-          },
-          "verificationId": {
-            "type": "string",
-            "example": "12345678"
-          },
-          "primaryVerificationSource": {
-            "type": "boolean",
-            "example": true
-          }
-        }
-      },
-      "Standard": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string",
-            "example": "Software Development"
-          },
-          "code": {
-            "type": "string",
-            "example": "ST0123"
-          },
-          "level": {
-            "type": "string",
-            "example": "Level 3"
           }
         }
       }

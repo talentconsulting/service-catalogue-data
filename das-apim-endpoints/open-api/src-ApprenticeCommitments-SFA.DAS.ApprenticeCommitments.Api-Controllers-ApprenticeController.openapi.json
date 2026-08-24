@@ -2,29 +2,31 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Apprentice Commitments API",
-    "version": "1.0.0",
-    "description": "API managing apprentice commitments."
+    "version": "1.0.0"
   },
   "paths": {
     "/apprentices/{id}": {
       "get": {
-        "summary": "Get Apprentice",
-        "operationId": "GetApprentice",
+        "summary": "Retrieve apprentice details",
+        "operationId": "getApprentice",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "The unique identifier of the apprentice",
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The ID of the apprentice"
           }
         ],
         "responses": {
           "200": {
-            "description": "Apprentice data retrieved successfully"
+            "description": "Apprentice details retrieved successfully"
+          },
+          "400": {
+            "description": "Invalid request"
           },
           "404": {
             "description": "Apprentice not found"
@@ -32,18 +34,18 @@
         }
       },
       "patch": {
-        "summary": "Update Apprentice",
-        "operationId": "UpdateApprentice",
+        "summary": "Update apprentice details",
+        "operationId": "updateApprentice",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
-            "description": "The unique identifier for the apprentice",
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The ID of the apprentice"
           }
         ],
         "requestBody": {
@@ -51,17 +53,18 @@
           "content": {
             "application/json-patch+json": {
               "schema": {
-                "$ref": "#/components/schemas/JsonPatchDocument-Apprentice"
-              }
+                "$ref": "#/components/schemas/JsonPatchDocument"
+              },
+              "description": "The JSON Patch document containing updates for the apprentice"
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Apprentice was successfully updated"
+            "description": "Apprentice details updated successfully"
           },
           "400": {
-            "description": "Invalid patch operations"
+            "description": "Invalid patch request"
           },
           "404": {
             "description": "Apprentice not found"
@@ -77,39 +80,46 @@
         "properties": {
           "ApprenticeId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The ID of the apprentice"
           },
           "FirstName": {
-            "type": "string"
+            "type": "string",
+            "description": "The first name of the apprentice"
           },
           "LastName": {
-            "type": "string"
+            "type": "string",
+            "description": "The last name of the apprentice"
           },
           "Email": {
             "type": "string",
-            "format": "email"
+            "format": "email",
+            "description": "The email address of the apprentice"
           },
           "DateOfBirth": {
             "type": "string",
-            "format": "date-time"
+            "format": "date",
+            "description": "The date of birth of the apprentice"
           },
           "TermsOfUseAccepted": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Indicates whether the apprentice has accepted the terms of use"
           },
           "GovUkIdentifier": {
-            "type": "string"
+            "type": "string",
+            "description": "The Gov UK identifier for the apprentice"
           }
         }
       },
-      "JsonPatchDocument-Apprentice": {
+      "JsonPatchDocument": {
         "type": "object",
-        "description": "JSON Patch operations for updating an apprentice.",
         "properties": {
           "operations": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/JsonPatchOperation"
-            }
+            },
+            "description": "List of operations for the patch request"
           }
         }
       },
@@ -125,16 +135,20 @@
               "move",
               "copy",
               "test"
-            ]
+            ],
+            "description": "The operation to perform"
           },
           "path": {
-            "type": "string"
+            "type": "string",
+            "description": "A JSON-Pointer path describing the target location"
           },
           "value": {
-            "type": "string"
+            "type": "object",
+            "description": "The value to use for 'add' or 'replace' operations"
           },
           "from": {
-            "type": "string"
+            "type": "string",
+            "description": "A JSON-Pointer path describing the source location for 'move' or 'copy' operations"
           }
         },
         "required": [

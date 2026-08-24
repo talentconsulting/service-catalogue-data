@@ -1,35 +1,36 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Apprenticeships API",
-    "description": "API for managing apprenticeships",
-    "version": "1.0.0"
+    "title": "Apprentice Commitments API",
+    "version": "1.0.0",
+    "description": "API for managing apprentice commitments and their apprenticeships."
   },
   "paths": {
     "/apprenticeships": {
       "post": {
-        "operationId": "createApprenticeship",
-        "summary": "Create a new apprenticeship",
+        "summary": "Create an apprenticeship",
+        "operationId": "CreateApprenticeship",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateApprenticeshipCommand"
+                "$ref": "#/components/schemas/CreateApprenticeshipRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Apprenticeship created successfully"
+            "description": "Apprenticeship successfully created."
           },
           "default": {
-            "description": "Error occurred",
+            "description": "Unexpected error",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseException"
+                "example": {
+                  "status": 500,
+                  "error": "An error occurred."
                 }
               }
             }
@@ -39,8 +40,8 @@
     },
     "/apprenticeships/{id}": {
       "get": {
-        "operationId": "getApprenticeship",
-        "summary": "Get apprenticeship by ID",
+        "summary": "Retrieve an apprenticeship by its ID",
+        "operationId": "GetApprenticeship",
         "parameters": [
           {
             "name": "id",
@@ -54,18 +55,22 @@
         ],
         "responses": {
           "200": {
-            "description": "Apprenticeship details retrieved successfully"
-          },
-          "default": {
-            "description": "Error occurred"
+            "description": "Apprenticeship retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprenticeshipResponse"
+                }
+              }
+            }
           }
         }
       }
     },
     "/apprentices/{id}/apprenticeships": {
       "get": {
-        "operationId": "listApprenticeApprenticeships",
-        "summary": "List all apprenticeships for an apprentice",
+        "summary": "List apprenticeships for a specific apprentice",
+        "operationId": "ListApprenticeApprenticeships",
         "parameters": [
           {
             "name": "id",
@@ -79,18 +84,25 @@
         ],
         "responses": {
           "200": {
-            "description": "Apprenticeship list retrieved successfully"
-          },
-          "default": {
-            "description": "Error occurred"
+            "description": "Apprenticeships listed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprenticeshipResponse"
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
     "/apprentices/{apprenticeId}/apprenticeships/{apprenticeshipId}": {
       "get": {
-        "operationId": "getSpecificApprenticeship",
-        "summary": "Get specific apprenticeship information",
+        "summary": "Retrieve an apprenticeship by its apprentice and apprenticeship IDs",
+        "operationId": "GetApprenticeshipDetails",
         "parameters": [
           {
             "name": "apprenticeId",
@@ -106,23 +118,26 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Specific apprenticeship details retrieved successfully"
-          },
-          "default": {
-            "description": "Error occurred"
+            "description": "Apprenticeship retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprenticeshipResponse"
+                }
+              }
+            }
           }
         }
       },
       "patch": {
-        "operationId": "patchApprenticeship",
-        "summary": "Update apprenticeship",
+        "summary": "Update specific fields of an apprenticeship",
+        "operationId": "PatchApprenticeship",
         "parameters": [
           {
             "name": "apprenticeId",
@@ -138,8 +153,7 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "integer"
             }
           }
         ],
@@ -148,25 +162,23 @@
           "content": {
             "application/json-patch+json": {
               "schema": {
-                "$ref": "#/components/schemas/JsonPatchDocument"
+                "type": "object",
+                "additionalProperties": true
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Apprenticeship updated successfully"
-          },
-          "default": {
-            "description": "Error occurred"
+            "description": "Apprenticeship updated successfully."
           }
         }
       }
     },
     "/apprentices/{apprenticeId}/apprenticeships/{apprenticeshipId}/confirmed/latest": {
       "get": {
-        "operationId": "getLatestConfirmedApprenticeship",
-        "summary": "Get latest confirmed apprenticeship information",
+        "summary": "Retrieve the latest confirmed apprenticeship for a specific apprentice",
+        "operationId": "GetLatestConfirmedApprenticeship",
         "parameters": [
           {
             "name": "apprenticeId",
@@ -182,25 +194,28 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Latest confirmed apprenticeship details retrieved successfully"
-          },
-          "default": {
-            "description": "Error occurred"
+            "description": "Latest confirmed apprenticeship retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprenticeshipResponse"
+                }
+              }
+            }
           }
         }
       }
     },
     "/apprentices/{apprenticeId}/apprenticeships/{apprenticeshipId}/revisions": {
       "get": {
-        "operationId": "getApprenticeshipRevisions",
-        "summary": "Get apprenticeship revisions",
+        "summary": "Get all revisions of an apprenticeship",
+        "operationId": "GetApprenticeshipRevisions",
         "parameters": [
           {
             "name": "apprenticeId",
@@ -216,39 +231,44 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Apprenticeship revision details retrieved successfully"
-          },
-          "default": {
-            "description": "Error occurred"
+            "description": "Revisions retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprenticeshipResponse"
+                  }
+                }
+              }
+            }
           }
         }
       }
     },
     "/commitments-apprenticeships/{apprenticeshipId}": {
       "get": {
-        "operationId": "getCommitmentsApprenticeshipById",
-        "summary": "Get commitments apprenticeship details by ID",
+        "summary": "Retrieve commitment details of an apprenticeship",
+        "operationId": "GetCommitmentsApprenticeship",
         "parameters": [
           {
             "name": "apprenticeshipId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Commitments apprenticeship details retrieved successfully",
+            "description": "Commitment apprenticeship details retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -256,9 +276,6 @@
                 }
               }
             }
-          },
-          "default": {
-            "description": "Error occurred"
           }
         }
       }
@@ -266,7 +283,7 @@
   },
   "components": {
     "schemas": {
-      "CreateApprenticeshipCommand": {
+      "CreateApprenticeshipRequest": {
         "type": "object",
         "properties": {
           "RegistrationId": {
@@ -283,40 +300,17 @@
           "ApprenticeId"
         ]
       },
-      "JsonPatchDocument": {
-        "type": "object",
-        "additionalProperties": true
-      },
-      "ApiResponseException": {
-        "type": "object",
-        "properties": {
-          "Status": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "Error": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "Status",
-          "Error"
-        ]
-      },
-      "CommitmentsApprenticeshipResponse": {
+      "ApprenticeshipResponse": {
         "type": "object",
         "properties": {
           "Id": {
-            "type": "integer",
-            "format": "int64"
+            "type": "integer"
           },
           "EmployerAccountId": {
-            "type": "integer",
-            "format": "int64"
+            "type": "integer"
           },
           "AccountLegalEntityId": {
-            "type": "integer",
-            "format": "int64"
+            "type": "integer"
           },
           "EmployerName": {
             "type": "string"
@@ -331,119 +325,32 @@
             "type": "string",
             "format": "email"
           },
-          "Uln": {
-            "type": "string"
-          },
-          "DeliveryModel": {
-            "type": "integer",
-            "format": "int32",
-            "enum": [
-              0,
-              1,
-              2
-            ]
-          },
-          "StandardUId": {
-            "type": "string"
-          },
-          "CourseCode": {
-            "type": "string"
-          },
-          "CourseName": {
-            "type": "string"
-          },
-          "Option": {
-            "type": "string"
-          },
           "StartDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date"
           },
           "EndDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date"
           },
-          "EmploymentEndDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "DateOfBirth": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "StopDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "PauseDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "CompletionDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "HasHadDataLockSuccess": {
-            "type": "boolean"
-          },
-          "OriginalStartDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "ProviderId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "RecognisePriorLearning": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "TrainingTotalHours": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "DurationReducedByHours": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "DurationReducedBy": {
-            "type": "integer",
-            "nullable": true
-          },
-          "PriceReducedBy": {
-            "type": "integer",
-            "nullable": true
-          },
-          "ApprenticeshipType": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
+          "DeliveryModel": {
+            "type": "integer"
           }
-        },
-        "required": [
-          "Id",
-          "EmployerAccountId",
-          "AccountLegalEntityId",
-          "EmployerName",
-          "FirstName",
-          "LastName",
-          "Email",
-          "Uln",
-          "DeliveryModel",
-          "StandardUId",
-          "CourseCode",
-          "CourseName",
-          "StartDate",
-          "EndDate",
-          "DateOfBirth"
-        ]
+        }
+      },
+      "CommitmentsApprenticeshipResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer"
+          },
+          "Status": {
+            "type": "string"
+          },
+          "Cost": {
+            "type": "number"
+          }
+        }
       }
     }
   }
