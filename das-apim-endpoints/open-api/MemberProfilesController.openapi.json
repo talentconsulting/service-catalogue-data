@@ -1,51 +1,49 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Member Profiles API",
-    "description": "API for managing member profiles.",
+    "title": "ApprenticeAan API",
     "version": "1.0.0"
   },
   "paths": {
     "/members/{memberId}/profile": {
       "get": {
-        "summary": "Get Member Profile With Preferences",
-        "description": "Retrieve the member profile along with preferences and apprenticeship details based on user type.",
-        "operationId": "GetMemberProfileWithPreferences",
+        "summary": "Get Member Profile with Preferences",
+        "operationId": "getMemberProfileWithPreferences",
         "parameters": [
           {
             "name": "memberId",
             "in": "path",
             "required": true,
+            "description": "Unique identifier for a member",
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "Unique identifier for the member"
+            }
           },
           {
             "name": "X-RequestedByMemberId",
             "in": "header",
             "required": true,
+            "description": "Identifier of the member making the request",
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "The ID of the member requesting the data"
+            }
           },
           {
             "name": "public",
             "in": "query",
             "required": false,
+            "description": "Boolean flag indicating if the data is public",
             "schema": {
               "type": "boolean",
               "default": true
-            },
-            "description": "Flag indicating if the data should be publicly visible"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Member profile retrieved successfully",
+            "description": "Member profile with preferences retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -67,8 +65,7 @@
             "type": "string"
           },
           "Email": {
-            "type": "string",
-            "format": "email"
+            "type": "string"
           },
           "FirstName": {
             "type": "string"
@@ -92,11 +89,7 @@
             "format": "date-time"
           },
           "UserType": {
-            "type": "string",
-            "enum": [
-              "Apprentice",
-              "Employer"
-            ]
+            "$ref": "#/components/schemas/MemberUserType"
           },
           "IsRegionalChair": {
             "type": "boolean"
@@ -116,19 +109,7 @@
               "$ref": "#/components/schemas/MemberPreference"
             }
           }
-        },
-        "required": [
-          "FullName",
-          "Email",
-          "FirstName",
-          "LastName",
-          "RegionName",
-          "JoinedDate",
-          "UserType",
-          "IsRegionalChair",
-          "Profiles",
-          "Preferences"
-        ]
+        }
       },
       "Apprenticeship": {
         "type": "object",
@@ -153,21 +134,23 @@
           }
         }
       },
+      "MemberUserType": {
+        "type": "string",
+        "enum": [
+          "Apprentice",
+          "Employer"
+        ]
+      },
       "MemberProfile": {
         "type": "object",
         "properties": {
-          "Id": {
-            "type": "string",
-            "format": "uuid"
+          "ProfileId": {
+            "type": "integer"
           },
-          "Name": {
+          "Description": {
             "type": "string"
           }
-        },
-        "required": [
-          "Id",
-          "Name"
-        ]
+        }
       },
       "MemberPreference": {
         "type": "object",
@@ -178,11 +161,7 @@
           "Value": {
             "type": "boolean"
           }
-        },
-        "required": [
-          "PreferenceId",
-          "Value"
-        ]
+        }
       }
     }
   }

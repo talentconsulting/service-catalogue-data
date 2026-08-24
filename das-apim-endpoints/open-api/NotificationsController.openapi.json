@@ -1,14 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Notifications API",
+    "title": "Apprentice Aan - Notifications API",
     "version": "1.0.0"
   },
   "paths": {
     "/notifications/{id}": {
       "get": {
-        "summary": "Retrieve a specific notification",
-        "operationId": "getNotification",
+        "operationId": "GetNotification",
+        "summary": "Retrieve a notification by ID",
         "parameters": [
           {
             "name": "id",
@@ -18,7 +18,7 @@
               "type": "string",
               "format": "uuid"
             },
-            "description": "The unique identifier of the notification to retrieve."
+            "description": "The unique identifier of the notification."
           },
           {
             "name": "X-RequestedByMemberId",
@@ -41,14 +41,17 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Notification not found."
           }
         }
       }
     },
     "/notifications": {
       "post": {
+        "operationId": "CreateNotification",
         "summary": "Create a new notification",
-        "operationId": "createNotification",
         "parameters": [
           {
             "name": "X-RequestedByMemberId",
@@ -81,6 +84,9 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Referenced member or template not found."
           }
         }
       }
@@ -91,42 +97,51 @@
       "GetNotificationResponse": {
         "type": "object",
         "properties": {
-          "memberId": {
+          "MemberId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The unique identifier of the member."
           },
-          "templateName": {
-            "type": "string"
-          },
-          "sentTime": {
+          "TemplateName": {
             "type": "string",
-            "format": "date-time"
+            "description": "The name of the notification template."
           },
-          "referenceId": {
+          "SentTime": {
             "type": "string",
-            "nullable": true
+            "format": "date-time",
+            "description": "The timestamp when the notification was sent."
           },
-          "employerAccountId": {
+          "ReferenceId": {
+            "type": "string",
+            "description": "An optional reference ID associated with the notification."
+          },
+          "EmployerAccountId": {
             "type": "integer",
-            "nullable": true
+            "description": "An optional employer account ID associated with the notification."
           }
-        }
+        },
+        "required": [
+          "MemberId",
+          "TemplateName",
+          "SentTime"
+        ]
       },
       "CreateNotificationModel": {
         "type": "object",
         "properties": {
-          "memberId": {
+          "MemberId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The unique identifier of the member associated with the notification."
           },
-          "notificationTemplateId": {
-            "type": "string",
-            "format": "uuid"
+          "NotificationTemplateId": {
+            "type": "integer",
+            "description": "The ID of the notification template to be used."
           }
         },
         "required": [
-          "memberId",
-          "notificationTemplateId"
+          "MemberId",
+          "NotificationTemplateId"
         ]
       }
     }

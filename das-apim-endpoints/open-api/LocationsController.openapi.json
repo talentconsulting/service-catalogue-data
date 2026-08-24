@@ -1,26 +1,28 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Apprentice Aan Locations API",
+    "title": "Apprentice AAN Locations API",
     "version": "1.0.0"
   },
   "paths": {
     "/locations": {
       "get": {
-        "summary": "Get addresses",
+        "summary": "Retrieve addresses based on a search query",
+        "operationId": "getAddresses",
         "parameters": [
           {
             "name": "query",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The search query to retrieve addresses"
           }
         ],
         "responses": {
           "200": {
-            "description": "Addresses obtained successfully.",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -37,7 +39,8 @@
     },
     "/locations/{postcode}": {
       "get": {
-        "summary": "Get coordinates by postcode",
+        "summary": "Retrieve coordinates for a given postcode",
+        "operationId": "getCoordinates",
         "parameters": [
           {
             "name": "postcode",
@@ -45,43 +48,45 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The postcode to retrieve coordinates for"
           }
         ],
         "responses": {
           "200": {
-            "description": "Coordinates obtained successfully.",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "$ref": "#/components/schemas/Coordinate"
+                  "$ref": "#/components/schemas/Coordinates"
                 }
               }
             }
           },
           "404": {
-            "description": "Postcode not found."
+            "description": "Coordinates not found"
           }
         }
       }
     },
     "/locations/search": {
       "get": {
-        "summary": "Search locations",
+        "summary": "Retrieve locations by search",
+        "operationId": "getLocationsBySearch",
         "parameters": [
           {
             "name": "query",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The search query to retrieve locations"
           }
         ],
         "responses": {
           "200": {
-            "description": "Locations obtained successfully.",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -111,7 +116,10 @@
           "addressLine3": {
             "type": "string"
           },
-          "addressLine4": {
+          "town": {
+            "type": "string"
+          },
+          "county": {
             "type": "string"
           },
           "postcode": {
@@ -119,41 +127,38 @@
           },
           "latitude": {
             "type": "number",
-            "format": "double"
+            "format": "float"
           },
           "longitude": {
             "type": "number",
-            "format": "double"
-          },
-          "country": {
-            "type": "string"
+            "format": "float"
           }
         }
       },
-      "Coordinate": {
+      "Coordinates": {
         "type": "object",
         "properties": {
           "latitude": {
             "type": "number",
-            "format": "double"
+            "format": "float"
           },
           "longitude": {
             "type": "number",
-            "format": "double"
+            "format": "float"
           }
         }
       },
       "Location": {
         "type": "object",
         "properties": {
+          "identifier": {
+            "type": "string"
+          },
           "name": {
             "type": "string"
           },
-          "address": {
-            "$ref": "#/components/schemas/Address"
-          },
-          "coordinates": {
-            "$ref": "#/components/schemas/Coordinate"
+          "type": {
+            "type": "string"
           }
         }
       }

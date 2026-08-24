@@ -1,18 +1,18 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Apprentice Aan Calendar Events API",
-    "description": "API for managing calendar events including event retrieval, updating attendance, and fetching details by ID.",
-    "version": "1.0.0"
+    "title": "Apprentice Aan API",
+    "version": "1.0.0",
+    "description": "API for managing calendar events and attendances."
   },
   "paths": {
     "/CalendarEvents": {
       "get": {
-        "summary": "Retrieve calendar events",
-        "operationId": "getCalendarEvents",
+        "summary": "Get Calendar Events",
+        "operationId": "GetCalendarEvents",
         "parameters": [
           {
-            "name": "X-RequestedByMemberId",
+            "name": "RequestedByMemberId",
             "in": "header",
             "required": true,
             "schema": {
@@ -34,7 +34,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "format": "date"
             }
           },
           {
@@ -43,7 +43,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time"
+              "format": "date"
             }
           },
           {
@@ -53,12 +53,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "string",
-                "enum": [
-                  "InPerson",
-                  "Online",
-                  "Hybrid"
-                ]
+                "$ref": "#/components/schemas/EventFormat"
               }
             }
           },
@@ -127,7 +122,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of calendar events",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -141,8 +136,8 @@
     },
     "/CalendarEvents/{calendarEventId}": {
       "get": {
-        "summary": "Retrieve calendar event details by ID",
-        "operationId": "getCalendarEventById",
+        "summary": "Get Calendar Event By ID",
+        "operationId": "GetCalendarEventById",
         "parameters": [
           {
             "name": "calendarEventId",
@@ -154,7 +149,7 @@
             }
           },
           {
-            "name": "X-RequestedByMemberId",
+            "name": "RequestedByMemberId",
             "in": "header",
             "required": true,
             "schema": {
@@ -165,7 +160,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Calendar event details found",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -175,22 +170,15 @@
             }
           },
           "404": {
-            "description": "Calendar event not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CalendarEvent"
-                }
-              }
-            }
+            "description": "Event not found"
           }
         }
       }
     },
     "/CalendarEvents/{calendarEventId}/attendance": {
       "put": {
-        "summary": "Update attendance for a calendar event",
-        "operationId": "putAttendance",
+        "summary": "Update Attendance for Calendar Event",
+        "operationId": "PutAttendance",
         "parameters": [
           {
             "name": "calendarEventId",
@@ -202,7 +190,7 @@
             }
           },
           {
-            "name": "X-RequestedByMemberId",
+            "name": "RequestedByMemberId",
             "in": "header",
             "required": true,
             "schema": {
@@ -223,7 +211,7 @@
         },
         "responses": {
           "204": {
-            "description": "Attendance successfully updated"
+            "description": "No content"
           }
         }
       }
@@ -231,6 +219,14 @@
   },
   "components": {
     "schemas": {
+      "EventFormat": {
+        "type": "string",
+        "enum": [
+          "InPerson",
+          "Online",
+          "Hybrid"
+        ]
+      },
       "GetCalendarEventsQueryResult": {
         "type": "object",
         "properties": {
@@ -251,6 +247,9 @@
             "items": {
               "$ref": "#/components/schemas/CalendarEventSummary"
             }
+          },
+          "IsInvalidLocation": {
+            "type": "boolean"
           },
           "Regions": {
             "type": "array",
@@ -277,12 +276,7 @@
             "type": "string"
           },
           "EventFormat": {
-            "type": "string",
-            "enum": [
-              "InPerson",
-              "Online",
-              "Hybrid"
-            ]
+            "$ref": "#/components/schemas/EventFormat"
           },
           "StartDate": {
             "type": "string",
@@ -351,7 +345,8 @@
         "type": "object",
         "properties": {
           "Status": {
-            "type": "string"
+            "type": "string",
+            "description": "Attendance status"
           }
         }
       },

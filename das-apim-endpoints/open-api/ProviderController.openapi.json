@@ -1,18 +1,21 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Apprentice App API",
+    "title": "Provider API",
     "version": "1.0.0",
-    "description": "API for apprentice-related services"
+    "description": "API for managing providers and their active standards."
   },
   "paths": {
     "/providers/registeredProviders": {
       "get": {
-        "summary": "Get Registered Providers",
         "operationId": "GetRegisteredProviders",
+        "summary": "Retrieve a list of registered providers",
+        "tags": [
+          "Providers"
+        ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful response with a list of registered providers",
             "content": {
               "application/json": {
                 "schema": {
@@ -26,15 +29,21 @@
     },
     "/providers/activeStandards": {
       "get": {
-        "summary": "Get Active Standards",
         "operationId": "GetActiveStandards",
+        "summary": "Retrieve a list of active standards",
+        "tags": [
+          "Providers"
+        ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful response with a list of active standards",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ActiveStandardsResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Standard"
+                  }
                 }
               }
             }
@@ -60,19 +69,22 @@
         "type": "object",
         "properties": {
           "ukprn": {
-            "type": "integer"
+            "type": "integer",
+            "example": 12345678
           },
           "legalName": {
-            "type": "string"
+            "type": "string",
+            "example": "Legal Name"
           },
           "tradingName": {
-            "type": "string"
+            "type": "string",
+            "example": "Trading Name"
           },
           "contactDetails": {
             "$ref": "#/components/schemas/ProviderContactModel"
           },
           "legalAddress": {
-            "$ref": "#/components/schemas/UkrlpAddress"
+            "$ref": "#/components/schemas/Address"
           },
           "verificationDetails": {
             "type": "array",
@@ -86,48 +98,61 @@
         "type": "object",
         "properties": {
           "title": {
-            "type": "string"
+            "type": "string",
+            "example": "Dr."
           },
           "firstName": {
-            "type": "string"
+            "type": "string",
+            "example": "John"
           },
           "lastName": {
-            "type": "string"
+            "type": "string",
+            "example": "Doe"
           },
           "email": {
-            "type": "string"
+            "type": "string",
+            "example": "johndoe@example.com"
           },
           "telephone": {
-            "type": "string"
+            "type": "string",
+            "example": "01234 567890"
           },
           "website": {
-            "type": "string"
+            "type": "string",
+            "example": "http://example.com"
           }
         }
       },
-      "UkrlpAddress": {
+      "Address": {
         "type": "object",
         "properties": {
           "address1": {
-            "type": "string"
+            "type": "string",
+            "example": "123 Street Lane"
           },
           "address2": {
-            "type": "string"
+            "type": "string",
+            "example": "Suite 456"
           },
           "address3": {
-            "type": "string"
+            "type": "string",
+            "example": "Building 7"
           },
           "address4": {
-            "type": "string"
+            "type": "string",
+            "example": "Business Park"
           },
           "town": {
-            "type": "string"
+            "type": "string",
+            "example": "Townsville"
           },
           "county": {
-            "type": "string"
+            "type": "string",
+            "example": "Countyshire"
           },
           "postcode": {
-            "type": "string"
+            "type": "string",
+            "example": "AB12 3CD"
           }
         }
       },
@@ -135,42 +160,33 @@
         "type": "object",
         "properties": {
           "verificationAuthority": {
-            "type": "string"
+            "type": "string",
+            "example": "Authority Name"
           },
           "verificationId": {
-            "type": "string"
+            "type": "string",
+            "example": "12345678"
           },
           "primaryVerificationSource": {
-            "type": "boolean"
+            "type": "boolean",
+            "example": true
           }
         }
       },
-      "ActiveStandardsResponse": {
+      "Standard": {
         "type": "object",
         "properties": {
-          "courses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Course"
-            }
-          }
-        }
-      },
-      "Course": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
           "title": {
-            "type": "string"
+            "type": "string",
+            "example": "Software Development"
+          },
+          "code": {
+            "type": "string",
+            "example": "ST0123"
           },
           "level": {
-            "type": "string"
-          },
-          "duration": {
-            "type": "integer"
+            "type": "string",
+            "example": "Level 3"
           }
         }
       }

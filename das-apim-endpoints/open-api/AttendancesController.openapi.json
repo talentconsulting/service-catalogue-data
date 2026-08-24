@@ -8,6 +8,7 @@
     "/Attendances": {
       "get": {
         "summary": "Retrieve attendances",
+        "operationId": "GetAttendances",
         "parameters": [
           {
             "name": "X-RequestedByMemberId",
@@ -16,7 +17,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The ID of the member making the request."
           },
           {
             "name": "fromDate",
@@ -25,7 +27,8 @@
             "schema": {
               "type": "string",
               "format": "date"
-            }
+            },
+            "description": "Start date for filtering attendances."
           },
           {
             "name": "toDate",
@@ -34,31 +37,43 @@
             "schema": {
               "type": "string",
               "format": "date"
-            }
+            },
+            "description": "End date for filtering attendances."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of attendances",
+            "description": "List of attendances retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object"
-                  }
+                  "$ref": "#/components/schemas/Attendances"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid input parameters."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "500": {
+            "description": "Server error."
           }
-        },
-        "tags": [
-          "Attendances"
-        ]
+        }
       }
     }
   },
   "components": {
-    "schemas": {}
+    "schemas": {
+      "Attendances": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    }
   }
 }
