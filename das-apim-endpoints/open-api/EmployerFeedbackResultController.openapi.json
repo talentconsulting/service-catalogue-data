@@ -1,0 +1,105 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Feedback API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/EmployerFeedbackResult/": {
+      "post": {
+        "summary": "Submit employer feedback",
+        "description": "Submit feedback from an employer about a provider.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitEmployerFeedbackRequestData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content - Feedback successfully submitted."
+          },
+          "500": {
+            "description": "Internal Server Error - Unhandled error occurred while submitting feedback."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SubmitEmployerFeedbackRequestData": {
+        "type": "object",
+        "properties": {
+          "UserRef": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier of the user submitting feedback."
+          },
+          "Ukprn": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The UKPRN of the provider being reviewed."
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The account identifier associated with the feedback submission."
+          },
+          "ProviderRating": {
+            "type": "string",
+            "description": "Overall rating given to the provider.",
+            "enum": [
+              "VeryPoor",
+              "Poor",
+              "Good",
+              "Excellent"
+            ]
+          },
+          "FeedbackSource": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Source or context of the feedback."
+          },
+          "ProviderAttributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderAttributeData"
+            },
+            "description": "Detailed attributes about the provider being reviewed."
+          }
+        },
+        "required": [
+          "UserRef",
+          "Ukprn",
+          "AccountId",
+          "ProviderRating",
+          "FeedbackSource"
+        ]
+      },
+      "ProviderAttributeData": {
+        "type": "object",
+        "properties": {
+          "AttributeId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Identifier for the provider attribute."
+          },
+          "AttributeValue": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Value or score associated with the provider attribute."
+          }
+        },
+        "required": [
+          "AttributeId",
+          "AttributeValue"
+        ]
+      }
+    }
+  }
+}

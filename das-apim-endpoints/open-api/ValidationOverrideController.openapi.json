@@ -1,0 +1,125 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Incentives API",
+    "version": "1.0.0",
+    "description": "API for managing validation overrides in employer incentives."
+  },
+  "paths": {
+    "/validation-overrides": {
+      "post": {
+        "summary": "Add Validation Override",
+        "operationId": "AddValidationOverride",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidationOverrideRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ValidationType": {
+        "type": "string",
+        "enum": [
+          "NotSet",
+          "HasDaysInLearning",
+          "IsInLearning",
+          "HasNoDataLocks",
+          "EmployedBeforeSchemeStarted",
+          "EmployedAtStartOfApprenticeship",
+          "EmployedAt365Days"
+        ]
+      },
+      "ServiceRequest": {
+        "type": "object",
+        "properties": {
+          "TaskId": {
+            "type": "string"
+          },
+          "DecisionReference": {
+            "type": "string"
+          },
+          "TaskCreatedDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "TaskId",
+          "DecisionReference"
+        ]
+      },
+      "ValidationStep": {
+        "type": "object",
+        "properties": {
+          "ValidationType": {
+            "$ref": "#/components/schemas/ValidationType"
+          },
+          "ExpiryDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Remove": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ValidationType",
+          "ExpiryDate"
+        ]
+      },
+      "ValidationOverride": {
+        "type": "object",
+        "properties": {
+          "AccountLegalEntityId": {
+            "type": "integer"
+          },
+          "ULN": {
+            "type": "integer"
+          },
+          "ValidationSteps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationStep"
+            }
+          },
+          "ServiceRequest": {
+            "$ref": "#/components/schemas/ServiceRequest"
+          }
+        },
+        "required": [
+          "AccountLegalEntityId",
+          "ULN",
+          "ValidationSteps",
+          "ServiceRequest"
+        ]
+      },
+      "ValidationOverrideRequest": {
+        "type": "object",
+        "properties": {
+          "ValidationOverrides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationOverride"
+            }
+          }
+        },
+        "required": [
+          "ValidationOverrides"
+        ]
+      }
+    }
+  }
+}

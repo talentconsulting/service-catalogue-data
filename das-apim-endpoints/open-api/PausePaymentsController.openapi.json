@@ -1,0 +1,130 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Incentives API",
+    "version": "1.0.0",
+    "description": "API for managing employer incentives, including pausing payments."
+  },
+  "paths": {
+    "/pause-payments": {
+      "post": {
+        "operationId": "PausePayments",
+        "summary": "Pause payments for employer incentives.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PausePaymentsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment successfully paused."
+          },
+          "404": {
+            "description": "Not Found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleMessageResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SingleMessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PausePaymentsRequest": {
+        "type": "object",
+        "properties": {
+          "Action": {
+            "type": "string",
+            "enum": [
+              "Pause",
+              "Resume"
+            ],
+            "description": "Action to perform on payments."
+          },
+          "Applications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Application"
+            }
+          },
+          "ServiceRequest": {
+            "$ref": "#/components/schemas/ServiceRequest"
+          }
+        },
+        "required": [
+          "Action",
+          "Applications",
+          "ServiceRequest"
+        ]
+      },
+      "Application": {
+        "type": "object",
+        "properties": {
+          "AccountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ULN": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ServiceRequest": {
+            "$ref": "#/components/schemas/ServiceRequest"
+          }
+        },
+        "required": [
+          "AccountLegalEntityId",
+          "ULN",
+          "ServiceRequest"
+        ]
+      },
+      "ServiceRequest": {
+        "type": "object",
+        "properties": {
+          "TaskId": {
+            "type": "string"
+          },
+          "DecisionReference": {
+            "type": "string"
+          },
+          "TaskCreatedDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "TaskId",
+          "DecisionReference"
+        ]
+      },
+      "SingleMessageResponse": {
+        "type": "object",
+        "properties": {
+          "Message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

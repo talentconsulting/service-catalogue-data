@@ -1,0 +1,199 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Incentives API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/employmentchecks/{correlationId}": {
+      "put": {
+        "summary": "Update an employment check",
+        "parameters": [
+          {
+            "name": "correlationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEmploymentCheckRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Employment check updated successfully"
+          }
+        }
+      }
+    },
+    "/employmentchecks": {
+      "post": {
+        "summary": "Register a new employment check",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterCheckRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Employment check registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterEmploymentCheckCommand"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpRequestContentException"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpdateEmploymentCheckRequest": {
+        "type": "object",
+        "properties": {
+          "CorrelationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Result": {
+            "type": "string"
+          },
+          "DateChecked": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "CorrelationId",
+          "Result",
+          "DateChecked"
+        ]
+      },
+      "RegisterCheckRequest": {
+        "type": "object",
+        "properties": {
+          "CorrelationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "CheckType": {
+            "type": "string"
+          },
+          "Uln": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ApprenticeshipAccountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ApprenticeshipId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "MinDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "MaxDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "CorrelationId",
+          "CheckType",
+          "Uln",
+          "ApprenticeshipAccountId",
+          "MinDate",
+          "MaxDate"
+        ]
+      },
+      "RegisterEmploymentCheckCommand": {
+        "type": "object",
+        "properties": {
+          "CorrelationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "CheckType": {
+            "type": "string"
+          },
+          "Uln": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ApprenticeshipAccountId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ApprenticeshipId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "MinDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "MaxDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "CorrelationId",
+          "CheckType",
+          "Uln",
+          "ApprenticeshipAccountId",
+          "MinDate",
+          "MaxDate"
+        ]
+      },
+      "HttpRequestContentException": {
+        "type": "object",
+        "properties": {
+          "StatusCode": {
+            "type": "integer"
+          },
+          "ErrorContent": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "StatusCode",
+          "ErrorContent"
+        ]
+      }
+    }
+  }
+}

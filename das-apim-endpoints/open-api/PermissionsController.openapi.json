@@ -1,0 +1,151 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Permissions API",
+    "version": "1.0.0",
+    "description": "API for managing employer permissions."
+  },
+  "paths": {
+    "/Permissions": {
+      "get": {
+        "summary": "Retrieve permissions for an employer",
+        "operationId": "GetPermissions",
+        "parameters": [
+          {
+            "name": "Ukprn",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "AccountLegalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPermissionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create or update permissions for an employer",
+        "operationId": "PostPermissions",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostPermissionsCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetPermissionsQuery": {
+        "type": "object",
+        "properties": {
+          "Ukprn": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "AccountLegalEntityId": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "GetPermissionsResponse": {
+        "type": "object",
+        "properties": {
+          "Operations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Operation"
+            }
+          },
+          "ProviderName": {
+            "type": "string"
+          },
+          "AccountLegalEntityName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Operations",
+          "ProviderName",
+          "AccountLegalEntityName"
+        ]
+      },
+      "PostPermissionsCommand": {
+        "type": "object",
+        "properties": {
+          "UserRef": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Ukprn": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "AccountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Operations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Operation"
+            }
+          }
+        },
+        "required": [
+          "UserRef",
+          "AccountLegalEntityId",
+          "Operations"
+        ]
+      },
+      "Operation": {
+        "type": "string",
+        "enum": [
+          "CreateCohort",
+          "Recruitment",
+          "RecruitmentRequiresReview"
+        ]
+      }
+    }
+  }
+}

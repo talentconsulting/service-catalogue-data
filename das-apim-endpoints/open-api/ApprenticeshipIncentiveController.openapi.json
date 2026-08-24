@@ -1,0 +1,132 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Incentives API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/accounts/{accountId}/legalentities/{accountLegalEntityId}/apprenticeshipIncentives": {
+      "get": {
+        "summary": "Retrieve Apprenticeship Incentives",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "accountLegalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of apprenticeship incentives",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprenticeshipIncentiveDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/earningsRecalculations": {
+      "post": {
+        "summary": "Recalculate earnings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecalculateEarningsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Recalculation successful"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApprenticeshipIncentiveDto": {
+        "type": "object",
+        "properties": {
+          "accountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "uln": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "accountLegalEntityId",
+          "uln"
+        ]
+      },
+      "RecalculateEarningsRequest": {
+        "type": "object",
+        "properties": {
+          "incentiveLearnerIdentifiers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncentiveLearnerIdentifierDto"
+            }
+          }
+        },
+        "required": [
+          "incentiveLearnerIdentifiers"
+        ]
+      },
+      "IncentiveLearnerIdentifierDto": {
+        "type": "object",
+        "properties": {
+          "accountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "uln": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "accountLegalEntityId",
+          "uln"
+        ]
+      }
+    }
+  }
+}

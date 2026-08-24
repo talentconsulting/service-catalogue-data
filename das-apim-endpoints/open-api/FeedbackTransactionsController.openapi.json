@@ -1,0 +1,228 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Feedback API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/FeedbackTransactions": {
+      "get": {
+        "operationId": "GetFeedbackTransactionsBatch",
+        "summary": "Retrieve a batch of feedback transactions",
+        "parameters": [
+          {
+            "name": "batchsize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batch of feedback transactions retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "feedbackTransactions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "example": {
+                          "transactionId": "uuid",
+                          "details": "transaction details"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No transactions found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/FeedbackTransactions/send": {
+      "post": {
+        "operationId": "SendFeedbackEmail",
+        "summary": "Send a feedback email",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendFeedbackEmailRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Feedback email sent successfully"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/FeedbackTransactions/{id}": {
+      "put": {
+        "operationId": "UpdateFeedbackTransaction",
+        "summary": "Update a feedback transaction",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFeedbackTransactionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Feedback transaction updated successfully"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/FeedbackTransactions/{id}/users": {
+      "get": {
+        "operationId": "GetFeedbackTransactionUsers",
+        "summary": "Retrieve users for a specific feedback transaction",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "example": {
+                      "userId": "uuid",
+                      "userName": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No users found for the feedback transaction"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SendFeedbackEmailRequest": {
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contact": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "employerName": {
+            "type": "string"
+          },
+          "accountHashedId": {
+            "type": "string"
+          },
+          "accountsBaseUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "feedbackBaseUrl": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "required": [
+          "templateId",
+          "email"
+        ]
+      },
+      "UpdateFeedbackTransactionRequest": {
+        "type": "object",
+        "properties": {
+          "templateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sentCount": {
+            "type": "integer"
+          },
+          "sentDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "templateId",
+          "sentCount",
+          "sentDate"
+        ]
+      }
+    }
+  }
+}
