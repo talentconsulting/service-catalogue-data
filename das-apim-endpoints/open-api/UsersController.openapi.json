@@ -1,344 +1,273 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Digital Certificates API",
-    "version": "1.0.0"
+    "title": "FindAnApprenticeship Users API",
+    "version": "1.0.0",
+    "description": "API for managing user-related operations in FindAnApprenticeship platform."
   },
   "paths": {
-    "/users/{govUkIdentifier}": {
-      "get": {
-        "operationId": "GetUser",
+    "/users/{candidateId}/create-account/add-details": {
+      "put": {
+        "summary": "Add user details",
         "parameters": [
           {
-            "name": "govUkIdentifier",
+            "name": "candidateId",
             "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidatesNameModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Details added successfully"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{candidateId}/create-account/user-name": {
+      "get": {
+        "summary": "Get user name",
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User name fetched successfully"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{candidateId}/create-account/date-of-birth": {
+      "get": {
+        "summary": "Get user date of birth",
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Date of birth fetched successfully"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Add or update user date of birth",
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidatesDateOfBirthModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Date of birth updated successfully"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{candidateId}/create-account/postcode": {
+      "get": {
+        "summary": "Get user postcode",
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Postcode fetched successfully"
+          },
+          "404": {
+            "description": "Postcode not found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/create-account/postcode-address": {
+      "get": {
+        "summary": "Get address by postcode",
+        "parameters": [
+          {
+            "name": "postcode",
+            "in": "query",
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "The GOV.UK identifier of the user."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "User details retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Address fetched successfully"
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
           }
         }
       }
     },
-    "/users": {
-      "post": {
-        "operationId": "CreateOrUpdateUser",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateOrUpdateUserRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "User created or updated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "description": "The ID of the created or updated user."
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
-    "/users/{userId}/identity": {
-      "post": {
-        "operationId": "UpdateUserIdentity",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "The ID of the user."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateUserIdentityRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "User identity updated successfully."
-          },
-          "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
-    "/users/{userId}/certificates": {
+    "/users/{candidateId}/create-account/select-address": {
       "get": {
-        "operationId": "GetCertificates",
+        "summary": "Get candidate addresses by postcode",
         "parameters": [
           {
-            "name": "userId",
+            "name": "candidateId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "The ID of the user."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Certificates retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
             }
           },
-          "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
-    "/users/{userId}/sharings": {
-      "get": {
-        "operationId": "GetSharings",
-        "parameters": [
           {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "The ID of the user."
-          },
-          {
-            "name": "certificateId",
+            "name": "postcode",
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "The ID of the certificate."
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "description": "The maximum number of results to return."
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Sharings retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Addresses fetched successfully"
           },
           "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
-    "/users/{userId}/match": {
-      "get": {
-        "operationId": "GetCertificatesMatch",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "The ID of the user."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Certificate matches retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          },
-          "204": {
-            "description": "No matches found."
-          },
-          "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
           }
         }
       },
       "post": {
-        "operationId": "CreateUserMatch",
+        "summary": "Select candidate address",
         "parameters": [
           {
-            "name": "userId",
+            "name": "candidateId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "The ID of the user."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUserMatchRequest"
-              }
             }
           }
-        },
-        "responses": {
-          "204": {
-            "description": "User match created successfully."
-          },
-          "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
-    "/users/{userId}/user-actions": {
-      "post": {
-        "operationId": "CreateUserAction",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "The ID of the user."
-          }
         ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateUserActionRequest"
+                "$ref": "#/components/schemas/CandidatesAddressModel"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "User action created successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Address selected successfully"
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{candidateId}/create-account/phone-number": {
+      "get": {
+        "summary": "Get user phone number",
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone number fetched successfully"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       },
-      "get": {
-        "operationId": "GetUserActions",
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "The ID of the user."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User actions retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
-    "/users/{userId}/authorise": {
       "post": {
-        "operationId": "CreateUserAuthorise",
+        "summary": "Add or update user phone number",
         "parameters": [
           {
-            "name": "userId",
+            "name": "candidateId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "The ID of the user."
+            }
           }
         ],
         "requestBody": {
@@ -346,17 +275,51 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateUserAuthoriseRequest"
+                "$ref": "#/components/schemas/CandidatesPhoneNumberModel"
               }
             }
           }
         },
         "responses": {
-          "204": {
-            "description": "User authorised successfully."
+          "200": {
+            "description": "Phone number updated successfully"
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/users/{candidateId}/create-account/enter-address": {
+      "post": {
+        "summary": "Add manually entered address for user",
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CandidatesManuallyEnteredAddressModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Manually entered address added successfully"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -364,150 +327,142 @@
   },
   "components": {
     "schemas": {
-      "CreateOrUpdateUserRequest": {
+      "CandidatesModel": {
         "type": "object",
-        "required": [
-          "GovUkIdentifier",
-          "EmailAddress"
-        ],
         "properties": {
-          "GovUkIdentifier": {
-            "type": "string"
-          },
-          "EmailAddress": {
-            "type": "string",
-            "format": "email"
-          },
-          "PhoneNumber": {
+          "email": {
             "type": "string"
           }
-        }
-      },
-      "UpdateUserIdentityRequest": {
-        "type": "object",
+        },
         "required": [
-          "Names",
-          "DateOfBirth"
-        ],
-        "properties": {
-          "Names": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "UserIdentityId",
-                "FamilyName",
-                "GivenNames"
-              ],
-              "properties": {
-                "UserIdentityId": {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                "ValidSince": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "ValidUntil": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "FamilyName": {
-                  "type": "string"
-                },
-                "GivenNames": {
-                  "type": "string"
-                }
+          "email"
+        ]
+      },
+      "CandidatesNameModel": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CandidatesModel"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "firstName": {
+                "type": "string"
+              },
+              "lastName": {
+                "type": "string"
               }
-            }
-          },
-          "DateOfBirth": {
-            "type": "string",
-            "format": "date-time"
+            },
+            "required": [
+              "firstName",
+              "lastName"
+            ]
           }
-        }
+        ]
       },
-      "CreateUserActionRequest": {
-        "type": "object",
-        "required": [
-          "ActionType",
-          "CertificateType"
-        ],
-        "properties": {
-          "ActionType": {
-            "type": "string"
+      "CandidatesDateOfBirthModel": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CandidatesModel"
           },
-          "FamilyName": {
-            "type": "string"
-          },
-          "GivenNames": {
-            "type": "string"
-          },
-          "CertificateId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "CertificateType": {
-            "type": "string"
-          },
-          "CourseName": {
-            "type": "string"
+          {
+            "type": "object",
+            "properties": {
+              "dateOfBirth": {
+                "type": "string",
+                "format": "date"
+              }
+            },
+            "required": [
+              "dateOfBirth"
+            ]
           }
-        }
+        ]
       },
-      "CreateUserMatchRequest": {
-        "type": "object",
-        "properties": {
-          "Uln": {
-            "type": "integer",
-            "nullable": true
+      "CandidatesPhoneNumberModel": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CandidatesModel"
           },
-          "UserIdentityId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "CertificateType": {
-            "type": "string"
-          },
-          "CourseCode": {
-            "type": "string"
-          },
-          "CourseName": {
-            "type": "string"
-          },
-          "CourseLevel": {
-            "type": "string"
-          },
-          "YearAwarded": {
-            "type": "integer",
-            "nullable": true
-          },
-          "ProviderName": {
-            "type": "string"
-          },
-          "Ukprn": {
-            "type": "integer",
-            "nullable": true
-          },
-          "IsMatched": {
-            "type": "boolean"
-          },
-          "IsFailed": {
-            "type": "boolean"
+          {
+            "type": "object",
+            "properties": {
+              "phoneNumber": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "phoneNumber"
+            ]
           }
-        }
+        ]
       },
-      "CreateUserAuthoriseRequest": {
-        "type": "object",
-        "required": [
-          "Uln"
-        ],
-        "properties": {
-          "Uln": {
-            "type": "integer"
+      "CandidatesAddressModel": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CandidatesModel"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "uprn": {
+                "type": "string"
+              },
+              "addressLine1": {
+                "type": "string"
+              },
+              "addressLine2": {
+                "type": "string"
+              },
+              "addressLine3": {
+                "type": "string"
+              },
+              "addressLine4": {
+                "type": "string"
+              },
+              "postcode": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "addressLine1",
+              "postcode"
+            ]
           }
-        }
+        ]
+      },
+      "CandidatesManuallyEnteredAddressModel": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/CandidatesModel"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "addressLine1": {
+                "type": "string"
+              },
+              "addressLine2": {
+                "type": "string"
+              },
+              "townOrCity": {
+                "type": "string"
+              },
+              "county": {
+                "type": "string"
+              },
+              "postcode": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "addressLine1",
+              "townOrCity",
+              "county",
+              "postcode"
+            ]
+          }
+        ]
       }
     }
   }

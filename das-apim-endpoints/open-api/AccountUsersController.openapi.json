@@ -1,0 +1,114 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AccountUsers API",
+    "version": "1.0.0",
+    "description": "API to manage employer profiles, specifically account users, including upserting user accounts."
+  },
+  "paths": {
+    "/AccountUsers/{userId}/upsert-user": {
+      "put": {
+        "summary": "Upsert User Account",
+        "description": "Endpoint to add & update the employer information.",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "description": "Email address/Gov Unique Identifier.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "UpsertAccountRequest model",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertAccountRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response with upserted user details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertUserApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpsertAccountRequest": {
+        "type": "object",
+        "properties": {
+          "Email": {
+            "type": "string",
+            "description": "Email address of the user",
+            "format": "email"
+          },
+          "FirstName": {
+            "type": "string",
+            "description": "First name of the user"
+          },
+          "LastName": {
+            "type": "string",
+            "description": "Last name of the user"
+          },
+          "GovIdentifier": {
+            "type": "string",
+            "description": "Government Unique Identifier"
+          },
+          "CorrelationId": {
+            "type": "string",
+            "description": "Correlation ID for tracking",
+            "nullable": true,
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "Email",
+          "GovIdentifier"
+        ]
+      },
+      "UpsertUserApiResponse": {
+        "type": "object",
+        "description": "Response for the Upsert User API",
+        "properties": {
+          "Success": {
+            "type": "boolean",
+            "description": "Indicates if the operation was successful"
+          },
+          "ErrorMessage": {
+            "type": "string",
+            "description": "Error message if operation was not successful",
+            "nullable": true
+          },
+          "ErrorCode": {
+            "type": "string",
+            "description": "Error code if operation was not successful",
+            "nullable": true
+          },
+          "Value": {
+            "type": "object",
+            "description": "Details of the upserted user",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

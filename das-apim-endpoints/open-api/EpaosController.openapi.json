@@ -1,22 +1,25 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SFA DAS Approvals API",
+    "title": "Epao Register API",
     "version": "1.0.0",
-    "description": "API for managing EPAOs (End Point Assessment Organizations)"
+    "description": "API for managing EPAO register."
   },
   "paths": {
-    "/Epaos": {
+    "/epaos": {
       "get": {
-        "summary": "Retrieve all EPAOs",
-        "operationId": "GetAllEpaos",
+        "operationId": "GetEpaos",
+        "summary": "Retrieve a list of EPAOs",
+        "tags": [
+          "EPAOs"
+        ],
         "responses": {
           "200": {
             "description": "List of EPAOs",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetEpaosListResponse"
+                  "$ref": "#/components/schemas/GetEpaosApiModel"
                 }
               }
             }
@@ -26,24 +29,143 @@
           }
         }
       }
+    },
+    "/epaos/{epaoId}": {
+      "get": {
+        "operationId": "GetEpao",
+        "summary": "Retrieve detailed information about a specific EPAO",
+        "tags": [
+          "EPAOs"
+        ],
+        "parameters": [
+          {
+            "name": "epaoId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the EPAO",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the EPAO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEpaoApiModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "EPAO not found"
+          },
+          "400": {
+            "description": "Invalid EpaoId"
+          }
+        }
+      }
+    },
+    "/epaos/{epaoId}/courses": {
+      "get": {
+        "operationId": "GetEpaoCourses",
+        "summary": "Retrieve the list of courses offered by a specific EPAO",
+        "tags": [
+          "EPAOs"
+        ],
+        "parameters": [
+          {
+            "name": "epaoId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the EPAO",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of courses offered by the EPAO",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEpaoCoursesApiModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "EPAO courses not found"
+          },
+          "400": {
+            "description": "Invalid EpaoId"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
-      "GetEpaosListResponse": {
+      "GetEpaosApiModel": {
         "type": "object",
         "properties": {
-          "Epaos": {
+          "epaos": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/GetEpaoResponse"
+              "$ref": "#/components/schemas/Epao"
             }
           }
         }
       },
-      "GetEpaoResponse": {
+      "GetEpaoApiModel": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          }
+        }
+      },
+      "GetEpaoCoursesApiModel": {
+        "type": "object",
+        "properties": {
+          "courses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Course"
+            }
+          }
+        }
+      },
+      "Epao": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "Course": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
       }
     }
   }

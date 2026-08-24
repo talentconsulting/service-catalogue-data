@@ -1,0 +1,191 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Find An Apprenticeship API",
+    "version": "1.0"
+  },
+  "paths": {
+    "/applications/{applicationId}/employmentlocations": {
+      "get": {
+        "summary": "Get Employment Locations",
+        "operationId": "GetEmploymentLocations",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Employment locations not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Update Employment Locations",
+        "operationId": "UpdateEmploymentLocations",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostEmploymentLocationsApiRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Employment locations updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Application not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PostEmploymentLocationsApiRequest": {
+        "type": "object",
+        "properties": {
+          "CandidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "EmployerLocation": {
+            "$ref": "#/components/schemas/LocationDto"
+          },
+          "EmploymentLocationSectionStatus": {
+            "$ref": "#/components/schemas/SectionStatus"
+          }
+        },
+        "required": [
+          "CandidateId",
+          "EmployerLocation",
+          "EmploymentLocationSectionStatus"
+        ]
+      },
+      "LocationDto": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Addresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AddressDto"
+            }
+          },
+          "EmployerLocationOption": {
+            "$ref": "#/components/schemas/AvailableWhere"
+          },
+          "EmploymentLocationInformation": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Id",
+          "Addresses"
+        ]
+      },
+      "AvailableWhere": {
+        "type": "string",
+        "enum": [
+          "OneLocation",
+          "MultipleLocations",
+          "AcrossEngland"
+        ]
+      },
+      "AddressDto": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "FullAddress": {
+            "type": "string"
+          },
+          "IsSelected": {
+            "type": "boolean"
+          },
+          "AddressOrder": {
+            "type": "integer",
+            "format": "int16"
+          }
+        },
+        "required": [
+          "Id",
+          "FullAddress",
+          "IsSelected",
+          "AddressOrder"
+        ]
+      },
+      "SectionStatus": {
+        "type": "string",
+        "enum": [
+          "NotStarted",
+          "InProgress",
+          "Incomplete",
+          "Completed",
+          "NotRequired",
+          "PreviousAnswer"
+        ]
+      }
+    }
+  }
+}

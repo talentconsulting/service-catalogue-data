@@ -1,0 +1,371 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Find An Apprenticeship API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/SearchApprenticeships/": {
+      "get": {
+        "summary": "Search apprenticeships index",
+        "operationId": "SearchApprenticeships_Index",
+        "parameters": [
+          {
+            "name": "locationSearchTerm",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search apprenticeships index response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchIndexApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/SearchApprenticeships/browsebyinterests": {
+      "get": {
+        "summary": "Browse by interests",
+        "operationId": "BrowseByInterests_Get",
+        "responses": {
+          "200": {
+            "description": "Browse by interests response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrowseByInterestsApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/SearchApprenticeships/browsebyinterestslocation": {
+      "get": {
+        "summary": "Browse by interests with location",
+        "operationId": "BrowseByInterestsLocation_Get",
+        "parameters": [
+          {
+            "name": "locationSearchTerm",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Browse by interests location response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BrowseByInterestsLocationApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/SearchApprenticeships/searchResults": {
+      "get": {
+        "summary": "Search results for apprenticeships",
+        "operationId": "SearchApprenticeships_Results",
+        "parameters": [
+          {
+            "name": "model",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/GetSearchApprenticeshipsModel"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search apprenticeships results response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchApprenticeshipsApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/SearchApprenticeships/saved-search": {
+      "post": {
+        "summary": "Create a saved search",
+        "operationId": "PostSaveSearch",
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostSaveSearchApiRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SearchIndexApiResponse": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "BrowseByInterestsApiResponse": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "BrowseByInterestsLocationApiResponse": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "SearchApprenticeshipsApiResponse": {
+        "type": "object",
+        "properties": {
+          "candidateDateOfBirth": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalFound": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalApprenticeshipCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalCompetitiveVacanciesCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "location": {
+            "$ref": "#/components/schemas/SearchLocationApiResponse"
+          },
+          "routes": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "vacancies": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "pageNumber": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          },
+          "vacancyReference": {
+            "type": "string"
+          },
+          "disabilityConfident": {
+            "type": "boolean"
+          },
+          "savedSearchesCount": {
+            "type": "integer"
+          },
+          "searchAlreadySaved": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SearchLocationApiResponse": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number"
+          },
+          "lon": {
+            "type": "number"
+          }
+        }
+      },
+      "GetSearchApprenticeshipsModel": {
+        "type": "object",
+        "properties": {
+          "routeIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "levelIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "location": {
+            "type": "string"
+          },
+          "distance": {
+            "type": "integer"
+          },
+          "pageNumber": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "searchTerm": {
+            "type": "string"
+          },
+          "sort": {
+            "type": "string"
+          },
+          "skipWageType": {
+            "type": "string"
+          },
+          "disabilityConfident": {
+            "type": "boolean"
+          },
+          "candidateId": {
+            "type": "string"
+          },
+          "excludeNational": {
+            "type": "boolean"
+          },
+          "apprenticeshipTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Standard",
+                "Foundation"
+              ]
+            }
+          }
+        }
+      },
+      "PostSaveSearchApiRequest": {
+        "type": "object",
+        "properties": {
+          "disabilityConfident": {
+            "type": "boolean"
+          },
+          "excludeNational": {
+            "type": "boolean"
+          },
+          "distance": {
+            "type": "integer"
+          },
+          "location": {
+            "type": "string"
+          },
+          "searchTerm": {
+            "type": "string"
+          },
+          "selectedLevelIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "selectedRouteIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "unSubscribeToken": {
+            "type": "string"
+          },
+          "apprenticeshipTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Standard",
+                "Foundation"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
