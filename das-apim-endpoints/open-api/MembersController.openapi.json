@@ -1,0 +1,348 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Admin AAN API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/Members": {
+      "get": {
+        "summary": "Get Members",
+        "operationId": "GetMembers",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMembersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Members/{memberId}/profile": {
+      "get": {
+        "summary": "Get Member Profile",
+        "operationId": "GetMemberProfile",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-RequestedByMemberId",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMemberProfileQueryResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Members/{memberId}/leaving": {
+      "post": {
+        "summary": "Post Member Leaving",
+        "operationId": "PostMemberLeaving",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-RequestedByMemberId",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostMemberStatusModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetMembersResponse": {
+        "type": "object",
+        "properties": {
+          "Page": {
+            "type": "integer"
+          },
+          "PageSize": {
+            "type": "integer"
+          },
+          "TotalPages": {
+            "type": "integer"
+          },
+          "TotalCount": {
+            "type": "integer"
+          },
+          "Members": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberSummary"
+            }
+          }
+        }
+      },
+      "MemberSummary": {
+        "type": "object",
+        "properties": {
+          "ProfileId": {
+            "type": "integer"
+          },
+          "Value": {
+            "type": "string"
+          },
+          "PreferenceId": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "GetMemberProfileQueryResult": {
+        "type": "object",
+        "properties": {
+          "FullName": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "OrganisationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "RegionId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "RegionName": {
+            "type": "string"
+          },
+          "UserType": {
+            "$ref": "#/components/schemas/MemberUserType"
+          },
+          "IsRegionalChair": {
+            "type": "boolean"
+          },
+          "JoinedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Apprenticeship": {
+            "$ref": "#/components/schemas/Apprenticeship"
+          },
+          "Activities": {
+            "$ref": "#/components/schemas/GetMemberActivitiesResponse"
+          },
+          "Profiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberProfile"
+            }
+          },
+          "Preferences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberPreference"
+            }
+          }
+        }
+      },
+      "MemberUserType": {
+        "type": "string",
+        "enum": [
+          "Apprentice",
+          "Employer",
+          "Admin"
+        ]
+      },
+      "Apprenticeship": {
+        "type": "object",
+        "properties": {
+          "Sector": {
+            "type": "string",
+            "nullable": true
+          },
+          "Programme": {
+            "type": "string",
+            "nullable": true
+          },
+          "Level": {
+            "type": "string",
+            "nullable": true
+          },
+          "ActiveApprenticesCount": {
+            "type": "integer"
+          },
+          "Sectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "GetMemberActivitiesResponse": {
+        "type": "object",
+        "properties": {
+          "LastSignedUpDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "EventsAttended": {
+            "$ref": "#/components/schemas/EventsModel"
+          },
+          "EventsPlanned": {
+            "$ref": "#/components/schemas/EventsModel"
+          }
+        }
+      },
+      "EventsModel": {
+        "type": "object",
+        "properties": {
+          "EventsDateRange": {
+            "$ref": "#/components/schemas/DateRangeModel"
+          },
+          "Events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EventAttendanceModel"
+            }
+          }
+        }
+      },
+      "DateRangeModel": {
+        "type": "object",
+        "properties": {
+          "FromDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ToDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EventAttendanceModel": {
+        "type": "object",
+        "properties": {
+          "CalendarEventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "EventDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EventTitle": {
+            "type": "string"
+          },
+          "Urn": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "MemberProfile": {
+        "type": "object",
+        "properties": {
+          "ProfileId": {
+            "type": "integer"
+          },
+          "Value": {
+            "type": "string"
+          },
+          "PreferenceId": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "MemberPreference": {
+        "type": "object",
+        "properties": {
+          "PreferenceId": {
+            "type": "integer"
+          },
+          "Value": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PostMemberStatusModel": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

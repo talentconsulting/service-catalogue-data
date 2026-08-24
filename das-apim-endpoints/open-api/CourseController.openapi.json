@@ -1,0 +1,163 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Course API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/courses/{larsCode}/providers/allowed": {
+      "get": {
+        "summary": "Get allowed providers by course",
+        "operationId": "getAllowedProvidersByCourse",
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestrictedCourseDetailsModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/courses/{larsCode}/providers/not-allowed": {
+      "get": {
+        "summary": "Get providers not allowed by course",
+        "operationId": "getProvidersNotAllowedByCourse",
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestrictedCourseDetailsModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RestrictedCourseDetailsModel": {
+        "type": "object",
+        "properties": {
+          "LarsCode": {
+            "type": "string"
+          },
+          "IfateReferenceNumber": {
+            "type": "string"
+          },
+          "CourseName": {
+            "type": "string"
+          },
+          "Level": {
+            "type": "integer"
+          },
+          "Route": {
+            "type": "string"
+          },
+          "LearningType": {
+            "$ref": "#/components/schemas/LearningType"
+          },
+          "CourseType": {
+            "$ref": "#/components/schemas/CourseType"
+          },
+          "IsActiveAvailable": {
+            "type": "boolean"
+          },
+          "LastDateStarts": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "IsCourseRestricted": {
+            "type": "boolean"
+          },
+          "Providers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderModel"
+            }
+          }
+        },
+        "required": [
+          "LarsCode",
+          "IfateReferenceNumber",
+          "CourseName",
+          "Level",
+          "Route",
+          "LearningType",
+          "CourseType",
+          "IsActiveAvailable",
+          "IsCourseRestricted",
+          "Providers"
+        ]
+      },
+      "ProviderModel": {
+        "type": "object",
+        "properties": {
+          "Ukprn": {
+            "type": "integer"
+          },
+          "ProviderName": {
+            "type": "string"
+          },
+          "LastDateStarts": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "Ukprn",
+          "ProviderName"
+        ]
+      },
+      "LearningType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "FoundationApprenticeship",
+          "ApprenticeshipUnit"
+        ]
+      },
+      "CourseType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "ShortCourse"
+        ]
+      }
+    }
+  }
+}

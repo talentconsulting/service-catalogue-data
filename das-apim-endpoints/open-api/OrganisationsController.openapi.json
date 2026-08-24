@@ -1,0 +1,390 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Organisations API",
+    "version": "1.0.0",
+    "description": "API for managing organisations within the application."
+  },
+  "paths": {
+    "/Organisations": {
+      "get": {
+        "summary": "Get all organisations",
+        "operationId": "GetOrganisations",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOrganisationsQueryResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new organisation",
+        "operationId": "PostOrganisation",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostOrganisationCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/Organisations/{ukprn}": {
+      "get": {
+        "summary": "Get organisation by UKPRN",
+        "operationId": "GetOrganisation",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Unique UKPRN identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetOrganisationQueryResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update organisation details",
+        "operationId": "PatchOrganisation",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Unique UKPRN identifier"
+          },
+          {
+            "name": "X-RequestingUserId",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "User ID of the requester"
+          },
+          {
+            "name": "X-RequestingUserName",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Name of the requester"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchOrganisationModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/Organisations/{ukprn}/ukrlp-data": {
+      "get": {
+        "summary": "Get UKRLP data by UKPRN",
+        "operationId": "GetUkrlp",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Unique UKPRN identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUkrlpQueryResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetOrganisationsQueryResult": {
+        "type": "object",
+        "properties": {
+          "organisations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganisationSummary"
+            }
+          }
+        }
+      },
+      "OrganisationSummary": {
+        "type": "object",
+        "properties": {
+          "ukprn": {
+            "type": "integer"
+          },
+          "legalName": {
+            "type": "string"
+          }
+        }
+      },
+      "GetOrganisationQueryResult": {
+        "type": "object",
+        "properties": {
+          "organisationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ukprn": {
+            "type": "integer"
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "tradingName": {
+            "type": "string",
+            "nullable": true
+          },
+          "companyNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "charityNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "providerType": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "organisationTypeId": {
+            "type": "integer"
+          },
+          "organisationType": {
+            "type": "string"
+          },
+          "status": {
+            "$ref": "#/components/schemas/OrganisationStatus"
+          },
+          "applicationDeterminedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "removedReasonId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "removedReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastUpdatedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "allowedCourseTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllowedCourseType"
+            }
+          }
+        }
+      },
+      "AllowedCourseType": {
+        "type": "object",
+        "properties": {
+          "courseTypeId": {
+            "type": "integer"
+          },
+          "courseTypeName": {
+            "type": "string"
+          }
+        }
+      },
+      "ProviderType": {
+        "type": "string",
+        "enum": [
+          "Type1",
+          "Type2",
+          "Type3"
+        ]
+      },
+      "OrganisationStatus": {
+        "type": "string",
+        "enum": [
+          "Removed",
+          "Active",
+          "ActiveNoStarts",
+          "OnBoarding"
+        ]
+      },
+      "GetUkrlpQueryResult": {
+        "type": "object",
+        "properties": {
+          "legalName": {
+            "type": "string",
+            "nullable": true
+          },
+          "tradingName": {
+            "type": "string",
+            "nullable": true
+          },
+          "charityNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "companyNumber": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PostOrganisationCommand": {
+        "type": "object",
+        "properties": {
+          "ukprn": {
+            "type": "integer"
+          },
+          "legalName": {
+            "type": "string"
+          },
+          "tradingName": {
+            "type": "string",
+            "nullable": true
+          },
+          "companyNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "charityNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "providerType": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "organisationTypeId": {
+            "type": "integer"
+          },
+          "requestingUserId": {
+            "type": "string"
+          },
+          "requestingUserDisplayName": {
+            "type": "string"
+          },
+          "deliversApprenticeships": {
+            "type": "boolean"
+          },
+          "deliversApprenticeshipUnits": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PatchOrganisationModel": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/OrganisationStatus"
+          },
+          "removedReasonId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "providerType": {
+            "$ref": "#/components/schemas/ProviderType"
+          },
+          "organisationTypeId": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}
