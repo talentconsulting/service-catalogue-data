@@ -1,0 +1,406 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Incentives API",
+    "version": "1.0.0",
+    "description": "API for managing employer incentives, accounts, legal entities, and applications."
+  },
+  "paths": {
+    "/accounts/{accountId}/legalentities": {
+      "get": {
+        "summary": "Get Legal Entities",
+        "operationId": "GetLegalEntities",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of legal entities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountLegalEntityDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Add Legal Entity",
+        "operationId": "AddLegalEntity",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LegalEntityRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Legal entity created"
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/legalentities/{accountLegalEntityId}": {
+      "get": {
+        "summary": "Get Legal Entity",
+        "operationId": "GetLegalEntity",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "accountLegalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the legal entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountLegalEntityDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove Legal Entity",
+        "operationId": "RemoveLegalEntity",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "accountLegalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Legal entity removal accepted"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Sign Agreement",
+        "operationId": "SignAgreement",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "accountLegalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SignAgreementRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Agreement signed successfully"
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/legalentity/{accountLegalEntityId}/applications": {
+      "get": {
+        "summary": "Get Applications",
+        "operationId": "GetApplications",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "accountLegalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of applications",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationsQueryResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Applications not found"
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/legalentity/{accountLegalEntityId}/vrfcasestatus": {
+      "put": {
+        "summary": "Update VRF Case Status",
+        "operationId": "UpdateVrfCaseStatus",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "accountLegalEntityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "vrfCaseStatus": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "VRF Case Status updated successfully"
+          }
+        }
+      }
+    },
+    "/blockedpayments": {
+      "patch": {
+        "summary": "Block Payments for Account Legal Entities",
+        "operationId": "BlockAccountLegalEntityForPayments",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/BlockAccountLegalEntityForPaymentsRequest"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Payments blocked successfully"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccountLegalEntityDto": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "LegalEntityRequest": {
+        "type": "object",
+        "properties": {
+          "AccountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "LegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "OrganisationName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "AccountLegalEntityId",
+          "LegalEntityId",
+          "OrganisationName"
+        ]
+      },
+      "SignAgreementRequest": {
+        "type": "object",
+        "properties": {
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AccountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "LegalEntityName": {
+            "type": "string"
+          },
+          "LegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AgreementVersion": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "AccountId",
+          "AccountLegalEntityId",
+          "LegalEntityName",
+          "LegalEntityId",
+          "AgreementVersion"
+        ]
+      },
+      "GetApplicationsQueryResult": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "BlockAccountLegalEntityForPaymentsRequest": {
+        "type": "object",
+        "properties": {
+          "VendorBlocks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VendorBlock"
+            }
+          },
+          "ServiceRequest": {
+            "$ref": "#/components/schemas/ServiceRequest"
+          }
+        },
+        "required": [
+          "VendorBlocks",
+          "ServiceRequest"
+        ]
+      },
+      "VendorBlock": {
+        "type": "object",
+        "properties": {
+          "VendorId": {
+            "type": "string"
+          },
+          "VendorBlockEndDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "VendorId",
+          "VendorBlockEndDate"
+        ]
+      },
+      "ServiceRequest": {
+        "type": "object",
+        "properties": {
+          "TaskId": {
+            "type": "string"
+          },
+          "DecisionReference": {
+            "type": "string"
+          },
+          "TaskCreatedDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "TaskId",
+          "DecisionReference"
+        ]
+      }
+    }
+  }
+}

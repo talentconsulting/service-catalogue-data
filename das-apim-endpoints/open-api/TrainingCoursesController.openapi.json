@@ -1,43 +1,48 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "TrainingCourses API",
+    "title": "EmployerFinance API",
     "version": "1.0.0"
   },
   "paths": {
-    "/trainingcourses/standards/{courseCode}": {
+    "/trainingcourses/standards": {
       "get": {
-        "tags": [
-          "TrainingCourses"
-        ],
-        "summary": "Retrieve a standard by its course code",
-        "parameters": [
-          {
-            "name": "courseCode",
-            "in": "path",
-            "required": true,
-            "description": "The course code of the standard",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "summary": "Get list of standards",
+        "operationId": "GetStandards",
         "responses": {
           "200": {
-            "description": "Standard retrieved successfully",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetStandardResponse"
+                  "$ref": "#/components/schemas/GetStandardsResponse"
                 }
               }
             }
           },
-          "404": {
-            "description": "Standard not found"
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/trainingcourses/frameworks": {
+      "get": {
+        "summary": "Get list of frameworks",
+        "operationId": "GetFrameworks",
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFrameworksResponse"
+                }
+              }
+            }
           },
           "400": {
-            "description": "Invalid request"
+            "description": "Bad request"
           }
         }
       }
@@ -45,9 +50,75 @@
   },
   "components": {
     "schemas": {
-      "GetStandardResponse": {
+      "GetStandardsResponse": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "standards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StandardResponse"
+            }
+          }
+        },
+        "required": [
+          "standards"
+        ]
+      },
+      "StandardResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer"
+          },
+          "duration": {
+            "type": "integer"
+          },
+          "fundingCap": {
+            "type": "integer"
+          }
+        }
+      },
+      "GetFrameworksResponse": {
+        "type": "object",
+        "properties": {
+          "frameworks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FrameworkResponse"
+            }
+          }
+        },
+        "required": [
+          "frameworks"
+        ]
+      },
+      "FrameworkResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer"
+          },
+          "pathway": {
+            "type": "string"
+          },
+          "fundingCap": {
+            "type": "integer"
+          }
+        }
       }
     }
   }

@@ -1,77 +1,71 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Accounts API",
-    "description": "Provides operations related to accounts, including account information and user details.",
-    "version": "1.0.0"
+    "title": "Employer Finance API",
+    "version": "1.0.0",
+    "description": "API for managing employer finance-related operations."
   },
   "paths": {
-    "/Accounts/{hashedAccountId}": {
+    "/accounts/{accountId}/users/which-receive-notifications": {
       "get": {
-        "summary": "Retrieve account information",
-        "operationId": "GetAccount",
+        "summary": "Get account team members which receive notifications",
+        "operationId": "GetAccountTeamMembersWhichReceiveNotifications",
         "parameters": [
           {
-            "name": "hashedAccountId",
+            "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            },
-            "description": "The hashed account ID of the employer account"
+              "type": "integer",
+              "format": "int64"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of the employer account",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetAccountQueryResponse"
+                  "$ref": "#/components/schemas/GetAccountTeamMembersWhichReceiveNotificationsResponse"
                 }
               }
             }
           },
-          "404": {
-            "description": "Employer account not found"
-          },
           "400": {
-            "description": "Bad request due to an error"
+            "description": "Bad request"
           }
         }
       }
     },
-    "/Accounts/{hashedAccountId}/users": {
+    "/accounts/{accountId}/minimum-signed-agreement-version": {
       "get": {
-        "summary": "Retrieve account users",
-        "operationId": "GetAccountUsers",
+        "summary": "Get account minimum signed agreement version",
+        "operationId": "GetAccountMinimumSignedAgreementVersion",
         "parameters": [
           {
-            "name": "hashedAccountId",
+            "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            },
-            "description": "The hashed account ID of the employer account"
+              "type": "integer",
+              "format": "int64"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of account users",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetAccountUsersQueryResponse"
+                  "$ref": "#/components/schemas/GetAccountMinimumSignedAgreementVersionResponse"
                 }
               }
             }
           },
-          "404": {
-            "description": "Account users not found"
-          },
           "400": {
-            "description": "Bad request due to an error"
+            "description": "Bad request"
           }
         }
       }
@@ -79,73 +73,23 @@
   },
   "components": {
     "schemas": {
-      "GetAccountQueryResponse": {
+      "GetAccountMinimumSignedAgreementVersionResponse": {
         "type": "object",
         "properties": {
-          "accountId": {
-            "type": "string",
-            "description": "The unique identifier for the account"
-          },
-          "name": {
-            "type": "string",
-            "description": "The name of the employer account"
-          },
-          "createdDate": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The date and time when the account was created"
-          },
-          "status": {
-            "$ref": "#/components/schemas/AccountStatus"
+          "MinimumSignedAgreementVersion": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
-      "GetAccountUsersQueryResponse": {
+      "GetAccountTeamMembersWhichReceiveNotificationsResponse": {
         "type": "object",
         "properties": {
-          "users": {
+          "result": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/UserDetails"
+              "type": "object"
             }
-          }
-        }
-      },
-      "AccountStatus": {
-        "type": "string",
-        "enum": [
-          "Active",
-          "Inactive",
-          "Closed"
-        ],
-        "description": "The status of the employer account"
-      },
-      "UserDetails": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string",
-            "description": "The unique identifier for the user"
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "description": "The email address of the user"
-          },
-          "firstName": {
-            "type": "string",
-            "description": "The first name of the user"
-          },
-          "lastName": {
-            "type": "string",
-            "description": "The last name of the user"
-          },
-          "roles": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "The roles assigned to the user"
           }
         }
       }

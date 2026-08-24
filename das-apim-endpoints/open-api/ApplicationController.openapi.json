@@ -1,0 +1,397 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Incentives API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/accounts/{accountId}/applications": {
+      "post": {
+        "summary": "Create a new application",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApplicationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Application created successfully"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an existing application",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateApplicationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application updated successfully"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Confirm application submission",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmApplicationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application confirmed successfully"
+          },
+          "409": {
+            "description": "Conflict due to duplicate ULN"
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/applications/{applicationId}": {
+      "get": {
+        "summary": "Retrieve application details",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "includeApprenticeships",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/applications/{applicationId}/bankingDetails/": {
+      "get": {
+        "summary": "Retrieve banking details for an application",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "hashedAccountId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Banking details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankingDetailsDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/applications/{applicationId}/accountlegalentity": {
+      "get": {
+        "summary": "Retrieve account legal entity for an application",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account legal entity details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationAccountLegalEntityResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/applications/{applicationId}/apprenticeships": {
+      "patch": {
+        "summary": "Save apprenticeship details for an application",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprenticeshipDetailsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Apprenticeship details saved successfully"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateApplicationRequest": {
+        "type": "object",
+        "properties": {
+          "ApplicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "AccountId": {
+            "type": "integer"
+          },
+          "AccountLegalEntityId": {
+            "type": "integer"
+          },
+          "ApprenticeshipIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "ApplicationId",
+          "AccountId",
+          "AccountLegalEntityId",
+          "ApprenticeshipIds"
+        ]
+      },
+      "UpdateApplicationRequest": {
+        "type": "object",
+        "properties": {
+          "ApplicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "AccountId": {
+            "type": "integer"
+          },
+          "ApprenticeshipIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "ApplicationId",
+          "AccountId",
+          "ApprenticeshipIds"
+        ]
+      },
+      "ConfirmApplicationRequest": {
+        "type": "object",
+        "properties": {
+          "ApplicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "AccountId": {
+            "type": "integer"
+          },
+          "DateSubmitted": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "SubmittedByEmail": {
+            "type": "string"
+          },
+          "SubmittedByName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ApplicationId",
+          "AccountId",
+          "DateSubmitted",
+          "SubmittedByEmail",
+          "SubmittedByName"
+        ]
+      },
+      "ApplicationResponse": {
+        "type": "object",
+        "properties": {
+          "Application": {
+            "type": "object"
+          }
+        }
+      },
+      "BankingDetailsDto": {
+        "type": "object"
+      },
+      "ApplicationAccountLegalEntityResponse": {
+        "type": "object"
+      },
+      "ApprenticeshipDetailsRequest": {
+        "type": "object",
+        "properties": {
+          "AccountId": {
+            "type": "integer"
+          },
+          "ApplicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ApprenticeshipDetails": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprenticeDetailsDto"
+            }
+          }
+        },
+        "required": [
+          "AccountId",
+          "ApplicationId",
+          "ApprenticeshipDetails"
+        ]
+      },
+      "ApprenticeDetailsDto": {
+        "type": "object",
+        "properties": {
+          "ApprenticeId": {
+            "type": "integer"
+          },
+          "EmploymentStartDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "ApprenticeId",
+          "EmploymentStartDate"
+        ]
+      }
+    }
+  }
+}

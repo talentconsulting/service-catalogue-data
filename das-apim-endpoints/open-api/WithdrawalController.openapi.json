@@ -1,0 +1,148 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Incentives API",
+    "version": "1.0.0",
+    "description": "API for managing employer incentives."
+  },
+  "paths": {
+    "/withdrawals": {
+      "post": {
+        "operationId": "WithdrawApplication",
+        "summary": "Withdraw an application",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    },
+    "/withdrawal-reinstatements": {
+      "post": {
+        "operationId": "ReinstateApplication",
+        "summary": "Reinstate a withdrawn application",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReinstateApplicationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "WithdrawRequest": {
+        "type": "object",
+        "properties": {
+          "WithdrawalType": {
+            "$ref": "#/components/schemas/WithdrawalType"
+          },
+          "Applications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Application"
+            }
+          },
+          "ServiceRequest": {
+            "$ref": "#/components/schemas/ServiceRequest"
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "EmailAddress": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "WithdrawalType",
+          "Applications",
+          "ServiceRequest",
+          "AccountId",
+          "EmailAddress"
+        ]
+      },
+      "WithdrawalType": {
+        "type": "string",
+        "enum": [
+          "Employer",
+          "Compliance"
+        ]
+      },
+      "Application": {
+        "type": "object",
+        "properties": {
+          "AccountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ULN": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ServiceRequest": {
+            "$ref": "#/components/schemas/ServiceRequest"
+          }
+        },
+        "required": [
+          "AccountLegalEntityId",
+          "ULN",
+          "ServiceRequest"
+        ]
+      },
+      "ServiceRequest": {
+        "type": "object",
+        "properties": {
+          "TaskId": {
+            "type": "string"
+          },
+          "DecisionReference": {
+            "type": "string"
+          },
+          "TaskCreatedDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "TaskId",
+          "DecisionReference"
+        ]
+      },
+      "ReinstateApplicationRequest": {
+        "type": "object",
+        "properties": {
+          "Applications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Application"
+            }
+          }
+        },
+        "required": [
+          "Applications"
+        ]
+      }
+    }
+  }
+}
