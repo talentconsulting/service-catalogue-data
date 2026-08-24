@@ -1,18 +1,24 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SelectLearners API",
-    "version": "1.0.0"
+    "title": "Approvals API",
+    "version": "1.0.0",
+    "description": "API for managing learner selection within the Approvals system."
   },
   "paths": {
     "/providers/{providerId}/unapproved/add/learners/select": {
       "post": {
-        "summary": "Get ILR records for a provider",
+        "tags": [
+          "Learners"
+        ],
+        "summary": "Get learners for a provider.",
+        "operationId": "getLearnersForProvider",
         "parameters": [
           {
             "name": "providerId",
             "in": "path",
             "required": true,
+            "description": "The ID of the provider.",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -20,6 +26,7 @@
           }
         ],
         "requestBody": {
+          "description": "Search criteria for learners.",
           "required": true,
           "content": {
             "application/json": {
@@ -31,29 +38,37 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "A list of learners matching the search criteria.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetLearnersForProviderQueryResponse"
+                  }
                 }
               }
             }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error."
           }
         }
       }
     },
     "/providers/{providerId}/unapproved/add/learners/select/{learnerId}": {
       "get": {
-        "summary": "Get ILR record for a selected learner",
+        "tags": [
+          "Learners"
+        ],
+        "summary": "Get ILR record for a specific learner.",
+        "operationId": "getLearnerForProvider",
         "parameters": [
           {
             "name": "providerId",
             "in": "path",
             "required": true,
+            "description": "The ID of the provider.",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -63,6 +78,7 @@
             "name": "learnerId",
             "in": "path",
             "required": true,
+            "description": "The ID of the learner.",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -71,17 +87,17 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "The ILR record for the specified learner.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/GetLearnerForProviderQueryResponse"
                 }
               }
             }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error."
           }
         }
       }
@@ -94,10 +110,12 @@
         "properties": {
           "StartMonth": {
             "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "StartYear": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "Page": {
             "type": "integer",
@@ -122,10 +140,12 @@
           },
           "AccountLegalEntityId": {
             "type": "integer",
+            "format": "int64",
             "nullable": true
           },
           "CohortId": {
             "type": "integer",
+            "format": "int64",
             "nullable": true
           },
           "SearchTerm": {
@@ -133,22 +153,33 @@
             "default": ""
           },
           "LearningType": {
-            "type": "string",
-            "enum": [
-              "Apprenticeship",
-              "FoundationApprenticeship",
-              "ApprenticeshipUnit"
-            ],
-            "nullable": true
+            "$ref": "#/components/schemas/LearningType"
           },
           "ExcludeUlns": {
             "type": "array",
             "items": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             },
             "default": []
           }
         }
+      },
+      "LearningType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "FoundationApprenticeship",
+          "ApprenticeshipUnit"
+        ]
+      },
+      "GetLearnersForProviderQueryResponse": {
+        "type": "object",
+        "description": "Response schema for learners retrieved for a provider. Details not provided in the input data."
+      },
+      "GetLearnerForProviderQueryResponse": {
+        "type": "object",
+        "description": "Response schema for a specific learner's ILR record. Details not provided in the input data."
       }
     }
   }

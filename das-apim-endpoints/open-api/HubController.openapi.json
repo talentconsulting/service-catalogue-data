@@ -1,14 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Campaign Hub API",
+    "title": "Campaign API",
     "version": "1.0.0"
   },
   "paths": {
     "/Hub/{hub}": {
       "get": {
-        "summary": "Get Hub",
-        "description": "Retrieve details of a specific hub page.",
+        "summary": "Retrieve information about a hub.",
+        "operationId": "getHub",
         "parameters": [
           {
             "name": "hub",
@@ -17,12 +17,12 @@
             "schema": {
               "type": "string"
             },
-            "description": "The identifier for the hub page."
+            "description": "The hub identifier."
           }
         ],
         "responses": {
           "200": {
-            "description": "Hub details retrieved successfully.",
+            "description": "Successfully retrieved hub information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -46,8 +46,8 @@
     },
     "/Hub/preview/{hub}": {
       "get": {
-        "summary": "Get Preview Hub",
-        "description": "Retrieve details of a preview hub page.",
+        "summary": "Retrieve preview information about a hub.",
+        "operationId": "getPreviewHub",
         "parameters": [
           {
             "name": "hub",
@@ -56,12 +56,12 @@
             "schema": {
               "type": "string"
             },
-            "description": "The identifier for the preview hub page."
+            "description": "The hub identifier for preview."
           }
         ],
         "responses": {
           "200": {
-            "description": "Preview hub details retrieved successfully.",
+            "description": "Successfully retrieved preview information about the hub.",
             "content": {
               "application/json": {
                 "schema": {
@@ -100,7 +100,8 @@
           "Message": {
             "type": "string"
           }
-        }
+        },
+        "description": "Details of the not found error."
       },
       "HubPageModel": {
         "type": "object",
@@ -112,10 +113,10 @@
             "$ref": "#/components/schemas/HubContent"
           },
           "MenuContent": {
-            "$ref": "#/components/schemas/MenuPageModel.MenuPageContent"
+            "$ref": "#/components/schemas/MenuPageContent"
           },
           "BannerModels": {
-            "$ref": "#/components/schemas/BannerPageModel.BannerPageContent"
+            "$ref": "#/components/schemas/BannerPageModel"
           }
         }
       },
@@ -193,6 +194,46 @@
           }
         }
       },
+      "MenuPageContent": {
+        "type": "object",
+        "properties": {
+          "TopLevel": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          },
+          "Apprentices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          },
+          "Employers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          },
+          "Influencers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          }
+        }
+      },
+      "BannerPageModel": {
+        "type": "object",
+        "properties": {
+          "MainContent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BannerPageContent"
+            }
+          }
+        }
+      },
       "CardPageModel": {
         "type": "object",
         "properties": {
@@ -201,25 +242,52 @@
           },
           "CardImage": {
             "$ref": "#/components/schemas/ContentItem"
-          }
-        }
-      },
-      "UrlDetails": {
-        "type": "object",
-        "properties": {
+          },
+          "Id": {
+            "type": "string"
+          },
           "Slug": {
+            "type": "string"
+          },
+          "Summary": {
             "type": "string"
           },
           "Title": {
             "type": "string"
           },
-          "Hub": {
+          "HubType": {
+            "type": "string"
+          },
+          "MetaDescription": {
             "type": "string"
           },
           "PageType": {
+            "$ref": "#/components/schemas/PageType"
+          }
+        }
+      },
+      "BannerPageContent": {
+        "type": "object",
+        "properties": {
+          "Items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentItem"
+            }
+          },
+          "BackgroundColour": {
             "type": "string"
           },
-          "ParentSlug": {
+          "AllowUserToHideTheBanner": {
+            "type": "boolean"
+          },
+          "ShowOnTheHomepageOnly": {
+            "type": "boolean"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Id": {
             "type": "string"
           }
         }
@@ -293,57 +361,22 @@
           }
         }
       },
-      "MenuPageModel.MenuPageContent": {
+      "UrlDetails": {
         "type": "object",
         "properties": {
-          "TopLevel": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UrlDetails"
-            }
-          },
-          "Apprentices": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UrlDetails"
-            }
-          },
-          "Employers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UrlDetails"
-            }
-          },
-          "Influencers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UrlDetails"
-            }
-          }
-        }
-      },
-      "BannerPageModel.BannerPageContent": {
-        "type": "object",
-        "properties": {
-          "Items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ContentItem"
-            }
-          },
-          "BackgroundColour": {
+          "Slug": {
             "type": "string"
-          },
-          "AllowUserToHideTheBanner": {
-            "type": "boolean"
-          },
-          "ShowOnTheHomepageOnly": {
-            "type": "boolean"
           },
           "Title": {
             "type": "string"
           },
-          "Id": {
+          "Hub": {
+            "type": "string"
+          },
+          "PageType": {
+            "type": "string"
+          },
+          "ParentSlug": {
             "type": "string"
           }
         }

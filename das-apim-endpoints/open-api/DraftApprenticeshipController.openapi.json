@@ -1,13 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "DraftApprenticeship API",
+    "title": "Draft Apprenticeship API",
     "version": "1.0.0"
   },
   "paths": {
-    "/draftApprenticeship/{cohortId}": {
+    "/DraftApprenticeship/{cohortId}": {
       "get": {
-        "summary": "Get all draft apprenticeships for a cohort",
+        "operationId": "GetAllDraftApprenticeships",
         "parameters": [
           {
             "name": "cohortId",
@@ -21,125 +21,25 @@
         ],
         "responses": {
           "200": {
-            "description": "Draft apprenticeships retrieved successfully"
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
           },
           "404": {
-            "description": "Cohort not found"
+            "description": "Not found"
           },
           "400": {
-            "description": "Bad Request"
-          }
-        }
-      }
-    },
-    "/employer/{accountId}/unapproved/{cohortId}/apprentices/{draftApprenticeshipId}/edit": {
-      "get": {
-        "summary": "Get draft apprenticeship details for editing (Employer view)",
-        "parameters": [
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "cohortId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "draftApprenticeshipId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "courseCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Draft apprenticeship details retrieved successfully"
-          },
-          "404": {
-            "description": "Draft apprenticeship not found"
-          },
-          "400": {
-            "description": "Bad Request"
-          }
-        }
-      }
-    },
-    "/provider/{providerId}/unapproved/{cohortId}/apprentices/{draftApprenticeshipId}/edit": {
-      "get": {
-        "summary": "Get draft apprenticeship details for editing (Provider view)",
-        "parameters": [
-          {
-            "name": "providerId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "cohortId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "draftApprenticeshipId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "courseCode",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Draft apprenticeship details retrieved successfully"
-          },
-          "404": {
-            "description": "Draft apprenticeship not found"
-          },
-          "400": {
-            "description": "Bad Request"
+            "description": "Bad request"
           }
         }
       }
     },
     "/cohorts/{cohortId}/draft-apprenticeships": {
       "post": {
-        "summary": "Add a draft apprenticeship to a cohort",
+        "operationId": "AddDraftApprenticeship",
         "parameters": [
           {
             "name": "cohortId",
@@ -163,7 +63,7 @@
         },
         "responses": {
           "200": {
-            "description": "Draft apprenticeship created successfully",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -177,7 +77,7 @@
     },
     "/cohorts/{cohortId}/draft-apprenticeships/{apprenticeshipId}": {
       "put": {
-        "summary": "Update a draft apprenticeship",
+        "operationId": "UpdateDraftApprenticeship",
         "parameters": [
           {
             "name": "cohortId",
@@ -210,7 +110,154 @@
         },
         "responses": {
           "200": {
-            "description": "Draft apprenticeship updated successfully"
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/provider/{providerId}/unapproved/{cohortId}/apprentices/{draftApprenticeshipId}/sync-learner-data": {
+      "post": {
+        "operationId": "SyncLearnerData",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "cohortId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "draftApprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncLearnerDataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/provider/{providerId}/unapproved/{cohortId}/apprentices/{draftApprenticeshipId}/email": {
+      "put": {
+        "operationId": "AddEmailToDraftApprenticeship",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "cohortId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "draftApprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDraftApprenticeEmailRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          }
+        }
+      }
+    },
+    "/provider/{providerId}/unapproved/{cohortId}/apprentices/{draftApprenticeshipId}/reference": {
+      "put": {
+        "operationId": "SetReferenceForDraftApprenticeship",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "cohortId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "draftApprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DraftApprenticeshipSetReferenceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
           }
         }
       }
@@ -221,46 +268,108 @@
       "AddDraftApprenticeshipRequest": {
         "type": "object",
         "properties": {
-          "FirstName": {
-            "type": "string"
+          "userInfo": {
+            "type": "object",
+            "nullable": true
           },
-          "LastName": {
-            "type": "string"
-          },
-          "Email": {
-            "type": "string"
-          },
-          "DateOfBirth": {
+          "requestingParty": {
             "type": "string",
-            "format": "date"
+            "nullable": true
           },
-          "CourseCode": {
+          "userId": {
             "type": "string"
           },
-          "Cost": {
+          "providerId": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           },
-          "StartDate": {
-            "type": "string",
-            "format": "date"
+          "firstName": {
+            "type": "string"
           },
-          "EndDate": {
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "dateOfBirth": {
             "type": "string",
-            "format": "date"
+            "format": "date-time",
+            "nullable": true
+          },
+          "uln": {
+            "type": "string"
+          },
+          "courseCode": {
+            "type": "string"
+          },
+          "deliveryModel": {
+            "type": "string",
+            "nullable": true
+          },
+          "cost": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "actualStartDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "employmentPrice": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "employmentEndDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ignoreStartDateOverlap": {
+            "type": "boolean"
+          },
+          "isOnFlexiPaymentPilot": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "trainingPrice": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "endPointAssessmentPrice": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "learnerDataId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
           }
-        },
-        "required": [
-          "FirstName",
-          "LastName",
-          "Email",
-          "CourseCode"
-        ]
+        }
       },
       "AddDraftApprenticeshipResponse": {
         "type": "object",
         "properties": {
-          "DraftApprenticeshipId": {
+          "draftApprenticeshipId": {
             "type": "integer",
             "format": "int64"
           }
@@ -269,41 +378,111 @@
       "UpdateDraftApprenticeshipRequest": {
         "type": "object",
         "properties": {
-          "FirstName": {
-            "type": "string"
+          "userInfo": {
+            "type": "object",
+            "nullable": true
           },
-          "LastName": {
-            "type": "string"
-          },
-          "Email": {
-            "type": "string"
-          },
-          "DateOfBirth": {
+          "requestingParty": {
             "type": "string",
-            "format": "date"
+            "nullable": true
           },
-          "CourseCode": {
+          "firstName": {
             "type": "string"
           },
-          "Cost": {
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "uln": {
+            "type": "string"
+          },
+          "courseCode": {
+            "type": "string"
+          },
+          "courseOption": {
+            "type": "string"
+          },
+          "deliveryModel": {
+            "type": "string"
+          },
+          "cost": {
             "type": "integer",
-            "format": "int32"
+            "format": "int32",
+            "nullable": true
           },
-          "StartDate": {
+          "startDate": {
             "type": "string",
-            "format": "date"
+            "format": "date-time",
+            "nullable": true
           },
-          "EndDate": {
+          "actualStartDate": {
             "type": "string",
-            "format": "date"
+            "format": "date-time",
+            "nullable": true
+          },
+          "employmentEndDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reference": {
+            "type": "string"
+          },
+          "reservationId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "isOnFlexiPaymentPilot": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "hasLearnerDataChanges": {
+            "type": "boolean"
+          },
+          "lastLearnerDataSync": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
-        },
-        "required": [
-          "FirstName",
-          "LastName",
-          "Email",
-          "CourseCode"
-        ]
+        }
+      },
+      "SyncLearnerDataResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "updatedDraftApprenticeship": {
+            "type": "object"
+          }
+        }
+      },
+      "AddDraftApprenticeEmailRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "DraftApprenticeshipSetReferenceRequest": {
+        "type": "object",
+        "properties": {
+          "reference": {
+            "type": "string"
+          }
+        }
       }
     }
   }

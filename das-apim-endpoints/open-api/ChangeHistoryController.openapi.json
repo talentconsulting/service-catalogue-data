@@ -1,15 +1,15 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Approvals API",
+    "title": "Change History API",
     "version": "1.0.0",
-    "description": "API for managing approvals change history"
+    "description": "API for accessing apprenticeship change history."
   },
   "paths": {
     "/change-history/{apprenticeshipId}": {
       "get": {
-        "summary": "Get Change History for an Apprenticeship",
-        "operationId": "GetChangeHistory",
+        "summary": "Get Change History",
+        "description": "Retrieves the change history for a given apprenticeship.",
         "parameters": [
           {
             "name": "apprenticeshipId",
@@ -18,12 +18,20 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "Unique identifier for the apprenticeship."
           }
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successfully retrieved change history.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeHistoryResponse"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
@@ -33,8 +41,8 @@
     },
     "/change-history/provider/{providerId}/apprentices/change-history": {
       "get": {
-        "summary": "Get Change History for All Apprentices of a Provider",
-        "operationId": "GetChangeHistoryForAllLearnersOfProvider",
+        "summary": "Get Change History for All Learners of Provider",
+        "description": "Retrieves the change history for all apprentices for a specified provider.",
         "parameters": [
           {
             "name": "providerId",
@@ -43,12 +51,20 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "Unique identifier for the provider."
           }
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successfully retrieved change history.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeHistoryResponse"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
@@ -58,8 +74,8 @@
     },
     "/change-history/employer/{accountId}/apprentices/change-history": {
       "get": {
-        "summary": "Get Change History for Employer's Apprentices",
-        "operationId": "GetChangeHistoryForEmployer",
+        "summary": "Get Change History for Employer",
+        "description": "Retrieves the change history for all apprentices of a specified employer account.",
         "parameters": [
           {
             "name": "accountId",
@@ -68,12 +84,20 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "Unique identifier for the employer account."
           }
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successfully retrieved change history.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeHistoryResponse"
+                }
+              }
+            }
           },
           "400": {
             "description": "Bad Request"
@@ -83,6 +107,32 @@
     }
   },
   "components": {
-    "schemas": {}
+    "schemas": {
+      "ChangeHistoryResponse": {
+        "type": "object",
+        "properties": {
+          "changes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Change"
+            }
+          }
+        }
+      },
+      "Change": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date and time of the change."
+          },
+          "description": {
+            "type": "string",
+            "description": "Details of the change."
+          }
+        }
+      }
+    }
   }
 }

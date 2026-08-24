@@ -2,24 +2,22 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Approvals API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing data locks in SFA DAS Approvals."
   },
   "paths": {
-    "/DataLock/statuses": {
+    "/datalock/statuses": {
       "get": {
         "summary": "Get Data Lock Statuses",
-        "description": "Retrieves data lock statuses filtered by parameters.",
-        "operationId": "GetDataLockStatuses",
+        "description": "Retrieve data lock statuses based on query parameters.",
         "parameters": [
           {
             "name": "sinceEventId",
             "in": "query",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Filter data lock statuses since the provided event ID."
+              "type": "integer"
+            }
           },
           {
             "name": "sinceTime",
@@ -28,8 +26,7 @@
             "schema": {
               "type": "string",
               "format": "date-time"
-            },
-            "description": "Filter data lock statuses since the provided time."
+            }
           },
           {
             "name": "employerAccountId",
@@ -37,18 +34,15 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "The employer account ID linked to the data lock statuses."
+            }
           },
           {
             "name": "ukprn",
             "in": "query",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "The UKPRN (UK Provider Reference Number) to filter statuses."
+              "type": "integer"
+            }
           },
           {
             "name": "page",
@@ -56,15 +50,13 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "format": "int32",
               "default": 1
-            },
-            "description": "The page number for paginated results. Defaults to 1."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved data lock statuses.",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -74,7 +66,7 @@
             }
           },
           "400": {
-            "description": "Bad request. The query parameters may be invalid."
+            "description": "Bad request"
           }
         }
       }
@@ -85,23 +77,38 @@
       "GetDataLockStatusListResponse": {
         "type": "object",
         "properties": {
-          "TotalNumberOfPages": {
-            "type": "integer",
-            "format": "int32",
-            "description": "Total number of pages available for paginated results."
+          "totalNumberOfPages": {
+            "type": "integer"
           },
-          "DataLockStatuses": {
+          "dataLockStatuses": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/GetDataLockStatusResponse"
-            },
-            "description": "List of data lock statuses."
+            }
           }
         }
       },
       "GetDataLockStatusResponse": {
         "type": "object",
-        "description": "Representing a single data lock status."
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DataLockStatus"
+          },
+          "details": {
+            "type": "string"
+          }
+        }
+      },
+      "DataLockStatus": {
+        "type": "string",
+        "enum": [
+          "Unknown",
+          "Pass",
+          "Fail"
+        ]
       }
     }
   }

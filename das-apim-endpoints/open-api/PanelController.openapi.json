@@ -1,19 +1,20 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SFA DAS Campaign API",
+    "title": "Campaign Panel API",
     "version": "1.0.0"
   },
   "paths": {
     "/Panel/{panelId}": {
       "get": {
-        "summary": "Retrieve a specific Panel by ID",
+        "summary": "Retrieve a campaign panel by ID",
+        "operationId": "GetPanelAsync",
         "parameters": [
           {
             "name": "panelId",
             "in": "path",
             "required": true,
-            "description": "ID of the Panel",
+            "description": "ID of the panel to retrieve",
             "schema": {
               "type": "integer"
             }
@@ -21,7 +22,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of panel",
+            "description": "Panel found",
             "content": {
               "application/json": {
                 "schema": {
@@ -45,13 +46,14 @@
     },
     "/Panel/preview/{panelId}": {
       "get": {
-        "summary": "Retrieve a preview of a Panel by ID",
+        "summary": "Retrieve a preview of a campaign panel by ID",
+        "operationId": "GetPreviewPanelAsync",
         "parameters": [
           {
             "name": "panelId",
             "in": "path",
             "required": true,
-            "description": "ID of the Panel",
+            "description": "ID of the panel preview to retrieve",
             "schema": {
               "type": "integer"
             }
@@ -59,7 +61,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of the preview panel",
+            "description": "Preview Panel found",
             "content": {
               "application/json": {
                 "schema": {
@@ -96,7 +98,7 @@
         "type": "object",
         "properties": {
           "Panel": {
-            "$ref": "#/components/schemas/PanelModel"
+            "$ref": "#/components/schemas/PanelModel.PanelContent"
           }
         }
       },
@@ -112,11 +114,11 @@
         "type": "object",
         "properties": {
           "MainContent": {
-            "$ref": "#/components/schemas/PanelContent"
+            "$ref": "#/components/schemas/PanelModel.PanelContent"
           }
         }
       },
-      "PanelContent": {
+      "PanelModel.PanelContent": {
         "type": "object",
         "properties": {
           "Title": {
@@ -174,6 +176,17 @@
           }
         }
       },
+      "VideoTranscript": {
+        "type": "object",
+        "properties": {
+          "VideoName": {
+            "type": "string"
+          },
+          "Text": {
+            "type": "string"
+          }
+        }
+      },
       "ResourceItem": {
         "type": "object",
         "properties": {
@@ -190,24 +203,12 @@
             "type": "string"
           },
           "Url": {
-            "type": "string",
-            "format": "uri"
+            "type": "string"
           },
           "Size": {
             "type": "integer"
           },
           "Description": {
-            "type": "string"
-          }
-        }
-      },
-      "VideoTranscript": {
-        "type": "object",
-        "properties": {
-          "VideoName": {
-            "type": "string"
-          },
-          "Text": {
             "type": "string"
           }
         }
@@ -219,8 +220,7 @@
             "type": "string"
           },
           "Url": {
-            "type": "string",
-            "format": "uri"
+            "type": "string"
           },
           "Styles": {
             "type": "array",

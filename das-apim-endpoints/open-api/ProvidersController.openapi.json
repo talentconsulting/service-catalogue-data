@@ -1,60 +1,40 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Apprentice Feedback API",
+    "title": "Providers API",
     "version": "1.0.0"
   },
   "paths": {
-    "/Provider/{ApprenticeId}": {
+    "/providers/": {
       "get": {
-        "operationId": "GetApprenticeTrainingProviders",
-        "summary": "Get a list of training providers for a given apprentice.",
-        "parameters": [
-          {
-            "name": "ApprenticeId",
-            "in": "path",
-            "required": true,
-            "description": "Unique identifier of the apprentice.",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
+        "summary": "Get all providers",
+        "operationId": "getProviders",
         "responses": {
           "200": {
-            "description": "Successful response with a list of training providers.",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetApprenticeTrainingProvidersResult"
+                  "$ref": "#/components/schemas/GetProvidersListResponse"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
     },
-    "/Provider/{ApprenticeId}/{Ukprn}": {
+    "/providers/{ukprn}/users": {
       "get": {
-        "operationId": "GetApprenticeTrainingProvider",
-        "summary": "Get details of a specific training provider for a given apprentice.",
+        "summary": "Get users for a provider",
+        "operationId": "getProviderUsers",
         "parameters": [
           {
-            "name": "ApprenticeId",
+            "name": "ukprn",
             "in": "path",
             "required": true,
-            "description": "Unique identifier of the apprentice.",
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "Ukprn",
-            "in": "path",
-            "required": true,
-            "description": "Unique identifier of the training provider.",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -63,14 +43,185 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with details of a specific training provider.",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetApprenticeTrainingProviderResult"
+                  "$ref": "#/components/schemas/GetProvidersUsersResponse"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/providers/{providerId}/courses/{trainingCode}": {
+      "get": {
+        "summary": "Get provider course delivery model",
+        "operationId": "getProviderCourseDeliveryModel",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "trainingCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountLegalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDeliveryModelsQueryResult"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/providers/{providerId}/courses": {
+      "get": {
+        "summary": "Get provider courses delivery model by query parameters",
+        "operationId": "getProviderCourseDeliveryModelByQuery",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "trainingCode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountLegalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDeliveryModelsQueryResult"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/providers/{ukprn}/emails": {
+      "post": {
+        "summary": "Send emails to provider users",
+        "operationId": "emailProviderUsers",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderEmailRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email sent successfully"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/providers/{ukprn}/status": {
+      "get": {
+        "summary": "Get provider status",
+        "operationId": "getProviderStatus",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderAccountDetailsResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -78,76 +229,63 @@
   },
   "components": {
     "schemas": {
-      "GetApprenticeTrainingProvidersResult": {
+      "GetProvidersListResponse": {
         "type": "object",
         "properties": {
-          "RecentDenyPeriodDays": {
-            "type": "integer",
-            "description": "Number of days for the recent deny feedback period."
-          },
-          "InitialDenyPeriodDays": {
-            "type": "integer",
-            "description": "Number of days for the initial deny feedback period."
-          },
-          "FinalAllowedPeriodDays": {
-            "type": "integer",
-            "description": "Number of days for the final allowed feedback period."
-          },
-          "TrainingProviders": {
+          "providers": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/TrainingProvider"
+              "$ref": "#/components/schemas/GetProvidersResponse"
             }
           }
         }
       },
-      "GetApprenticeTrainingProviderResult": {
+      "GetProvidersResponse": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "GetProvidersUsersResponse": {
         "type": "object",
         "properties": {
-          "TrainingProvider": {
-            "$ref": "#/components/schemas/TrainingProvider"
+          "users": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
           }
         }
       },
-      "TrainingProvider": {
+      "GetDeliveryModelsQueryResult": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "ProviderEmailRequest": {
         "type": "object",
         "properties": {
-          "ApprenticeFeedbackTargetId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Unique identifier for the feedback target associated with the training provider."
+          "templateId": {
+            "type": "string"
           },
-          "ProviderName": {
-            "type": "string",
-            "description": "Name of the training provider."
+          "tokens": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
           },
-          "Ukprn": {
+          "explicitEmailAddresses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ProviderAccountDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "providerStatusTypeId": {
             "type": "integer",
-            "format": "int64",
-            "description": "Unique identifier for the training provider."
-          },
-          "LarsCode": {
-            "type": "integer",
-            "description": "LARS code associated with the training provider."
-          },
-          "LastFeedbackSubmittedDate": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Date of the last feedback submitted for the training provider."
-          },
-          "TimeWindow": {
-            "type": "string",
-            "format": "duration",
-            "description": "Time window for feedback submission."
-          },
-          "SignificantDate": {
-            "type": "string",
-            "format": "date-time",
-            "description": "A notable date related to the training provider."
-          },
-          "FeedbackEligibility": {
-            "type": "string",
-            "description": "Feedback eligibility status for the training provider."
+            "format": "int32"
           }
         }
       }

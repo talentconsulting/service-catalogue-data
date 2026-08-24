@@ -1,19 +1,21 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Locations API",
-    "version": "1.0.0"
+    "title": "Assessors API",
+    "version": "1.0.0",
+    "description": "API for managing locations and address queries."
   },
   "paths": {
-    "/Locations": {
+    "/locations": {
       "get": {
-        "operationId": "GetAddresses",
-        "summary": "Get a list of addresses based on a search query.",
+        "summary": "Retrieve list of addresses for a query",
+        "operationId": "GetLocations",
         "parameters": [
           {
             "name": "query",
             "in": "query",
-            "required": true,
+            "required": false,
+            "description": "Search query for addresses",
             "schema": {
               "type": "string"
             }
@@ -21,73 +23,20 @@
         ],
         "responses": {
           "200": {
-            "description": "A list of addresses matching the query.",
+            "description": "A list of addresses matching the query",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetAddressesQueryResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/Locations/{postcode}": {
-      "get": {
-        "operationId": "GetCoordinates",
-        "summary": "Get coordinates for a given postcode.",
-        "parameters": [
-          {
-            "name": "postcode",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Coordinates for the given postcode.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetPostcodeQueryResponse"
+                  "$ref": "#/components/schemas/AddressesResponse"
                 }
               }
             }
           },
           "404": {
-            "description": "No data found for the given postcode."
-          }
-        }
-      }
-    },
-    "/Locations/search": {
-      "get": {
-        "operationId": "GetLocationsBySearch",
-        "summary": "Get locations that match a search query.",
-        "parameters": [
-          {
-            "name": "query",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Matching locations for the search query.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetLocationsBySearchQueryResponse"
-                }
-              }
-            }
+            "description": "No addresses found matching the query"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -95,94 +44,47 @@
   },
   "components": {
     "schemas": {
-      "GetAddressesQueryResponse": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "addressLine1": {
-              "type": "string"
-            },
-            "addressLine2": {
-              "type": "string"
-            },
-            "addressLine3": {
-              "type": "string"
-            },
-            "addressLine4": {
-              "type": "string"
-            },
-            "postcode": {
-              "type": "string"
-            },
-            "latitude": {
-              "type": "number",
-              "format": "double"
-            },
-            "longitude": {
-              "type": "number",
-              "format": "double"
-            }
-          }
-        }
-      },
-      "GetPostcodeQueryResponse": {
+      "AddressesResponse": {
         "type": "object",
         "properties": {
-          "latitude": {
-            "type": "number",
-            "format": "double"
-          },
-          "longitude": {
-            "type": "number",
-            "format": "double"
-          }
-        }
-      },
-      "GetLocationsBySearchQueryResponse": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "name": {
-              "type": "string"
-            },
-            "type": {
-              "type": "string"
-            },
-            "address": {
-              "$ref": "#/components/schemas/Address"
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "addressLine1": {
+                  "type": "string"
+                },
+                "addressLine2": {
+                  "type": "string"
+                },
+                "addressLine3": {
+                  "type": "string"
+                },
+                "addressLine4": {
+                  "type": "string"
+                },
+                "postcode": {
+                  "type": "string"
+                },
+                "latitude": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "longitude": {
+                  "type": "number",
+                  "format": "double"
+                },
+                "country": {
+                  "type": "string"
+                }
+              }
             }
           }
-        }
-      },
-      "Address": {
-        "type": "object",
-        "properties": {
-          "addressLine1": {
-            "type": "string"
-          },
-          "addressLine2": {
-            "type": "string"
-          },
-          "addressLine3": {
-            "type": "string"
-          },
-          "addressLine4": {
-            "type": "string"
-          },
-          "postcode": {
-            "type": "string"
-          },
-          "latitude": {
-            "type": "number",
-            "format": "double"
-          },
-          "longitude": {
-            "type": "number",
-            "format": "double"
-          }
-        }
+        },
+        "required": [
+          "addresses"
+        ]
       }
     }
   }

@@ -1,46 +1,48 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Approvals Cohort API",
-    "version": "1.0.0"
+    "title": "SFA DAS Approvals API",
+    "version": "1.0.0",
+    "description": "API for managing cohorts and apprenticeships approvals within the SFA DAS platform."
   },
   "paths": {
-    "/Cohort/{cohortId}": {
+    "/cohort/{cohortId}": {
       "get": {
-        "summary": "Get Cohort",
-        "description": "Retrieve cohort details by ID.",
+        "summary": "Get cohort by ID",
         "parameters": [
           {
             "name": "cohortId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response.",
+            "description": "Cohort retrieved successfully",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "type": "object"
+                }
               }
             }
           },
           "404": {
-            "description": "Cohort not found."
+            "description": "Cohort not found"
           },
           "400": {
-            "description": "Bad request."
+            "description": "Bad Request"
           }
         }
       }
     },
     "/employer/{accountId}/unapproved/{cohortId}": {
       "get": {
-        "summary": "Get Cohort Details (Employer)",
-        "description": "Retrieve detailed cohort data for employer.",
+        "summary": "Get cohort details for employer",
         "parameters": [
           {
             "name": "accountId",
@@ -55,30 +57,32 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response.",
+            "description": "Cohort details retrieved successfully",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "type": "object"
+                }
               }
             }
           },
           "404": {
-            "description": "Cohort not found."
+            "description": "Cohort not found"
           },
           "400": {
-            "description": "Bad request."
+            "description": "Bad Request"
           }
         }
       },
       "post": {
-        "summary": "Post Cohort Details (Employer)",
-        "description": "Submit cohort details for employer.",
+        "summary": "Update cohort details for employer",
         "parameters": [
           {
             "name": "accountId",
@@ -93,7 +97,8 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
@@ -109,61 +114,20 @@
         },
         "responses": {
           "200": {
-            "description": "Successful operation."
+            "description": "Cohort details updated successfully"
           },
           "404": {
-            "description": "Resource not found."
+            "description": "Cohort not found"
           },
           "400": {
-            "description": "Bad request."
-          }
-        }
-      }
-    },
-    "/provider/{providerId}/unapproved/{cohortId}": {
-      "get": {
-        "summary": "Get Cohort Details (Provider)",
-        "description": "Retrieve detailed cohort data for provider.",
-        "parameters": [
-          {
-            "name": "providerId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "cohortId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response.",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "404": {
-            "description": "Cohort not found."
-          },
-          "400": {
-            "description": "Bad request."
+            "description": "Bad Request"
           }
         }
       }
     },
     "/employer/{accountHashedId}/unapproved/add/assign/allow-employer-add": {
       "get": {
-        "summary": "Get Assign Allow Employer Add",
-        "description": "Retrieve information to allow employer addition with reservation ID.",
+        "summary": "Get employer assignment details",
         "parameters": [
           {
             "name": "accountHashedId",
@@ -185,46 +149,88 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response.",
+            "description": "Employer assignment details retrieved successfully",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "type": "object"
+                }
               }
             }
           },
           "404": {
-            "description": "Not found."
+            "description": "Details not found"
           },
           "400": {
-            "description": "Bad request."
+            "description": "Bad Request"
           }
         }
       }
     },
-    "/cohorts": {
-      "post": {
-        "summary": "Create Cohort",
-        "description": "Create a new cohort.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateCohortRequest"
-              }
+    "/employer/{accountId}/unapproved/add/apprenticeship": {
+      "get": {
+        "summary": "Get apprenticeship draft details for employer",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountLegalEntityId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "providerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "courseCode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
-            "description": "Successful operation.",
+            "description": "Apprenticeship draft details retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateCohortResponse"
+                  "type": "object"
                 }
               }
             }
+          },
+          "404": {
+            "description": "Details not found"
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
@@ -232,114 +238,15 @@
   },
   "components": {
     "schemas": {
-      "CreateCohortRequest": {
-        "type": "object",
-        "properties": {
-          "UserInfo": {
-            "$ref": "#/components/schemas/UserInfo"
-          },
-          "RequestingParty": {
-            "$ref": "#/components/schemas/Party"
-          },
-          "AccountId": {
-            "type": "integer"
-          },
-          "AccountLegalEntityId": {
-            "type": "integer"
-          },
-          "ProviderId": {
-            "type": "integer"
-          },
-          "FirstName": {
-            "type": "string"
-          },
-          "LastName": {
-            "type": "string"
-          },
-          "Email": {
-            "type": "string"
-          },
-          "DateOfBirth": {
-            "type": "string",
-            "format": "date"
-          },
-          "Uln": {
-            "type": "string"
-          },
-          "CourseCode": {
-            "type": "string"
-          },
-          "DeliveryModel": {
-            "$ref": "#/components/schemas/DeliveryModel"
-          },
-          "Cost": {
-            "type": "integer"
-          },
-          "TrainingPrice": {
-            "type": "integer"
-          },
-          "EndPointAssessmentPrice": {
-            "type": "integer"
-          },
-          "StartDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "ActualStartDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "EndDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "OriginatorReference": {
-            "type": "string"
-          },
-          "ReservationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "TransferSenderId": {
-            "type": "integer"
-          },
-          "PledgeApplicationId": {
-            "type": "integer"
-          },
-          "EmploymentPrice": {
-            "type": "integer"
-          },
-          "EmploymentEndDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "IgnoreStartDateOverlap": {
-            "type": "boolean"
-          },
-          "IsOnFlexiPaymentPilot": {
-            "type": "boolean"
-          },
-          "LearnerDataId": {
-            "type": "integer"
-          }
-        }
-      },
-      "CreateCohortResponse": {
-        "type": "object",
-        "properties": {
-          "CohortId": {
-            "type": "integer"
-          },
-          "CohortReference": {
-            "type": "string"
-          }
-        }
-      },
       "DetailsPostRequest": {
         "type": "object",
         "properties": {
           "SubmissionType": {
-            "$ref": "#/components/schemas/CohortSubmissionType"
+            "type": "string",
+            "enum": [
+              "Send",
+              "Approve"
+            ]
           },
           "Message": {
             "type": "string"
@@ -347,7 +254,12 @@
           "UserInfo": {
             "$ref": "#/components/schemas/UserInfo"
           }
-        }
+        },
+        "required": [
+          "SubmissionType",
+          "Message",
+          "UserInfo"
+        ]
       },
       "UserInfo": {
         "type": "object",
@@ -359,33 +271,10 @@
             "type": "string"
           },
           "UserEmail": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           }
         }
-      },
-      "Party": {
-        "type": "string",
-        "enum": [
-          "None",
-          "Employer",
-          "Provider",
-          "TransferSender"
-        ]
-      },
-      "DeliveryModel": {
-        "type": "string",
-        "enum": [
-          "Regular",
-          "PortableFlexiJob",
-          "FlexiJobAgency"
-        ]
-      },
-      "CohortSubmissionType": {
-        "type": "string",
-        "enum": [
-          "Send",
-          "Approve"
-        ]
       }
     }
   }

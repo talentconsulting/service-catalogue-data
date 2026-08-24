@@ -1,13 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SFA DAS Campaign API",
+    "title": "Campaign API",
+    "description": "API for managing articles in the campaign module.",
     "version": "1.0.0"
   },
   "paths": {
-    "/Article/{hub}/{slug}": {
+    "/article/{hub}/{slug}": {
       "get": {
-        "summary": "Get an article by hub and slug",
+        "summary": "Retrieve an article by hub and slug.",
         "parameters": [
           {
             "name": "hub",
@@ -15,7 +16,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Hub identifier"
           },
           {
             "name": "slug",
@@ -23,12 +25,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Slug identifier"
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful response with article details",
             "content": {
               "application/json": {
                 "schema": {
@@ -50,9 +53,9 @@
         }
       }
     },
-    "/Article/preview/{hub}/{slug}": {
+    "/article/preview/{hub}/{slug}": {
       "get": {
-        "summary": "Get a preview article by hub and slug",
+        "summary": "Retrieve a preview article by hub and slug.",
         "parameters": [
           {
             "name": "hub",
@@ -60,7 +63,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Hub identifier"
           },
           {
             "name": "slug",
@@ -68,12 +72,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Slug identifier"
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful response with preview article details",
             "content": {
               "application/json": {
                 "schema": {
@@ -98,59 +103,42 @@
   },
   "components": {
     "schemas": {
+      "GetArticleResponse": {
+        "type": "object",
+        "properties": {
+          "article": {
+            "$ref": "#/components/schemas/CmsPageModel"
+          }
+        }
+      },
       "CmsPageModel": {
         "type": "object",
         "properties": {
-          "PageAttributes": {
-            "type": "object",
-            "properties": {
-              "Title": {
-                "type": "string"
-              },
-              "Summary": {
-                "type": "string"
-              },
-              "Slug": {
-                "type": "string"
-              },
-              "HubType": {
-                "type": "string"
-              },
-              "MetaDescription": {
-                "type": "string"
-              },
-              "PageType": {
-                "$ref": "#/components/schemas/PageType"
-              },
-              "ArticleType": {
-                "type": "string"
-              }
-            }
+          "pageAttributes": {
+            "$ref": "#/components/schemas/PageModel"
           },
-          "MainContent": {
+          "mainContent": {
             "$ref": "#/components/schemas/PageContent"
           },
-          "MenuContent": {
-            "type": "object",
-            "additionalProperties": true
+          "menuContent": {
+            "$ref": "#/components/schemas/MenuPageModel_MenuPageContent"
           },
-          "BannerModels": {
-            "type": "object",
-            "additionalProperties": true
+          "bannerModels": {
+            "$ref": "#/components/schemas/BannerPageModel"
           },
-          "TabbedContents": {
+          "tabbedContents": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/TabbedContentModel"
             }
           },
-          "RelatedArticles": {
+          "relatedArticles": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/PageModel"
             }
           },
-          "Attachments": {
+          "attachments": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ResourceItem"
@@ -158,81 +146,31 @@
           }
         }
       },
-      "GetArticleResponse": {
-        "type": "object",
-        "properties": {
-          "Article": {
-            "$ref": "#/components/schemas/CmsPageModel"
-          }
-        }
-      },
-      "NotFoundResponse": {
-        "type": "object",
-        "properties": {
-          "Message": {
-            "type": "string"
-          }
-        }
-      },
-      "PageContent": {
-        "type": "object",
-        "properties": {
-          "Items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ContentItem"
-            }
-          },
-          "HeaderImage": {
-            "$ref": "#/components/schemas/ContentItem"
-          }
-        }
-      },
-      "TabbedContentModel": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "string"
-          },
-          "TabName": {
-            "type": "string"
-          },
-          "TabTitle": {
-            "type": "string"
-          },
-          "FindTraineeship": {
-            "type": "boolean"
-          },
-          "Content": {
-            "$ref": "#/components/schemas/PageContent"
-          }
-        }
-      },
       "PageModel": {
         "type": "object",
         "properties": {
-          "Id": {
+          "id": {
             "type": "string"
           },
-          "PageType": {
+          "pageType": {
             "$ref": "#/components/schemas/PageType"
           },
-          "Title": {
+          "title": {
             "type": "string"
           },
-          "MetaDescription": {
+          "metaDescription": {
             "type": "string"
           },
-          "Slug": {
+          "slug": {
             "type": "string"
           },
-          "HubType": {
+          "hubType": {
             "type": "string"
           },
-          "Summary": {
+          "summary": {
             "type": "string"
           },
-          "ArticleType": {
+          "articleType": {
             "type": "string"
           }
         }
@@ -247,29 +185,142 @@
           "Tab"
         ]
       },
+      "PageContent": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentItem"
+            }
+          },
+          "headerImage": {
+            "$ref": "#/components/schemas/ContentItem"
+          }
+        }
+      },
+      "MenuPageModel_MenuPageContent": {
+        "type": "object",
+        "properties": {
+          "topLevel": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          },
+          "apprentices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          },
+          "employers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          },
+          "influencers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          }
+        }
+      },
+      "BannerPageModel": {
+        "type": "object",
+        "properties": {
+          "mainContent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BannerPageModel_BannerPageContent"
+            }
+          }
+        }
+      },
+      "BannerPageModel_BannerPageContent": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentItem"
+            }
+          },
+          "backgroundColour": {
+            "type": "string"
+          },
+          "allowUserToHideTheBanner": {
+            "type": "boolean"
+          },
+          "showOnTheHomepageOnly": {
+            "type": "boolean"
+          },
+          "title": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "TabbedContentModel": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tabName": {
+            "type": "string"
+          },
+          "tabTitle": {
+            "type": "string"
+          },
+          "findTraineeship": {
+            "type": "boolean"
+          },
+          "content": {
+            "$ref": "#/components/schemas/CmsPageModel_PageContent"
+          }
+        }
+      },
+      "CmsPageModel_PageContent": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentItem"
+            }
+          },
+          "headerImage": {
+            "$ref": "#/components/schemas/ContentItem"
+          }
+        }
+      },
       "ResourceItem": {
         "type": "object",
         "properties": {
-          "Title": {
+          "title": {
             "type": "string"
           },
-          "Id": {
+          "id": {
             "type": "string"
           },
-          "FileName": {
+          "fileName": {
             "type": "string"
           },
-          "ContentType": {
+          "contentType": {
             "type": "string"
           },
-          "Url": {
+          "url": {
             "type": "string"
           },
-          "Size": {
-            "type": "integer",
-            "format": "int64"
+          "size": {
+            "type": "integer"
           },
-          "Description": {
+          "description": {
             "type": "string"
           }
         }
@@ -277,16 +328,16 @@
       "ContentItem": {
         "type": "object",
         "properties": {
-          "Values": {
+          "values": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
-          "Type": {
+          "type": {
             "type": "string"
           },
-          "TableValue": {
+          "tableValue": {
             "type": "array",
             "items": {
               "type": "array",
@@ -295,10 +346,10 @@
               }
             }
           },
-          "EmbeddedResource": {
+          "embeddedResource": {
             "$ref": "#/components/schemas/ResourceItem"
           },
-          "VideoTranscripts": {
+          "videoTranscripts": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/VideoTranscript"
@@ -309,10 +360,38 @@
       "VideoTranscript": {
         "type": "object",
         "properties": {
-          "VideoName": {
+          "videoName": {
             "type": "string"
           },
-          "Text": {
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "UrlDetails": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "hub": {
+            "type": "string"
+          },
+          "pageType": {
+            "type": "string"
+          },
+          "parentSlug": {
+            "type": "string"
+          }
+        }
+      },
+      "NotFoundResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
             "type": "string"
           }
         }

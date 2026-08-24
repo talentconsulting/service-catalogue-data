@@ -1,25 +1,21 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Epao Register API",
-    "version": "1.0.0",
-    "description": "API for managing EPAO register."
+    "title": "SFA DAS Approvals API",
+    "version": "1.0.0"
   },
   "paths": {
-    "/epaos": {
+    "/Epaos": {
       "get": {
-        "operationId": "GetEpaos",
-        "summary": "Retrieve a list of EPAOs",
-        "tags": [
-          "EPAOs"
-        ],
+        "operationId": "GetAllEpaos",
+        "summary": "Retrieve all EPAOs",
         "responses": {
           "200": {
-            "description": "List of EPAOs",
+            "description": "List of EPAOs retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetEpaosApiModel"
+                  "$ref": "#/components/schemas/GetEpaosListResponse"
                 }
               }
             }
@@ -29,143 +25,50 @@
           }
         }
       }
-    },
-    "/epaos/{epaoId}": {
-      "get": {
-        "operationId": "GetEpao",
-        "summary": "Retrieve detailed information about a specific EPAO",
-        "tags": [
-          "EPAOs"
-        ],
-        "parameters": [
-          {
-            "name": "epaoId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the EPAO",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Details of the EPAO",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetEpaoApiModel"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "EPAO not found"
-          },
-          "400": {
-            "description": "Invalid EpaoId"
-          }
-        }
-      }
-    },
-    "/epaos/{epaoId}/courses": {
-      "get": {
-        "operationId": "GetEpaoCourses",
-        "summary": "Retrieve the list of courses offered by a specific EPAO",
-        "tags": [
-          "EPAOs"
-        ],
-        "parameters": [
-          {
-            "name": "epaoId",
-            "in": "path",
-            "required": true,
-            "description": "The ID of the EPAO",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "List of courses offered by the EPAO",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetEpaoCoursesApiModel"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "EPAO courses not found"
-          },
-          "400": {
-            "description": "Invalid EpaoId"
-          }
-        }
-      }
     }
   },
   "components": {
     "schemas": {
-      "GetEpaosApiModel": {
+      "GetEpaosListResponse": {
         "type": "object",
         "properties": {
-          "epaos": {
+          "Epaos": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Epao"
+              "$ref": "#/components/schemas/GetEpaoResponse"
             }
           }
-        }
+        },
+        "required": [
+          "Epaos"
+        ]
       },
-      "GetEpaoApiModel": {
+      "GetEpaoResponse": {
         "type": "object",
         "properties": {
-          "id": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Name": {
             "type": "string"
           },
-          "name": {
+          "OrganisationType": {
             "type": "string"
           },
-          "details": {
-            "type": "string"
-          }
-        }
-      },
-      "GetEpaoCoursesApiModel": {
-        "type": "object",
-        "properties": {
-          "courses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Course"
-            }
-          }
-        }
-      },
-      "Epao": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
+          "CreatedDate": {
+            "type": "string",
+            "format": "date-time"
           },
-          "name": {
-            "type": "string"
-          }
-        }
-      },
-      "Course": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
+          "UpdatedDate": {
+            "type": "string",
+            "format": "date-time"
           },
-          "name": {
-            "type": "string"
+          "IsApproved": {
+            "type": "boolean"
           }
-        }
+        },
+        "additionalProperties": true
       }
     }
   }
