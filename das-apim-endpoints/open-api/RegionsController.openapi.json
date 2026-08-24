@@ -1,88 +1,74 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Request Apprentice Training API",
-    "description": "API for managing regions and apprentice training requests.",
-    "version": "1.0.0"
+    "title": "AdminAan API",
+    "version": "1.0.0",
+    "description": "API for managing regions in the AdminAan system."
   },
   "paths": {
-    "/regions": {
+    "/Regions": {
       "get": {
         "summary": "Get all regions",
-        "description": "Retrieves a list of all regions.",
+        "operationId": "getRegions",
         "responses": {
           "200": {
             "description": "Successfully retrieved regions.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Region"
-                  }
+                  "$ref": "#/components/schemas/GetRegionsQueryResult"
                 }
               }
             }
-          },
-          "404": {
-            "description": "No regions found."
-          },
-          "500": {
-            "description": "Internal server error."
           }
-        }
-      }
-    },
-    "/regions/closest": {
-      "get": {
-        "summary": "Get closest region",
-        "description": "Retrieves the closest region to a specified location name.",
+        },
         "parameters": [
           {
-            "name": "locationName",
+            "name": "cancellationToken",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "The name of the location to find the closest region for."
+            "description": "Token for cancelling the request."
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved the closest region.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Region"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "No location or region found."
-          },
-          "400": {
-            "description": "Bad request. Could not process the location name."
-          }
-        }
+        ]
       }
     }
   },
   "components": {
     "schemas": {
+      "GetRegionsQueryResult": {
+        "type": "object",
+        "properties": {
+          "Regions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Region"
+            }
+          }
+        }
+      },
       "Region": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "description": "Unique identifier for the region."
+          "Id": {
+            "type": "integer",
+            "format": "int32"
           },
-          "name": {
-            "type": "string",
-            "description": "Name of the region."
+          "Area": {
+            "type": "string"
+          },
+          "Ordering": {
+            "type": "integer",
+            "format": "int32"
           }
-        }
+        },
+        "required": [
+          "Id",
+          "Area",
+          "Ordering"
+        ]
       }
     }
   }

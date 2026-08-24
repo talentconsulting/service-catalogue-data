@@ -7,8 +7,9 @@
   "paths": {
     "/providers/allowedlist": {
       "get": {
-        "summary": "Get Allowed List of Providers",
-        "operationId": "GetAllowedList",
+        "operationId": "getAllowedList",
+        "summary": "Get Allowed List",
+        "description": "Retrieve the list of allowed providers.",
         "parameters": [
           {
             "name": "sortColumn",
@@ -16,7 +17,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The column to sort results by."
           },
           {
             "name": "sortOrder",
@@ -24,12 +26,13 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The order to sort results (e.g., 'Ascending' or 'Descending')."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful response with allowed providers list.",
             "content": {
               "application/json": {
                 "schema": {
@@ -39,14 +42,11 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Invalid request parameters.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string"
-                  }
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -60,7 +60,7 @@
       "GetProvidersAllowedListQueryResponse": {
         "type": "object",
         "properties": {
-          "Providers": {
+          "providers": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AllowedProvider"
@@ -71,28 +71,40 @@
       "AllowedProvider": {
         "type": "object",
         "properties": {
-          "Ukprn": {
-            "type": "integer"
+          "ukprn": {
+            "type": "integer",
+            "description": "The UK Provider Reference Number."
           },
-          "StartDateTime": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "EndDateTime": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "AddedDateTime": {
+          "startDateTime": {
             "type": "string",
             "format": "date-time",
+            "description": "The start date and time for the provider."
+          },
+          "endDateTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The end date and time for the provider."
+          },
+          "addedDateTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the provider was added.",
             "nullable": true
           }
-        },
-        "required": [
-          "Ukprn",
-          "StartDateTime",
-          "EndDateTime"
-        ]
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "errorCode": {
+            "type": "string",
+            "description": "A code that indicates the type of error."
+          },
+          "errorMessage": {
+            "type": "string",
+            "description": "A descriptive error message."
+          }
+        }
       }
     }
   }

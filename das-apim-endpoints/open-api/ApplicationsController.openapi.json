@@ -1,40 +1,22 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Find An Apprenticeship API",
-    "version": "1.0.0"
+    "title": "Applications API",
+    "version": "1.0.0",
+    "description": "API for managing applications in the Skills Funding Agency's platform."
   },
   "paths": {
-    "/applications": {
+    "/api/applications/forms": {
       "get": {
-        "operationId": "GetApplications",
-        "summary": "Retrieve applications for a given candidate",
-        "parameters": [
-          {
-            "name": "candidateId",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "status",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "$ref": "#/components/schemas/ApplicationStatus"
-            }
-          }
-        ],
+        "summary": "Get all application forms",
+        "operationId": "GetAllApplicationForms",
         "responses": {
           "200": {
-            "description": "Successful retrieval of applications",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetApplicationsApiResponse"
+                  "$ref": "#/components/schemas/GetApplicationFormsQueryResponse"
                 }
               }
             }
@@ -45,14 +27,14 @@
         }
       }
     },
-    "/applications/count": {
+    "/api/applications/forms/{formVersionId}/sections/{sectionId}/pages/{pageOrder}": {
       "get": {
-        "operationId": "GetApplicationsCount",
-        "summary": "Retrieve the count of applications for a given candidate",
+        "summary": "Get application page by ID",
+        "operationId": "GetApplicationPageById",
         "parameters": [
           {
-            "name": "candidateId",
-            "in": "query",
+            "name": "formVersionId",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "string",
@@ -60,21 +42,281 @@
             }
           },
           {
-            "name": "status",
-            "in": "query",
+            "name": "sectionId",
+            "in": "path",
             "required": true,
             "schema": {
-              "$ref": "#/components/schemas/ApplicationStatus"
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pageOrder",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of application count",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetApplicationsCountQueryResult"
+                  "$ref": "#/components/schemas/GetApplicationPageByIdQueryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/applications/{applicationId}/metadata": {
+      "get": {
+        "summary": "Get application metadata by ID",
+        "operationId": "GetApplicationMetadataById",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationMetadataByIdQueryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/applications/forms/{formVersionId}": {
+      "get": {
+        "summary": "Get application form version by ID",
+        "operationId": "GetApplicationFormById",
+        "parameters": [
+          {
+            "name": "formVersionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationFormByIdQueryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/applications/organisations/{organisationId}": {
+      "get": {
+        "summary": "Get applications by organisation ID",
+        "operationId": "GetApplicationsByOrganisationId",
+        "parameters": [
+          {
+            "name": "organisationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationsByOrganisationIdQueryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/applications/{applicationId}": {
+      "get": {
+        "summary": "Get application by ID",
+        "operationId": "GetApplicationById",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationByIdQueryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete application by ID",
+        "operationId": "DeleteApplicationById",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/applications": {
+      "post": {
+        "summary": "Create an application",
+        "operationId": "CreateApplication",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApplicationCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateApplicationCommandResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/applications/{applicationId}/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/answers": {
+      "get": {
+        "summary": "Get answers for a specific page",
+        "operationId": "GetPageAnswers",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "formVersionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationPageAnswersByPageIdQueryResponse"
                 }
               }
             }
@@ -88,29 +330,36 @@
   },
   "components": {
     "schemas": {
-      "ApplicationStatus": {
-        "type": "string",
-        "enum": [
-          "Draft",
-          "Submitted",
-          "Withdrawn",
-          "Successful",
-          "UnSuccessful",
-          "Expired"
-        ]
-      },
-      "GetApplicationsApiResponse": {
+      "GetApplicationFormsQueryResponse": {
         "type": "object",
         "properties": {
-          "applications": {
+          "forms": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Application"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "descriptionHTML": {
+                  "type": "string"
+                },
+                "order": {
+                  "type": "integer"
+                }
+              }
             }
           }
         }
       },
-      "Application": {
+      "GetApplicationPageByIdQueryResponse": {
         "type": "object",
         "properties": {
           "id": {
@@ -120,137 +369,175 @@
           "title": {
             "type": "string"
           },
-          "vacancyReference": {
+          "description": {
             "type": "string"
           },
-          "employerName": {
-            "type": "string"
-          },
-          "createdDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "submittedDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "closingDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "closedDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "responseDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "responseNotes": {
-            "type": "string",
-            "nullable": true
-          },
-          "status": {
-            "$ref": "#/components/schemas/ApplicationStatus"
-          },
-          "withdrawnDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "address": {
-            "$ref": "#/components/schemas/Address"
-          },
-          "otherAddresses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Address"
-            },
-            "nullable": true
-          },
-          "employmentLocationInformation": {
-            "type": "string",
-            "nullable": true
-          },
-          "employerLocationOption": {
-            "$ref": "#/components/schemas/AvailableWhere",
-            "nullable": true
-          },
-          "apprenticeshipType": {
-            "$ref": "#/components/schemas/ApprenticeshipTypes"
-          }
-        }
-      },
-      "Address": {
-        "type": "object",
-        "properties": {
-          "addressLine1": {
-            "type": "string"
-          },
-          "addressLine2": {
-            "type": "string",
-            "nullable": true
-          },
-          "addressLine3": {
-            "type": "string",
-            "nullable": true
-          },
-          "addressLine4": {
-            "type": "string",
-            "nullable": true
-          },
-          "postcode": {
-            "type": "string"
-          },
-          "latitude": {
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          },
-          "longitude": {
-            "type": "number",
-            "format": "double",
-            "nullable": true
-          },
-          "country": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "AvailableWhere": {
-        "type": "string",
-        "enum": [
-          "OneLocation",
-          "MultipleLocations",
-          "AcrossEngland"
-        ]
-      },
-      "ApprenticeshipTypes": {
-        "type": "string",
-        "enum": [
-          "Standard",
-          "Foundation"
-        ]
-      },
-      "GetApplicationsCountQueryResult": {
-        "type": "object",
-        "properties": {
-          "applicationIds": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          "status": {
-            "type": "string"
-          },
-          "count": {
+          "order": {
             "type": "integer"
+          }
+        }
+      },
+      "GetApplicationMetadataByIdQueryResponse": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "formVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "organisationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reference": {
+            "type": "integer"
+          }
+        }
+      },
+      "GetApplicationFormByIdQueryResponse": {
+        "type": "object",
+        "properties": {
+          "formTitle": {
+            "type": "string"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "order": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetApplicationsByOrganisationIdQueryResponse": {
+        "type": "object",
+        "properties": {
+          "applications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "createdDate": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "submittedDate": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "owner": {
+                  "type": "string"
+                },
+                "reference": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetApplicationByIdQueryResponse": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "formVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "organisationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "EmptyResponse": {
+        "type": "object"
+      },
+      "CreateApplicationCommand": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "formVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "organisationUkprn": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateApplicationCommandResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isQanValid": {
+            "type": "boolean"
+          },
+          "qanValidationMessage": {
+            "type": "string"
+          }
+        }
+      },
+      "GetApplicationPageAnswersByPageIdQueryResponse": {
+        "type": "object",
+        "properties": {
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "questionId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "answer": {
+                  "type": "object",
+                  "properties": {
+                    "textValue": {
+                      "type": "string"
+                    },
+                    "numberValue": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
