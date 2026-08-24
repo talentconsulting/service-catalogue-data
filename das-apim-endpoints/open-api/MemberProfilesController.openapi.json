@@ -1,49 +1,49 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "ApprenticeAan API",
-    "version": "1.0.0"
+    "title": "EmployerAAN API",
+    "version": "1.0.0",
+    "description": "API for Member Profiles and Preferences"
   },
   "paths": {
     "/members/{memberId}/profile": {
       "get": {
         "summary": "Get Member Profile with Preferences",
-        "operationId": "getMemberProfileWithPreferences",
         "parameters": [
           {
             "name": "memberId",
             "in": "path",
             "required": true,
-            "description": "Unique identifier for a member",
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "ID of the member whose profile is fetched"
           },
           {
             "name": "X-RequestedByMemberId",
             "in": "header",
             "required": true,
-            "description": "Identifier of the member making the request",
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "ID of the member making the request"
           },
           {
             "name": "public",
             "in": "query",
             "required": false,
-            "description": "Boolean flag indicating if the data is public",
             "schema": {
               "type": "boolean",
               "default": true
-            }
+            },
+            "description": "Flag for public access"
           }
         ],
         "responses": {
           "200": {
-            "description": "Member profile with preferences retrieved successfully",
+            "description": "Successful response with member profile and preferences",
             "content": {
               "application/json": {
                 "schema": {
@@ -65,7 +65,8 @@
             "type": "string"
           },
           "Email": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           },
           "FirstName": {
             "type": "string"
@@ -89,7 +90,11 @@
             "format": "date-time"
           },
           "UserType": {
-            "$ref": "#/components/schemas/MemberUserType"
+            "type": "string",
+            "enum": [
+              "Apprentice",
+              "Employer"
+            ]
           },
           "IsRegionalChair": {
             "type": "boolean"
@@ -134,34 +139,13 @@
           }
         }
       },
-      "MemberUserType": {
-        "type": "string",
-        "enum": [
-          "Apprentice",
-          "Employer"
-        ]
-      },
       "MemberProfile": {
         "type": "object",
-        "properties": {
-          "ProfileId": {
-            "type": "integer"
-          },
-          "Description": {
-            "type": "string"
-          }
-        }
+        "additionalProperties": true
       },
       "MemberPreference": {
         "type": "object",
-        "properties": {
-          "PreferenceId": {
-            "type": "integer"
-          },
-          "Value": {
-            "type": "boolean"
-          }
-        }
+        "additionalProperties": true
       }
     }
   }
