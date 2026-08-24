@@ -7,19 +7,15 @@
   "paths": {
     "/providers/{ukprn}/allowed-courses/{larsCode}": {
       "post": {
-        "summary": "Upsert Provider Allowed Course",
+        "summary": "Upsert provider allowed course",
         "operationId": "UpsertProviderAllowedCourse",
-        "tags": [
-          "ProviderAllowedCourses"
-        ],
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "integer"
             }
           },
           {
@@ -48,19 +44,15 @@
         }
       },
       "patch": {
-        "summary": "Patch Provider Allowed Course",
+        "summary": "Patch provider allowed course",
         "operationId": "PatchProviderAllowedCourse",
-        "tags": [
-          "ProviderAllowedCourses"
-        ],
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "integer"
             }
           },
           {
@@ -104,6 +96,42 @@
           }
         }
       }
+    },
+    "/providers/{ukprn}/allowed-courses": {
+      "get": {
+        "summary": "Get provider allowed courses",
+        "operationId": "GetProviderAllowedCourses",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "courseType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/CourseType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetProviderAllowedCoursesResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -135,6 +163,56 @@
             "type": "string",
             "format": "date-time",
             "nullable": true
+          }
+        }
+      },
+      "CourseType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "ShortCourse"
+        ]
+      },
+      "ProviderAllowedCourseModel": {
+        "type": "object",
+        "properties": {
+          "LarsCode": {
+            "type": "string"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Level": {
+            "type": "integer"
+          },
+          "LastDateStarts": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "IsStartRestricted": {
+            "type": "boolean"
+          },
+          "IsActive": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "LarsCode",
+          "Title",
+          "Level",
+          "IsStartRestricted",
+          "IsActive"
+        ]
+      },
+      "GetProviderAllowedCoursesResponse": {
+        "type": "object",
+        "properties": {
+          "AllowedCourses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderAllowedCourseModel"
+            }
           }
         }
       }

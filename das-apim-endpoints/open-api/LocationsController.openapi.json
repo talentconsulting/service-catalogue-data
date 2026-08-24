@@ -1,53 +1,78 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Locations API",
+    "title": "AdminAan API",
     "version": "1.0.0",
-    "description": "API for managing locations and retrieving address data."
+    "description": "API for managing locations in the AdminAan system."
   },
   "paths": {
     "/locations": {
       "get": {
-        "summary": "Get locations",
-        "operationId": "getLocations",
+        "operationId": "GetAddresses",
+        "summary": "Get addresses based on search query.",
         "parameters": [
           {
             "name": "query",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "Query string for searching addresses."
+            "description": "The search query for retrieving addresses."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "List of matched addresses.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AddressesResponse"
+                  "type": "object",
+                  "properties": {
+                    "addresses": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Address"
+                      }
+                    }
+                  }
                 }
               }
             }
-          },
-          "404": {
-            "description": "No addresses found",
+          }
+        }
+      }
+    },
+    "/locations/search": {
+      "get": {
+        "operationId": "GetLocationsBySearch",
+        "summary": "Search locations by query.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The search query for retrieving locations."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of matched locations.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
+                  "type": "object",
+                  "properties": {
+                    "locations": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Location"
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -58,55 +83,47 @@
   },
   "components": {
     "schemas": {
-      "AddressesResponse": {
+      "Address": {
         "type": "object",
         "properties": {
-          "addresses": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "addressLine1": {
-                  "type": "string"
-                },
-                "addressLine2": {
-                  "type": "string"
-                },
-                "addressLine3": {
-                  "type": "string"
-                },
-                "postcode": {
-                  "type": "string"
-                },
-                "latitude": {
-                  "type": "number",
-                  "format": "float"
-                },
-                "longitude": {
-                  "type": "number",
-                  "format": "float"
-                }
-              },
-              "required": [
-                "addressLine1",
-                "postcode"
-              ]
-            }
-          }
-        },
-        "description": "List of addresses returned for the given query."
-      },
-      "ErrorResponse": {
-        "type": "object",
-        "properties": {
-          "errorMessage": {
+          "addressLine1": {
             "type": "string"
           },
-          "errorCode": {
+          "addressLine2": {
+            "type": "string"
+          },
+          "addressLine3": {
+            "type": "string"
+          },
+          "addressLine4": {
+            "type": "string"
+          },
+          "postcode": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "country": {
             "type": "string"
           }
-        },
-        "description": "Details of an error response."
+        }
+      },
+      "Location": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          }
+        }
       }
     }
   }
