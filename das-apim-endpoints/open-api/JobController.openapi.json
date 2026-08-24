@@ -7,8 +7,8 @@
   "paths": {
     "/jobs": {
       "put": {
-        "summary": "Add a new job request.",
         "operationId": "AddJob",
+        "summary": "Add a new job for processing.",
         "requestBody": {
           "required": true,
           "content": {
@@ -21,23 +21,31 @@
         },
         "responses": {
           "204": {
-            "description": "No content. The job was added successfully."
+            "description": "No Content - Job successfully added."
           },
           "400": {
-            "description": "Bad Request. The provided data is invalid.",
+            "description": "Bad Request - Invalid job data provided.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "description": "Details of the bad request."
+                  "properties": {
+                    "errorCode": {
+                      "type": "string"
+                    },
+                    "errorMessage": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "errorCode",
+                    "errorMessage"
+                  ]
                 }
               }
             }
           }
-        },
-        "tags": [
-          "Jobs"
-        ]
+        }
       }
     }
   },
@@ -46,20 +54,19 @@
       "JobRequest": {
         "type": "object",
         "properties": {
-          "type": {
+          "Type": {
             "$ref": "#/components/schemas/JobType"
           },
-          "data": {
+          "Data": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            },
-            "description": "Additional data for the job request."
+            }
           }
         },
         "required": [
-          "type",
-          "data"
+          "Type",
+          "Data"
         ]
       },
       "JobType": {

@@ -1,15 +1,15 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Incentives API",
+    "title": "Pause Payments API",
     "version": "1.0.0",
-    "description": "API for managing employer incentives, including pausing payments."
+    "description": "API for pausing or resuming incentive payments."
   },
   "paths": {
     "/pause-payments": {
       "post": {
-        "operationId": "PausePayments",
-        "summary": "Pause payments for employer incentives.",
+        "summary": "Pause or resume payments",
+        "operationId": "pausePayments",
         "requestBody": {
           "required": true,
           "content": {
@@ -22,10 +22,10 @@
         },
         "responses": {
           "200": {
-            "description": "Payment successfully paused."
+            "description": "Operation successful"
           },
-          "404": {
-            "description": "Not Found.",
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
@@ -34,8 +34,8 @@
               }
             }
           },
-          "400": {
-            "description": "Bad Request.",
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -53,74 +53,70 @@
       "PausePaymentsRequest": {
         "type": "object",
         "properties": {
-          "Action": {
-            "type": "string",
-            "enum": [
-              "Pause",
-              "Resume"
-            ],
-            "description": "Action to perform on payments."
+          "action": {
+            "$ref": "#/components/schemas/PausePaymentsAction"
           },
-          "Applications": {
+          "applications": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Application"
             }
           },
-          "ServiceRequest": {
+          "serviceRequest": {
             "$ref": "#/components/schemas/ServiceRequest"
           }
         },
         "required": [
-          "Action",
-          "Applications",
-          "ServiceRequest"
+          "action",
+          "applications"
+        ]
+      },
+      "PausePaymentsAction": {
+        "type": "string",
+        "enum": [
+          "Pause",
+          "Resume"
         ]
       },
       "Application": {
         "type": "object",
         "properties": {
-          "AccountLegalEntityId": {
+          "accountLegalEntityId": {
             "type": "integer",
             "format": "int64"
           },
-          "ULN": {
+          "uln": {
             "type": "integer",
             "format": "int64"
           },
-          "ServiceRequest": {
+          "serviceRequest": {
             "$ref": "#/components/schemas/ServiceRequest"
           }
         },
         "required": [
-          "AccountLegalEntityId",
-          "ULN",
-          "ServiceRequest"
+          "accountLegalEntityId",
+          "uln"
         ]
       },
       "ServiceRequest": {
         "type": "object",
         "properties": {
-          "TaskId": {
+          "taskId": {
             "type": "string"
           },
-          "DecisionReference": {
+          "decisionReference": {
             "type": "string"
           },
-          "TaskCreatedDate": {
+          "taskCreatedDate": {
             "type": "string",
             "format": "date-time"
           }
-        },
-        "required": [
-          "TaskId",
-          "DecisionReference"
-        ]
+        }
       },
       "SingleMessageResponse": {
         "type": "object",
         "properties": {
-          "Message": {
+          "message": {
             "type": "string"
           }
         }

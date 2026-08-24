@@ -2,14 +2,13 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Incentives API",
-    "version": "1.0.0",
-    "description": "API for managing employer incentives, accounts, legal entities, and applications."
+    "version": "1.0.0"
   },
   "paths": {
     "/accounts/{accountId}/legalentities": {
       "get": {
-        "summary": "Get Legal Entities",
-        "operationId": "GetLegalEntities",
+        "summary": "Get legal entities for an account",
+        "operationId": "getLegalEntities",
         "parameters": [
           {
             "name": "accountId",
@@ -23,7 +22,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of legal entities",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -38,8 +37,8 @@
         }
       },
       "put": {
-        "summary": "Add Legal Entity",
-        "operationId": "AddLegalEntity",
+        "summary": "Add a legal entity to an account",
+        "operationId": "addLegalEntity",
         "parameters": [
           {
             "name": "accountId",
@@ -63,15 +62,15 @@
         },
         "responses": {
           "201": {
-            "description": "Legal entity created"
+            "description": "Created"
           }
         }
       }
     },
     "/accounts/{accountId}/legalentities/{accountLegalEntityId}": {
       "get": {
-        "summary": "Get Legal Entity",
-        "operationId": "GetLegalEntity",
+        "summary": "Get a legal entity by its ID",
+        "operationId": "getLegalEntity",
         "parameters": [
           {
             "name": "accountId",
@@ -94,7 +93,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Details of the legal entity",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -106,8 +105,8 @@
         }
       },
       "delete": {
-        "summary": "Remove Legal Entity",
-        "operationId": "RemoveLegalEntity",
+        "summary": "Remove a legal entity from an account",
+        "operationId": "removeLegalEntity",
         "parameters": [
           {
             "name": "accountId",
@@ -130,13 +129,13 @@
         ],
         "responses": {
           "202": {
-            "description": "Legal entity removal accepted"
+            "description": "Accepted"
           }
         }
       },
       "patch": {
-        "summary": "Sign Agreement",
-        "operationId": "SignAgreement",
+        "summary": "Sign an agreement for a legal entity",
+        "operationId": "signAgreement",
         "parameters": [
           {
             "name": "accountId",
@@ -169,15 +168,15 @@
         },
         "responses": {
           "204": {
-            "description": "Agreement signed successfully"
+            "description": "No Content"
           }
         }
       }
     },
     "/accounts/{accountId}/legalentity/{accountLegalEntityId}/applications": {
       "get": {
-        "summary": "Get Applications",
-        "operationId": "GetApplications",
+        "summary": "Get applications for a legal entity",
+        "operationId": "getApplications",
         "parameters": [
           {
             "name": "accountId",
@@ -200,25 +199,28 @@
         ],
         "responses": {
           "200": {
-            "description": "List of applications",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetApplicationsQueryResult"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Application"
+                  }
                 }
               }
             }
           },
           "404": {
-            "description": "Applications not found"
+            "description": "Not Found"
           }
         }
       }
     },
     "/accounts/{accountId}/legalentity/{accountLegalEntityId}/vrfcasestatus": {
       "put": {
-        "summary": "Update VRF Case Status",
-        "operationId": "UpdateVrfCaseStatus",
+        "summary": "Update VRF Case Status for a legal entity",
+        "operationId": "updateVrfCaseStatus",
         "parameters": [
           {
             "name": "accountId",
@@ -242,29 +244,24 @@
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "text/plain": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "vrfCaseStatus": {
-                    "type": "string"
-                  }
-                }
+                "type": "string"
               }
             }
           }
         },
         "responses": {
           "204": {
-            "description": "VRF Case Status updated successfully"
+            "description": "No Content"
           }
         }
       }
     },
     "/blockedpayments": {
       "patch": {
-        "summary": "Block Payments for Account Legal Entities",
-        "operationId": "BlockAccountLegalEntityForPayments",
+        "summary": "Block Account Legal Entity for Payments",
+        "operationId": "blockAccountLegalEntityForPayments",
         "requestBody": {
           "required": true,
           "content": {
@@ -280,7 +277,7 @@
         },
         "responses": {
           "204": {
-            "description": "Payments blocked successfully"
+            "description": "No Content"
           }
         }
       }
@@ -290,7 +287,7 @@
     "schemas": {
       "AccountLegalEntityDto": {
         "type": "object",
-        "additionalProperties": false
+        "properties": {}
       },
       "LegalEntityRequest": {
         "type": "object",
@@ -332,8 +329,7 @@
             "format": "int64"
           },
           "AgreementVersion": {
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           }
         },
         "required": [
@@ -344,9 +340,9 @@
           "AgreementVersion"
         ]
       },
-      "GetApplicationsQueryResult": {
+      "Application": {
         "type": "object",
-        "additionalProperties": false
+        "properties": {}
       },
       "BlockAccountLegalEntityForPaymentsRequest": {
         "type": "object",
@@ -360,11 +356,7 @@
           "ServiceRequest": {
             "$ref": "#/components/schemas/ServiceRequest"
           }
-        },
-        "required": [
-          "VendorBlocks",
-          "ServiceRequest"
-        ]
+        }
       },
       "VendorBlock": {
         "type": "object",
@@ -376,11 +368,7 @@
             "type": "string",
             "format": "date-time"
           }
-        },
-        "required": [
-          "VendorId",
-          "VendorBlockEndDate"
-        ]
+        }
       },
       "ServiceRequest": {
         "type": "object",
@@ -395,11 +383,7 @@
             "type": "string",
             "format": "date-time"
           }
-        },
-        "required": [
-          "TaskId",
-          "DecisionReference"
-        ]
+        }
       }
     }
   }
