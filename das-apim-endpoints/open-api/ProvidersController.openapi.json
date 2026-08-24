@@ -1,18 +1,21 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Provider API",
-    "description": "API for retrieving information about registered providers.",
+    "title": "Providers API",
+    "description": "Provides API endpoints for retrieving information about registered providers.",
     "version": "1.0.0"
   },
   "paths": {
     "/providers": {
       "get": {
-        "summary": "Retrieve a list of registered providers",
-        "operationId": "getProviders",
+        "summary": "Retrieves the list of registered providers.",
+        "operationId": "GetProviders",
+        "tags": [
+          "Providers"
+        ],
         "responses": {
           "200": {
-            "description": "A list of registered providers",
+            "description": "Successfully retrieved the list of registered providers.",
             "content": {
               "application/json": {
                 "schema": {
@@ -26,48 +29,49 @@
     },
     "/providers/status-events": {
       "get": {
-        "summary": "Retrieve provider status events",
-        "description": "Returns a paginated list of provider status events that occurred since the specified event ID.",
-        "operationId": "getProviderStatusEvents",
+        "summary": "Retrieves a paginated list of provider status events since a specific event ID.",
+        "operationId": "GetProviderStatusEvents",
+        "tags": [
+          "Providers"
+        ],
         "parameters": [
           {
             "name": "sinceEventId",
             "in": "query",
-            "description": "The ID of the last received event. Only events with an ID greater than this value are returned. Must be zero or greater.",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "integer",
-              "minimum": 0,
-              "default": 0
-            }
+              "minimum": 0
+            },
+            "description": "The ID of the last received event. Only events with an ID greater than this value are returned."
           },
           {
             "name": "pageSize",
             "in": "query",
-            "description": "The maximum number of events to return in the response. Must be between 1 and 1000. Defaults to 1000.",
             "required": false,
             "schema": {
               "type": "integer",
+              "default": 1000,
               "minimum": 1,
-              "maximum": 1000,
-              "default": 1000
-            }
+              "maximum": 1000
+            },
+            "description": "The maximum number of events to return in the response. Defaults to 1000."
           },
           {
             "name": "pageNumber",
             "in": "query",
-            "description": "The page number of results to retrieve. Must be 1 or greater. Defaults to 1.",
             "required": false,
             "schema": {
               "type": "integer",
-              "minimum": 1,
-              "default": 1
-            }
+              "default": 1,
+              "minimum": 1
+            },
+            "description": "The page number of results to retrieve. Defaults to 1."
           }
         ],
         "responses": {
           "200": {
-            "description": "A list of provider status events",
+            "description": "Successfully retrieved the provider status events.",
             "content": {
               "application/json": {
                 "schema": {
@@ -94,58 +98,75 @@
               "$ref": "#/components/schemas/ProviderModel"
             }
           }
-        }
+        },
+        "required": [
+          "providers"
+        ]
       },
       "ProviderModel": {
         "type": "object",
         "properties": {
           "ukprn": {
             "type": "integer",
-            "description": "UKPRN of the provider"
+            "description": "The UKPRN of the provider."
           },
           "name": {
             "type": "string",
-            "description": "Registered name of the provider"
+            "description": "The registered name of the provider."
           },
           "tradingName": {
             "type": "string",
-            "description": "Registered trading name of the provider"
+            "description": "The trading name of the provider."
           },
           "providerTypeId": {
             "type": "integer",
-            "description": "Provider type. `0 -> Main`, `1 -> Employer`, `2 -> Supporting`."
+            "description": "The type of the provider. 0 -> Main, 1 -> Employer, 2 -> Supporting."
           },
           "statusId": {
             "type": "integer",
-            "description": "Provider status. `0 -> Active`, `1 -> ActiveButNotTakingOnApprentices`, `2 -> OnBoarding`."
+            "description": "The status of the provider. 0 -> Active, 1 -> Active but not taking on apprentices, 2 -> Onboarding."
           },
           "canAccessApprenticeshipService": {
             "type": "boolean",
-            "description": "Indicates if the provider can access the apprenticeship service"
+            "description": "Indicates whether the provider can access apprenticeship services."
           }
-        }
+        },
+        "required": [
+          "ukprn",
+          "name",
+          "tradingName",
+          "providerTypeId",
+          "statusId",
+          "canAccessApprenticeshipService"
+        ]
       },
       "ProviderStatusEvent": {
         "type": "object",
         "properties": {
           "id": {
             "type": "integer",
-            "description": "The unique ID of the provider status event"
+            "description": "The unique identifier of the status event."
           },
           "providerId": {
             "type": "integer",
-            "description": "The ID of the associated provider"
+            "description": "The UKPRN of the provider associated with the event."
           },
           "event": {
             "type": "string",
-            "description": "The type of provider status event"
+            "description": "The type of the event."
           },
           "createdOn": {
             "type": "string",
             "format": "date-time",
-            "description": "The timestamp when the event occurred"
+            "description": "The timestamp when the event was created."
           }
-        }
+        },
+        "required": [
+          "id",
+          "providerId",
+          "event",
+          "createdOn"
+        ]
       }
     }
   }

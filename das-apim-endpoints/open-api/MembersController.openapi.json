@@ -2,7 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Members API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing members."
   },
   "paths": {
     "/Members": {
@@ -36,11 +37,7 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "string",
-                "enum": [
-                  "Apprentice",
-                  "Employer"
-                ]
+                "$ref": "#/components/schemas/MemberUserType"
               }
             }
           },
@@ -110,7 +107,7 @@
         },
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "Updated successfully"
           }
         }
       }
@@ -144,11 +141,11 @@
           "204": {
             "description": "No Content"
           },
-          "404": {
-            "description": "Not Found"
-          },
           "400": {
             "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -172,11 +169,11 @@
           "204": {
             "description": "No Content"
           },
-          "404": {
-            "description": "Not Found"
-          },
           "400": {
             "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
           }
         }
       }
@@ -215,29 +212,50 @@
             "format": "uuid"
           },
           "FullName": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "RegionId": {
-            "type": "integer"
+            "type": "integer",
+            "nullable": true
           },
           "RegionName": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "UserType": {
-            "type": "string",
-            "enum": [
-              "Apprentice",
-              "Employer"
-            ]
+            "type": "string"
           },
           "IsRegionalChair": {
-            "type": "boolean"
+            "type": "boolean",
+            "nullable": true
           },
           "JoinedDate": {
             "type": "string",
             "format": "date-time"
           }
         }
+      },
+      "MemberUserType": {
+        "type": "string",
+        "enum": [
+          "Apprentice",
+          "Employer"
+        ]
+      },
+      "PostMemberLeavingModel": {
+        "type": "object",
+        "properties": {
+          "LeavingReasons": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "LeavingReasons"
+        ]
       },
       "UpdateMemberProfileModel": {
         "type": "object",
@@ -257,13 +275,16 @@
             "type": "integer"
           },
           "OrganisationName": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "FirstName": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "LastName": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           }
         }
       },
@@ -272,21 +293,16 @@
         "properties": {
           "MemberProfiles": {
             "type": "array",
-            "items": {}
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
           },
           "MemberPreferences": {
             "type": "array",
-            "items": {}
-          }
-        }
-      },
-      "PostMemberLeavingModel": {
-        "type": "object",
-        "properties": {
-          "LeavingReasons": {
-            "type": "array",
             "items": {
-              "type": "integer"
+              "type": "object",
+              "additionalProperties": true
             }
           }
         }

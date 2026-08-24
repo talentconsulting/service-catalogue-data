@@ -1,9 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Qualifications API",
-    "version": "1.0.0",
-    "description": "API for managing qualifications and associated operations."
+    "title": "Aodp API",
+    "version": "1.0.0"
   },
   "paths": {
     "/api/qualifications": {
@@ -13,55 +12,54 @@
           {
             "name": "status",
             "in": "query",
-            "required": false,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "nullable": true
             }
           },
           {
             "name": "skip",
             "in": "query",
-            "required": false,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "nullable": true
             }
           },
           {
             "name": "take",
             "in": "query",
-            "required": false,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "nullable": true
             }
           },
           {
             "name": "name",
             "in": "query",
-            "required": false,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "nullable": true
             }
           },
           {
             "name": "organisation",
             "in": "query",
-            "required": false,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "nullable": true
             }
           },
           {
             "name": "qan",
             "in": "query",
-            "required": false,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "nullable": true
             }
           },
           {
             "name": "processStatusFilter",
             "in": "query",
-            "required": false,
             "schema": {
               "type": "array",
               "items": {
@@ -73,7 +71,6 @@
           {
             "name": "ageGroups",
             "in": "query",
-            "required": false,
             "schema": {
               "type": "array",
               "items": {
@@ -84,26 +81,20 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BaseMediatrResponse"
+                  "$ref": "#/components/schemas/BaseMediatrResponse_GetQualificationsResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Bad request"
           },
           "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Internal server error"
           }
         }
       }
@@ -123,32 +114,23 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BaseMediatrResponse"
+                  "$ref": "#/components/schemas/BaseMediatrResponse_GetQualificationDetailsQueryResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Bad request"
           },
           "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Not found"
           },
           "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Internal server error"
           }
         }
       }
@@ -168,23 +150,17 @@
         ],
         "responses": {
           "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Bad request"
           },
           "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Internal server error"
           }
         }
       }
     },
     "/api/qualifications/{qualificationReference}/qualificationversions/{version}": {
       "get": {
-        "summary": "Get qualification version details",
+        "summary": "Get qualification details by reference and version",
         "parameters": [
           {
             "name": "qualificationReference",
@@ -205,32 +181,79 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BaseMediatrResponse"
+                  "$ref": "#/components/schemas/BaseMediatrResponse_GetQualificationDetailsQueryResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Bad request"
           },
           "404": {
-            "description": "Not Found",
-            "content": {
-              "application/json": {}
-            }
+            "description": "Not found"
           },
           "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {}
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/qualifications/qualificationdiscussionhistory": {
+      "post": {
+        "summary": "Add qualification discussion history",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddQualificationDiscussionHistoryCommand"
+              }
             }
+          }
+        },
+        "responses": {
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/qualifications/{qualificationReference}/qualificationdiscussionhistories": {
+      "get": {
+        "summary": "Get discussion histories for qualification",
+        "parameters": [
+          {
+            "name": "qualificationReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseMediatrResponse_GetDiscussionHistoriesForQualificationQueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -240,7 +263,6 @@
     "schemas": {
       "AgeGroup": {
         "type": "string",
-        "description": "Age group associated with a qualification",
         "enum": [
           "Pre16",
           "SixteenToEighteen",
@@ -248,7 +270,46 @@
           "NineteenPlus"
         ]
       },
-      "BaseMediatrResponse": {
+      "BaseMediatrResponse_GetQualificationsResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          },
+          "errorCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "value": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "AddQualificationDiscussionHistoryCommand": {
+        "type": "object",
+        "required": [
+          "qualificationReference"
+        ],
+        "properties": {
+          "qualificationReference": {
+            "type": "string"
+          },
+          "userDisplayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "BaseMediatrResponse_GetDiscussionHistoriesForQualificationQueryResponse": {
         "type": "object",
         "properties": {
           "success": {
@@ -257,136 +318,43 @@
           "errorMessage": {
             "type": "string"
           },
-          "errorCode": {
-            "type": "string"
-          },
           "value": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/GetNewQualificationsQueryResponse"
-              },
-              {
-                "$ref": "#/components/schemas/GetChangedQualificationsQueryResponse"
+            "$ref": "#/components/schemas/DiscussionHistory"
+          }
+        }
+      },
+      "DiscussionHistory": {
+        "type": "object",
+        "properties": {
+          "qualificationDiscussionHistories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "qualificationId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "actionTypeId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "userDisplayName": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time"
+                }
               }
-            ]
-          }
-        }
-      },
-      "GetNewQualificationsQueryResponse": {
-        "type": "object",
-        "properties": {
-          "totalRecords": {
-            "type": "integer"
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NewQualification"
             }
-          },
-          "job": {
-            "$ref": "#/components/schemas/Job"
-          }
-        }
-      },
-      "GetChangedQualificationsQueryResponse": {
-        "type": "object",
-        "properties": {
-          "totalRecords": {
-            "type": "integer"
-          },
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ChangedQualification"
-            }
-          },
-          "job": {
-            "$ref": "#/components/schemas/Job"
-          }
-        }
-      },
-      "NewQualification": {
-        "type": "object",
-        "properties": {
-          "qualificationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "title": {
-            "type": "string"
-          },
-          "reference": {
-            "type": "string"
-          },
-          "awardingOrganisation": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "ageGroup": {
-            "$ref": "#/components/schemas/AgeGroup"
-          },
-          "eligibleForFunding": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ChangedQualification": {
-        "type": "object",
-        "properties": {
-          "qualificationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "qualificationReference": {
-            "type": "string"
-          },
-          "awardingOrganisation": {
-            "type": "string"
-          },
-          "qualificationTitle": {
-            "type": "string"
-          },
-          "qualificationType": {
-            "type": "string"
-          },
-          "level": {
-            "type": "string"
-          },
-          "ageGroup": {
-            "$ref": "#/components/schemas/AgeGroup"
-          },
-          "subject": {
-            "type": "string"
-          },
-          "sectorSubjectArea": {
-            "type": "string"
-          },
-          "changedFieldNames": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "eligibleForFunding": {
-            "type": "boolean"
-          }
-        }
-      },
-      "Job": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "lastRunTime": {
-            "type": "string",
-            "format": "date-time"
           }
         }
       }
