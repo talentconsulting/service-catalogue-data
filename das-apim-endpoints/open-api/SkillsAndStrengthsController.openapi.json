@@ -1,0 +1,165 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Find An Apprenticeship API",
+    "description": "API for managing skills and strengths within apprenticeship applications.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/applications/{applicationId}/skillsandstrengths/expected": {
+      "get": {
+        "summary": "Get Expected Skills and Strengths",
+        "description": "Retrieves the expected skills and strengths for a given application and candidate.",
+        "operationId": "getExpectedSkillsAndStrengths",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the application."
+          },
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the candidate."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response containing expected skills and strengths.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetExpectedSkillsAndStrengthsApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/skillsandstrengths": {
+      "post": {
+        "summary": "Create or Update Skills and Strengths",
+        "description": "Stores or updates skills and strengths for a given application.",
+        "operationId": "postSkillsAndStrengths",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the application."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostSkillsAndStrengthsApiRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Skills and strengths created or updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertSkillsAndStrengthsCommandResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "The requested resource was not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetExpectedSkillsAndStrengthsApiResponse": {
+        "type": "object",
+        "properties": {
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "strengths": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PostSkillsAndStrengthsApiRequest": {
+        "type": "object",
+        "properties": {
+          "CandidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "SkillsAndStrengths": {
+            "type": "string"
+          },
+          "SkillsAndStrengthsSectionStatus": {
+            "type": "string",
+            "enum": [
+              "NotStarted",
+              "InProgress",
+              "Incomplete",
+              "Completed",
+              "NotRequired",
+              "PreviousAnswer"
+            ]
+          }
+        },
+        "required": [
+          "CandidateId",
+          "SkillsAndStrengths",
+          "SkillsAndStrengthsSectionStatus"
+        ]
+      },
+      "UpsertSkillsAndStrengthsCommandResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "Application": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  }
+}

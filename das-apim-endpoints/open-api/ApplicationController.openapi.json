@@ -1,141 +1,144 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Incentives API",
-    "description": "API for managing employer incentives applications.",
-    "version": "1.0.0"
+    "title": "FindAnApprenticeship API",
+    "version": "1.0.0",
+    "description": "API for managing apprenticeship applications."
   },
   "paths": {
-    "/accounts/{accountId}/applications": {
+    "/applications/{applicationId}": {
+      "get": {
+        "summary": "Retrieve application index",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application index retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationsApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Application not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/{candidateId}/summary": {
+      "get": {
+        "summary": "Retrieve application summary",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application summary retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Application not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/{candidateId}/view": {
+      "get": {
+        "summary": "View application details",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationViewApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Application not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/{candidateId}/status": {
       "post": {
-        "summary": "Create Application",
-        "operationId": "createApplication",
+        "summary": "Update application status",
         "parameters": [
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Employer account ID."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateApplicationRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Application created successfully.",
-            "headers": {
-              "Location": {
-                "description": "URI of the created resource.",
-                "schema": {
-                  "type": "string",
-                  "format": "uri"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "summary": "Update Application",
-        "operationId": "updateApplication",
-        "parameters": [
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Employer account ID."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateApplicationRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Application updated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string",
-                  "description": "URI of the updated resource."
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "summary": "Confirm Application",
-        "operationId": "confirmApplication",
-        "parameters": [
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Employer account ID."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ConfirmApplicationRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Application confirmed successfully."
-          },
-          "409": {
-            "description": "Conflict: Application contains a ULN which has already been submitted."
-          }
-        }
-      }
-    },
-    "/accounts/{accountId}/applications/{applicationId}": {
-      "get": {
-        "summary": "Get Application",
-        "operationId": "getApplication",
-        "parameters": [
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Employer account ID."
-          },
           {
             "name": "applicationId",
             "in": "path",
@@ -143,148 +146,16 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "Application ID."
-          },
-          {
-            "name": "includeApprenticeships",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            },
-            "description": "Include apprenticeship details.",
-            "required": false,
-            "example": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Application retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApplicationResponse"
-                }
-              }
             }
-          }
-        }
-      }
-    },
-    "/accounts/{accountId}/applications/{applicationId}/bankingDetails/": {
-      "get": {
-        "summary": "Get Banking Details",
-        "operationId": "getBankingDetails",
-        "parameters": [
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Employer account ID."
           },
           {
-            "name": "applicationId",
+            "name": "candidateId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "Application ID."
-          },
-          {
-            "name": "hashedAccountId",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "Hashed account ID."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Banking details retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BankingDetailsDto"
-                }
-              }
             }
-          }
-        }
-      }
-    },
-    "/accounts/{accountId}/applications/{applicationId}/accountlegalentity": {
-      "get": {
-        "summary": "Get Application Account Legal Entity",
-        "operationId": "getApplicationAccountLegalEntity",
-        "parameters": [
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Employer account ID."
-          },
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "Application ID."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Account legal entity retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/accounts/{accountId}/applications/{applicationId}/apprenticeships": {
-      "patch": {
-        "summary": "Save Apprenticeship Details",
-        "operationId": "saveApprenticeshipDetails",
-        "parameters": [
-          {
-            "name": "accountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Employer account ID."
-          },
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "Application ID."
           }
         ],
         "requestBody": {
@@ -292,14 +163,158 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ApprenticeshipDetailsRequest"
+                "$ref": "#/components/schemas/UpdateApplicationStatusModel"
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Apprenticeship details saved successfully."
+          "204": {
+            "description": "Application status updated successfully"
+          },
+          "404": {
+            "description": "Application not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/{candidateId}/work-history": {
+      "post": {
+        "summary": "Update application work history",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateApplicationWorkHistoryModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Application work history updated successfully"
+          },
+          "404": {
+            "description": "Application not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/{candidateId}/training-courses": {
+      "post": {
+        "summary": "Update application training courses",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateApplicationTrainingCoursesModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Application training courses updated successfully"
+          },
+          "404": {
+            "description": "Application not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/{candidateId}/disability-confidence": {
+      "post": {
+        "summary": "Update disability confidence status",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDisabilityConfidenceModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Disability confidence status updated successfully"
+          },
+          "404": {
+            "description": "Application not found"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -307,145 +322,91 @@
   },
   "components": {
     "schemas": {
-      "CreateApplicationRequest": {
+      "GetApplicationsApiResponse": {
         "type": "object",
         "properties": {
-          "ApplicationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "AccountId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "AccountLegalEntityId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "ApprenticeshipIds": {
+          "applications": {
             "type": "array",
             "items": {
-              "type": "integer",
-              "format": "int64"
+              "$ref": "#/components/schemas/Application"
             }
-          }
-        },
-        "required": [
-          "ApplicationId",
-          "AccountId",
-          "AccountLegalEntityId",
-          "ApprenticeshipIds"
-        ]
-      },
-      "UpdateApplicationRequest": {
-        "type": "object",
-        "properties": {
-          "ApplicationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "AccountId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "ApprenticeshipIds": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        },
-        "required": [
-          "ApplicationId",
-          "AccountId",
-          "ApprenticeshipIds"
-        ]
-      },
-      "ConfirmApplicationRequest": {
-        "type": "object",
-        "properties": {
-          "ApplicationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "AccountId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "DateSubmitted": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "SubmittedByEmail": {
-            "type": "string",
-            "format": "email"
-          },
-          "SubmittedByName": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "ApplicationId",
-          "AccountId",
-          "DateSubmitted",
-          "SubmittedByEmail",
-          "SubmittedByName"
-        ]
-      },
-      "ApplicationResponse": {
-        "type": "object",
-        "properties": {
-          "Application": {
-            "type": "object",
-            "additionalProperties": true
           }
         }
       },
-      "BankingDetailsDto": {
-        "type": "object",
-        "additionalProperties": true
-      },
-      "ApprenticeshipDetailsRequest": {
+      "Application": {
         "type": "object",
         "properties": {
-          "AccountId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "ApplicationId": {
+          "id": {
             "type": "string",
             "format": "uuid"
           },
-          "ApprenticeshipDetails": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ApprenticeDetailsDto"
-            }
-          }
-        },
-        "required": [
-          "AccountId",
-          "ApplicationId",
-          "ApprenticeshipDetails"
-        ]
-      },
-      "ApprenticeDetailsDto": {
-        "type": "object",
-        "properties": {
-          "ApprenticeId": {
-            "type": "integer",
-            "format": "int64"
+          "title": {
+            "type": "string"
           },
-          "EmploymentStartDate": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "Draft",
+              "Submitted",
+              "Withdrawn",
+              "Successful",
+              "UnSuccessful",
+              "Expired"
+            ]
+          },
+          "createdDate": {
             "type": "string",
             "format": "date-time"
           }
-        },
-        "required": [
-          "ApprenticeId",
-          "EmploymentStartDate"
-        ]
+        }
+      },
+      "UpdateApplicationStatusModel": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "Draft",
+              "Submitted",
+              "Withdrawn",
+              "Successful",
+              "UnSuccessful",
+              "Expired"
+            ]
+          }
+        }
+      },
+      "UpdateApplicationWorkHistoryModel": {
+        "type": "object",
+        "properties": {
+          "workHistorySectionStatus": {
+            "type": "string",
+            "enum": [
+              "Incomplete",
+              "Completed"
+            ]
+          }
+        }
+      },
+      "UpdateApplicationTrainingCoursesModel": {
+        "type": "object",
+        "properties": {
+          "trainingCoursesSectionStatus": {
+            "type": "string",
+            "enum": [
+              "Incomplete",
+              "Completed"
+            ]
+          }
+        }
+      },
+      "UpdateDisabilityConfidenceModel": {
+        "type": "object",
+        "properties": {
+          "isSectionCompleted": {
+            "type": "boolean"
+          }
+        }
       }
     }
   }

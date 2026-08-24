@@ -3,45 +3,12 @@
   "info": {
     "title": "Employment Check API",
     "version": "1.0.0",
-    "description": "API for managing employment checks."
+    "description": "API for employment checks."
   },
   "paths": {
-    "/employmentchecks/{correlationId}": {
-      "put": {
-        "summary": "Update Employment Check",
-        "operationId": "UpdateCheck",
-        "parameters": [
-          {
-            "name": "correlationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "Unique identifier for the employment check."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateEmploymentCheckRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Employment check updated successfully."
-          }
-        }
-      }
-    },
-    "/employmentchecks": {
+    "/api/EmploymentCheck/RegisterCheck": {
       "post": {
-        "summary": "Register Employment Check",
+        "summary": "Registers an employment check",
         "operationId": "RegisterCheck",
         "requestBody": {
           "required": true,
@@ -55,20 +22,34 @@
         },
         "responses": {
           "200": {
-            "description": "Employment check registered successfully.",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RegisterEmploymentCheckResponse"
+                  "$ref": "#/components/schemas/RegisterCheckResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid request data."
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpContentError"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpContentError"
+                }
+              }
+            }
           }
         }
       }
@@ -76,32 +57,45 @@
   },
   "components": {
     "schemas": {
-      "UpdateEmploymentCheckRequest": {
+      "RegisterCheckRequest": {
         "type": "object",
-        "required": [
-          "CorrelationId",
-          "Result",
-          "DateChecked"
-        ],
         "properties": {
           "CorrelationId": {
             "type": "string",
             "format": "uuid",
-            "description": "Unique identifier for the employment check."
+            "description": "The correlation identifier of the check."
           },
-          "Result": {
+          "CheckType": {
             "type": "string",
-            "description": "Result of the employment check."
+            "description": "The type of check being performed."
           },
-          "DateChecked": {
+          "Uln": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The unique learner number."
+          },
+          "ApprenticeshipAccountId": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The apprenticeship account ID."
+          },
+          "ApprenticeshipId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The apprenticeship ID.",
+            "nullable": true
+          },
+          "MinDate": {
             "type": "string",
             "format": "date-time",
-            "description": "Date the check was performed."
+            "description": "The minimum date for the check."
+          },
+          "MaxDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The maximum date for the check."
           }
-        }
-      },
-      "RegisterCheckRequest": {
-        "type": "object",
+        },
         "required": [
           "CorrelationId",
           "CheckType",
@@ -109,49 +103,25 @@
           "ApprenticeshipAccountId",
           "MinDate",
           "MaxDate"
-        ],
-        "properties": {
-          "CorrelationId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Unique identifier for the employment check."
-          },
-          "CheckType": {
-            "type": "string",
-            "description": "Type of the check to be performed."
-          },
-          "Uln": {
-            "type": "integer",
-            "format": "int64",
-            "description": "Unique learner number associated with the check."
-          },
-          "ApprenticeshipAccountId": {
-            "type": "integer",
-            "description": "Account ID associated with the apprenticeship."
-          },
-          "ApprenticeshipId": {
-            "type": "integer",
-            "description": "Optional ID of the apprenticeship."
-          },
-          "MinDate": {
-            "type": "string",
-            "format": "date",
-            "description": "Earliest date covered by the employment check."
-          },
-          "MaxDate": {
-            "type": "string",
-            "format": "date",
-            "description": "Latest date covered by the employment check."
-          }
-        }
+        ]
       },
-      "RegisterEmploymentCheckResponse": {
+      "RegisterCheckResponse": {
         "type": "object",
-        "description": "Response data for registering an employment check.",
+        "description": "Response for RegisterCheck endpoint.",
+        "properties": {}
+      },
+      "HttpContentError": {
+        "type": "object",
+        "description": "Error response returned by the API.",
         "properties": {
-          "status": {
+          "StatusCode": {
+            "type": "integer",
+            "format": "int32",
+            "description": "HTTP status code."
+          },
+          "ErrorContent": {
             "type": "string",
-            "description": "Registration status."
+            "description": "Detail of the error."
           }
         }
       }

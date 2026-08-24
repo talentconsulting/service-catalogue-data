@@ -1,130 +1,41 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Aodp API",
+    "title": "Find An Apprenticeship Qualifications API",
     "version": "1.0.0"
   },
   "paths": {
-    "/api/qualifications": {
+    "/applications/{applicationId}/qualifications": {
       "get": {
-        "summary": "Get qualifications",
+        "summary": "Get qualifications for an application.",
         "parameters": [
           {
-            "name": "status",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            }
-          },
-          {
-            "name": "skip",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "nullable": true
-            }
-          },
-          {
-            "name": "take",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "nullable": true
-            }
-          },
-          {
-            "name": "name",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            }
-          },
-          {
-            "name": "organisation",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            }
-          },
-          {
-            "name": "qan",
-            "in": "query",
-            "schema": {
-              "type": "string",
-              "nullable": true
-            }
-          },
-          {
-            "name": "processStatusFilter",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "format": "uuid"
-              }
-            }
-          },
-          {
-            "name": "ageGroups",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/components/schemas/AgeGroup"
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseMediatrResponse_GetQualificationsResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/api/qualifications/{qualificationReference}/detail": {
-      "get": {
-        "summary": "Get qualification details",
-        "parameters": [
-          {
-            "name": "qualificationReference",
+            "name": "applicationId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseMediatrResponse_GetQualificationDetailsQueryResponse"
-                }
+                "schema": {}
               }
             }
-          },
-          "400": {
-            "description": "Bad request"
           },
           "404": {
             "description": "Not found"
@@ -133,91 +44,33 @@
             "description": "Internal server error"
           }
         }
-      }
-    },
-    "/api/qualifications/{qualificationReference}/detailwithversions": {
-      "get": {
-        "summary": "Get qualification details with versions",
-        "parameters": [
-          {
-            "name": "qualificationReference",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "400": {
-            "description": "Bad request"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/api/qualifications/{qualificationReference}/qualificationversions/{version}": {
-      "get": {
-        "summary": "Get qualification details by reference and version",
-        "parameters": [
-          {
-            "name": "qualificationReference",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "version",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseMediatrResponse_GetQualificationDetailsQueryResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "404": {
-            "description": "Not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/api/qualifications/qualificationdiscussionhistory": {
+      },
       "post": {
-        "summary": "Add qualification discussion history",
+        "summary": "Update qualifications for an application.",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AddQualificationDiscussionHistoryCommand"
+                "$ref": "#/components/schemas/PostQualificationsApiRequest"
               }
             }
           }
         },
         "responses": {
-          "404": {
-            "description": "Not found"
+          "201": {
+            "description": "Created"
           },
           "500": {
             "description": "Internal server error"
@@ -225,35 +78,234 @@
         }
       }
     },
-    "/api/qualifications/{qualificationReference}/qualificationdiscussionhistories": {
+    "/applications/{applicationId}/qualifications/add/select-type": {
       "get": {
-        "summary": "Get discussion histories for qualification",
+        "summary": "Get qualification types for adding qualifications.",
         "parameters": [
           {
-            "name": "qualificationReference",
+            "name": "applicationId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response",
             "content": {
               "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BaseMediatrResponse_GetDiscussionHistoriesForQualificationQueryResponse"
-                }
+                "schema": {}
               }
             }
           },
-          "400": {
-            "description": "Bad request"
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/qualifications/{qualificationReferenceId}/modify": {
+      "get": {
+        "summary": "Get details for modifying a qualification.",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "qualificationReferenceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
           },
           "500": {
             "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Modify a qualification.",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "qualificationReferenceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateApplicationQualificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/qualifications/delete/{qualificationReferenceId}": {
+      "get": {
+        "summary": "Get qualifications to delete.",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "qualificationReferenceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Delete a qualification.",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "qualificationReferenceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostDeleteQualificationsApiRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -261,72 +313,40 @@
   },
   "components": {
     "schemas": {
-      "AgeGroup": {
-        "type": "string",
-        "enum": [
-          "Pre16",
-          "SixteenToEighteen",
-          "EighteenPlus",
-          "NineteenPlus"
-        ]
-      },
-      "BaseMediatrResponse_GetQualificationsResponse": {
+      "PostQualificationsApiRequest": {
         "type": "object",
         "properties": {
-          "success": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isComplete": {
             "type": "boolean"
-          },
-          "errorMessage": {
+          }
+        }
+      },
+      "PostDeleteQualificationsApiRequest": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
             "type": "string",
-            "nullable": true
+            "format": "uuid"
           },
-          "errorCode": {
+          "id": {
             "type": "string",
-            "nullable": true
-          },
-          "value": {
-            "type": "object",
+            "format": "uuid",
             "nullable": true
           }
         }
       },
-      "AddQualificationDiscussionHistoryCommand": {
+      "UpdateApplicationQualificationRequest": {
         "type": "object",
-        "required": [
-          "qualificationReference"
-        ],
         "properties": {
-          "qualificationReference": {
-            "type": "string"
-          },
-          "userDisplayName": {
+          "candidateId": {
             "type": "string",
-            "nullable": true
+            "format": "uuid"
           },
-          "notes": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "BaseMediatrResponse_GetDiscussionHistoriesForQualificationQueryResponse": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean"
-          },
-          "errorMessage": {
-            "type": "string"
-          },
-          "value": {
-            "$ref": "#/components/schemas/DiscussionHistory"
-          }
-        }
-      },
-      "DiscussionHistory": {
-        "type": "object",
-        "properties": {
-          "qualificationDiscussionHistories": {
+          "subjects": {
             "type": "array",
             "items": {
               "type": "object",
@@ -335,23 +355,34 @@
                   "type": "string",
                   "format": "uuid"
                 },
-                "qualificationId": {
+                "toYear": {
+                  "type": "integer",
+                  "nullable": true
+                },
+                "grade": {
                   "type": "string",
-                  "format": "uuid"
+                  "nullable": true
                 },
-                "actionTypeId": {
+                "name": {
                   "type": "string",
-                  "format": "uuid"
+                  "nullable": true
                 },
-                "userDisplayName": {
-                  "type": "string"
+                "isPredicted": {
+                  "type": "boolean",
+                  "nullable": true
                 },
-                "notes": {
-                  "type": "string"
+                "qualificationOrder": {
+                  "type": "integer",
+                  "format": "int16",
+                  "nullable": true
                 },
-                "timestamp": {
+                "additionalInformation": {
                   "type": "string",
-                  "format": "date-time"
+                  "nullable": true
+                },
+                "isDeleted": {
+                  "type": "boolean",
+                  "nullable": true
                 }
               }
             }

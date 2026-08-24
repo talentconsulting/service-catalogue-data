@@ -1,0 +1,166 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Find An Apprenticeship Interview Adjustments API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/applications/{applicationId}/InterviewAdjustments": {
+      "get": {
+        "summary": "Get interview adjustments for a specific application",
+        "operationId": "getInterviewAdjustments",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the application for which to retrieve interview adjustments"
+          },
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the candidate"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of interview adjustments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetInterviewAdjustmentsApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Interview adjustments not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create or update interview adjustments for an application",
+        "operationId": "postInterviewAdjustments",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the application for which to create/update interview adjustments"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostInterviewAdjustmentsApiRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Interview adjustments created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpsertInterviewAdjustmentsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Application not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetInterviewAdjustmentsApiResponse": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "candidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "interviewAdjustmentsDescription": {
+            "type": "string",
+            "nullable": true
+          },
+          "interviewAdjustmentsSectionStatus": {
+            "$ref": "#/components/schemas/SectionStatus"
+          }
+        }
+      },
+      "PostInterviewAdjustmentsApiRequest": {
+        "type": "object",
+        "properties": {
+          "candidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "interviewAdjustmentsDescription": {
+            "type": "string"
+          },
+          "interviewAdjustmentsSectionStatus": {
+            "$ref": "#/components/schemas/SectionStatus"
+          }
+        },
+        "required": [
+          "candidateId",
+          "interviewAdjustmentsDescription",
+          "interviewAdjustmentsSectionStatus"
+        ]
+      },
+      "UpsertInterviewAdjustmentsResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "application": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "SectionStatus": {
+        "type": "string",
+        "enum": [
+          "NotStarted",
+          "InProgress",
+          "Incomplete",
+          "Completed",
+          "NotRequired",
+          "PreviousAnswer"
+        ]
+      }
+    }
+  }
+}

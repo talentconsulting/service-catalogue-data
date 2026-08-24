@@ -1,14 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "EmployerFinance API",
+    "title": "Employer Request Apprentice Training API",
     "version": "1.0.0"
   },
   "paths": {
-    "/Accounts/{accountId}/users/which-receive-notifications": {
+    "/accounts/{accountId}/standard/{standardReference}/employer-request/existing": {
       "get": {
-        "summary": "Get account team members which receive notifications",
-        "operationId": "GetAccountTeamMembersWhichReceiveNotifications",
+        "summary": "Check for existing employer request",
         "parameters": [
           {
             "name": "accountId",
@@ -18,29 +17,80 @@
               "type": "integer",
               "format": "int64"
             }
+          },
+          {
+            "name": "standardReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Returns whether an employer request exists",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetAccountTeamMembersWhichReceiveNotificationsResponse"
+                  "type": "boolean"
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad request"
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
     },
-    "/Accounts/{accountId}/minimum-signed-agreement-version": {
+    "/accounts/{accountId}/employer-requests": {
+      "post": {
+        "summary": "Submit employer request",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitEmployerRequestRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Returns the employer request ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to invalid location or other errors"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/dashboard": {
       "get": {
-        "summary": "Get account minimum signed agreement version",
-        "operationId": "GetAccountMinimumSignedAgreementVersion",
+        "summary": "Get employer dashboard details",
         "parameters": [
           {
             "name": "accountId",
@@ -54,17 +104,17 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Returns dashboard details",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetAccountMinimumSignedAgreementVersionResponse"
+                  "$ref": "#/components/schemas/Dashboard"
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad request"
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -72,18 +122,79 @@
   },
   "components": {
     "schemas": {
-      "GetAccountMinimumSignedAgreementVersionResponse": {
+      "SubmitEmployerRequestRequest": {
         "type": "object",
         "properties": {
-          "minimumSignedAgreementVersion": {
-            "type": "integer",
-            "format": "int32"
+          "OriginalLocation": {
+            "type": "string"
+          },
+          "RequestType": {
+            "type": "string",
+            "enum": [
+              "Shortlist",
+              "CourseDetail",
+              "Providers"
+            ]
+          },
+          "StandardReference": {
+            "type": "string"
+          },
+          "NumberOfApprentices": {
+            "type": "integer"
+          },
+          "SameLocation": {
+            "type": "string"
+          },
+          "SingleLocation": {
+            "type": "string"
+          },
+          "MultipleLocations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "AtApprenticesWorkplace": {
+            "type": "boolean"
+          },
+          "DayRelease": {
+            "type": "boolean"
+          },
+          "BlockRelease": {
+            "type": "boolean"
+          },
+          "RequestedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ModifiedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "DashboardUrl": {
+            "type": "string"
           }
         }
       },
-      "GetAccountTeamMembersWhichReceiveNotificationsResponse": {
+      "Dashboard": {
         "type": "object",
-        "description": "Minimal placeholder schema for response",
+        "properties": {
+          "AggregatedEmployerRequests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AggregatedEmployerRequest"
+            }
+          },
+          "ExpiryAfterMonths": {
+            "type": "integer"
+          },
+          "RemovedAfterExpiryMonths": {
+            "type": "integer"
+          }
+        }
+      },
+      "AggregatedEmployerRequest": {
+        "type": "object",
         "properties": {}
       }
     }

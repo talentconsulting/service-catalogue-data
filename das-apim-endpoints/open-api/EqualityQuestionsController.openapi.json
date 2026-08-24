@@ -1,0 +1,176 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Equality Questions API",
+    "version": "1.0.0",
+    "description": "API to handle equality questions for candidates."
+  },
+  "paths": {
+    "/EqualityQuestions": {
+      "get": {
+        "summary": "Retrieve equality questions for a specific candidate.",
+        "operationId": "GetEqualityQuestions",
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The unique identifier of the candidate."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Equality questions retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEqualityQuestionsApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Submit equality questions for a specific candidate.",
+        "operationId": "PostEqualityQuestions",
+        "parameters": [
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The unique identifier of the candidate."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostEqualityQuestionsApiRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Equality questions created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostEqualityQuestionsApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Candidate not found."
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PostEqualityQuestionsApiRequest": {
+        "type": "object",
+        "properties": {
+          "Sex": {
+            "$ref": "#/components/schemas/GenderIdentity"
+          },
+          "EthnicGroup": {
+            "$ref": "#/components/schemas/EthnicGroup"
+          },
+          "EthnicSubGroup": {
+            "$ref": "#/components/schemas/EthnicSubGroup"
+          },
+          "IsGenderIdentifySameSexAtBirth": {
+            "type": "string",
+            "nullable": true
+          },
+          "OtherEthnicSubGroupAnswer": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "PostEqualityQuestionsApiResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Status": {
+            "type": "string"
+          }
+        }
+      },
+      "GetEqualityQuestionsApiResponse": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "GenderIdentity": {
+        "type": "string",
+        "enum": [
+          "Female",
+          "Male",
+          "PreferNotToSay"
+        ]
+      },
+      "EthnicGroup": {
+        "type": "string",
+        "enum": [
+          "White",
+          "MixedOrMultiple",
+          "AsianOrAsianBritish",
+          "BlackOrAfricanOrCaribbeanOrBlackBritish",
+          "Other",
+          "PreferNotToSay"
+        ]
+      },
+      "EthnicSubGroup": {
+        "type": "string",
+        "enum": [
+          "EnglishOrWelshOrScottishOrNorthernIrishOrBritish",
+          "Irish",
+          "GypsyOrIrishTraveller",
+          "AnyOtherWhiteBackground",
+          "PreferNotToSayWhite",
+          "WhiteAndBlackCaribbean",
+          "WhiteAndBlackAfrican",
+          "WhiteAndAsian",
+          "AnyOtherMixedBackground",
+          "PreferNotToSayMixed",
+          "Indian",
+          "Pakistani",
+          "Bangladeshi",
+          "Chinese",
+          "AnyOtherAsianBackground",
+          "PreferNotToSayAsian",
+          "African",
+          "Caribbean",
+          "AnyOtherBlackAfricanOrCaribbeanBackground",
+          "PreferNotToSayBlack",
+          "Arab",
+          "AnyOtherEthnicGroup",
+          "PreferNotToSayArab"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,189 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Find An Apprenticeship API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/locations/": {
+      "get": {
+        "summary": "Get list of addresses by query",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "description": "Search term for addresses",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Addresses retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddressesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Addresses not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/locations/geopoint": {
+      "get": {
+        "summary": "Get geo-coordinates for a postcode",
+        "parameters": [
+          {
+            "name": "postcode",
+            "in": "query",
+            "description": "Postcode for geopoint lookup",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Geo-coordinates retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPointResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Geo-coordinates not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/locations/searchbylocation": {
+      "get": {
+        "summary": "Search locations by term",
+        "parameters": [
+          {
+            "name": "searchTerm",
+            "in": "query",
+            "description": "Search term for locations",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Locations retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLocationBySearchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request due to invalid search term"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddressesResponse": {
+        "type": "object",
+        "properties": {
+          "addresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Address"
+            }
+          }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "addressLine1": {
+            "type": "string"
+          },
+          "addressLine2": {
+            "type": "string"
+          },
+          "addressLine3": {
+            "type": "string"
+          },
+          "addressLine4": {
+            "type": "string"
+          },
+          "postcode": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "GetPointResponse": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "postcode": {
+            "type": "string"
+          }
+        }
+      },
+      "GetLocationBySearchResponse": {
+        "type": "object",
+        "properties": {
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GetLocationSearchResponseItem"
+            }
+          }
+        }
+      },
+      "GetLocationSearchResponseItem": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "geoPoint": {
+            "$ref": "#/components/schemas/GetPointResponse"
+          }
+        }
+      }
+    }
+  }
+}
