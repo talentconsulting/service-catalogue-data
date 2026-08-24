@@ -1,14 +1,15 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SFA DAS Campaign API",
+    "title": "Adverts API",
     "version": "1.0.0",
-    "description": "API for retrieving adverts"
+    "description": "API for fetching adverts based on postcode, route, and distance."
   },
   "paths": {
-    "/Adverts/": {
+    "/adverts": {
       "get": {
-        "summary": "Retrieve list of adverts",
+        "summary": "Get Adverts",
+        "description": "Fetch a list of adverts filtered by postcode, route, and distance.",
         "operationId": "GetAdverts",
         "parameters": [
           {
@@ -17,7 +18,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The postcode to filter adverts."
           },
           {
             "name": "route",
@@ -25,7 +27,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The route to filter adverts."
           },
           {
             "name": "distance",
@@ -33,13 +36,15 @@
             "required": true,
             "schema": {
               "type": "integer",
-              "format": "uint32"
-            }
+              "format": "int32",
+              "minimum": 0
+            },
+            "description": "The distance in kilometers to filter adverts."
           }
         ],
         "responses": {
           "200": {
-            "description": "List of adverts",
+            "description": "A list of adverts matching the specified filters.",
             "content": {
               "application/json": {
                 "schema": {
@@ -49,7 +54,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error. Unable to retrieve adverts."
           }
         }
       }
@@ -59,7 +64,61 @@
     "schemas": {
       "GetAdvertsResponse": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "adverts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "location": {
+                  "$ref": "#/components/schemas/Address"
+                },
+                "route": {
+                  "type": "string"
+                },
+                "distance": {
+                  "type": "integer",
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "addressLine1": {
+            "type": "string"
+          },
+          "addressLine2": {
+            "type": "string"
+          },
+          "addressLine3": {
+            "type": "string"
+          },
+          "postcode": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          }
+        }
       }
     }
   }

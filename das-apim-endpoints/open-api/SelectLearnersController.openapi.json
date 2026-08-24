@@ -1,13 +1,15 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SelectLearners API",
+    "title": "Approvals API",
+    "description": "API for managing learners and providers",
     "version": "1.0.0"
   },
   "paths": {
     "/providers/{providerId}/unapproved/add/learners/select": {
       "post": {
         "summary": "Get ILR records for a provider",
+        "operationId": "getILRRecordsForProvider",
         "parameters": [
           {
             "name": "providerId",
@@ -31,17 +33,15 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "List of ILR records",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object"
-                }
+                "schema": {}
               }
             }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error"
           }
         }
       }
@@ -49,6 +49,7 @@
     "/providers/{providerId}/unapproved/add/learners/select/{learnerId}": {
       "get": {
         "summary": "Get ILR record for a selected learner",
+        "operationId": "getILRRecordForLearner",
         "parameters": [
           {
             "name": "providerId",
@@ -71,17 +72,15 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "ILR record for the learner",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object"
-                }
+                "schema": {}
               }
             }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error"
           }
         }
       }
@@ -105,8 +104,8 @@
           },
           "PageSize": {
             "type": "integer",
-            "nullable": true,
-            "default": 20
+            "default": 20,
+            "nullable": true
           },
           "SortColumn": {
             "type": "string",
@@ -133,22 +132,34 @@
             "default": ""
           },
           "LearningType": {
-            "type": "string",
-            "enum": [
-              "Apprenticeship",
-              "FoundationApprenticeship",
-              "ApprenticeshipUnit"
-            ],
+            "$ref": "#/components/schemas/LearningType",
             "nullable": true
           },
           "ExcludeUlns": {
             "type": "array",
             "items": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             },
             "default": []
           }
-        }
+        },
+        "required": [
+          "StartYear",
+          "Page",
+          "SortColumn",
+          "SortDescending",
+          "SearchTerm",
+          "ExcludeUlns"
+        ]
+      },
+      "LearningType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "FoundationApprenticeship",
+          "ApprenticeshipUnit"
+        ]
       }
     }
   }

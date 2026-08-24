@@ -2,32 +2,35 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employment Checks API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing employment checks related to apprenticeships."
   },
   "paths": {
-    "/EmploymentChecks/": {
+    "/EmploymentChecks": {
       "get": {
-        "summary": "Get employment checks",
-        "operationId": "getEmploymentChecks",
+        "summary": "Retrieve Employment Checks",
+        "description": "Fetch employment checks for specific apprenticeship IDs.",
+        "operationId": "GetEmploymentChecks",
         "parameters": [
           {
             "name": "apprenticeshipIds",
             "in": "query",
             "required": true,
-            "description": "List of apprenticeship IDs",
             "schema": {
               "type": "array",
               "items": {
                 "type": "integer",
                 "format": "int64"
               },
+              "minItems": 1,
               "maxItems": 50
-            }
+            },
+            "description": "List of apprenticeship IDs (max 50)."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of employment checks",
+            "description": "Employment checks retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -37,7 +40,19 @@
             }
           },
           "400": {
-            "description": "Invalid request parameters"
+            "description": "Bad Request. Invalid or missing parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
           }
         }
       }
@@ -48,40 +63,37 @@
       "GetEmploymentChecksQueryResponse": {
         "type": "object",
         "properties": {
-          "ApprenticeshipIds": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          "EmploymentCheckResults": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EmploymentCheckResult"
-            }
-          }
-        }
-      },
-      "EmploymentCheckResult": {
-        "type": "object",
-        "properties": {
-          "Id": {
+          "apprenticeshipId": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "Unique identifier for the apprenticeship."
           },
-          "Status": {
-            "$ref": "#/components/schemas/EmploymentCheckStatus"
+          "employmentChecks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "$ref": "#/components/schemas/DataLockStatus"
+                },
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time",
+                  "description": "Timestamp of the check."
+                }
+              }
+            }
           }
         }
       },
-      "EmploymentCheckStatus": {
+      "DataLockStatus": {
         "type": "string",
         "enum": [
+          "Unknown",
           "Pass",
-          "Fail",
-          "Unknown"
-        ]
+          "Fail"
+        ],
+        "description": "Status of the employment check."
       }
     }
   }

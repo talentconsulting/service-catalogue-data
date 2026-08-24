@@ -2,16 +2,17 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Training Courses API",
+    "description": "API for retrieving training courses and standards details.",
     "version": "1.0.0"
   },
   "paths": {
-    "/trainingcourses": {
+    "/trainingcourses/": {
       "get": {
-        "summary": "Retrieve a list of training courses",
-        "operationId": "getTrainingCoursesList",
+        "summary": "Get a list of training courses",
+        "operationId": "getTrainingCourses",
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -19,16 +20,13 @@
                 }
               }
             }
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
     },
     "/trainingcourses/{id}": {
       "get": {
-        "summary": "Retrieve details of a training standard by ID",
+        "summary": "Get standard details by ID",
         "operationId": "getStandardById",
         "parameters": [
           {
@@ -38,12 +36,12 @@
             "schema": {
               "type": "string"
             },
-            "description": "Standard ID, which can be StandardUId, LarsCode, or IFateReferenceNumber"
+            "description": "ID of the standard (standardUId, LarsCode, or IfateReferenceNumber)"
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -53,18 +51,18 @@
             }
           },
           "404": {
-            "description": "Not Found"
+            "description": "Standard details not found"
           }
         }
       }
     },
     "/trainingcourses/active": {
       "get": {
-        "summary": "Retrieve a list of active training courses",
+        "summary": "Get a list of active training courses",
         "operationId": "getActiveTrainingCourses",
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -74,18 +72,18 @@
             }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error"
           }
         }
       }
     },
     "/trainingcourses/draft": {
       "get": {
-        "summary": "Retrieve a list of draft training courses",
+        "summary": "Get a list of draft training courses",
         "operationId": "getDraftTrainingCourses",
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -117,26 +115,35 @@
       "GetStandardDetailsResponse": {
         "type": "object",
         "properties": {
-          "standardId": {
-            "type": "string"
+          "standardCode": {
+            "type": "integer",
+            "format": "int32"
           },
           "title": {
             "type": "string"
           },
           "level": {
-            "type": "string"
+            "type": "integer",
+            "format": "int32"
           },
-          "description": {
-            "type": "string"
+          "duration": {
+            "type": "integer",
+            "format": "int32"
           },
-          "larsCode": {
-            "type": "string"
+          "assessmentPlanUrl": {
+            "type": "string",
+            "format": "uri"
           },
-          "ifateReferenceNumber": {
+          "version": {
             "type": "string"
           },
           "status": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "Active",
+              "Draft",
+              "Retired"
+            ]
           }
         }
       },
@@ -154,17 +161,28 @@
       "GetCourseListItem": {
         "type": "object",
         "properties": {
-          "standardId": {
-            "type": "string"
+          "standardCode": {
+            "type": "integer",
+            "format": "int32"
           },
           "title": {
             "type": "string"
           },
           "level": {
-            "type": "string"
+            "type": "integer",
+            "format": "int32"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int32"
           },
           "status": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "Active",
+              "Draft",
+              "Retired"
+            ]
           }
         }
       }

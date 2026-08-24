@@ -1,15 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Landing Page API",
-    "version": "1.0.0",
-    "description": "API for managing landing pages and preview landing pages."
+    "title": "Campaign API",
+    "version": "1.0.0"
   },
   "paths": {
     "/LandingPage/{hub}/{slug}": {
       "get": {
-        "summary": "Retrieve a landing page by hub and slug",
-        "operationId": "getLandingPage",
+        "operationId": "GetLandingPageAsync",
+        "summary": "Fetch a landing page by hub and slug.",
         "parameters": [
           {
             "name": "hub",
@@ -30,7 +29,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Landing page retrieved successfully",
+            "description": "Successful response.",
             "content": {
               "application/json": {
                 "schema": {
@@ -40,7 +39,7 @@
             }
           },
           "404": {
-            "description": "Landing page not found",
+            "description": "Landing page not found.",
             "content": {
               "application/json": {
                 "schema": {
@@ -54,8 +53,8 @@
     },
     "/LandingPage/preview/{hub}/{slug}": {
       "get": {
-        "summary": "Retrieve a preview landing page by hub and slug",
-        "operationId": "getPreviewLandingPage",
+        "operationId": "GetPreviewLandingPage",
+        "summary": "Fetch a preview of a landing page by hub and slug.",
         "parameters": [
           {
             "name": "hub",
@@ -76,7 +75,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Preview landing page retrieved successfully",
+            "description": "Successful response.",
             "content": {
               "application/json": {
                 "schema": {
@@ -86,7 +85,7 @@
             }
           },
           "404": {
-            "description": "Preview landing page not found",
+            "description": "Preview landing page not found.",
             "content": {
               "application/json": {
                 "schema": {
@@ -127,7 +126,7 @@
             "$ref": "#/components/schemas/HubContent"
           },
           "MenuContent": {
-            "$ref": "#/components/schemas/MenuPageContent"
+            "$ref": "#/components/schemas/MenuPageModel_MenuPageContent"
           },
           "BannerModels": {
             "$ref": "#/components/schemas/BannerPageModel"
@@ -177,7 +176,7 @@
           }
         }
       },
-      "MenuPageContent": {
+      "MenuPageModel_MenuPageContent": {
         "type": "object",
         "properties": {
           "TopLevel": {
@@ -212,33 +211,43 @@
           "MainContent": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/BannerPageContent"
+              "$ref": "#/components/schemas/BannerPageModel_BannerPageContent"
             }
           }
         }
       },
-      "BannerPageContent": {
+      "CardPageModel": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageModel"
+          }
+        ],
+        "properties": {
+          "LandingPage": {
+            "$ref": "#/components/schemas/UrlDetails"
+          },
+          "CardImage": {
+            "$ref": "#/components/schemas/ContentItem"
+          }
+        }
+      },
+      "UrlDetails": {
         "type": "object",
         "properties": {
-          "Items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ContentItem"
-            }
-          },
-          "BackgroundColour": {
+          "Slug": {
             "type": "string"
-          },
-          "AllowUserToHideTheBanner": {
-            "type": "boolean"
-          },
-          "ShowOnTheHomepageOnly": {
-            "type": "boolean"
           },
           "Title": {
             "type": "string"
           },
-          "Id": {
+          "Hub": {
+            "type": "string"
+          },
+          "PageType": {
+            "type": "string"
+          },
+          "ParentSlug": {
             "type": "string"
           }
         }
@@ -275,17 +284,6 @@
           }
         }
       },
-      "VideoTranscript": {
-        "type": "object",
-        "properties": {
-          "VideoName": {
-            "type": "string"
-          },
-          "Text": {
-            "type": "string"
-          }
-        }
-      },
       "ResourceItem": {
         "type": "object",
         "properties": {
@@ -305,40 +303,47 @@
             "type": "string"
           },
           "Size": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "Description": {
             "type": "string"
           }
         }
       },
-      "CardPageModel": {
+      "VideoTranscript": {
         "type": "object",
         "properties": {
-          "LandingPage": {
-            "$ref": "#/components/schemas/UrlDetails"
+          "VideoName": {
+            "type": "string"
           },
-          "CardImage": {
-            "$ref": "#/components/schemas/ContentItem"
+          "Text": {
+            "type": "string"
           }
         }
       },
-      "UrlDetails": {
+      "BannerPageModel_BannerPageContent": {
         "type": "object",
         "properties": {
-          "Slug": {
+          "Items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentItem"
+            }
+          },
+          "BackgroundColour": {
             "type": "string"
+          },
+          "AllowUserToHideTheBanner": {
+            "type": "boolean"
+          },
+          "ShowOnTheHomepageOnly": {
+            "type": "boolean"
           },
           "Title": {
             "type": "string"
           },
-          "Hub": {
-            "type": "string"
-          },
-          "PageType": {
-            "type": "string"
-          },
-          "ParentSlug": {
+          "Id": {
             "type": "string"
           }
         }

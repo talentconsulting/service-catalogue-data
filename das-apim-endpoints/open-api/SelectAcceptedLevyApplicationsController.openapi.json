@@ -1,30 +1,29 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SFA DAS Approvals API",
-    "version": "1.0.0",
-    "description": "API for managing levy applications for the SFA DAS Approvals service."
+    "title": "Approvals API",
+    "version": "1.0.0"
   },
   "paths": {
     "/{accountId}/unapproved/add/select-funding/select-accepted-levy-connection": {
       "get": {
-        "summary": "Get accepted levy transfer connections",
-        "operationId": "getAcceptedLevyConnections",
+        "summary": "Retrieve accepted levy transfer connections for a specified account",
+        "operationId": "GetAcceptedLevyConnections",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
-            "description": "The unique identifier for the employer's account",
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "The ID of the account."
           }
         ],
         "responses": {
           "200": {
-            "description": "List of accepted employer account applications",
+            "description": "Successful response with accepted levy transfer connections",
             "content": {
               "application/json": {
                 "schema": {
@@ -34,7 +33,7 @@
             }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal server error occurred."
           }
         }
       }
@@ -44,8 +43,50 @@
     "schemas": {
       "GetAcceptedEmployerAccountApplicationsQueryResponse": {
         "type": "object",
-        "description": "Response model for accepted employer account applications query",
-        "properties": {}
+        "description": "Response for accepted employer account applications",
+        "properties": {
+          "applications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Application"
+            }
+          }
+        }
+      },
+      "Application": {
+        "type": "object",
+        "description": "Details of an application",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier of the application."
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the application."
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date when the application was created."
+          },
+          "submittedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Date when the application was submitted."
+          },
+          "status": {
+            "type": "string",
+            "description": "Status of the application, e.g., Pending, Accepted.",
+            "enum": [
+              "Pending",
+              "Accepted",
+              "Approved"
+            ]
+          }
+        }
       }
     }
   }

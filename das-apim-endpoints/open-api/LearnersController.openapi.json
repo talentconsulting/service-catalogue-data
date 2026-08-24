@@ -2,11 +2,10 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Assessors API",
-    "version": "1.0.0",
-    "description": "API for managing and retrieving learner information."
+    "version": "1.0.0"
   },
   "paths": {
-    "/Learners/": {
+    "/Learners": {
       "get": {
         "summary": "Get all learners",
         "operationId": "getAllLearners",
@@ -14,40 +13,37 @@
           {
             "name": "sinceTime",
             "in": "query",
-            "description": "Timestamp to filter learners updated since this time.",
+            "description": "Optional filter to get learners updated since a specific time",
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date-time",
-              "nullable": true
+              "format": "date-time"
             }
           },
           {
             "name": "batch_number",
             "in": "query",
-            "description": "Batch number for paginated results.",
+            "description": "Batch number for pagination",
             "required": false,
             "schema": {
               "type": "integer",
-              "default": 1,
-              "example": 1
+              "default": 1
             }
           },
           {
             "name": "batch_size",
             "in": "query",
-            "description": "Size of each batch of learners.",
+            "description": "Number of learners to return per batch",
             "required": false,
             "schema": {
               "type": "integer",
-              "default": 1000,
-              "example": 1000
+              "default": 1000
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Learners retrieved successfully.",
+            "description": "Learners retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -57,7 +53,7 @@
             }
           },
           "400": {
-            "description": "Invalid request or error occurred."
+            "description": "Invalid request parameters"
           }
         }
       }
@@ -65,91 +61,6 @@
   },
   "components": {
     "schemas": {
-      "Learner": {
-        "type": "object",
-        "properties": {
-          "ApprenticeshipId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "FirstName": {
-            "type": "string"
-          },
-          "LastName": {
-            "type": "string"
-          },
-          "ULN": {
-            "type": "string"
-          },
-          "TrainingCode": {
-            "type": "string"
-          },
-          "TrainingCourseVersion": {
-            "type": "string"
-          },
-          "TrainingCourseVersionConfirmed": {
-            "type": "boolean"
-          },
-          "TrainingCourseOption": {
-            "type": "string"
-          },
-          "StandardUId": {
-            "type": "string"
-          },
-          "StartDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "EndDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "CreatedOn": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "UpdatedOn": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "StopDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "PauseDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "CompletionDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "UKPRN": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "LearnRefNumber": {
-            "type": "string"
-          },
-          "PaymentStatus": {
-            "type": "integer",
-            "format": "int16"
-          },
-          "EmployerAccountId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "EmployerName": {
-            "type": "string"
-          }
-        }
-      },
       "GetAllLearnersResponse": {
         "type": "object",
         "properties": {
@@ -160,13 +71,112 @@
             }
           },
           "BatchNumber": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The current batch number"
           },
           "BatchSize": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The size of each batch"
           },
           "TotalNumberOfBatches": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The total number of batches"
+          }
+        }
+      },
+      "Learner": {
+        "type": "object",
+        "properties": {
+          "ApprenticeshipId": {
+            "type": "integer",
+            "description": "Unique identifier for the apprenticeship"
+          },
+          "FirstName": {
+            "type": "string",
+            "description": "First name of the learner"
+          },
+          "LastName": {
+            "type": "string",
+            "description": "Last name of the learner"
+          },
+          "ULN": {
+            "type": "string",
+            "description": "Unique Learning Number"
+          },
+          "TrainingCode": {
+            "type": "string",
+            "description": "Code for the training course"
+          },
+          "TrainingCourseVersion": {
+            "type": "string",
+            "description": "Version of the training course"
+          },
+          "TrainingCourseVersionConfirmed": {
+            "type": "boolean",
+            "description": "Indicates whether the training course version is confirmed"
+          },
+          "TrainingCourseOption": {
+            "type": "string",
+            "description": "Option for the training course"
+          },
+          "StandardUId": {
+            "type": "string",
+            "description": "Standard unique identifier"
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Start date of the apprenticeship"
+          },
+          "EndDate": {
+            "type": "string",
+            "format": "date",
+            "description": "End date of the apprenticeship"
+          },
+          "CreatedOn": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the record was created"
+          },
+          "UpdatedOn": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the record was last updated"
+          },
+          "StopDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the apprenticeship was stopped"
+          },
+          "PauseDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the apprenticeship was paused"
+          },
+          "CompletionDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the apprenticeship was completed"
+          },
+          "UKPRN": {
+            "type": "integer",
+            "description": "UK Provider Reference Number"
+          },
+          "LearnRefNumber": {
+            "type": "string",
+            "description": "Learner reference number"
+          },
+          "PaymentStatus": {
+            "type": "integer",
+            "description": "Payment status of the apprenticeship"
+          },
+          "EmployerAccountId": {
+            "type": "integer",
+            "description": "Unique identifier for the employer's account"
+          },
+          "EmployerName": {
+            "type": "string",
+            "description": "Name of the employer"
           }
         }
       }

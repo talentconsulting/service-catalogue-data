@@ -1,14 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OverlappingTrainingDateRequest API",
-    "version": "1.0.0",
-    "description": "API for managing overlapping training date requests."
+    "title": "SFA DAS Approvals API",
+    "version": "1.0.0"
   },
   "paths": {
     "/OverlappingTrainingDateRequest/create": {
       "post": {
-        "summary": "Create an overlapping training date request.",
+        "summary": "Creates an Overlapping Training Date",
         "operationId": "CreateOverlappingTrainingDate",
         "requestBody": {
           "required": true,
@@ -22,22 +21,15 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Request completed successfully."
           }
         }
       }
     },
     "/OverlappingTrainingDateRequest/validate": {
       "post": {
-        "summary": "Validate draft apprenticeship details.",
-        "operationId": "ValidateDraftApprenticeship",
+        "summary": "Validates Draft Apprenticeship Request",
+        "operationId": "ValidateDraftApprenticeshipRequest",
         "requestBody": {
           "required": true,
           "content": {
@@ -50,21 +42,14 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Request completed successfully."
           }
         }
       }
     },
     "/OverlappingTrainingDateRequest/validateChangeOfEmployerOverlap": {
       "post": {
-        "summary": "Validate change of employer overlap.",
+        "summary": "Validates Change of Employer Overlap",
         "operationId": "ValidateChangeOfEmployerOverlap",
         "requestBody": {
           "required": true,
@@ -78,21 +63,14 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Request completed successfully."
           }
         }
       }
     },
     "/OverlappingTrainingDateRequest/{providerId}/validateUlnOverlap": {
       "get": {
-        "summary": "Validate ULN overlap during training dates.",
+        "summary": "Validates ULN Overlap on Start Date",
         "operationId": "ValidateUlnOverlapOnStartDate",
         "parameters": [
           {
@@ -117,7 +95,8 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "date"
             }
           },
           {
@@ -125,27 +104,21 @@
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "date"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Request completed successfully."
           }
         }
       }
     },
     "/OverlappingTrainingDateRequest/{draftApprenticeshipId}/getOverlapRequest": {
       "get": {
-        "summary": "Get overlap request for draft apprenticeship.",
+        "summary": "Gets Overlap Request",
         "operationId": "GetOverlapRequest",
         "parameters": [
           {
@@ -160,14 +133,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
+            "description": "Request completed successfully."
           }
         }
       }
@@ -194,6 +160,26 @@
           "ProviderId",
           "DraftApprenticeshipId",
           "UserInfo"
+        ]
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          },
+          "UserDisplayName": {
+            "type": "string"
+          },
+          "UserEmail": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "UserId",
+          "UserDisplayName",
+          "UserEmail"
         ]
       },
       "ValidateDraftApprenticeshipRequest": {
@@ -237,7 +223,12 @@
             "type": "string"
           },
           "DeliveryModel": {
-            "$ref": "#/components/schemas/DeliveryModel",
+            "type": "string",
+            "enum": [
+              "Regular",
+              "PortableFlexiJob",
+              "FlexiJobAgency"
+            ],
             "nullable": true
           },
           "Cost": {
@@ -252,6 +243,7 @@
           },
           "EndPointAssessmentPrice": {
             "type": "integer",
+            "format": "int32",
             "nullable": true
           },
           "StartDate": {
@@ -294,21 +286,25 @@
             "type": "boolean",
             "nullable": true
           },
-          "UserInfo": {
-            "$ref": "#/components/schemas/UserInfo"
-          },
           "LearnerDataId": {
             "type": "integer",
             "format": "int64",
             "nullable": true
+          },
+          "UserInfo": {
+            "$ref": "#/components/schemas/UserInfo"
           }
         },
         "required": [
           "Id",
-          "UserId",
           "ProviderId",
+          "UserId",
+          "FirstName",
+          "LastName",
+          "Email",
           "Uln",
           "CourseCode",
+          "IgnoreStartDateOverlap",
           "UserInfo"
         ]
       },
@@ -336,34 +332,6 @@
           "StartDate",
           "EndDate",
           "ProviderId"
-        ]
-      },
-      "DeliveryModel": {
-        "type": "string",
-        "enum": [
-          "Regular",
-          "PortableFlexiJob",
-          "FlexiJobAgency"
-        ]
-      },
-      "UserInfo": {
-        "type": "object",
-        "properties": {
-          "UserId": {
-            "type": "string"
-          },
-          "UserDisplayName": {
-            "type": "string"
-          },
-          "UserEmail": {
-            "type": "string",
-            "format": "email"
-          }
-        },
-        "required": [
-          "UserId",
-          "UserDisplayName",
-          "UserEmail"
         ]
       }
     }
