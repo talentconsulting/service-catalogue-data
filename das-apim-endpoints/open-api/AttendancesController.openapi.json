@@ -1,14 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Attendances API",
+    "title": "Employer AAN API",
     "version": "1.0.0"
   },
   "paths": {
     "/Attendances": {
       "get": {
-        "summary": "Retrieve attendances",
-        "operationId": "GetAttendances",
+        "summary": "Retrieve attendances within a date range",
         "parameters": [
           {
             "name": "X-RequestedByMemberId",
@@ -18,7 +17,7 @@
               "type": "string",
               "format": "uuid"
             },
-            "description": "The ID of the member making the request."
+            "description": "Unique identifier of the member making the request"
           },
           {
             "name": "fromDate",
@@ -28,7 +27,7 @@
               "type": "string",
               "format": "date"
             },
-            "description": "Start date for filtering attendances."
+            "description": "Start date of the attendance range"
           },
           {
             "name": "toDate",
@@ -38,28 +37,19 @@
               "type": "string",
               "format": "date"
             },
-            "description": "End date for filtering attendances."
+            "description": "End date of the attendance range"
           }
         ],
         "responses": {
           "200": {
-            "description": "List of attendances retrieved successfully.",
+            "description": "List of attendances",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Attendances"
+                  "$ref": "#/components/schemas/AttendanceList"
                 }
               }
             }
-          },
-          "400": {
-            "description": "Invalid input parameters."
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "500": {
-            "description": "Server error."
           }
         }
       }
@@ -67,11 +57,32 @@
   },
   "components": {
     "schemas": {
-      "Attendances": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "additionalProperties": true
+      "AttendanceList": {
+        "type": "object",
+        "properties": {
+          "attendances": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "attendanceId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "date": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "memberId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          }
         }
       }
     }

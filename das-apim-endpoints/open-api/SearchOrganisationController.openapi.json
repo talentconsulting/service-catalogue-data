@@ -1,0 +1,228 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Accounts API",
+    "version": "1.0.0",
+    "description": "API for managing employer accounts, searching organisations, retrieving organisation details, and fetching organisation types."
+  },
+  "paths": {
+    "/SearchOrganisationController/organisations/search/results": {
+      "get": {
+        "summary": "Search Organisations",
+        "operationId": "SearchOrganisations",
+        "parameters": [
+          {
+            "name": "searchTerm",
+            "in": "query",
+            "description": "Term to search organisations by.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "maximumResults",
+            "in": "query",
+            "description": "Maximum number of results to return.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 500
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Organisation"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/SearchOrganisationController/review": {
+      "get": {
+        "summary": "Get Latest Organisation Details",
+        "operationId": "GetLatestDetails",
+        "parameters": [
+          {
+            "name": "identifier",
+            "in": "query",
+            "description": "Unique identifier for the organisation.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "organisationType",
+            "in": "query",
+            "description": "Type of the organisation.",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/OrganisationType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Organisation"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/SearchOrganisationController/IdentifiableOrganisationTypes": {
+      "get": {
+        "summary": "Get Identifiable Organisation Types",
+        "operationId": "GetIdentifiableOrganisationTypes",
+        "responses": {
+          "200": {
+            "description": "Successful operation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrganisationType"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Organisation": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the organisation."
+          },
+          "type": {
+            "$ref": "#/components/schemas/OrganisationType"
+          },
+          "subType": {
+            "$ref": "#/components/schemas/OrganisationSubType"
+          },
+          "code": {
+            "type": "string",
+            "description": "Unique code for the organisation."
+          },
+          "registrationDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Registration date of the organisation."
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "sector": {
+            "type": "string",
+            "description": "Sector of the organisation."
+          },
+          "organisationStatus": {
+            "$ref": "#/components/schemas/OrganisationStatus"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "address"
+        ]
+      },
+      "OrganisationType": {
+        "type": "string",
+        "enum": [
+          "Company",
+          "Charity",
+          "PublicSector",
+          "EducationOrganisation"
+        ]
+      },
+      "OrganisationSubType": {
+        "type": "string",
+        "enum": [
+          "None",
+          "Ons",
+          "Nhs",
+          "Police"
+        ]
+      },
+      "OrganisationStatus": {
+        "type": "string",
+        "enum": [
+          "None",
+          "Active",
+          "Dissolved",
+          "Liquidation",
+          "Receivership",
+          "Administration",
+          "VoluntaryArrangement",
+          "ConvertedClosed",
+          "InsolvencyProceedings"
+        ]
+      },
+      "Address": {
+        "type": "object",
+        "properties": {
+          "line1": {
+            "type": "string",
+            "description": "Address line 1."
+          },
+          "line2": {
+            "type": "string",
+            "description": "Address line 2."
+          },
+          "line3": {
+            "type": "string",
+            "description": "Address line 3."
+          },
+          "line4": {
+            "type": "string",
+            "description": "Address line 4."
+          },
+          "line5": {
+            "type": "string",
+            "description": "Address line 5."
+          },
+          "postcode": {
+            "type": "string",
+            "description": "Postcode."
+          }
+        },
+        "required": [
+          "line1",
+          "postcode"
+        ]
+      }
+    }
+  }
+}

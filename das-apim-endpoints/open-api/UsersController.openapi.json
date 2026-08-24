@@ -1,211 +1,85 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "ApimDeveloper Users API",
+    "title": "Digital Certificates API",
     "version": "1.0.0"
   },
   "paths": {
-    "/users/{id}": {
-      "post": {
-        "summary": "Create User",
-        "description": "Creates a new user.",
+    "/users/{govUkIdentifier}": {
+      "get": {
+        "operationId": "GetUser",
         "parameters": [
           {
-            "name": "id",
+            "name": "govUkIdentifier",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "string"
             },
-            "description": "Unique identifier for the user."
+            "description": "The GOV.UK identifier of the user."
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateUserRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "User created successfully."
-          },
-          "400": {
-            "description": "Bad Request."
-          },
-          "500": {
-            "description": "Internal Server Error."
-          }
-        }
-      }
-    },
-    "/users/{id}/activate": {
-      "put": {
-        "summary": "Activate User Account",
-        "description": "Activates a user account.",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "Unique identifier for the user."
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Account activation successful."
-          },
-          "400": {
-            "description": "Bad Request."
-          },
-          "500": {
-            "description": "Internal Server Error."
-          }
-        }
-      }
-    },
-    "/users/authenticate": {
-      "post": {
-        "summary": "Authenticate User",
-        "description": "Authenticates a user's credentials.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AuthenticateUserRequest"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "Authentication successful.",
+            "description": "User details retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserAuthenticationApiResponse"
+                  "type": "object"
                 }
               }
             }
           },
-          "404": {
-            "description": "User not found."
-          },
           "500": {
-            "description": "Internal Server Error."
+            "description": "Internal server error."
           }
         }
       }
     },
     "/users": {
-      "get": {
-        "summary": "Get User",
-        "description": "Retrieves a user by email.",
-        "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "email"
-            },
-            "description": "Email address of the user."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "User retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserApiResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "User not found."
-          },
-          "500": {
-            "description": "Internal Server Error."
-          }
-        }
-      }
-    },
-    "/users/{id}/send-change-password-email": {
       "post": {
-        "summary": "Send Change Password Email",
-        "description": "Sends an email to change password.",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "Unique identifier for the user."
-          }
-        ],
+        "operationId": "CreateOrUpdateUser",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SendChangePasswordEmailRequest"
+                "$ref": "#/components/schemas/CreateOrUpdateUserRequest"
               }
             }
           }
         },
         "responses": {
-          "201": {
-            "description": "Email sent successfully.",
+          "200": {
+            "description": "User created or updated successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    }
-                  }
+                  "type": "string",
+                  "description": "The ID of the created or updated user."
                 }
               }
             }
           },
           "500": {
-            "description": "Internal Server Error."
+            "description": "Internal server error."
           }
         }
       }
     },
-    "/users/{id}/change-password": {
-      "put": {
-        "summary": "Change Password",
-        "description": "Changes the user's password.",
+    "/users/{userId}/identity": {
+      "post": {
+        "operationId": "UpdateUserIdentity",
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid"
             },
-            "description": "Unique identifier for the user."
+            "description": "The ID of the user."
           }
         ],
         "requestBody": {
@@ -213,20 +87,276 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ChangePasswordRequest"
+                "$ref": "#/components/schemas/UpdateUserIdentityRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User identity updated successfully."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/users/{userId}/certificates": {
+      "get": {
+        "operationId": "GetCertificates",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the user."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Certificates retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/users/{userId}/sharings": {
+      "get": {
+        "operationId": "GetSharings",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the user."
+          },
+          {
+            "name": "certificateId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the certificate."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "The maximum number of results to return."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sharings retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/users/{userId}/match": {
+      "get": {
+        "operationId": "GetCertificatesMatch",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the user."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Certificate matches retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No matches found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "post": {
+        "operationId": "CreateUserMatch",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the user."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserMatchRequest"
               }
             }
           }
         },
         "responses": {
           "204": {
-            "description": "Password change successful."
-          },
-          "400": {
-            "description": "Bad Request."
+            "description": "User match created successfully."
           },
           "500": {
-            "description": "Internal Server Error."
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/users/{userId}/user-actions": {
+      "post": {
+        "operationId": "CreateUserAction",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the user."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserActionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User action created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "get": {
+        "operationId": "GetUserActions",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the user."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User actions retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/users/{userId}/authorise": {
+      "post": {
+        "operationId": "CreateUserAuthorise",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the user."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserAuthoriseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "User authorised successfully."
+          },
+          "500": {
+            "description": "Internal server error."
           }
         }
       }
@@ -234,123 +364,148 @@
   },
   "components": {
     "schemas": {
-      "CreateUserRequest": {
+      "CreateOrUpdateUserRequest": {
         "type": "object",
+        "required": [
+          "GovUkIdentifier",
+          "EmailAddress"
+        ],
         "properties": {
-          "FirstName": {
+          "GovUkIdentifier": {
             "type": "string"
           },
-          "LastName": {
-            "type": "string"
-          },
-          "Email": {
+          "EmailAddress": {
             "type": "string",
             "format": "email"
           },
-          "Password": {
-            "type": "string",
-            "format": "password"
-          },
-          "ConfirmationEmailLink": {
+          "PhoneNumber": {
             "type": "string"
           }
-        },
-        "required": [
-          "FirstName",
-          "LastName",
-          "Email",
-          "Password",
-          "ConfirmationEmailLink"
-        ]
+        }
       },
-      "AuthenticateUserRequest": {
+      "UpdateUserIdentityRequest": {
         "type": "object",
+        "required": [
+          "Names",
+          "DateOfBirth"
+        ],
         "properties": {
-          "Email": {
-            "type": "string",
-            "format": "email"
+          "Names": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "UserIdentityId",
+                "FamilyName",
+                "GivenNames"
+              ],
+              "properties": {
+                "UserIdentityId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "ValidSince": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "ValidUntil": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "FamilyName": {
+                  "type": "string"
+                },
+                "GivenNames": {
+                  "type": "string"
+                }
+              }
+            }
           },
-          "Password": {
+          "DateOfBirth": {
             "type": "string",
-            "format": "password"
+            "format": "date-time"
           }
-        },
-        "required": [
-          "Email",
-          "Password"
-        ]
+        }
       },
-      "SendChangePasswordEmailRequest": {
+      "CreateUserActionRequest": {
         "type": "object",
+        "required": [
+          "ActionType",
+          "CertificateType"
+        ],
         "properties": {
-          "FirstName": {
+          "ActionType": {
             "type": "string"
           },
-          "LastName": {
+          "FamilyName": {
             "type": "string"
           },
-          "Email": {
-            "type": "string",
-            "format": "email"
+          "GivenNames": {
+            "type": "string"
           },
-          "ChangePasswordUrl": {
+          "CertificateId": {
             "type": "string",
-            "format": "uri"
+            "format": "uuid"
+          },
+          "CertificateType": {
+            "type": "string"
+          },
+          "CourseName": {
+            "type": "string"
           }
-        },
-        "required": [
-          "FirstName",
-          "LastName",
-          "Email",
-          "ChangePasswordUrl"
-        ]
+        }
       },
-      "ChangePasswordRequest": {
+      "CreateUserMatchRequest": {
         "type": "object",
         "properties": {
-          "Password": {
-            "type": "string",
-            "format": "password"
-          }
-        },
-        "required": [
-          "Password"
-        ]
-      },
-      "UserAuthenticationApiResponse": {
-        "type": "object",
-        "properties": {
-          "Email": {
-            "type": "string",
-            "format": "email"
+          "Uln": {
+            "type": "integer",
+            "nullable": true
           },
-          "FirstName": {
+          "UserIdentityId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "CertificateType": {
             "type": "string"
           },
-          "LastName": {
+          "CourseCode": {
             "type": "string"
           },
-          "IsAuthenticated": {
+          "CourseName": {
+            "type": "string"
+          },
+          "CourseLevel": {
+            "type": "string"
+          },
+          "YearAwarded": {
+            "type": "integer",
+            "nullable": true
+          },
+          "ProviderName": {
+            "type": "string"
+          },
+          "Ukprn": {
+            "type": "integer",
+            "nullable": true
+          },
+          "IsMatched": {
+            "type": "boolean"
+          },
+          "IsFailed": {
             "type": "boolean"
           }
         }
       },
-      "UserApiResponse": {
+      "CreateUserAuthoriseRequest": {
         "type": "object",
+        "required": [
+          "Uln"
+        ],
         "properties": {
-          "Id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "Email": {
-            "type": "string",
-            "format": "email"
-          },
-          "FirstName": {
-            "type": "string"
-          },
-          "LastName": {
-            "type": "string"
+          "Uln": {
+            "type": "integer"
           }
         }
       }

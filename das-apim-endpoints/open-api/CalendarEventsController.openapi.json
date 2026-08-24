@@ -1,9 +1,8 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Apprentice Aan API",
-    "version": "1.0.0",
-    "description": "API for managing calendar events and attendances."
+    "title": "EmployerAan API",
+    "version": "1.0.0"
   },
   "paths": {
     "/CalendarEvents": {
@@ -34,7 +33,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date"
+              "format": "date-time"
             }
           },
           {
@@ -43,7 +42,7 @@
             "required": false,
             "schema": {
               "type": "string",
-              "format": "date"
+              "format": "date-time"
             }
           },
           {
@@ -53,7 +52,12 @@
             "schema": {
               "type": "array",
               "items": {
-                "$ref": "#/components/schemas/EventFormat"
+                "type": "string",
+                "enum": [
+                  "InPerson",
+                  "Online",
+                  "Hybrid"
+                ]
               }
             }
           },
@@ -170,14 +174,21 @@
             }
           },
           "404": {
-            "description": "Event not found"
+            "description": "Event not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarEvent"
+                }
+              }
+            }
           }
         }
       }
     },
     "/CalendarEvents/{calendarEventId}/attendance": {
       "put": {
-        "summary": "Update Attendance for Calendar Event",
+        "summary": "Update Attendance",
         "operationId": "PutAttendance",
         "parameters": [
           {
@@ -219,14 +230,6 @@
   },
   "components": {
     "schemas": {
-      "EventFormat": {
-        "type": "string",
-        "enum": [
-          "InPerson",
-          "Online",
-          "Hybrid"
-        ]
-      },
       "GetCalendarEventsQueryResult": {
         "type": "object",
         "properties": {
@@ -254,13 +257,43 @@
           "Regions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/RegionData"
+              "type": "object",
+              "properties": {
+                "Id": {
+                  "type": "integer"
+                },
+                "Area": {
+                  "type": "string"
+                },
+                "Ordering": {
+                  "type": "integer"
+                }
+              }
             }
           },
           "Calendars": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/CalendarType"
+              "type": "object",
+              "properties": {
+                "Id": {
+                  "type": "integer"
+                },
+                "CalendarName": {
+                  "type": "string"
+                },
+                "EffectiveFrom": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "EffectiveTo": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "Ordering": {
+                  "type": "integer"
+                }
+              }
             }
           }
         }
@@ -276,7 +309,7 @@
             "type": "string"
           },
           "EventFormat": {
-            "$ref": "#/components/schemas/EventFormat"
+            "type": "string"
           },
           "StartDate": {
             "type": "string",
@@ -336,75 +369,26 @@
           "EventGuests": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/EventGuest"
+              "type": "object",
+              "properties": {
+                "GuestName": {
+                  "type": "string"
+                },
+                "GuestJobTitle": {
+                  "type": "string"
+                }
+              }
             }
           }
         }
       },
       "AttendanceStatus": {
-        "type": "object",
-        "properties": {
-          "Status": {
-            "type": "string",
-            "description": "Attendance status"
-          }
-        }
-      },
-      "CalendarEventSummary": {
-        "type": "object",
-        "properties": {
-          "CalendarEventId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "Title": {
-            "type": "string"
-          },
-          "StartDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "EndDate": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "RegionData": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "integer"
-          },
-          "Area": {
-            "type": "string"
-          },
-          "Ordering": {
-            "type": "integer"
-          }
-        }
-      },
-      "CalendarType": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "integer"
-          },
-          "CalendarName": {
-            "type": "string"
-          },
-          "EffectiveFrom": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "EffectiveTo": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "Ordering": {
-            "type": "integer"
-          }
-        }
+        "type": "string",
+        "enum": [
+          "Attending",
+          "NotAttending",
+          "Tentative"
+        ]
       },
       "Attendee": {
         "type": "object",
@@ -425,14 +409,64 @@
           }
         }
       },
-      "EventGuest": {
+      "CalendarEventSummary": {
         "type": "object",
         "properties": {
-          "GuestName": {
+          "CalendarEventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "CalendarName": {
             "type": "string"
           },
-          "GuestJobTitle": {
+          "EventFormat": {
             "type": "string"
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "Summary": {
+            "type": "string"
+          },
+          "RegionId": {
+            "type": "integer"
+          },
+          "Location": {
+            "type": "string"
+          },
+          "Postcode": {
+            "type": "string"
+          },
+          "Latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "Longitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "EventLink": {
+            "type": "string"
+          },
+          "ContactName": {
+            "type": "string"
+          },
+          "ContactEmail": {
+            "type": "string"
+          },
+          "IsActive": {
+            "type": "boolean"
           }
         }
       }

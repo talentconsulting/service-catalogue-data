@@ -1,0 +1,121 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Feedback API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/Accounts/update": {
+      "post": {
+        "operationId": "SyncEmployerAccounts",
+        "summary": "Sync employer accounts",
+        "responses": {
+          "204": {
+            "description": "Request successfully queued."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/Accounts/{id}/feedbacktransaction": {
+      "post": {
+        "operationId": "UpsertFeedbackTransaction",
+        "summary": "Upsert feedback transaction for a specific account",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Account ID for which the feedback transaction will be upserted."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Feedback transaction successfully upserted."
+          },
+          "404": {
+            "description": "Account not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/Accounts": {
+      "get": {
+        "operationId": "GetEmailNudgeAccountsBatch",
+        "summary": "Get a batch of accounts for email nudge",
+        "parameters": [
+          {
+            "name": "batchsize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Number of accounts to include in the batch."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A batch of accounts retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "AccountIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "integer",
+                        "format": "int64"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No accounts found for the given batch size."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SyncEmployerAccountsCommand": {
+        "type": "object",
+        "description": "Placeholder for SyncEmployerAccountsCommand schema."
+      },
+      "UpsertFeedbackTransactionCommand": {
+        "type": "object",
+        "properties": {
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "GetEmailNudgeAccountsBatchQuery": {
+        "type": "object",
+        "properties": {
+          "batchsize": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

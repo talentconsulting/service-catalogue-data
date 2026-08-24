@@ -1,15 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Members API",
-    "version": "1.0.0",
-    "description": "API for managing members."
+    "title": "Employer Aan API",
+    "version": "1.0.0"
   },
   "paths": {
     "/Members": {
       "get": {
-        "summary": "Get Members",
-        "operationId": "GetMembers",
+        "summary": "Get a list of members",
+        "operationId": "getMembers",
         "parameters": [
           {
             "name": "Keyword",
@@ -68,7 +67,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -81,9 +80,36 @@
       }
     },
     "/Members/{memberId}": {
+      "get": {
+        "summary": "Get member details by ID",
+        "operationId": "getMemberById",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMemberByIdQueryResult"
+                }
+              }
+            }
+          }
+        }
+      },
       "put": {
-        "summary": "Update Member Profile and Preferences",
-        "operationId": "UpdateMemberProfileAndPreferences",
+        "summary": "Update member profile and preferences",
+        "operationId": "updateMemberProfileAndPreferences",
         "parameters": [
           {
             "name": "memberId",
@@ -107,15 +133,15 @@
         },
         "responses": {
           "204": {
-            "description": "Updated successfully"
+            "description": "No Content"
           }
         }
       }
     },
     "/Members/{memberId}/Leaving": {
       "post": {
-        "summary": "Post Member Leaving Reasons",
-        "operationId": "PostMemberLeavingReasons",
+        "summary": "Submit member leaving reasons",
+        "operationId": "postMemberLeavingReasons",
         "parameters": [
           {
             "name": "memberId",
@@ -141,19 +167,19 @@
           "204": {
             "description": "No Content"
           },
-          "400": {
-            "description": "Bad Request"
-          },
           "404": {
             "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
     },
     "/Members/{memberId}/reinstate": {
       "post": {
-        "summary": "Reinstate Member",
-        "operationId": "PostMemberReinstate",
+        "summary": "Reinstate a member",
+        "operationId": "postMemberReinstate",
         "parameters": [
           {
             "name": "memberId",
@@ -169,11 +195,11 @@
           "204": {
             "description": "No Content"
           },
-          "400": {
-            "description": "Bad Request"
-          },
           "404": {
             "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
@@ -181,6 +207,13 @@
   },
   "components": {
     "schemas": {
+      "MemberUserType": {
+        "type": "string",
+        "enum": [
+          "Apprentice",
+          "Employer"
+        ]
+      },
       "GetMembersQueryResult": {
         "type": "object",
         "properties": {
@@ -199,12 +232,12 @@
           "Members": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MembersSummary"
+              "$ref": "#/components/schemas/MemberSummary"
             }
           }
         }
       },
-      "MembersSummary": {
+      "MemberSummary": {
         "type": "object",
         "properties": {
           "MemberId": {
@@ -212,8 +245,7 @@
             "format": "uuid"
           },
           "FullName": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "RegionId": {
             "type": "integer",
@@ -236,26 +268,48 @@
           }
         }
       },
-      "MemberUserType": {
-        "type": "string",
-        "enum": [
-          "Apprentice",
-          "Employer"
-        ]
-      },
-      "PostMemberLeavingModel": {
+      "GetMemberByIdQueryResult": {
         "type": "object",
         "properties": {
-          "LeavingReasons": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
+          "MemberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "OrganisationName": {
+            "type": "string",
+            "nullable": true
+          },
+          "RegionId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "UserType": {
+            "type": "string"
+          },
+          "IsRegionalChair": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "FullName": {
+            "type": "string"
+          },
+          "EmployerAccountId": {
+            "type": "integer"
+          },
+          "UserRef": {
+            "type": "string",
+            "format": "uuid"
           }
-        },
-        "required": [
-          "LeavingReasons"
-        ]
+        }
       },
       "UpdateMemberProfileModel": {
         "type": "object",
@@ -272,17 +326,10 @@
         "type": "object",
         "properties": {
           "RegionId": {
-            "type": "integer"
+            "type": "integer",
+            "nullable": true
           },
           "OrganisationName": {
-            "type": "string",
-            "nullable": true
-          },
-          "FirstName": {
-            "type": "string",
-            "nullable": true
-          },
-          "LastName": {
             "type": "string",
             "nullable": true
           }
@@ -294,15 +341,24 @@
           "MemberProfiles": {
             "type": "array",
             "items": {
-              "type": "object",
-              "additionalProperties": true
+              "type": "object"
             }
           },
           "MemberPreferences": {
             "type": "array",
             "items": {
-              "type": "object",
-              "additionalProperties": true
+              "type": "object"
+            }
+          }
+        }
+      },
+      "PostMemberLeavingModel": {
+        "type": "object",
+        "properties": {
+          "LeavingReasons": {
+            "type": "array",
+            "items": {
+              "type": "integer"
             }
           }
         }
