@@ -2,14 +2,13 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Incentives API",
-    "version": "1.0.0",
-    "description": "API for managing validation overrides in employer incentives."
+    "version": "1.0.0"
   },
   "paths": {
     "/validation-overrides": {
       "post": {
-        "summary": "Add Validation Override",
-        "operationId": "AddValidationOverride",
+        "summary": "Add validation overrides",
+        "operationId": "AddValidationOverrides",
         "requestBody": {
           "required": true,
           "content": {
@@ -30,6 +29,54 @@
   },
   "components": {
     "schemas": {
+      "ValidationOverrideRequest": {
+        "type": "object",
+        "properties": {
+          "ValidationOverrides": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationOverride"
+            }
+          }
+        }
+      },
+      "ValidationOverride": {
+        "type": "object",
+        "properties": {
+          "AccountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ULN": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ValidationSteps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValidationStep"
+            }
+          },
+          "ServiceRequest": {
+            "$ref": "#/components/schemas/ServiceRequest"
+          }
+        }
+      },
+      "ValidationStep": {
+        "type": "object",
+        "properties": {
+          "ValidationType": {
+            "$ref": "#/components/schemas/ValidationType"
+          },
+          "ExpiryDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Remove": {
+            "type": "boolean"
+          }
+        }
+      },
       "ValidationType": {
         "type": "string",
         "enum": [
@@ -55,70 +102,7 @@
             "type": "string",
             "format": "date-time"
           }
-        },
-        "required": [
-          "TaskId",
-          "DecisionReference"
-        ]
-      },
-      "ValidationStep": {
-        "type": "object",
-        "properties": {
-          "ValidationType": {
-            "$ref": "#/components/schemas/ValidationType"
-          },
-          "ExpiryDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "Remove": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "ValidationType",
-          "ExpiryDate"
-        ]
-      },
-      "ValidationOverride": {
-        "type": "object",
-        "properties": {
-          "AccountLegalEntityId": {
-            "type": "integer"
-          },
-          "ULN": {
-            "type": "integer"
-          },
-          "ValidationSteps": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ValidationStep"
-            }
-          },
-          "ServiceRequest": {
-            "$ref": "#/components/schemas/ServiceRequest"
-          }
-        },
-        "required": [
-          "AccountLegalEntityId",
-          "ULN",
-          "ValidationSteps",
-          "ServiceRequest"
-        ]
-      },
-      "ValidationOverrideRequest": {
-        "type": "object",
-        "properties": {
-          "ValidationOverrides": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ValidationOverride"
-            }
-          }
-        },
-        "required": [
-          "ValidationOverrides"
-        ]
+        }
       }
     }
   }

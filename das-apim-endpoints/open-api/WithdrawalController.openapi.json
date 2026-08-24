@@ -1,15 +1,15 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Incentives API",
+    "title": "Employer Incentives Withdrawal and Reinstatement API",
     "version": "1.0.0",
-    "description": "API for managing employer incentives."
+    "description": "API for handling withdrawal and reinstatement of applications."
   },
   "paths": {
     "/withdrawals": {
       "post": {
-        "operationId": "WithdrawApplication",
         "summary": "Withdraw an application",
+        "operationId": "withdrawApplication",
         "requestBody": {
           "required": true,
           "content": {
@@ -29,8 +29,8 @@
     },
     "/withdrawal-reinstatements": {
       "post": {
-        "operationId": "ReinstateApplication",
         "summary": "Reinstate a withdrawn application",
+        "operationId": "reinstateApplication",
         "requestBody": {
           "required": true,
           "content": {
@@ -55,7 +55,11 @@
         "type": "object",
         "properties": {
           "WithdrawalType": {
-            "$ref": "#/components/schemas/WithdrawalType"
+            "type": "string",
+            "enum": [
+              "Employer",
+              "Compliance"
+            ]
           },
           "Applications": {
             "type": "array",
@@ -71,7 +75,8 @@
             "format": "int64"
           },
           "EmailAddress": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           }
         },
         "required": [
@@ -82,11 +87,18 @@
           "EmailAddress"
         ]
       },
-      "WithdrawalType": {
-        "type": "string",
-        "enum": [
-          "Employer",
-          "Compliance"
+      "ReinstateApplicationRequest": {
+        "type": "object",
+        "properties": {
+          "Applications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Application"
+            }
+          }
+        },
+        "required": [
+          "Applications"
         ]
       },
       "Application": {
@@ -127,20 +139,6 @@
         "required": [
           "TaskId",
           "DecisionReference"
-        ]
-      },
-      "ReinstateApplicationRequest": {
-        "type": "object",
-        "properties": {
-          "Applications": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Application"
-            }
-          }
-        },
-        "required": [
-          "Applications"
         ]
       }
     }

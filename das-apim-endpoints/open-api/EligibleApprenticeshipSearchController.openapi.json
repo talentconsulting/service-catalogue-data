@@ -1,14 +1,15 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Incentives API",
-    "version": "1.0.0"
+    "title": "Eligible Apprenticeship Search API",
+    "version": "1.0.0",
+    "description": "API for searching eligible apprenticeships."
   },
   "paths": {
     "/apprenticeships": {
       "get": {
         "summary": "Get eligible apprenticeships",
-        "operationId": "GetEligibleApprentices",
+        "operationId": "getEligibleApprentices",
         "parameters": [
           {
             "name": "accountId",
@@ -17,7 +18,8 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "ID of the user's account."
           },
           {
             "name": "accountLegalEntityId",
@@ -26,12 +28,13 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "ID of the legal entity associated with the account."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with eligible apprenticeships",
+            "description": "A list of eligible apprenticeships.",
             "content": {
               "application/json": {
                 "schema": {
@@ -55,16 +58,57 @@
       "EligibleApprenticeshipDto": {
         "type": "object",
         "properties": {
+          "apprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
           "apprenticeshipStatus": {
             "type": "string",
-            "description": "Status of the apprenticeship"
+            "enum": [
+              "Draft",
+              "Submitted",
+              "Withdrawn",
+              "Successful",
+              "UnSuccessful",
+              "Expired"
+            ]
           },
-          "otherProperties": {
-            "type": "string",
-            "description": "Placeholder for additional unknown properties"
+          "accountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "uln": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "serviceRequest": {
+            "$ref": "#/components/schemas/ServiceRequest"
           }
         },
-        "additionalProperties": false
+        "required": [
+          "apprenticeshipId",
+          "apprenticeshipStatus",
+          "accountLegalEntityId"
+        ]
+      },
+      "ServiceRequest": {
+        "type": "object",
+        "properties": {
+          "taskId": {
+            "type": "string"
+          },
+          "decisionReference": {
+            "type": "string"
+          },
+          "taskCreatedDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "taskId",
+          "decisionReference"
+        ]
       }
     }
   }

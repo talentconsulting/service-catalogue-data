@@ -2,20 +2,24 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Incentives API",
+    "description": "API for managing employer incentives applications.",
     "version": "1.0.0"
   },
   "paths": {
     "/accounts/{accountId}/applications": {
       "post": {
-        "summary": "Create a new application",
+        "summary": "Create Application",
+        "operationId": "createApplication",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            }
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Employer account ID."
           }
         ],
         "requestBody": {
@@ -30,20 +34,32 @@
         },
         "responses": {
           "201": {
-            "description": "Application created successfully"
+            "description": "Application created successfully.",
+            "headers": {
+              "Location": {
+                "description": "URI of the created resource.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
           }
         }
       },
       "put": {
-        "summary": "Update an existing application",
+        "summary": "Update Application",
+        "operationId": "updateApplication",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            }
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Employer account ID."
           }
         ],
         "requestBody": {
@@ -58,20 +74,31 @@
         },
         "responses": {
           "200": {
-            "description": "Application updated successfully"
+            "description": "Application updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string",
+                  "description": "URI of the updated resource."
+                }
+              }
+            }
           }
         }
       },
       "patch": {
-        "summary": "Confirm application submission",
+        "summary": "Confirm Application",
+        "operationId": "confirmApplication",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            }
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Employer account ID."
           }
         ],
         "requestBody": {
@@ -86,25 +113,28 @@
         },
         "responses": {
           "200": {
-            "description": "Application confirmed successfully"
+            "description": "Application confirmed successfully."
           },
           "409": {
-            "description": "Conflict due to duplicate ULN"
+            "description": "Conflict: Application contains a ULN which has already been submitted."
           }
         }
       }
     },
     "/accounts/{accountId}/applications/{applicationId}": {
       "get": {
-        "summary": "Retrieve application details",
+        "summary": "Get Application",
+        "operationId": "getApplication",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            }
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Employer account ID."
           },
           {
             "name": "applicationId",
@@ -113,20 +143,23 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Application ID."
           },
           {
             "name": "includeApprenticeships",
             "in": "query",
-            "required": false,
             "schema": {
               "type": "boolean"
-            }
+            },
+            "description": "Include apprenticeship details.",
+            "required": false,
+            "example": true
           }
         ],
         "responses": {
           "200": {
-            "description": "Application details retrieved successfully",
+            "description": "Application retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -140,15 +173,18 @@
     },
     "/accounts/{accountId}/applications/{applicationId}/bankingDetails/": {
       "get": {
-        "summary": "Retrieve banking details for an application",
+        "summary": "Get Banking Details",
+        "operationId": "getBankingDetails",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            }
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Employer account ID."
           },
           {
             "name": "applicationId",
@@ -157,7 +193,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Application ID."
           },
           {
             "name": "hashedAccountId",
@@ -165,12 +202,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Hashed account ID."
           }
         ],
         "responses": {
           "200": {
-            "description": "Banking details retrieved successfully",
+            "description": "Banking details retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -184,15 +222,18 @@
     },
     "/accounts/{accountId}/applications/{applicationId}/accountlegalentity": {
       "get": {
-        "summary": "Retrieve account legal entity for an application",
+        "summary": "Get Application Account Legal Entity",
+        "operationId": "getApplicationAccountLegalEntity",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            }
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Employer account ID."
           },
           {
             "name": "applicationId",
@@ -201,16 +242,18 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Application ID."
           }
         ],
         "responses": {
           "200": {
-            "description": "Account legal entity details retrieved successfully",
+            "description": "Account legal entity retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApplicationAccountLegalEntityResponse"
+                  "type": "object",
+                  "additionalProperties": true
                 }
               }
             }
@@ -220,15 +263,18 @@
     },
     "/accounts/{accountId}/applications/{applicationId}/apprenticeships": {
       "patch": {
-        "summary": "Save apprenticeship details for an application",
+        "summary": "Save Apprenticeship Details",
+        "operationId": "saveApprenticeshipDetails",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string"
-            }
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Employer account ID."
           },
           {
             "name": "applicationId",
@@ -237,7 +283,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "Application ID."
           }
         ],
         "requestBody": {
@@ -252,7 +299,7 @@
         },
         "responses": {
           "200": {
-            "description": "Apprenticeship details saved successfully"
+            "description": "Apprenticeship details saved successfully."
           }
         }
       }
@@ -268,15 +315,18 @@
             "format": "uuid"
           },
           "AccountId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "AccountLegalEntityId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "ApprenticeshipIds": {
             "type": "array",
             "items": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             }
           }
         },
@@ -295,12 +345,14 @@
             "format": "uuid"
           },
           "AccountId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "ApprenticeshipIds": {
             "type": "array",
             "items": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             }
           }
         },
@@ -318,14 +370,16 @@
             "format": "uuid"
           },
           "AccountId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "DateSubmitted": {
             "type": "string",
             "format": "date-time"
           },
           "SubmittedByEmail": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           },
           "SubmittedByName": {
             "type": "string"
@@ -343,21 +397,21 @@
         "type": "object",
         "properties": {
           "Application": {
-            "type": "object"
+            "type": "object",
+            "additionalProperties": true
           }
         }
       },
       "BankingDetailsDto": {
-        "type": "object"
-      },
-      "ApplicationAccountLegalEntityResponse": {
-        "type": "object"
+        "type": "object",
+        "additionalProperties": true
       },
       "ApprenticeshipDetailsRequest": {
         "type": "object",
         "properties": {
           "AccountId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "ApplicationId": {
             "type": "string",
@@ -380,7 +434,8 @@
         "type": "object",
         "properties": {
           "ApprenticeId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "EmploymentStartDate": {
             "type": "string",
