@@ -1,99 +1,53 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Apprentice AAN Locations API",
-    "version": "1.0.0"
+    "title": "Locations API",
+    "version": "1.0.0",
+    "description": "API for managing locations and retrieving address data."
   },
   "paths": {
     "/locations": {
       "get": {
-        "summary": "Retrieve addresses based on a search query",
-        "operationId": "getAddresses",
+        "summary": "Get locations",
+        "operationId": "getLocations",
         "parameters": [
           {
             "name": "query",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             },
-            "description": "The search query to retrieve addresses"
+            "description": "Query string for searching addresses."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Address"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/locations/{postcode}": {
-      "get": {
-        "summary": "Retrieve coordinates for a given postcode",
-        "operationId": "getCoordinates",
-        "parameters": [
-          {
-            "name": "postcode",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The postcode to retrieve coordinates for"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Coordinates"
+                  "$ref": "#/components/schemas/AddressesResponse"
                 }
               }
             }
           },
           "404": {
-            "description": "Coordinates not found"
-          }
-        }
-      }
-    },
-    "/locations/search": {
-      "get": {
-        "summary": "Retrieve locations by search",
-        "operationId": "getLocationsBySearch",
-        "parameters": [
-          {
-            "name": "query",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The search query to retrieve locations"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
+            "description": "No addresses found",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Location"
-                  }
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
                 }
               }
             }
@@ -104,63 +58,55 @@
   },
   "components": {
     "schemas": {
-      "Address": {
+      "AddressesResponse": {
         "type": "object",
         "properties": {
-          "addressLine1": {
-            "type": "string"
-          },
-          "addressLine2": {
-            "type": "string"
-          },
-          "addressLine3": {
-            "type": "string"
-          },
-          "town": {
-            "type": "string"
-          },
-          "county": {
-            "type": "string"
-          },
-          "postcode": {
-            "type": "string"
-          },
-          "latitude": {
-            "type": "number",
-            "format": "float"
-          },
-          "longitude": {
-            "type": "number",
-            "format": "float"
+          "addresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "addressLine1": {
+                  "type": "string"
+                },
+                "addressLine2": {
+                  "type": "string"
+                },
+                "addressLine3": {
+                  "type": "string"
+                },
+                "postcode": {
+                  "type": "string"
+                },
+                "latitude": {
+                  "type": "number",
+                  "format": "float"
+                },
+                "longitude": {
+                  "type": "number",
+                  "format": "float"
+                }
+              },
+              "required": [
+                "addressLine1",
+                "postcode"
+              ]
+            }
           }
-        }
+        },
+        "description": "List of addresses returned for the given query."
       },
-      "Coordinates": {
+      "ErrorResponse": {
         "type": "object",
         "properties": {
-          "latitude": {
-            "type": "number",
-            "format": "float"
-          },
-          "longitude": {
-            "type": "number",
-            "format": "float"
-          }
-        }
-      },
-      "Location": {
-        "type": "object",
-        "properties": {
-          "identifier": {
+          "errorMessage": {
             "type": "string"
           },
-          "name": {
-            "type": "string"
-          },
-          "type": {
+          "errorCode": {
             "type": "string"
           }
-        }
+        },
+        "description": "Details of an error response."
       }
     }
   }

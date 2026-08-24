@@ -1,0 +1,322 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SFA DAS Campaign API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/Article/{hub}/{slug}": {
+      "get": {
+        "summary": "Get an article by hub and slug",
+        "parameters": [
+          {
+            "name": "hub",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetArticleResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Article not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Article/preview/{hub}/{slug}": {
+      "get": {
+        "summary": "Get a preview article by hub and slug",
+        "parameters": [
+          {
+            "name": "hub",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "slug",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetArticleResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Preview article not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CmsPageModel": {
+        "type": "object",
+        "properties": {
+          "PageAttributes": {
+            "type": "object",
+            "properties": {
+              "Title": {
+                "type": "string"
+              },
+              "Summary": {
+                "type": "string"
+              },
+              "Slug": {
+                "type": "string"
+              },
+              "HubType": {
+                "type": "string"
+              },
+              "MetaDescription": {
+                "type": "string"
+              },
+              "PageType": {
+                "$ref": "#/components/schemas/PageType"
+              },
+              "ArticleType": {
+                "type": "string"
+              }
+            }
+          },
+          "MainContent": {
+            "$ref": "#/components/schemas/PageContent"
+          },
+          "MenuContent": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "BannerModels": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "TabbedContents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TabbedContentModel"
+            }
+          },
+          "RelatedArticles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PageModel"
+            }
+          },
+          "Attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceItem"
+            }
+          }
+        }
+      },
+      "GetArticleResponse": {
+        "type": "object",
+        "properties": {
+          "Article": {
+            "$ref": "#/components/schemas/CmsPageModel"
+          }
+        }
+      },
+      "NotFoundResponse": {
+        "type": "object",
+        "properties": {
+          "Message": {
+            "type": "string"
+          }
+        }
+      },
+      "PageContent": {
+        "type": "object",
+        "properties": {
+          "Items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentItem"
+            }
+          },
+          "HeaderImage": {
+            "$ref": "#/components/schemas/ContentItem"
+          }
+        }
+      },
+      "TabbedContentModel": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "TabName": {
+            "type": "string"
+          },
+          "TabTitle": {
+            "type": "string"
+          },
+          "FindTraineeship": {
+            "type": "boolean"
+          },
+          "Content": {
+            "$ref": "#/components/schemas/PageContent"
+          }
+        }
+      },
+      "PageModel": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "PageType": {
+            "$ref": "#/components/schemas/PageType"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "MetaDescription": {
+            "type": "string"
+          },
+          "Slug": {
+            "type": "string"
+          },
+          "HubType": {
+            "type": "string"
+          },
+          "Summary": {
+            "type": "string"
+          },
+          "ArticleType": {
+            "type": "string"
+          }
+        }
+      },
+      "PageType": {
+        "type": "string",
+        "enum": [
+          "Unknown",
+          "LandingPage",
+          "Article",
+          "Hub",
+          "Tab"
+        ]
+      },
+      "ResourceItem": {
+        "type": "object",
+        "properties": {
+          "Title": {
+            "type": "string"
+          },
+          "Id": {
+            "type": "string"
+          },
+          "FileName": {
+            "type": "string"
+          },
+          "ContentType": {
+            "type": "string"
+          },
+          "Url": {
+            "type": "string"
+          },
+          "Size": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Description": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentItem": {
+        "type": "object",
+        "properties": {
+          "Values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "Type": {
+            "type": "string"
+          },
+          "TableValue": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "EmbeddedResource": {
+            "$ref": "#/components/schemas/ResourceItem"
+          },
+          "VideoTranscripts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VideoTranscript"
+            }
+          }
+        }
+      },
+      "VideoTranscript": {
+        "type": "object",
+        "properties": {
+          "VideoName": {
+            "type": "string"
+          },
+          "Text": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
