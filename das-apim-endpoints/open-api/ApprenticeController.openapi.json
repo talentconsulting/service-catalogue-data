@@ -1,25 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Apprentice App API",
-    "version": "1.0.0",
-    "description": "API for managing apprentice accounts and subscriptions."
+    "title": "Apprentice API",
+    "version": "1.0.0"
   },
   "paths": {
     "/apprentices/{id}": {
       "patch": {
         "summary": "Update apprentice details",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -45,16 +33,27 @@
             }
           }
         },
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "responses": {
           "204": {
-            "description": "No content"
+            "description": "Apprentice updated successfully"
           }
         }
       }
     },
     "/apprentices": {
       "get": {
-        "summary": "Get apprentice by name and date of birth",
+        "summary": "Find apprentice by name and date of birth",
         "parameters": [
           {
             "name": "firstName",
@@ -84,7 +83,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Found matching apprentices",
             "content": {
               "application/json": {
                 "schema": {
@@ -97,25 +96,14 @@
             }
           },
           "404": {
-            "description": "Apprentice not found"
+            "description": "No matching apprentices found"
           }
         }
       }
     },
     "/apprentice/{id}/MyApprenticeship": {
       "patch": {
-        "summary": "Update apprentice's My Apprenticeship details",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
+        "summary": "Update My Apprenticeship details",
         "requestBody": {
           "required": true,
           "content": {
@@ -126,19 +114,6 @@
             }
           }
         },
-        "responses": {
-          "204": {
-            "description": "No content"
-          },
-          "404": {
-            "description": "Apprentice not found"
-          }
-        }
-      }
-    },
-    "/apprentices/{id}/subscriptions": {
-      "post": {
-        "summary": "Add a subscription for an apprentice",
         "parameters": [
           {
             "name": "id",
@@ -150,6 +125,19 @@
             }
           }
         ],
+        "responses": {
+          "204": {
+            "description": "Update successful"
+          },
+          "404": {
+            "description": "Apprentice or resource not found"
+          }
+        }
+      }
+    },
+    "/apprentices/{id}/subscriptions": {
+      "post": {
+        "summary": "Add apprentice subscription",
         "requestBody": {
           "required": true,
           "content": {
@@ -160,14 +148,6 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "Subscription successfully added."
-          }
-        }
-      },
-      "delete": {
-        "summary": "Remove a subscription for an apprentice",
         "parameters": [
           {
             "name": "id",
@@ -179,6 +159,14 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Subscription added successfully"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove apprentice subscription",
         "requestBody": {
           "required": true,
           "content": {
@@ -189,16 +177,6 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "Subscription successfully removed."
-          }
-        }
-      }
-    },
-    "/apprentice/{id}": {
-      "delete": {
-        "summary": "Delete apprentice account by ID",
         "parameters": [
           {
             "name": "id",
@@ -212,7 +190,28 @@
         ],
         "responses": {
           "200": {
-            "description": "Account successfully deleted.",
+            "description": "Subscription removed successfully"
+          }
+        }
+      }
+    },
+    "/apprentice/{id}": {
+      "delete": {
+        "summary": "Delete an apprentice account by ID",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Apprentice account deleted successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -265,7 +264,8 @@
             "type": "string"
           },
           "address": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           }
         }
       },

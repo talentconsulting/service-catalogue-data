@@ -1,39 +1,38 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Aan Notifications API",
+    "title": "ApprenticeAan - Notifications API",
     "version": "1.0.0"
   },
   "paths": {
-    "/Notifications/{id}": {
+    "/notifications/{id}": {
       "get": {
-        "summary": "Get a notification by ID",
-        "operationId": "GetNotification",
+        "summary": "Retrieve a specific notification",
         "parameters": [
           {
             "name": "id",
             "in": "path",
             "required": true,
+            "description": "ID of the notification",
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "The ID of the notification to retrieve."
+            }
           },
           {
             "name": "X-RequestedByMemberId",
             "in": "header",
             "required": true,
+            "description": "ID of the member making the request",
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "ID of the member requesting the notification."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Notification retrieved successfully.",
+            "description": "Notification successfully retrieved",
             "content": {
               "application/json": {
                 "schema": {
@@ -45,20 +44,19 @@
         }
       }
     },
-    "/Notifications": {
+    "/notifications": {
       "post": {
-        "summary": "Create a notification",
-        "operationId": "CreateNotification",
+        "summary": "Create a new notification",
         "parameters": [
           {
             "name": "X-RequestedByMemberId",
             "in": "header",
             "required": true,
+            "description": "ID of the member creating the notification",
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "ID of the member creating the notification."
+            }
           }
         ],
         "requestBody": {
@@ -66,14 +64,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PostNotificationRequest"
+                "$ref": "#/components/schemas/CreateNotificationModel"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Notification created successfully.",
+            "description": "Notification successfully created",
             "content": {
               "application/json": {
                 "schema": {
@@ -110,32 +108,27 @@
             "type": "integer",
             "nullable": true
           }
-        }
+        },
+        "required": [
+          "MemberId",
+          "TemplateName",
+          "SentTime"
+        ]
       },
-      "PostNotificationRequest": {
+      "CreateNotificationModel": {
         "type": "object",
         "properties": {
-          "TemplateId": {
-            "type": "string",
-            "description": "The ID of the notification template."
-          },
           "MemberId": {
             "type": "string",
-            "format": "uuid",
-            "description": "ID of the member the notification is for."
+            "format": "uuid"
           },
-          "Parameters": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            },
-            "description": "Additional parameters for the notification."
+          "NotificationTemplateId": {
+            "type": "integer"
           }
         },
         "required": [
-          "TemplateId",
           "MemberId",
-          "Parameters"
+          "NotificationTemplateId"
         ]
       }
     }
