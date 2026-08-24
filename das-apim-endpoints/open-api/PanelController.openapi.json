@@ -1,19 +1,20 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SFA DAS Campaign API",
+    "title": "Panel API",
     "version": "1.0.0"
   },
   "paths": {
     "/Panel/{panelId}": {
       "get": {
-        "summary": "Retrieve a specific Panel by ID",
+        "summary": "Get Panel by ID",
+        "operationId": "getPanelById",
         "parameters": [
           {
             "name": "panelId",
             "in": "path",
             "required": true,
-            "description": "ID of the Panel",
+            "description": "The ID of the panel to retrieve",
             "schema": {
               "type": "integer"
             }
@@ -21,7 +22,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of panel",
+            "description": "A GetPanelResponse object",
             "content": {
               "application/json": {
                 "schema": {
@@ -45,13 +46,14 @@
     },
     "/Panel/preview/{panelId}": {
       "get": {
-        "summary": "Retrieve a preview of a Panel by ID",
+        "summary": "Get Preview Panel by ID",
+        "operationId": "getPreviewPanelById",
         "parameters": [
           {
             "name": "panelId",
             "in": "path",
             "required": true,
-            "description": "ID of the Panel",
+            "description": "The ID of the preview panel to retrieve",
             "schema": {
               "type": "integer"
             }
@@ -59,7 +61,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of the preview panel",
+            "description": "A GetPreviewPanelResponse object",
             "content": {
               "application/json": {
                 "schema": {
@@ -87,74 +89,90 @@
       "GetPanelResponse": {
         "type": "object",
         "properties": {
-          "Panel": {
+          "panel": {
             "$ref": "#/components/schemas/PanelModel"
           }
-        }
+        },
+        "required": [
+          "panel"
+        ]
       },
       "GetPreviewPanelResponse": {
         "type": "object",
         "properties": {
-          "Panel": {
+          "panel": {
             "$ref": "#/components/schemas/PanelModel"
           }
-        }
+        },
+        "required": [
+          "panel"
+        ]
       },
       "NotFoundResponse": {
         "type": "object",
         "properties": {
-          "Message": {
-            "type": "string"
+          "message": {
+            "type": "string",
+            "description": "Error message indicating the reason for the not found response"
           }
-        }
+        },
+        "required": [
+          "message"
+        ]
       },
       "PanelModel": {
         "type": "object",
         "properties": {
-          "MainContent": {
+          "mainContent": {
             "$ref": "#/components/schemas/PanelContent"
           }
-        }
+        },
+        "required": [
+          "mainContent"
+        ]
       },
       "PanelContent": {
         "type": "object",
         "properties": {
-          "Title": {
+          "title": {
             "type": "string"
           },
-          "Slug": {
+          "slug": {
             "type": "string"
           },
-          "Items": {
+          "items": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ContentItem"
             }
           },
-          "Image": {
+          "image": {
             "$ref": "#/components/schemas/ResourceItem"
           },
-          "Button": {
+          "button": {
             "$ref": "#/components/schemas/ButtonModel"
           },
-          "Id": {
+          "id": {
             "type": "integer"
           }
-        }
+        },
+        "required": [
+          "items"
+        ]
       },
       "ContentItem": {
         "type": "object",
         "properties": {
-          "Values": {
+          "values": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
-          "Type": {
+          "type": {
             "type": "string"
           },
-          "TableValue": {
+          "tableValue": {
             "type": "array",
             "items": {
               "type": "array",
@@ -163,40 +181,45 @@
               }
             }
           },
-          "EmbeddedResource": {
+          "embeddedResource": {
             "$ref": "#/components/schemas/ResourceItem"
           },
-          "VideoTranscripts": {
+          "videoTranscripts": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/VideoTranscript"
             }
           }
-        }
+        },
+        "required": [
+          "values",
+          "type"
+        ]
       },
       "ResourceItem": {
         "type": "object",
         "properties": {
-          "Title": {
+          "title": {
             "type": "string"
           },
-          "Id": {
+          "id": {
             "type": "string"
           },
-          "FileName": {
+          "fileName": {
             "type": "string"
           },
-          "ContentType": {
+          "contentType": {
             "type": "string"
           },
-          "Url": {
+          "url": {
             "type": "string",
             "format": "uri"
           },
-          "Size": {
-            "type": "integer"
+          "size": {
+            "type": "integer",
+            "format": "int64"
           },
-          "Description": {
+          "description": {
             "type": "string"
           }
         }
@@ -204,10 +227,10 @@
       "VideoTranscript": {
         "type": "object",
         "properties": {
-          "VideoName": {
+          "videoName": {
             "type": "string"
           },
-          "Text": {
+          "text": {
             "type": "string"
           }
         }
@@ -215,20 +238,25 @@
       "ButtonModel": {
         "type": "object",
         "properties": {
-          "Title": {
+          "title": {
             "type": "string"
           },
-          "Url": {
+          "url": {
             "type": "string",
             "format": "uri"
           },
-          "Styles": {
+          "styles": {
             "type": "array",
             "items": {
               "type": "string"
             }
           }
-        }
+        },
+        "required": [
+          "title",
+          "url",
+          "styles"
+        ]
       }
     }
   }

@@ -2,27 +2,28 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Campaign Hub API",
+    "description": "API to manage hubs and preview hubs for Campaigns.",
     "version": "1.0.0"
   },
   "paths": {
     "/Hub/{hub}": {
       "get": {
-        "summary": "Get Hub",
-        "description": "Retrieve details of a specific hub page.",
+        "summary": "Retrieve a hub by its identifier",
+        "operationId": "GetHub",
         "parameters": [
           {
             "name": "hub",
             "in": "path",
             "required": true,
+            "description": "The identifier for the hub.",
             "schema": {
               "type": "string"
-            },
-            "description": "The identifier for the hub page."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Hub details retrieved successfully.",
+            "description": "Hub retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -32,7 +33,7 @@
             }
           },
           "404": {
-            "description": "Hub not found.",
+            "description": "Hub not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -46,22 +47,22 @@
     },
     "/Hub/preview/{hub}": {
       "get": {
-        "summary": "Get Preview Hub",
-        "description": "Retrieve details of a preview hub page.",
+        "summary": "Retrieve a preview of a hub by its identifier",
+        "operationId": "GetPreviewHub",
         "parameters": [
           {
             "name": "hub",
             "in": "path",
             "required": true,
+            "description": "The identifier for the preview hub.",
             "schema": {
               "type": "string"
-            },
-            "description": "The identifier for the preview hub page."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Preview hub details retrieved successfully.",
+            "description": "Preview hub retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -71,7 +72,7 @@
             }
           },
           "404": {
-            "description": "Preview hub not found.",
+            "description": "Preview hub not found",
             "content": {
               "application/json": {
                 "schema": {
@@ -100,7 +101,10 @@
           "Message": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "Message"
+        ]
       },
       "HubPageModel": {
         "type": "object",
@@ -115,7 +119,7 @@
             "$ref": "#/components/schemas/MenuPageModel.MenuPageContent"
           },
           "BannerModels": {
-            "$ref": "#/components/schemas/BannerPageModel.BannerPageContent"
+            "$ref": "#/components/schemas/BannerPageModel"
           }
         }
       },
@@ -195,34 +199,22 @@
       },
       "CardPageModel": {
         "type": "object",
-        "properties": {
-          "LandingPage": {
-            "$ref": "#/components/schemas/UrlDetails"
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PageModel"
           },
-          "CardImage": {
-            "$ref": "#/components/schemas/ContentItem"
+          {
+            "type": "object",
+            "properties": {
+              "LandingPage": {
+                "$ref": "#/components/schemas/UrlDetails"
+              },
+              "CardImage": {
+                "$ref": "#/components/schemas/ContentItem"
+              }
+            }
           }
-        }
-      },
-      "UrlDetails": {
-        "type": "object",
-        "properties": {
-          "Slug": {
-            "type": "string"
-          },
-          "Title": {
-            "type": "string"
-          },
-          "Hub": {
-            "type": "string"
-          },
-          "PageType": {
-            "type": "string"
-          },
-          "ParentSlug": {
-            "type": "string"
-          }
-        }
+        ]
       },
       "ContentItem": {
         "type": "object",
@@ -293,6 +285,26 @@
           }
         }
       },
+      "UrlDetails": {
+        "type": "object",
+        "properties": {
+          "Slug": {
+            "type": "string"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Hub": {
+            "type": "string"
+          },
+          "PageType": {
+            "type": "string"
+          },
+          "ParentSlug": {
+            "type": "string"
+          }
+        }
+      },
       "MenuPageModel.MenuPageContent": {
         "type": "object",
         "properties": {
@@ -322,15 +334,20 @@
           }
         }
       },
+      "BannerPageModel": {
+        "type": "object",
+        "properties": {
+          "MainContent": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BannerPageModel.BannerPageContent"
+            }
+          }
+        }
+      },
       "BannerPageModel.BannerPageContent": {
         "type": "object",
         "properties": {
-          "Items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ContentItem"
-            }
-          },
           "BackgroundColour": {
             "type": "string"
           },
@@ -345,6 +362,12 @@
           },
           "Id": {
             "type": "string"
+          },
+          "Items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentItem"
+            }
           }
         }
       }

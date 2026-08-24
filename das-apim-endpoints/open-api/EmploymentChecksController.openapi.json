@@ -7,27 +7,27 @@
   "paths": {
     "/EmploymentChecks/": {
       "get": {
-        "summary": "Get employment checks",
-        "operationId": "getEmploymentChecks",
+        "summary": "Retrieve employment checks for given apprenticeship IDs.",
+        "description": "Fetches employment check results given a list of apprenticeship IDs.",
         "parameters": [
           {
             "name": "apprenticeshipIds",
             "in": "query",
             "required": true,
-            "description": "List of apprenticeship IDs",
+            "style": "form",
+            "explode": true,
             "schema": {
               "type": "array",
               "items": {
                 "type": "integer",
                 "format": "int64"
-              },
-              "maxItems": 50
+              }
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of employment checks",
+            "description": "Successful response with employment check results.",
             "content": {
               "application/json": {
                 "schema": {
@@ -37,7 +37,7 @@
             }
           },
           "400": {
-            "description": "Invalid request parameters"
+            "description": "Bad request due to invalid or missing data."
           }
         }
       }
@@ -48,39 +48,21 @@
       "GetEmploymentChecksQueryResponse": {
         "type": "object",
         "properties": {
-          "ApprenticeshipIds": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          "EmploymentCheckResults": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EmploymentCheckResult"
-            }
-          }
-        }
-      },
-      "EmploymentCheckResult": {
-        "type": "object",
-        "properties": {
-          "Id": {
+          "apprenticeshipId": {
             "type": "integer",
             "format": "int64"
           },
-          "Status": {
-            "$ref": "#/components/schemas/EmploymentCheckStatus"
+          "employmentCheckPassed": {
+            "type": "boolean"
+          },
+          "errorDetails": {
+            "type": "string",
+            "nullable": true
           }
-        }
-      },
-      "EmploymentCheckStatus": {
-        "type": "string",
-        "enum": [
-          "Pass",
-          "Fail",
-          "Unknown"
+        },
+        "required": [
+          "apprenticeshipId",
+          "employmentCheckPassed"
         ]
       }
     }

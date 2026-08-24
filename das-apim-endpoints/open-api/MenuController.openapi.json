@@ -1,17 +1,29 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SFA DAS APIs",
-    "version": "1.0.0"
+    "title": "SFA DAS Campaign API",
+    "version": "1.0.0",
+    "description": "API for handling menu operations in the DAS Campaign system."
   },
   "paths": {
     "/menu": {
       "get": {
-        "operationId": "GetMenuAsync",
-        "summary": "Retrieve the menu information.",
+        "summary": "Retrieve the menu data",
+        "operationId": "GetMenu",
+        "parameters": [
+          {
+            "name": "cancellationToken",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional token to cancel the operation."
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Menu details retrieved successfully.",
+            "description": "Menu retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -19,14 +31,17 @@
                 }
               }
             }
+          },
+          "default": {
+            "description": "Unexpected error occurred."
           }
         }
       }
     },
     "/providers/{providerId}/unapproved/add/learners/select": {
       "post": {
+        "summary": "Retrieve ILR records for a provider",
         "operationId": "GetLearnersForProvider",
-        "summary": "Retrieve unapproved learners for a provider.",
         "parameters": [
           {
             "name": "providerId",
@@ -34,7 +49,8 @@
             "required": true,
             "schema": {
               "type": "integer"
-            }
+            },
+            "description": "Provider ID."
           }
         ],
         "requestBody": {
@@ -49,7 +65,7 @@
         },
         "responses": {
           "200": {
-            "description": "Learners data retrieved successfully.",
+            "description": "Records retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -66,8 +82,8 @@
     },
     "/providers/{providerId}/unapproved/add/learners/select/{learnerId}": {
       "get": {
+        "summary": "Get ILR record for a specific learner",
         "operationId": "GetLearnerForProvider",
-        "summary": "Retrieve a specific learner record for a provider.",
         "parameters": [
           {
             "name": "providerId",
@@ -75,7 +91,8 @@
             "required": true,
             "schema": {
               "type": "integer"
-            }
+            },
+            "description": "Provider ID."
           },
           {
             "name": "learnerId",
@@ -83,12 +100,13 @@
             "required": true,
             "schema": {
               "type": "integer"
-            }
+            },
+            "description": "Learner ID."
           }
         ],
         "responses": {
           "200": {
-            "description": "Learner data retrieved successfully.",
+            "description": "Record retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -103,10 +121,10 @@
         }
       }
     },
-    "/Ai/vacancies/{vacancyId}/review/{vacancyReviewId}": {
+    "/menu/{vacancyId:guid}/review/{vacancyReviewId:guid}": {
       "post": {
-        "operationId": "CreateVacancyReviewAsync",
-        "summary": "Create an AI review for a vacancy.",
+        "summary": "Create AiVacancyReview record",
+        "operationId": "CreateVacancyReview",
         "parameters": [
           {
             "name": "vacancyId",
@@ -115,7 +133,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The ID of the vacancy."
           },
           {
             "name": "vacancyReviewId",
@@ -124,7 +143,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The ID of the vacancy review."
           }
         ],
         "requestBody": {
@@ -141,44 +161,8 @@
           "200": {
             "description": "Vacancy review created successfully."
           },
-          "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
-    "/Ai/vacancies/{vacancyId}/approve": {
-      "post": {
-        "operationId": "AutoApproveVacancyAsync",
-        "summary": "Automatically approve a vacancy review.",
-        "parameters": [
-          {
-            "name": "vacancyId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "string",
-                "format": "uuid"
-              }
-            }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "Vacancy review approved successfully."
-          },
-          "500": {
-            "description": "Internal server error."
+          "default": {
+            "description": "Unexpected error occurred."
           }
         }
       }
@@ -189,7 +173,7 @@
       "GetMenuResponse": {
         "type": "object",
         "properties": {
-          "menu": {
+          "Menu": {
             "$ref": "#/components/schemas/MenuPageModel"
           }
         }
@@ -197,7 +181,7 @@
       "MenuPageModel": {
         "type": "object",
         "properties": {
-          "mainContent": {
+          "MainContent": {
             "$ref": "#/components/schemas/MenuPageContent"
           }
         }
@@ -205,25 +189,25 @@
       "MenuPageContent": {
         "type": "object",
         "properties": {
-          "topLevel": {
+          "TopLevel": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UrlDetails"
             }
           },
-          "apprentices": {
+          "Apprentices": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UrlDetails"
             }
           },
-          "employers": {
+          "Employers": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UrlDetails"
             }
           },
-          "influencers": {
+          "Influencers": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UrlDetails"
@@ -234,19 +218,19 @@
       "UrlDetails": {
         "type": "object",
         "properties": {
-          "slug": {
+          "Slug": {
             "type": "string"
           },
-          "title": {
+          "Title": {
             "type": "string"
           },
-          "hub": {
+          "Hub": {
             "type": "string"
           },
-          "pageType": {
+          "PageType": {
             "type": "string"
           },
-          "parentSlug": {
+          "ParentSlug": {
             "type": "string"
           }
         }
@@ -254,40 +238,40 @@
       "SearchLearnersRequest": {
         "type": "object",
         "properties": {
-          "accountLegalEntityId": {
+          "AccountLegalEntityId": {
             "type": "integer"
           },
-          "cohortId": {
+          "CohortId": {
             "type": "integer"
           },
-          "searchTerm": {
+          "SearchTerm": {
             "type": "string"
           },
-          "sortColumn": {
+          "SortColumn": {
             "type": "string"
           },
-          "sortDescending": {
+          "SortDescending": {
             "type": "boolean"
           },
-          "page": {
+          "Page": {
             "type": "integer"
           },
-          "pageSize": {
+          "PageSize": {
             "type": "integer"
           },
-          "startMonth": {
+          "StartMonth": {
             "type": "integer"
           },
-          "startYear": {
+          "StartYear": {
             "type": "integer"
           },
-          "courseCode": {
+          "CourseCode": {
             "type": "string"
           },
-          "learningType": {
-            "type": "string"
+          "LearningType": {
+            "$ref": "#/components/schemas/LearningType"
           },
-          "excludeUlns": {
+          "ExcludeUlns": {
             "type": "array",
             "items": {
               "type": "integer"
@@ -295,21 +279,65 @@
           }
         }
       },
+      "LearningType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "FoundationApprenticeship",
+          "ApprenticeshipUnit"
+        ]
+      },
       "GetLearnersForProviderQueryResult": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "Learners": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "LearnerId": {
+                  "type": "integer"
+                },
+                "Name": {
+                  "type": "string"
+                },
+                "CourseName": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       },
       "GetLearnerForProviderQueryResult": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "LearnerId": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "CourseName": {
+            "type": "string"
+          }
+        }
       },
       "CreateVacancyReviewData": {
         "type": "object",
         "properties": {
-          "reviewStatus": {
-            "type": "string"
+          "ReviewStatus": {
+            "$ref": "#/components/schemas/AiReviewStatus"
           }
         }
+      },
+      "AiReviewStatus": {
+        "type": "string",
+        "enum": [
+          "Skipped",
+          "Failed",
+          "Succeeded"
+        ]
       }
     }
   }

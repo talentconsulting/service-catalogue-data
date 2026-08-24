@@ -1,14 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Bulk Upload API",
+    "title": "Approvals API",
     "version": "1.0.0"
   },
   "paths": {
     "/BulkUpload/Validate": {
       "post": {
-        "operationId": "ValidateBulkUpload",
-        "summary": "Validates bulk upload records.",
+        "summary": "Validate Bulk Upload Records",
         "requestBody": {
           "required": true,
           "content": {
@@ -21,15 +20,21 @@
         },
         "responses": {
           "200": {
-            "description": "Validation results returned successfully."
+            "description": "Validation Result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         }
       }
     },
     "/BulkUpload/AddAndApprove": {
       "post": {
-        "operationId": "AddAndApproveDraftApprenticeships",
-        "summary": "Adds and approves draft apprenticeships from bulk upload.",
+        "summary": "Add and Approve Bulk Upload Draft Apprenticeships",
         "requestBody": {
           "required": true,
           "content": {
@@ -42,18 +47,24 @@
         },
         "responses": {
           "200": {
-            "description": "Draft apprenticeships added and approved successfully."
+            "description": "Operation Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Draft apprenticeships not found."
+            "description": "Not Found"
           }
         }
       }
     },
     "/BulkUpload/Add": {
       "post": {
-        "operationId": "AddDraftApprenticeships",
-        "summary": "Adds draft apprenticeships from bulk upload.",
+        "summary": "Add Draft Apprenticeships",
         "requestBody": {
           "required": true,
           "content": {
@@ -66,18 +77,24 @@
         },
         "responses": {
           "200": {
-            "description": "Draft apprenticeships added successfully."
+            "description": "Operation Successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Draft apprenticeships not found."
+            "description": "Not Found"
           }
         }
       }
     },
     "/BulkUpload/logs": {
       "post": {
-        "operationId": "AddBulkUploadLog",
-        "summary": "Adds a new bulk upload log.",
+        "summary": "Add Bulk Upload Log",
         "requestBody": {
           "required": true,
           "content": {
@@ -90,25 +107,29 @@
         },
         "responses": {
           "200": {
-            "description": "Bulk upload log added successfully."
+            "description": "Log Added Successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         }
       }
     },
     "/BulkUpload/logs/{logId}/error": {
       "put": {
-        "operationId": "UpdateLogWithErrorContent",
-        "summary": "Updates bulk upload log with error content.",
+        "summary": "Update Log With Error Content",
         "parameters": [
           {
             "name": "logId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Id of the log to update."
+              "type": "integer"
+            }
           }
         ],
         "requestBody": {
@@ -123,7 +144,7 @@
         },
         "responses": {
           "200": {
-            "description": "Bulk upload log updated successfully."
+            "description": "Log Updated Successfully"
           }
         }
       }
@@ -135,8 +156,7 @@
         "type": "object",
         "properties": {
           "ProviderId": {
-            "type": "integer",
-            "format": "int64"
+            "type": "integer"
           },
           "CsvRecords": {
             "type": "array",
@@ -149,104 +169,54 @@
           }
         },
         "required": [
-          "ProviderId",
-          "UserInfo"
+          "ProviderId"
         ]
       },
       "BulkUploadAddAndApproveDraftApprenticeshipsRequest": {
         "type": "object",
         "properties": {
           "ProviderId": {
-            "type": "integer",
-            "format": "int64"
+            "type": "integer"
           },
           "FileUploadLogId": {
             "type": "integer",
-            "format": "int64",
             "nullable": true
+          },
+          "UserInfo": {
+            "$ref": "#/components/schemas/UserInfo"
           },
           "BulkUploadAddAndApproveDraftApprenticeships": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/BulkUploadAddDraftApprenticeshipRequest"
             }
-          },
-          "UserInfo": {
-            "$ref": "#/components/schemas/UserInfo"
           }
         },
         "required": [
-          "ProviderId",
-          "UserInfo"
+          "ProviderId"
         ]
       },
       "BulkUploadAddDraftApprenticeshipsRequest": {
         "type": "object",
         "properties": {
           "ProviderId": {
-            "type": "integer",
-            "format": "int64"
+            "type": "integer"
           },
           "FileUploadLogId": {
             "type": "integer",
-            "format": "int64",
             "nullable": true
+          },
+          "UserInfo": {
+            "$ref": "#/components/schemas/UserInfo"
           },
           "BulkUploadDraftApprenticeships": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/BulkUploadAddDraftApprenticeshipRequest"
             }
-          },
-          "UserInfo": {
-            "$ref": "#/components/schemas/UserInfo"
           }
         },
         "required": [
-          "ProviderId",
-          "UserInfo"
-        ]
-      },
-      "BulkUploadAddDraftApprenticeshipRequest": {
-        "type": "object",
-        "properties": {
-          "ProviderRef": {
-            "type": "string"
-          },
-          "Uln": {
-            "type": "string"
-          },
-          "DateOfBirthAsString": {
-            "type": "string"
-          },
-          "Email": {
-            "type": "string"
-          },
-          "FirstName": {
-            "type": "string"
-          },
-          "LastName": {
-            "type": "string"
-          },
-          "StartDateAsString": {
-            "type": "string"
-          },
-          "EndDateAsString": {
-            "type": "string"
-          },
-          "CostAsString": {
-            "type": "string"
-          },
-          "ProviderId": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "required": [
-          "ProviderRef",
-          "Uln",
-          "FirstName",
-          "LastName",
           "ProviderId"
         ]
       },
@@ -254,20 +224,17 @@
         "type": "object",
         "properties": {
           "ProviderId": {
-            "type": "integer",
-            "format": "int64"
+            "type": "integer"
           },
           "FileName": {
             "type": "string"
           },
           "RplCount": {
             "type": "integer",
-            "format": "int32",
             "nullable": true
           },
           "RowCount": {
             "type": "integer",
-            "format": "int32",
             "nullable": true
           },
           "FileContent": {
@@ -288,8 +255,7 @@
         "type": "object",
         "properties": {
           "ProviderId": {
-            "type": "integer",
-            "format": "int64"
+            "type": "integer"
           },
           "ErrorContent": {
             "type": "string"
@@ -300,8 +266,51 @@
         },
         "required": [
           "ProviderId",
-          "ErrorContent",
-          "UserInfo"
+          "ErrorContent"
+        ]
+      },
+      "BulkUploadAddDraftApprenticeshipRequest": {
+        "type": "object",
+        "properties": {
+          "ProviderId": {
+            "type": "integer"
+          },
+          "AgreementId": {
+            "type": "string",
+            "nullable": true
+          },
+          "StartDateAsString": {
+            "type": "string",
+            "nullable": true
+          },
+          "EndDateAsString": {
+            "type": "string",
+            "nullable": true
+          },
+          "CostAsString": {
+            "type": "string",
+            "nullable": true
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string",
+            "format": "email",
+            "nullable": true
+          },
+          "ReservationId": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "ProviderId",
+          "FirstName",
+          "LastName"
         ]
       },
       "UserInfo": {
@@ -311,15 +320,16 @@
             "type": "string"
           },
           "UserDisplayName": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "UserEmail": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           }
         },
         "required": [
           "UserId",
-          "UserDisplayName",
           "UserEmail"
         ]
       }

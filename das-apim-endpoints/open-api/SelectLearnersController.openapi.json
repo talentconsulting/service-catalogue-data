@@ -1,18 +1,21 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SelectLearners API",
-    "version": "1.0.0"
+    "title": "Approvals API",
+    "version": "1.0.0",
+    "description": "API for managing learners and associated operations."
   },
   "paths": {
     "/providers/{providerId}/unapproved/add/learners/select": {
       "post": {
-        "summary": "Get ILR records for a provider",
+        "summary": "Get learners for provider",
+        "description": "Retrieves unapproved learners for a specific provider based on the provided search criteria.",
         "parameters": [
           {
             "name": "providerId",
             "in": "path",
             "required": true,
+            "description": "Unique identifier for the provider",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -31,7 +34,7 @@
         },
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -41,19 +44,28 @@
             }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         }
       }
     },
     "/providers/{providerId}/unapproved/add/learners/select/{learnerId}": {
       "get": {
-        "summary": "Get ILR record for a selected learner",
+        "summary": "Get details for a specific learner",
+        "description": "Retrieves the details of a specific learner using their learnerId and providerId.",
         "parameters": [
           {
             "name": "providerId",
             "in": "path",
             "required": true,
+            "description": "Unique identifier for the provider",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -63,6 +75,7 @@
             "name": "learnerId",
             "in": "path",
             "required": true,
+            "description": "Unique identifier for the learner",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -71,7 +84,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -81,7 +94,14 @@
             }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         }
       }
@@ -94,42 +114,52 @@
         "properties": {
           "StartMonth": {
             "type": "integer",
-            "nullable": true
+            "description": "Month to start the search"
           },
           "StartYear": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Year to start the search"
           },
           "Page": {
             "type": "integer",
+            "description": "Page number",
             "default": 1
           },
           "PageSize": {
             "type": "integer",
-            "nullable": true,
+            "description": "Number of results per page",
             "default": 20
           },
           "SortColumn": {
             "type": "string",
+            "description": "Column to sort by",
             "default": ""
           },
           "SortDescending": {
             "type": "boolean",
+            "description": "Indicates whether to sort in descending order",
             "default": false
           },
           "CourseCode": {
             "type": "string",
-            "nullable": true
+            "nullable": true,
+            "description": "Code of the course"
           },
           "AccountLegalEntityId": {
             "type": "integer",
-            "nullable": true
+            "format": "int64",
+            "nullable": true,
+            "description": "Account Legal Entity ID"
           },
           "CohortId": {
             "type": "integer",
-            "nullable": true
+            "format": "int64",
+            "nullable": true,
+            "description": "Cohort ID"
           },
           "SearchTerm": {
             "type": "string",
+            "description": "Search term",
             "default": ""
           },
           "LearningType": {
@@ -139,14 +169,16 @@
               "FoundationApprenticeship",
               "ApprenticeshipUnit"
             ],
-            "nullable": true
+            "nullable": true,
+            "description": "Type of learning"
           },
           "ExcludeUlns": {
             "type": "array",
             "items": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             },
-            "default": []
+            "description": "List of ULNs to exclude"
           }
         }
       }

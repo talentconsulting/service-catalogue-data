@@ -1,15 +1,15 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Landing Page API",
+    "title": "SFA DAS Campaign API",
     "version": "1.0.0",
-    "description": "API for managing landing pages and preview landing pages."
+    "description": "API for managing landing pages within the SFA DAS Campaign."
   },
   "paths": {
-    "/LandingPage/{hub}/{slug}": {
+    "/LandingPageController/{hub}/{slug}": {
       "get": {
-        "summary": "Retrieve a landing page by hub and slug",
-        "operationId": "getLandingPage",
+        "operationId": "GetLandingPage",
+        "summary": "Retrieve landing page details.",
         "parameters": [
           {
             "name": "hub",
@@ -17,7 +17,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The hub for which the landing page belongs."
           },
           {
             "name": "slug",
@@ -25,12 +26,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The unique identifier for the landing page within the hub."
           }
         ],
         "responses": {
           "200": {
-            "description": "Landing page retrieved successfully",
+            "description": "Landing page details retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -40,7 +42,7 @@
             }
           },
           "404": {
-            "description": "Landing page not found",
+            "description": "Landing page not found.",
             "content": {
               "application/json": {
                 "schema": {
@@ -52,10 +54,10 @@
         }
       }
     },
-    "/LandingPage/preview/{hub}/{slug}": {
+    "/LandingPageController/preview/{hub}/{slug}": {
       "get": {
-        "summary": "Retrieve a preview landing page by hub and slug",
-        "operationId": "getPreviewLandingPage",
+        "operationId": "GetPreviewLandingPage",
+        "summary": "Retrieve preview of a landing page.",
         "parameters": [
           {
             "name": "hub",
@@ -63,7 +65,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The hub for which the landing page preview belongs."
           },
           {
             "name": "slug",
@@ -71,12 +74,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The unique identifier for the preview landing page within the hub."
           }
         ],
         "responses": {
           "200": {
-            "description": "Preview landing page retrieved successfully",
+            "description": "Landing page preview retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -86,7 +90,7 @@
             }
           },
           "404": {
-            "description": "Preview landing page not found",
+            "description": "Preview landing page not found.",
             "content": {
               "application/json": {
                 "schema": {
@@ -107,15 +111,22 @@
           "LandingPage": {
             "$ref": "#/components/schemas/LandingPageModel"
           }
-        }
+        },
+        "required": [
+          "LandingPage"
+        ]
       },
       "NotFoundResponse": {
         "type": "object",
         "properties": {
           "Message": {
-            "type": "string"
+            "type": "string",
+            "description": "Error message providing details about why the requested resource was not found."
           }
-        }
+        },
+        "required": [
+          "Message"
+        ]
       },
       "LandingPageModel": {
         "type": "object",
@@ -163,6 +174,16 @@
           }
         }
       },
+      "PageType": {
+        "type": "string",
+        "enum": [
+          "Unknown",
+          "LandingPage",
+          "Article",
+          "Hub",
+          "Tab"
+        ]
+      },
       "HubContent": {
         "type": "object",
         "properties": {
@@ -174,6 +195,130 @@
             "items": {
               "$ref": "#/components/schemas/CardPageModel"
             }
+          }
+        }
+      },
+      "ContentItem": {
+        "type": "object",
+        "properties": {
+          "Values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "Type": {
+            "type": "string"
+          },
+          "TableValue": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "EmbeddedResource": {
+            "$ref": "#/components/schemas/ResourceItem"
+          },
+          "VideoTranscripts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VideoTranscript"
+            }
+          }
+        }
+      },
+      "ResourceItem": {
+        "type": "object",
+        "properties": {
+          "Title": {
+            "type": "string"
+          },
+          "Id": {
+            "type": "string"
+          },
+          "FileName": {
+            "type": "string"
+          },
+          "ContentType": {
+            "type": "string"
+          },
+          "Url": {
+            "type": "string"
+          },
+          "Size": {
+            "type": "integer"
+          },
+          "Description": {
+            "type": "string"
+          }
+        }
+      },
+      "VideoTranscript": {
+        "type": "object",
+        "properties": {
+          "VideoName": {
+            "type": "string"
+          },
+          "Text": {
+            "type": "string"
+          }
+        }
+      },
+      "CardPageModel": {
+        "type": "object",
+        "properties": {
+          "LandingPage": {
+            "$ref": "#/components/schemas/UrlDetails"
+          },
+          "CardImage": {
+            "$ref": "#/components/schemas/ContentItem"
+          },
+          "Id": {
+            "type": "string"
+          },
+          "PageType": {
+            "$ref": "#/components/schemas/PageType"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "MetaDescription": {
+            "type": "string"
+          },
+          "Slug": {
+            "type": "string"
+          },
+          "HubType": {
+            "type": "string"
+          },
+          "Summary": {
+            "type": "string"
+          },
+          "ArticleType": {
+            "type": "string"
+          }
+        }
+      },
+      "UrlDetails": {
+        "type": "object",
+        "properties": {
+          "Slug": {
+            "type": "string"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Hub": {
+            "type": "string"
+          },
+          "PageType": {
+            "type": "string"
+          },
+          "ParentSlug": {
+            "type": "string"
           }
         }
       },
@@ -242,116 +387,6 @@
             "type": "string"
           }
         }
-      },
-      "ContentItem": {
-        "type": "object",
-        "properties": {
-          "Values": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "Type": {
-            "type": "string"
-          },
-          "TableValue": {
-            "type": "array",
-            "items": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
-          },
-          "EmbeddedResource": {
-            "$ref": "#/components/schemas/ResourceItem"
-          },
-          "VideoTranscripts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/VideoTranscript"
-            }
-          }
-        }
-      },
-      "VideoTranscript": {
-        "type": "object",
-        "properties": {
-          "VideoName": {
-            "type": "string"
-          },
-          "Text": {
-            "type": "string"
-          }
-        }
-      },
-      "ResourceItem": {
-        "type": "object",
-        "properties": {
-          "Title": {
-            "type": "string"
-          },
-          "Id": {
-            "type": "string"
-          },
-          "FileName": {
-            "type": "string"
-          },
-          "ContentType": {
-            "type": "string"
-          },
-          "Url": {
-            "type": "string"
-          },
-          "Size": {
-            "type": "integer"
-          },
-          "Description": {
-            "type": "string"
-          }
-        }
-      },
-      "CardPageModel": {
-        "type": "object",
-        "properties": {
-          "LandingPage": {
-            "$ref": "#/components/schemas/UrlDetails"
-          },
-          "CardImage": {
-            "$ref": "#/components/schemas/ContentItem"
-          }
-        }
-      },
-      "UrlDetails": {
-        "type": "object",
-        "properties": {
-          "Slug": {
-            "type": "string"
-          },
-          "Title": {
-            "type": "string"
-          },
-          "Hub": {
-            "type": "string"
-          },
-          "PageType": {
-            "type": "string"
-          },
-          "ParentSlug": {
-            "type": "string"
-          }
-        }
-      },
-      "PageType": {
-        "type": "string",
-        "enum": [
-          "Unknown",
-          "LandingPage",
-          "Article",
-          "Hub",
-          "Tab"
-        ]
       }
     }
   }

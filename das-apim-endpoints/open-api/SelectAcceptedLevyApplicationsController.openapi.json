@@ -2,29 +2,28 @@
   "openapi": "3.1.0",
   "info": {
     "title": "SFA DAS Approvals API",
-    "version": "1.0.0",
-    "description": "API for managing levy applications for the SFA DAS Approvals service."
+    "version": "1.0.0"
   },
   "paths": {
     "/{accountId}/unapproved/add/select-funding/select-accepted-levy-connection": {
       "get": {
-        "summary": "Get accepted levy transfer connections",
-        "operationId": "getAcceptedLevyConnections",
+        "operationId": "GetAcceptedLevyConnections",
+        "summary": "Retrieve accepted levy connections for a specific account",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
-            "description": "The unique identifier for the employer's account",
             "schema": {
               "type": "integer",
               "format": "int64"
-            }
+            },
+            "description": "The ID of the employer account"
           }
         ],
         "responses": {
           "200": {
-            "description": "List of accepted employer account applications",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -34,7 +33,7 @@
             }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal Server Error"
           }
         }
       }
@@ -44,8 +43,57 @@
     "schemas": {
       "GetAcceptedEmployerAccountApplicationsQueryResponse": {
         "type": "object",
-        "description": "Response model for accepted employer account applications query",
-        "properties": {}
+        "properties": {
+          "applications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Application"
+            }
+          }
+        }
+      },
+      "Application": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submittedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submitted": {
+            "type": "boolean"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "formVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "updatedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string"
+          },
+          "newMessage": {
+            "type": "boolean"
+          }
+        }
       }
     }
   }
