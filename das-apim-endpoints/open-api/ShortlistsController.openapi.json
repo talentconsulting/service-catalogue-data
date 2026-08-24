@@ -1,0 +1,427 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Find Apprenticeship Training API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/Shortlists/": {
+      "post": {
+        "summary": "Create a shortlist for a user",
+        "operationId": "CreateShortlistForUser",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateShortListRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Shortlist created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostShortListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Shortlists/{id}": {
+      "delete": {
+        "summary": "Delete a shortlist item for a user",
+        "operationId": "DeleteShortlistItemForUser",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "Shortlist item deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteShortlistItemCommandResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Shortlists/users/{userId}/count": {
+      "get": {
+        "summary": "Get shortlist count for a user",
+        "operationId": "GetShortlistCountForUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Shortlist count retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetShortlistCountForUserQueryResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Shortlists/users/{userId}": {
+      "get": {
+        "summary": "Get shortlists for a user",
+        "operationId": "GetShortlistsForUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Shortlists retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetShortlistsForUserResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateShortListRequest": {
+        "type": "object",
+        "properties": {
+          "ShortlistUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "LarsCode": {
+            "type": "string"
+          },
+          "LocationName": {
+            "type": "string"
+          },
+          "Ukprn": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ShortlistUserId",
+          "LarsCode",
+          "LocationName",
+          "Ukprn"
+        ]
+      },
+      "PostShortListResponse": {
+        "type": "object",
+        "properties": {
+          "ShortlistId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "IsCreated": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ShortlistId",
+          "IsCreated"
+        ]
+      },
+      "DeleteShortlistItemCommandResult": {
+        "type": "object",
+        "properties": {
+          "Success": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Success"
+        ]
+      },
+      "GetShortlistCountForUserQueryResult": {
+        "type": "object",
+        "properties": {
+          "Count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "Count"
+        ]
+      },
+      "GetShortlistsForUserResponse": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "MaxCreatedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ShortlistsExpiryDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "QarPeriod": {
+            "type": "string"
+          },
+          "ReviewPeriod": {
+            "type": "string"
+          },
+          "Courses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShortlistCourseModel"
+            }
+          }
+        },
+        "required": [
+          "UserId",
+          "MaxCreatedDate",
+          "ShortlistsExpiryDate",
+          "QarPeriod",
+          "ReviewPeriod",
+          "Courses"
+        ]
+      },
+      "ShortlistCourseModel": {
+        "type": "object",
+        "properties": {
+          "Ordering": {
+            "type": "integer"
+          },
+          "LarsCode": {
+            "type": "string"
+          },
+          "StandardName": {
+            "type": "string"
+          },
+          "CourseType": {
+            "$ref": "#/components/schemas/CourseType"
+          },
+          "LearningType": {
+            "$ref": "#/components/schemas/LearningType"
+          },
+          "Locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShortlistLocationModel"
+            }
+          }
+        },
+        "required": [
+          "Ordering",
+          "LarsCode",
+          "StandardName",
+          "CourseType",
+          "LearningType",
+          "Locations"
+        ]
+      },
+      "ShortlistLocationModel": {
+        "type": "object",
+        "properties": {
+          "Ordering": {
+            "type": "integer"
+          },
+          "Latitude": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "Longitude": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "LocationName": {
+            "type": "string"
+          },
+          "Providers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShortlistProviderModel"
+            }
+          }
+        },
+        "required": [
+          "Ordering",
+          "Latitude",
+          "Longitude",
+          "LocationName",
+          "Providers"
+        ]
+      },
+      "ShortlistProviderModel": {
+        "type": "object",
+        "properties": {
+          "Ordering": {
+            "type": "integer"
+          },
+          "ShortlistId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Ukprn": {
+            "type": "integer"
+          },
+          "ProviderName": {
+            "type": "string"
+          },
+          "AtEmployer": {
+            "type": "boolean"
+          },
+          "HasBlockRelease": {
+            "type": "boolean"
+          },
+          "BlockReleaseDistance": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "BlockReleaseCount": {
+            "type": "integer"
+          },
+          "HasDayRelease": {
+            "type": "boolean"
+          },
+          "DayReleaseDistance": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "DayReleaseCount": {
+            "type": "integer"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Phone": {
+            "type": "string"
+          },
+          "Website": {
+            "type": "string"
+          },
+          "HasOnlineDeliveryOption": {
+            "type": "boolean"
+          },
+          "AtProvider": {
+            "type": "boolean"
+          },
+          "ProviderDistance": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "Leavers": {
+            "type": "string"
+          },
+          "QarPeriod": {
+            "type": "string"
+          },
+          "ReviewPeriod": {
+            "type": "string"
+          },
+          "AchievementRate": {
+            "type": "string"
+          },
+          "EmployerReviews": {
+            "type": "string"
+          },
+          "EmployerStars": {
+            "type": "string"
+          },
+          "EmployerRating": {
+            "type": "string"
+          },
+          "ApprenticeReviews": {
+            "type": "string"
+          },
+          "ApprenticeStars": {
+            "type": "string"
+          },
+          "ApprenticeRating": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Ordering",
+          "ShortlistId",
+          "Ukprn",
+          "ProviderName",
+          "AtEmployer",
+          "HasBlockRelease",
+          "BlockReleaseDistance",
+          "BlockReleaseCount",
+          "HasDayRelease",
+          "DayReleaseDistance",
+          "DayReleaseCount",
+          "Email",
+          "Phone",
+          "Website",
+          "HasOnlineDeliveryOption",
+          "AtProvider",
+          "ProviderDistance",
+          "Leavers",
+          "QarPeriod",
+          "ReviewPeriod",
+          "AchievementRate",
+          "EmployerReviews",
+          "EmployerStars",
+          "EmployerRating",
+          "ApprenticeReviews",
+          "ApprenticeStars",
+          "ApprenticeRating"
+        ]
+      },
+      "CourseType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "ShortCourse"
+        ]
+      },
+      "LearningType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "FoundationApprenticeship",
+          "ApprenticeshipUnit"
+        ]
+      }
+    }
+  }
+}

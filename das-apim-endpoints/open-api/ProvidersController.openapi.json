@@ -1,223 +1,68 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Providers API",
+    "title": "Find Apprenticeship Training API",
     "version": "1.0.0"
   },
   "paths": {
-    "/Providers/": {
+    "/Providers": {
       "get": {
-        "summary": "Retrieve all providers",
-        "operationId": "GetAllProviders",
+        "operationId": "GetProviders",
+        "summary": "Retrieve all RoATP providers",
+        "tags": [
+          "Providers"
+        ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful retrieval of providers",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetProvidersListResponse"
+                  "$ref": "#/components/schemas/GetRoatpProvidersQueryResult"
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad Request"
           }
         }
       }
     },
-    "/Providers/{ukprn}/users": {
+    "/Providers/{ukprn}": {
       "get": {
-        "summary": "Retrieve all users for a provider",
-        "operationId": "GetProviderUsers",
+        "operationId": "GetProviderSummary",
+        "summary": "Retrieve summary information for a provider",
+        "tags": [
+          "Providers"
+        ],
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful retrieval of provider summary",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetProvidersUsersResponse"
+                  "$ref": "#/components/schemas/GetProviderSummaryQueryResult"
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request"
-          }
-        }
-      }
-    },
-    "/Providers/{providerId}/courses/{trainingCode}": {
-      "get": {
-        "summary": "Retrieve delivery models for a specific provider course",
-        "operationId": "GetProviderCoursesDeliveryModel",
-        "parameters": [
-          {
-            "name": "providerId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "trainingCode",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "accountLegalEntityId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "default": 0
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/Providers/{providerId}/courses": {
-      "get": {
-        "summary": "Retrieve delivery models for a provider using query parameters",
-        "operationId": "GetProviderCoursesDeliveryModelByQuery",
-        "parameters": [
-          {
-            "name": "providerId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "trainingCode",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "accountLegalEntityId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "default": 0
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/Providers/{ukprn}/emails": {
-      "post": {
-        "summary": "Send emails to provider users",
-        "operationId": "EmailProviderUsers",
-        "parameters": [
-          {
-            "name": "ukprn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProviderEmailRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad Request"
-          }
-        }
-      }
-    },
-    "/Providers/{ukprn}/status": {
-      "get": {
-        "summary": "Retrieve provider status",
-        "operationId": "GetProviderStatus",
-        "parameters": [
-          {
-            "name": "ukprn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
+          "404": {
+            "description": "Provider not found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProviderAccountDetailsResponse"
+                  "$ref": "#/components/schemas/NotFoundResult"
                 }
               }
             }
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
@@ -225,60 +70,215 @@
   },
   "components": {
     "schemas": {
-      "GetProvidersListResponse": {
+      "GetRoatpProvidersQueryResult": {
         "type": "object",
         "properties": {
           "Providers": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/GetProvidersResponse"
+              "$ref": "#/components/schemas/RoatpProvider"
             }
           }
         }
       },
-      "GetProvidersResponse": {
+      "RoatpProvider": {
         "type": "object",
-        "properties": {}
+        "additionalProperties": true
       },
-      "GetProvidersUsersResponse": {
+      "GetProviderSummaryQueryResult": {
         "type": "object",
         "properties": {
-          "Users": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          }
-        }
-      },
-      "ProviderEmailRequest": {
-        "type": "object",
-        "properties": {
-          "TemplateId": {
+          "Ukprn": {
+            "type": "integer"
+          },
+          "ProviderName": {
             "type": "string"
           },
-          "Tokens": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
+          "ProviderAddress": {
+            "$ref": "#/components/schemas/ProviderAddressDetails"
           },
-          "ExplicitEmailAddresses": {
+          "Contact": {
+            "$ref": "#/components/schemas/ContactDetails"
+          },
+          "Qar": {
+            "$ref": "#/components/schemas/ProviderQarModel"
+          },
+          "Reviews": {
+            "$ref": "#/components/schemas/ReviewsModel"
+          },
+          "Courses": {
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/CourseDetails"
+            }
+          },
+          "EndpointAssessments": {
+            "$ref": "#/components/schemas/EndpointAssessmentsDetails"
+          },
+          "AnnualEmployerFeedbackDetails": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmployerFeedbackStarsAnnualSummary"
+            }
+          },
+          "AnnualApprenticeFeedbackDetails": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprenticeFeedbackStarsAnnualSummary"
             }
           }
         }
       },
-      "ProviderAccountDetailsResponse": {
+      "ProviderAddressDetails": {
         "type": "object",
         "properties": {
-          "ProviderStatusTypeId": {
-            "type": "integer",
-            "format": "int32"
+          "AddressLine1": {
+            "type": "string"
+          },
+          "AddressLine2": {
+            "type": "string"
+          },
+          "AddressLine3": {
+            "type": "string"
+          },
+          "AddressLine4": {
+            "type": "string"
+          },
+          "Town": {
+            "type": "string"
+          },
+          "Postcode": {
+            "type": "string"
           }
         }
+      },
+      "ContactDetails": {
+        "type": "object",
+        "properties": {
+          "MarketingInfo": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string",
+            "format": "email"
+          },
+          "PhoneNumber": {
+            "type": "string"
+          },
+          "Website": {
+            "type": "string"
+          }
+        }
+      },
+      "ProviderQarModel": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "ReviewsModel": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "CourseDetails": {
+        "type": "object",
+        "properties": {
+          "CourseName": {
+            "type": "string"
+          },
+          "CourseType": {
+            "$ref": "#/components/schemas/CourseType"
+          },
+          "LearningType": {
+            "$ref": "#/components/schemas/LearningType"
+          },
+          "Level": {
+            "type": "integer"
+          },
+          "LarsCode": {
+            "type": "string"
+          },
+          "IfateReferenceNumber": {
+            "type": "string"
+          }
+        }
+      },
+      "CourseType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "ShortCourse"
+        ]
+      },
+      "LearningType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "FoundationApprenticeship",
+          "ApprenticeshipUnit"
+        ]
+      },
+      "EndpointAssessmentsDetails": {
+        "type": "object",
+        "properties": {
+          "EarliestAssessment": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EndpointAssessmentCount": {
+            "type": "integer"
+          }
+        }
+      },
+      "EmployerFeedbackStarsAnnualSummary": {
+        "type": "object",
+        "properties": {
+          "Ukprn": {
+            "type": "integer"
+          },
+          "Stars": {
+            "type": "integer"
+          },
+          "ReviewCount": {
+            "type": "integer"
+          },
+          "TimePeriod": {
+            "type": "string"
+          },
+          "ProviderAttribute": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "ApprenticeFeedbackStarsAnnualSummary": {
+        "type": "object",
+        "properties": {
+          "Ukprn": {
+            "type": "integer"
+          },
+          "Stars": {
+            "type": "integer"
+          },
+          "ReviewCount": {
+            "type": "integer"
+          },
+          "TimePeriod": {
+            "type": "string"
+          },
+          "ProviderAttribute": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          }
+        }
+      },
+      "NotFoundResult": {
+        "type": "object",
+        "properties": {}
       }
     }
   }

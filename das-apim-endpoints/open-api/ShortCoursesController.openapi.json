@@ -1,0 +1,444 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Learner Data API",
+    "version": "1.0.0",
+    "description": "API for managing learner data including short courses, earnings, and learners."
+  },
+  "paths": {
+    "/providers/{ukprn}/shortCourses": {
+      "post": {
+        "summary": "Create a draft short course learner record",
+        "operationId": "CreateShortCourse",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "description": "The provider's UKPRN",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "academicYear",
+            "in": "query",
+            "required": false,
+            "description": "Academic year (default is 2526)",
+            "schema": {
+              "type": "integer",
+              "default": 2526
+            }
+          },
+          {
+            "name": "collectionPeriod",
+            "in": "query",
+            "required": false,
+            "description": "Collection period (default is 0)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortCourseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Draft short course learner created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "CorrelationId": {
+                      "type": "string",
+                      "description": "Correlation ID of the created record."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid course code."
+          },
+          "503": {
+            "description": "Courses API unavailable."
+          },
+          "500": {
+            "description": "Internal server error while creating short course."
+          }
+        }
+      }
+    },
+    "/providers/{ukprn}/academicyears/{academicyear}/shortCourses": {
+      "get": {
+        "summary": "Get legacy short course learners",
+        "operationId": "GetShortCourseLearnersLegacy",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "description": "The provider's UKPRN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "academicyear",
+            "in": "path",
+            "required": true,
+            "description": "Academic year",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page number (default is 1)",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pagesize",
+            "in": "query",
+            "required": false,
+            "description": "Page size (default is 20)",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Short course learners retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetShortCourseLearnersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/providers/{ukprn}/shortCourses/learners": {
+      "get": {
+        "summary": "Get short course learners",
+        "operationId": "GetShortCourseLearners",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "description": "The provider's UKPRN",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "academicyear",
+            "in": "query",
+            "required": true,
+            "description": "Academic year",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page number (default is 1)",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pagesize",
+            "in": "query",
+            "required": false,
+            "description": "Page size (default is 20)",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Short course learners retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetShortCourseLearnersResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/providers/{ukprn}/shortCourses/{learnerKey}": {
+      "put": {
+        "summary": "Update short course learning",
+        "operationId": "UpdateShortCourseLearning",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "description": "The provider's UKPRN",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "learnerKey",
+            "in": "path",
+            "required": true,
+            "description": "The learner's key",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "academicYear",
+            "in": "query",
+            "required": false,
+            "description": "Academic year (default is 2526)",
+            "schema": {
+              "type": "integer",
+              "default": 2526
+            }
+          },
+          {
+            "name": "collectionPeriod",
+            "in": "query",
+            "required": false,
+            "description": "Collection period (default is 0)",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShortCourseRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Short course learning updated successfully."
+          },
+          "422": {
+            "description": "Invalid course code."
+          },
+          "503": {
+            "description": "Courses API unavailable."
+          },
+          "500": {
+            "description": "Internal server error while updating short course learning."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ShortCourseRequest": {
+        "type": "object",
+        "properties": {
+          "Learner": {
+            "$ref": "#/components/schemas/ShortCourseLearnerRequestDetails"
+          },
+          "Delivery": {
+            "$ref": "#/components/schemas/ShortCourseDelivery"
+          },
+          "ConsumerReference": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Learner",
+          "Delivery"
+        ]
+      },
+      "ShortCourseLearnerRequestDetails": {
+        "type": "object",
+        "properties": {
+          "LearnerRef": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "LearnerRef"
+        ]
+      },
+      "ShortCourseDelivery": {
+        "type": "object",
+        "properties": {
+          "OnProgramme": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ShortCourseOnProgramme"
+            }
+          }
+        },
+        "required": [
+          "OnProgramme"
+        ]
+      },
+      "ShortCourseOnProgramme": {
+        "type": "object",
+        "properties": {
+          "CourseCode": {
+            "type": "string"
+          },
+          "AgreementId": {
+            "type": "string"
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ExpectedEndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "CompletionDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "WithdrawalDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "WithdrawalReasonCode": {
+            "type": "integer",
+            "format": "int16"
+          },
+          "LearningSupport": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LearningSupport"
+            }
+          },
+          "AimSequenceNumber": {
+            "type": "integer"
+          },
+          "Milestones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Milestone"
+            }
+          }
+        },
+        "required": [
+          "CourseCode",
+          "StartDate",
+          "ExpectedEndDate",
+          "AimSequenceNumber",
+          "LearningSupport",
+          "Milestones"
+        ]
+      },
+      "LearningSupport": {
+        "type": "object",
+        "properties": {
+          "StartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EndDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "StartDate",
+          "EndDate"
+        ]
+      },
+      "Milestone": {
+        "type": "string",
+        "enum": [
+          "ThirtyPercentLearningComplete",
+          "LearningComplete"
+        ]
+      },
+      "GetShortCourseLearnersResponse": {
+        "type": "object",
+        "properties": {
+          "Learners": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Learner"
+            }
+          },
+          "Total": {
+            "type": "integer"
+          },
+          "Page": {
+            "type": "integer"
+          },
+          "PageSize": {
+            "type": "integer"
+          },
+          "TotalPages": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "Learners",
+          "Total",
+          "Page",
+          "PageSize",
+          "TotalPages"
+        ]
+      },
+      "Learner": {
+        "type": "object",
+        "properties": {
+          "Uln": {
+            "type": "string"
+          },
+          "Key": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "Uln",
+          "Key"
+        ]
+      }
+    }
+  }
+}

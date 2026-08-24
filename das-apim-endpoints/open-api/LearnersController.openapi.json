@@ -1,63 +1,395 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Assessors API",
-    "version": "1.0.0",
-    "description": "API for managing and retrieving learner information."
+    "title": "SFA DAS Learner Data API",
+    "version": "1.0.0"
   },
   "paths": {
-    "/Learners/": {
+    "/providers/{ukprn}/academicyears/{academicyear}/learners": {
       "get": {
-        "summary": "Get all learners",
-        "operationId": "getAllLearners",
+        "summary": "Get learners (legacy endpoint)",
+        "operationId": "getLearnersLegacy",
         "parameters": [
           {
-            "name": "sinceTime",
-            "in": "query",
-            "description": "Timestamp to filter learners updated since this time.",
-            "required": false,
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
             "schema": {
-              "type": "string",
-              "format": "date-time",
-              "nullable": true
+              "type": "string"
             }
           },
           {
-            "name": "batch_number",
-            "in": "query",
-            "description": "Batch number for paginated results.",
-            "required": false,
+            "name": "academicyear",
+            "in": "path",
+            "required": true,
             "schema": {
-              "type": "integer",
-              "default": 1,
-              "example": 1
+              "type": "integer"
             }
           },
           {
-            "name": "batch_size",
+            "name": "page",
             "in": "query",
-            "description": "Size of each batch of learners.",
-            "required": false,
             "schema": {
               "type": "integer",
-              "default": 1000,
-              "example": 1000
+              "default": 1
+            }
+          },
+          {
+            "name": "pagesize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Learners retrieved successfully.",
+            "description": "Learners fetched successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetAllLearnersResponse"
+                  "$ref": "#/components/schemas/GetLearnersResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/providers/{ukprn}/apprenticeships/learners": {
+      "get": {
+        "summary": "Get apprenticeships learners",
+        "operationId": "getLearners",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "academicyear",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pagesize",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Learners fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLearnersResponse"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error"
+          }
+        }
+      }
+    },
+    "/providers/{ukprn}/learners": {
+      "post": {
+        "summary": "Create a learning record",
+        "operationId": "createLearningRecord",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "academicYear",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 2526
+            }
+          },
+          {
+            "name": "collectionPeriod",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLearnerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Learning record created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CorrelationResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/providers/{ukprn}/learning/{learningKey}": {
+      "put": {
+        "summary": "Update learning record",
+        "operationId": "updateLearner",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "learningKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "academicyear",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 2526
+            }
+          },
+          {
+            "name": "collectionPeriod",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLearnerRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Learning record updated successfully"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete learning record",
+        "operationId": "removeLearner",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "learningKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "academicyear",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 2526
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Learning record deleted successfully"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/providers/{ukprn}/collectionPeriod/{collectionYear}/{collectionPeriod}/fm36data": {
+      "get": {
+        "summary": "Get FM36 Learners by collection period",
+        "operationId": "getFm36Learners",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "collectionYear",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "collectionPeriod",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "byte"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "FM36 learners fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFm36DataResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid request or error occurred."
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/providers/{ukprn}/fm36data": {
+      "get": {
+        "summary": "Get FM36 Learners",
+        "operationId": "getFm36Data",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "academicYear",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "collectionPeriod",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "byte"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "FM36 learners fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFm36DataResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
           }
         }
       }
@@ -65,108 +397,125 @@
   },
   "components": {
     "schemas": {
-      "Learner": {
+      "GetLearnersResponse": {
         "type": "object",
         "properties": {
-          "ApprenticeshipId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "FirstName": {
-            "type": "string"
-          },
-          "LastName": {
-            "type": "string"
-          },
-          "ULN": {
-            "type": "string"
-          },
-          "TrainingCode": {
-            "type": "string"
-          },
-          "TrainingCourseVersion": {
-            "type": "string"
-          },
-          "TrainingCourseVersionConfirmed": {
-            "type": "boolean"
-          },
-          "TrainingCourseOption": {
-            "type": "string"
-          },
-          "StandardUId": {
-            "type": "string"
-          },
-          "StartDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "EndDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "CreatedOn": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "UpdatedOn": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "StopDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "PauseDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "CompletionDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "UKPRN": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "LearnRefNumber": {
-            "type": "string"
-          },
-          "PaymentStatus": {
-            "type": "integer",
-            "format": "int16"
-          },
-          "EmployerAccountId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "EmployerName": {
-            "type": "string"
+          "learners": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ukprn": {
+                  "type": "string"
+                },
+                "academicYear": {
+                  "type": "integer"
+                }
+              }
+            }
           }
         }
       },
-      "GetAllLearnersResponse": {
+      "CreateLearnerRequest": {
         "type": "object",
         "properties": {
-          "Learners": {
+          "consumerReference": {
+            "type": "string"
+          },
+          "learnerDetails": {
+            "$ref": "#/components/schemas/LearnerDetails"
+          },
+          "deliveryDetails": {
+            "$ref": "#/components/schemas/DeliveryDetails"
+          }
+        }
+      },
+      "UpdateLearnerRequest": {
+        "type": "object",
+        "properties": {
+          "learner": {
+            "$ref": "#/components/schemas/LearnerDetails"
+          },
+          "delivery": {
+            "$ref": "#/components/schemas/DeliveryDetails"
+          }
+        }
+      },
+      "CorrelationResponse": {
+        "type": "object",
+        "properties": {
+          "correlationId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "GetFm36DataResponse": {
+        "type": "object",
+        "properties": {
+          "apprenticeships": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Learner"
+              "type": "object",
+              "properties": {
+                "ukprn": {
+                  "type": "integer"
+                },
+                "episodes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "instalments": {
+                        "type": "array",
+                        "items": {
+                          "type": "object"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             }
-          },
-          "BatchNumber": {
+          }
+        }
+      },
+      "LearnerDetails": {
+        "type": "object",
+        "properties": {
+          "uln": {
             "type": "integer"
           },
-          "BatchSize": {
-            "type": "integer"
+          "dob": {
+            "type": "string",
+            "format": "date"
           },
-          "TotalNumberOfBatches": {
-            "type": "integer"
+          "learnerRef": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "uln",
+          "dob",
+          "learnerRef"
+        ]
+      },
+      "DeliveryDetails": {
+        "type": "object",
+        "properties": {
+          "onProgramme": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "percentageOfTrainingLeft": {
+                  "type": "integer"
+                },
+                "isFlexiJob": {
+                  "type": "boolean"
+                }
+              }
+            }
           }
         }
       }

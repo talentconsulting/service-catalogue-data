@@ -1,84 +1,63 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "FindAnApprenticeship API",
-    "version": "1.0.0"
+    "title": "Candidates API",
+    "version": "1.0.0",
+    "description": "API for managing candidates and their statuses."
   },
   "paths": {
-    "/Candidates/create-account": {
+    "/Candidates/GetInactiveCandidates": {
       "get": {
-        "summary": "Get Account Creation Inform",
+        "summary": "Get inactive candidates",
         "parameters": [
           {
-            "name": "candidateId",
+            "name": "cutOffDateTime",
             "in": "query",
             "required": true,
             "schema": {
               "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetInformQueryResponse"
-                }
-              }
+              "format": "date-time"
             }
           },
-          "500": {
-            "description": "Server Error"
-          }
-        }
-      }
-    },
-    "/Candidates/{govIdentifier}": {
-      "put": {
-        "summary": "Create or Update Candidate",
-        "parameters": [
           {
-            "name": "govIdentifier",
-            "in": "path",
-            "required": true,
+            "name": "pageNumber",
+            "in": "query",
+            "required": false,
             "schema": {
-              "type": "string"
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
             }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CandidatesModel"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CandidateResponse"
+                  "$ref": "#/components/schemas/GetInactiveCandidatesQueryResult"
                 }
               }
             }
           },
           "500": {
-            "description": "Server Error"
+            "description": "Internal server error"
           }
         }
       }
     },
     "/Candidates/{govIdentifier}/status": {
       "post": {
-        "summary": "Update Candidate Status",
+        "summary": "Update candidate status",
         "parameters": [
           {
             "name": "govIdentifier",
@@ -94,24 +73,17 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CandidateStatus"
+                "$ref": "#/components/schemas/CandidateUpdateStatusRequest"
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UpdateCandidateStatusCommandResponse"
-                }
-              }
-            }
+          "204": {
+            "description": "No content"
           },
           "500": {
-            "description": "Server Error"
+            "description": "Internal server error"
           }
         }
       }
@@ -119,18 +91,7 @@
   },
   "components": {
     "schemas": {
-      "CandidatesModel": {
-        "type": "object",
-        "properties": {
-          "Email": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "Email"
-        ]
-      },
-      "CandidateStatus": {
+      "CandidateUpdateStatusRequest": {
         "type": "object",
         "properties": {
           "Email": {
@@ -155,22 +116,136 @@
           "Dormant"
         ]
       },
-      "CandidateResponse": {
+      "GetInactiveCandidatesQueryResult": {
         "type": "object",
         "properties": {
-          "GovUkIdentifier": {
-            "type": "string"
+          "Candidates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Candidate"
+            }
           },
-          "Email": {
-            "type": "string"
+          "TotalCount": {
+            "type": "integer"
+          },
+          "PageIndex": {
+            "type": "integer"
+          },
+          "PageSize": {
+            "type": "integer"
+          },
+          "TotalPages": {
+            "type": "integer"
           }
         }
       },
-      "UpdateCandidateStatusCommandResponse": {
-        "type": "object"
+      "Candidate": {
+        "type": "object",
+        "properties": {
+          "Address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "GovUkIdentifier": {
+            "type": "string",
+            "nullable": true
+          },
+          "LastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "FirstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "MiddleNames": {
+            "type": "string",
+            "nullable": true
+          },
+          "PhoneNumber": {
+            "type": "string",
+            "nullable": true
+          },
+          "DateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "CreatedOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "UpdatedOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "TermsOfUseAcceptedOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "Status": {
+            "$ref": "#/components/schemas/UserStatus"
+          },
+          "MigratedEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "Email": {
+            "type": "string",
+            "nullable": true
+          },
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "MigratedCandidateId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        }
       },
-      "GetInformQueryResponse": {
-        "type": "object"
+      "Address": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Uprn": {
+            "type": "string",
+            "nullable": true
+          },
+          "AddressLine1": {
+            "type": "string",
+            "nullable": true
+          },
+          "AddressLine2": {
+            "type": "string",
+            "nullable": true
+          },
+          "Town": {
+            "type": "string",
+            "nullable": true
+          },
+          "County": {
+            "type": "string",
+            "nullable": true
+          },
+          "Postcode": {
+            "type": "string",
+            "nullable": true
+          },
+          "Latitude": {
+            "type": "number"
+          },
+          "Longitude": {
+            "type": "number"
+          },
+          "CandidateId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
       }
     }
   }

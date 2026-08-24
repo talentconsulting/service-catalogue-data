@@ -1,0 +1,554 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Levy Transfer Matching API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/opportunities": {
+      "get": {
+        "summary": "Get opportunities index",
+        "parameters": [
+          {
+            "name": "sectors",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pagesize",
+            "in": "query",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetIndexResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/opportunities/{opportunityId}": {
+      "get": {
+        "summary": "Get opportunity detail",
+        "parameters": [
+          {
+            "name": "opportunityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetDetailResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/opportunities/{opportunityId}/apply": {
+      "get": {
+        "summary": "Get apply for a specific opportunity",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "opportunityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplyResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create an application for a specific opportunity",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "opportunityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplyResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/opportunities/{opportunityId}/apply/confirmation": {
+      "get": {
+        "summary": "Get confirmation details of a specific application",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "opportunityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetConfirmationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/opportunities/{opportunityId}/apply/contact-details": {
+      "get": {
+        "summary": "Get contact details for an application",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "opportunityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetContactDetailsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/opportunities/{opportunityId}/select-account": {
+      "get": {
+        "summary": "Select account for an opportunity",
+        "parameters": [
+          {
+            "name": "opportunityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSelectAccountResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetIndexResponse": {
+        "type": "object",
+        "properties": {
+          "opportunities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GetIndexResponse.Opportunity"
+            }
+          },
+          "totalOpportunities": {
+            "type": "integer"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "totalPages": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "sectors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceDataItem"
+            }
+          },
+          "jobRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceDataItem"
+            }
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceDataItem"
+            }
+          }
+        }
+      },
+      "GetIndexResponse.Opportunity": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "isNamePublic": {
+            "type": "boolean"
+          },
+          "dasAccountName": {
+            "type": "string"
+          },
+          "sectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "jobRoles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdOn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ReferenceDataItem": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "shortDescription": {
+            "type": "string"
+          },
+          "hint": {
+            "type": "string"
+          }
+        }
+      },
+      "GetDetailResponse": {
+        "type": "object",
+        "properties": {
+          "opportunity": {
+            "$ref": "#/components/schemas/GetIndexResponse.Opportunity"
+          },
+          "sectors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceDataItem"
+            }
+          },
+          "jobRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceDataItem"
+            }
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceDataItem"
+            }
+          }
+        }
+      },
+      "GetApplyResponse": {
+        "type": "object",
+        "properties": {
+          "opportunity": {
+            "$ref": "#/components/schemas/GetIndexResponse.Opportunity"
+          },
+          "sectors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceDataItem"
+            }
+          },
+          "jobRoles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceDataItem"
+            }
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReferenceDataItem"
+            }
+          },
+          "pledgeLocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GetApplyResponse.PledgeLocation"
+            }
+          }
+        }
+      },
+      "GetApplyResponse.PledgeLocation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      },
+      "ApplyRequest": {
+        "type": "object",
+        "properties": {
+          "encodedAccountId": {
+            "type": "string"
+          },
+          "details": {
+            "type": "string"
+          },
+          "standardId": {
+            "type": "string"
+          },
+          "numberOfApprentices": {
+            "type": "integer"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "hasTrainingProvider": {
+            "type": "boolean"
+          },
+          "amount": {
+            "type": "integer"
+          },
+          "sectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "locations": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "additionalLocation": {
+            "type": "string"
+          },
+          "specificLocation": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "emailAddresses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "businessWebsite": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "userDisplayName": {
+            "type": "string"
+          }
+        }
+      },
+      "ApplyResponse": {
+        "type": "object",
+        "properties": {}
+      },
+      "GetConfirmationResponse": {
+        "type": "object",
+        "properties": {}
+      },
+      "GetContactDetailsResponse": {
+        "type": "object",
+        "properties": {}
+      },
+      "GetSelectAccountResponse": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

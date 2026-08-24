@@ -1,0 +1,169 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "EmployerAccount API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/EmployerAccount": {
+      "get": {
+        "summary": "Get relationships by UKPRN, AORN, and PAYE",
+        "operationId": "GetRelationshipByUkprnAornPaye",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "aorn",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "encodedPaye",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRelationshipsByUkprnPayeAornResult"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "EmployerAccount"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetRelationshipsByUkprnPayeAornResult": {
+        "type": "object",
+        "properties": {
+          "HasActiveRequest": {
+            "type": "boolean"
+          },
+          "HasInvalidPaye": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "Organisation": {
+            "$ref": "#/components/schemas/OrganisationDetails"
+          },
+          "Account": {
+            "$ref": "#/components/schemas/AccountDetails"
+          },
+          "HasOneLegalEntity": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "AccountLegalEntityId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "AccountLegalEntityName": {
+            "type": "string",
+            "nullable": true
+          },
+          "HasRelationship": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "Operations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Operation"
+            }
+          }
+        }
+      },
+      "AccountDetails": {
+        "type": "object",
+        "properties": {
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "AddedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "RemovedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "OrganisationDetails": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Address": {
+            "$ref": "#/components/schemas/AddressDetails"
+          }
+        }
+      },
+      "AddressDetails": {
+        "type": "object",
+        "properties": {
+          "Line1": {
+            "type": "string",
+            "nullable": true
+          },
+          "Line2": {
+            "type": "string",
+            "nullable": true
+          },
+          "Line3": {
+            "type": "string",
+            "nullable": true
+          },
+          "Line4": {
+            "type": "string",
+            "nullable": true
+          },
+          "Line5": {
+            "type": "string",
+            "nullable": true
+          },
+          "Postcode": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Operation": {
+        "type": "string",
+        "enum": [
+          "CreateCohort",
+          "Recruitment",
+          "RecruitmentRequiresReview"
+        ]
+      }
+    }
+  }
+}

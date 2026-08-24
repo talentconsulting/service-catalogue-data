@@ -1,0 +1,366 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Learner Data Jobs API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/learners": {
+      "get": {
+        "summary": "Get all learners",
+        "operationId": "GetAllLearners",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pagesize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "maximum": 1000
+            }
+          },
+          {
+            "name": "excludeApproved",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request (e.g., page size exceeds maximum)",
+            "content": {
+              "text/plain": {}
+            }
+          }
+        }
+      }
+    },
+    "/providers/{providerId}/learners": {
+      "put": {
+        "summary": "Add learner data",
+        "operationId": "PutLearner",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearnerDataIncomingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Learner data successfully created"
+          },
+          "424": {
+            "description": "Failed dependency"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/providers/{providerId}/learners/{learnerDataId}/apprenticeshipId": {
+      "patch": {
+        "summary": "Assign apprenticeship ID to learner data",
+        "operationId": "PatchLearnerDataApprenticeshipId",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "learnerDataId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LearnerDataApprenticeshipIdRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "424": {
+            "description": "Failed dependency"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/providers/{providerId}/learner/{learnerDataId}/apprenticeship-stop": {
+      "post": {
+        "summary": "Stop an apprenticeship",
+        "operationId": "ApprenticeshipStop",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "learnerDataId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprenticeshipStopRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Apprenticeship stopped successfully",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/providers/{providerId}/learner/{learnerDataId}/apprenticeshipstopdatechanged": {
+      "post": {
+        "summary": "Change apprenticeship stop date",
+        "operationId": "ApprenticeshipStopDateChanged",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "learnerDataId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprenticeshipStopRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Stop date successfully changed",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LearnerDataIncomingRequest": {
+        "type": "object",
+        "properties": {
+          "ULN": {
+            "type": "integer"
+          },
+          "UKPRN": {
+            "type": "integer"
+          },
+          "Firstname": {
+            "type": "string"
+          },
+          "Lastname": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "DoB": {
+            "type": "string",
+            "format": "date"
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "PlannedEndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "PercentageLearningToBeDelivered": {
+            "type": "integer"
+          },
+          "EpaoPrice": {
+            "type": "integer"
+          },
+          "TrainingPrice": {
+            "type": "integer"
+          },
+          "AgreementId": {
+            "type": "string"
+          },
+          "IsFlexiJob": {
+            "type": "boolean"
+          },
+          "PlannedOTJTrainingHours": {
+            "type": "integer"
+          },
+          "StandardCode": {
+            "type": "integer"
+          },
+          "LarsCode": {
+            "type": "string"
+          },
+          "CorrelationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ReceivedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "AcademicYear": {
+            "type": "integer"
+          },
+          "ConsumerReference": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ULN",
+          "UKPRN",
+          "Firstname",
+          "Lastname",
+          "DoB",
+          "StartDate",
+          "PlannedEndDate",
+          "EpaoPrice",
+          "TrainingPrice",
+          "IsFlexiJob",
+          "PlannedOTJTrainingHours",
+          "StandardCode",
+          "LarsCode",
+          "CorrelationId",
+          "ReceivedDate",
+          "AcademicYear",
+          "ConsumerReference"
+        ]
+      },
+      "LearnerDataApprenticeshipIdRequest": {
+        "type": "object",
+        "properties": {
+          "ApprenticeshipId": {
+            "type": "integer"
+          }
+        }
+      },
+      "ApprenticeshipStopRequest": {
+        "type": "object",
+        "properties": {
+          "ApprenticeshipId": {
+            "type": "integer"
+          },
+          "IsWithDrawnAtStartOfCourse": {
+            "type": "boolean"
+          },
+          "LearnerDataId": {
+            "type": "integer"
+          },
+          "StopDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "ApprenticeshipId",
+          "IsWithDrawnAtStartOfCourse"
+        ]
+      }
+    }
+  }
+}

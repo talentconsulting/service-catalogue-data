@@ -1,43 +1,36 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Incentives API",
-    "version": "1.0.0",
-    "description": "API for managing employer incentives, including updates to collection calendar periods."
+    "title": "Collection Calendar API",
+    "version": "1.0.0"
   },
   "paths": {
-    "/collectionPeriods": {
-      "patch": {
-        "summary": "Update a collection calendar period",
-        "operationId": "updateCollectionCalendarPeriod",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCollectionCalendarPeriodRequest"
-              }
+    "/collectionCalendar/academicYear/{searchDate}": {
+      "get": {
+        "summary": "Get Academic Year",
+        "description": "Retrieve the academic year based on the provided search date.",
+        "parameters": [
+          {
+            "name": "searchDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
             },
-            "application/json-patch+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCollectionCalendarPeriodRequest"
-              }
-            },
-            "text/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCollectionCalendarPeriodRequest"
-              }
-            },
-            "application/*+json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateCollectionCalendarPeriodRequest"
-              }
-            }
+            "description": "The search date to retrieve the academic year."
           }
-        },
+        ],
         "responses": {
           "200": {
-            "description": "The collection calendar period was updated successfully."
+            "description": "Successful response with academic year details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AcademicYearDetails"
+                }
+              }
+            }
           }
         }
       }
@@ -45,28 +38,37 @@
   },
   "components": {
     "schemas": {
-      "UpdateCollectionCalendarPeriodRequest": {
+      "AcademicYearDetails": {
         "type": "object",
         "properties": {
-          "PeriodNumber": {
-            "type": "integer",
-            "format": "int32",
-            "description": "The period number of the collection calendar."
+          "startDate": {
+            "type": "string",
+            "format": "date"
           },
-          "AcademicYear": {
-            "type": "integer",
-            "format": "int32",
-            "description": "The academic year for which the collection period is active."
+          "endDate": {
+            "type": "string",
+            "format": "date"
           },
-          "Active": {
-            "type": "boolean",
-            "description": "Indicates whether the collection period is active."
+          "name": {
+            "type": "string"
           }
         },
         "required": [
-          "PeriodNumber",
-          "AcademicYear",
-          "Active"
+          "startDate",
+          "endDate",
+          "name"
+        ]
+      },
+      "GetAcademicyearsApiRequest": {
+        "type": "object",
+        "properties": {
+          "searchDate": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "searchDate"
         ]
       }
     }

@@ -1,63 +1,129 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Find An Apprenticeship API",
+    "title": "FindApprenticeshipJobs API",
     "version": "1.0.0"
   },
   "paths": {
-    "/saved-searches/{id}/unsubscribe": {
+    "/SavedSearches": {
       "get": {
-        "summary": "Retrieve details of an unsubscribed saved search.",
-        "operationId": "GetUnsubscribeSavedSearch",
+        "summary": "Get candidates for saved searches",
         "parameters": [
           {
-            "name": "id",
-            "in": "path",
+            "name": "lastRunDateTime",
+            "in": "query",
             "required": true,
-            "description": "The unique identifier for the saved search.",
             "schema": {
               "type": "string",
-              "format": "uuid"
-            }
+              "format": "date-time"
+            },
+            "description": "The last run date-time filter."
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "The page number for pagination."
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "The size of the page for pagination."
+          },
+          {
+            "name": "maxApprenticeshipSearchResultCount",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 5
+            },
+            "description": "The maximum number of apprenticeship search results."
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/VacancySort"
+            },
+            "description": "The sort order for vacancies."
           }
         ],
         "responses": {
           "200": {
-            "description": "Retrieved successfully.",
+            "description": "Successful response",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object"
-                }
+                "schema": {}
               }
             }
           },
           "500": {
-            "description": "Internal Server Error."
+            "description": "Internal server error"
           }
         }
       }
     },
-    "/saved-searches/unsubscribe": {
+    "/SavedSearches/GetSavedSearchResult": {
       "post": {
-        "summary": "Unsubscribe a saved search.",
-        "operationId": "PostUnsubscribeSavedSearch",
+        "summary": "Get saved search result",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PostUnsubscribeSavedSearchApiRequest"
+                "$ref": "#/components/schemas/GetCandidateSavedVacanciesRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Unsubscribed successfully."
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
           },
           "500": {
-            "description": "Internal Server Error."
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/SavedSearches/sendNotification": {
+      "post": {
+        "summary": "Send saved search notification",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SavedSearchApiRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -65,17 +131,282 @@
   },
   "components": {
     "schemas": {
-      "PostUnsubscribeSavedSearchApiRequest": {
+      "VacancySort": {
+        "type": "string",
+        "enum": [
+          "AgeDesc",
+          "AgeAsc",
+          "DistanceDesc",
+          "DistanceAsc",
+          "ExpectedStartDateDesc",
+          "ExpectedStartDateAsc",
+          "SalaryDesc",
+          "SalaryAsc",
+          "ClosingAsc",
+          "ClosingDesc"
+        ]
+      },
+      "GetCandidateSavedVacanciesRequest": {
         "type": "object",
         "properties": {
-          "SavedSearchId": {
+          "ApprenticeshipSearchResultsSortOrder": {
+            "$ref": "#/components/schemas/VacancySort"
+          },
+          "Id": {
             "type": "string",
-            "format": "uuid",
-            "description": "The unique identifier of the saved search to unsubscribe."
+            "format": "uuid"
+          },
+          "UserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Distance": {
+            "type": "number",
+            "nullable": true
+          },
+          "SearchTerm": {
+            "type": "string",
+            "nullable": true
+          },
+          "Location": {
+            "type": "string",
+            "nullable": true
+          },
+          "DisabilityConfident": {
+            "type": "boolean"
+          },
+          "ExcludeNational": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "Longitude": {
+            "type": "string",
+            "nullable": true
+          },
+          "Latitude": {
+            "type": "string",
+            "nullable": true
+          },
+          "SelectedLevelIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "SelectedRouteIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "UnSubscribeToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "LastRunDateFilter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "PageNumber": {
+            "type": "integer"
+          },
+          "PageSize": {
+            "type": "integer"
+          },
+          "SelectedApprenticeshipTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprenticeshipTypes"
+            }
           }
-        },
-        "required": [
-          "SavedSearchId"
+        }
+      },
+      "SavedSearchApiRequest": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "User": {
+            "$ref": "#/components/schemas/UserDetails"
+          },
+          "Categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          },
+          "Levels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Level"
+            }
+          },
+          "Location": {
+            "type": "string",
+            "nullable": true
+          },
+          "Distance": {
+            "type": "number",
+            "nullable": true
+          },
+          "SearchTerm": {
+            "type": "string",
+            "nullable": true
+          },
+          "DisabilityConfident": {
+            "type": "boolean"
+          },
+          "ExcludeNational": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "UnSubscribeToken": {
+            "type": "string",
+            "nullable": true
+          },
+          "Vacancies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Vacancy"
+            }
+          },
+          "ApprenticeshipTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprenticeshipTypes"
+            }
+          }
+        }
+      },
+      "UserDetails": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "MiddleNames": {
+            "type": "string",
+            "nullable": true
+          },
+          "LastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Email": {
+            "type": "string"
+          }
+        }
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Level": {
+        "type": "object",
+        "properties": {
+          "Code": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Vacancy": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "nullable": true
+          },
+          "VacancyReference": {
+            "type": "string",
+            "nullable": true
+          },
+          "Title": {
+            "type": "string",
+            "nullable": true
+          },
+          "EmployerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "Address": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": {}
+          },
+          "OtherAddresses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "nullable": true,
+              "additionalProperties": {}
+            },
+            "nullable": true
+          },
+          "EmploymentLocationOption": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": {}
+          },
+          "Wage": {
+            "type": "string",
+            "nullable": true
+          },
+          "ClosingDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "StartDate": {
+            "type": "string",
+            "nullable": true
+          },
+          "TrainingCourse": {
+            "type": "string",
+            "nullable": true
+          },
+          "Distance": {
+            "type": "number",
+            "nullable": true
+          },
+          "VacancySource": {
+            "type": "string",
+            "nullable": true
+          },
+          "WageType": {
+            "type": "string",
+            "nullable": true
+          },
+          "WageUnit": {
+            "type": "string",
+            "nullable": true
+          },
+          "ApprenticeshipType": {
+            "$ref": "#/components/schemas/ApprenticeshipTypes"
+          }
+        }
+      },
+      "ApprenticeshipTypes": {
+        "type": "string",
+        "enum": [
+          "Standard",
+          "Foundation"
         ]
       }
     }

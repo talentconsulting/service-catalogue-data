@@ -1,0 +1,439 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Levy Transfer Matching API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/accounts/{accountId}/pledges": {
+      "get": {
+        "summary": "Retrieve pledges for an account",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The account identifier"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Page number"
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Number of items per page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pledge data successfully retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPledgesResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/pledges/create": {
+      "get": {
+        "summary": "Retrieve data for creating a pledge",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The account identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Create data successfully retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCreateResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new pledge",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The account identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePledgeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pledge created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PledgeIdDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/pledges/{pledgeId}/close": {
+      "post": {
+        "summary": "Close a pledge",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The account identifier"
+          },
+          {
+            "name": "pledgeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The pledge identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetClosePledgeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pledge closed successfully"
+          },
+          "404": {
+            "description": "Pledge not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/accounts/{accountId}/pledges/{pledgeId}/reject-applications": {
+      "post": {
+        "summary": "Reject applications for a pledge",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The account identifier"
+          },
+          {
+            "name": "pledgeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The pledge identifier"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectApplicationsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Applications rejected successfully"
+          }
+        }
+      },
+      "get": {
+        "summary": "Retrieve applications for rejection",
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The account identifier"
+          },
+          {
+            "name": "pledgeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The pledge identifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applications retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRejectApplicationsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "PledgeAccess": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetPledgesResponse": {
+        "type": "object",
+        "properties": {
+          "StartingTransferAllowance": {
+            "type": "integer"
+          },
+          "CurrentYearEstimatedCommittedSpend": {
+            "type": "integer"
+          },
+          "Items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GetPledgesResponsePledge"
+            }
+          },
+          "Page": {
+            "type": "integer"
+          },
+          "PageSize": {
+            "type": "integer"
+          },
+          "TotalPages": {
+            "type": "integer"
+          },
+          "TotalItems": {
+            "type": "integer"
+          }
+        }
+      },
+      "GetPledgesResponsePledge": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer"
+          },
+          "Amount": {
+            "type": "integer"
+          },
+          "RemainingAmount": {
+            "type": "integer"
+          },
+          "ApplicationCount": {
+            "type": "integer"
+          },
+          "Status": {
+            "type": "string"
+          }
+        }
+      },
+      "GetCreateResponse": {
+        "type": "object",
+        "properties": {
+          "Levels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "Sectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "JobRoles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CreatePledgeRequest": {
+        "type": "object",
+        "properties": {
+          "Amount": {
+            "type": "integer"
+          },
+          "IsNamePublic": {
+            "type": "boolean"
+          },
+          "DasAccountName": {
+            "type": "string"
+          },
+          "Sectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "JobRoles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "Levels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "Locations": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "AutomaticApprovalOption": {
+            "type": "string"
+          },
+          "UserId": {
+            "type": "string"
+          },
+          "UserDisplayName": {
+            "type": "string"
+          }
+        }
+      },
+      "PledgeIdDto": {
+        "type": "object",
+        "properties": {
+          "PledgeId": {
+            "type": "integer"
+          }
+        }
+      },
+      "SetClosePledgeRequest": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          },
+          "UserDisplayName": {
+            "type": "string"
+          }
+        }
+      },
+      "RejectApplicationsRequest": {
+        "type": "object",
+        "properties": {
+          "ApplicationsToReject": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "UserId": {
+            "type": "string"
+          },
+          "UserDisplayName": {
+            "type": "string"
+          }
+        }
+      },
+      "GetRejectApplicationsResponse": {
+        "type": "object",
+        "properties": {
+          "Applications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Application"
+            }
+          }
+        }
+      },
+      "Application": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer"
+          },
+          "DasAccountName": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "PledgeAccess": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  }
+}

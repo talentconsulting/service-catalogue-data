@@ -1,0 +1,114 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Find An Apprenticeship API",
+    "description": "API for managing 'What Interests You' functionality in apprenticeship applications.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/applications/{applicationId}/what-interests-you": {
+      "get": {
+        "summary": "Get information about what interests a candidate.",
+        "operationId": "GetWhatInterestsYou",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "candidateId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetWhatInterestsYouApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Application or candidate not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "post": {
+        "summary": "Update what interests a candidate.",
+        "operationId": "PostWhatInterestsYou",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostWhatInterestsYouApiRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Created successfully."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PostWhatInterestsYouApiRequest": {
+        "type": "object",
+        "properties": {
+          "CandidateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "AnswerText": {
+            "type": "string"
+          },
+          "IsComplete": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "CandidateId",
+          "AnswerText",
+          "IsComplete"
+        ]
+      },
+      "GetWhatInterestsYouApiResponse": {
+        "type": "object"
+      }
+    }
+  }
+}

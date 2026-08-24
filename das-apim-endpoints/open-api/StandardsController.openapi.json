@@ -2,89 +2,25 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Standards API",
+    "description": "API operations related to Standards.",
     "version": "1.0.0"
   },
   "paths": {
-    "/standards/{standardReference}": {
+    "/Standards": {
       "get": {
-        "summary": "Get a specific standard by reference.",
-        "operationId": "GetStandard",
-        "parameters": [
-          {
-            "name": "standardReference",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The reference identifier for the standard to retrieve."
-          }
-        ],
+        "summary": "Retrieve a list of standards",
+        "description": "Fetches all available standards.",
+        "operationId": "GetStandards",
         "responses": {
           "200": {
-            "description": "Standard retrieved successfully.",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Standard"
+                  "$ref": "#/components/schemas/GetStandardsQueryResult"
                 }
               }
             }
-          },
-          "404": {
-            "description": "Standard not found."
-          },
-          "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
-    "/standards/{standardLarsCode}": {
-      "post": {
-        "summary": "Cache a standard by LARS code.",
-        "operationId": "CacheStandard",
-        "parameters": [
-          {
-            "name": "standardLarsCode",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            },
-            "description": "The LARS code of the standard to cache."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Standard cached successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Standard"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Standard not found."
-          },
-          "500": {
-            "description": "Internal server error."
-          }
-        }
-      }
-    },
-    "/standards/refresh": {
-      "put": {
-        "summary": "Refresh all standards.",
-        "operationId": "RefreshStandards",
-        "responses": {
-          "200": {
-            "description": "Standards refreshed successfully."
-          },
-          "500": {
-            "description": "Internal server error."
           }
         }
       }
@@ -92,35 +28,58 @@
   },
   "components": {
     "schemas": {
-      "Standard": {
+      "GetStandardsQueryResult": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "description": "The unique identifier of the standard."
-          },
-          "title": {
-            "type": "string",
-            "description": "The title of the standard."
-          },
-          "reference": {
-            "type": "string",
-            "description": "The reference identifier for the standard."
-          },
-          "larsCode": {
-            "type": "string",
-            "description": "The LARS code for the standard."
-          },
-          "description": {
-            "type": "string",
-            "description": "A brief description of the standard."
+          "Standards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Standard"
+            }
           }
         },
         "required": [
-          "id",
-          "title",
-          "reference"
+          "Standards"
         ]
+      },
+      "Standard": {
+        "type": "object",
+        "properties": {
+          "StandardUId": {
+            "type": "string"
+          },
+          "IfateReferenceNumber": {
+            "type": "string"
+          },
+          "LarsCode": {
+            "type": "integer"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Level": {
+            "type": "integer"
+          },
+          "Route": {
+            "type": "string"
+          },
+          "Version": {
+            "type": "string"
+          },
+          "Options": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "VersionDetail": {
+            "type": "object",
+            "properties": {}
+          },
+          "StandardPageUrl": {
+            "type": "string"
+          }
+        }
       }
     }
   }

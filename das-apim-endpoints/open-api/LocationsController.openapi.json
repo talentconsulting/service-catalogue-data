@@ -1,56 +1,40 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Locations API",
+    "title": "Find Apprenticeship Training API",
     "version": "1.0.0",
-    "description": "API for managing locations and retrieving address data."
+    "description": "API for finding apprenticeship training locations."
   },
   "paths": {
-    "/locations": {
+    "/Locations/": {
       "get": {
-        "summary": "Get locations",
-        "operationId": "getLocations",
+        "summary": "Retrieve locations by search term",
+        "description": "Fetches a list of locations filtered by the provided search term.",
+        "operationId": "GetByQuery",
         "parameters": [
           {
-            "name": "query",
+            "name": "searchTerm",
             "in": "query",
-            "required": false,
+            "required": true,
             "schema": {
               "type": "string"
             },
-            "description": "Query string for searching addresses."
+            "description": "Search term used to filter locations."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Successful response with the list of locations.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AddressesResponse"
+                  "$ref": "#/components/schemas/GetLocationSearchResponse"
                 }
               }
             }
           },
-          "404": {
-            "description": "No addresses found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
+          "400": {
+            "description": "Bad Request - Error while fetching the locations."
           }
         }
       }
@@ -58,55 +42,36 @@
   },
   "components": {
     "schemas": {
-      "AddressesResponse": {
+      "GetLocationSearchResponse": {
         "type": "object",
         "properties": {
-          "addresses": {
+          "Locations": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "addressLine1": {
-                  "type": "string"
-                },
-                "addressLine2": {
-                  "type": "string"
-                },
-                "addressLine3": {
-                  "type": "string"
-                },
-                "postcode": {
-                  "type": "string"
-                },
-                "latitude": {
-                  "type": "number",
-                  "format": "float"
-                },
-                "longitude": {
-                  "type": "number",
-                  "format": "float"
-                }
-              },
-              "required": [
-                "addressLine1",
-                "postcode"
-              ]
+              "$ref": "#/components/schemas/GetLocationSearchResponseItem"
             }
           }
-        },
-        "description": "List of addresses returned for the given query."
+        }
       },
-      "ErrorResponse": {
+      "GetLocationSearchResponseItem": {
         "type": "object",
         "properties": {
-          "errorMessage": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Name": {
             "type": "string"
           },
-          "errorCode": {
-            "type": "string"
+          "Latitude": {
+            "type": "number",
+            "format": "float"
+          },
+          "Longitude": {
+            "type": "number",
+            "format": "float"
           }
-        },
-        "description": "Details of an error response."
+        }
       }
     }
   }
