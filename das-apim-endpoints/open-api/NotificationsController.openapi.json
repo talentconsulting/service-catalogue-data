@@ -1,0 +1,134 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Notifications API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/notifications/{id}": {
+      "get": {
+        "summary": "Retrieve a specific notification",
+        "operationId": "getNotification",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The unique identifier of the notification to retrieve."
+          },
+          {
+            "name": "X-RequestedByMemberId",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the member requesting the notification."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications": {
+      "post": {
+        "summary": "Create a new notification",
+        "operationId": "createNotification",
+        "parameters": [
+          {
+            "name": "X-RequestedByMemberId",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the member creating the notification."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "templateName": {
+            "type": "string"
+          },
+          "sentTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "referenceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "employerAccountId": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "CreateNotificationModel": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "notificationTemplateId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "memberId",
+          "notificationTemplateId"
+        ]
+      }
+    }
+  }
+}

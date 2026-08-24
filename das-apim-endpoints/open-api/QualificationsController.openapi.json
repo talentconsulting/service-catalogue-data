@@ -1,0 +1,395 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Qualifications API",
+    "version": "1.0.0",
+    "description": "API for managing qualifications and associated operations."
+  },
+  "paths": {
+    "/api/qualifications": {
+      "get": {
+        "summary": "Get qualifications",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skip",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "take",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "organisation",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "qan",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "processStatusFilter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          {
+            "name": "ageGroups",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/AgeGroup"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseMediatrResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/api/qualifications/{qualificationReference}/detail": {
+      "get": {
+        "summary": "Get qualification details",
+        "parameters": [
+          {
+            "name": "qualificationReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseMediatrResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/api/qualifications/{qualificationReference}/detailwithversions": {
+      "get": {
+        "summary": "Get qualification details with versions",
+        "parameters": [
+          {
+            "name": "qualificationReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/api/qualifications/{qualificationReference}/qualificationversions/{version}": {
+      "get": {
+        "summary": "Get qualification version details",
+        "parameters": [
+          {
+            "name": "qualificationReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BaseMediatrResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AgeGroup": {
+        "type": "string",
+        "description": "Age group associated with a qualification",
+        "enum": [
+          "Pre16",
+          "SixteenToEighteen",
+          "EighteenPlus",
+          "NineteenPlus"
+        ]
+      },
+      "BaseMediatrResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "value": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/GetNewQualificationsQueryResponse"
+              },
+              {
+                "$ref": "#/components/schemas/GetChangedQualificationsQueryResponse"
+              }
+            ]
+          }
+        }
+      },
+      "GetNewQualificationsQueryResponse": {
+        "type": "object",
+        "properties": {
+          "totalRecords": {
+            "type": "integer"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NewQualification"
+            }
+          },
+          "job": {
+            "$ref": "#/components/schemas/Job"
+          }
+        }
+      },
+      "GetChangedQualificationsQueryResponse": {
+        "type": "object",
+        "properties": {
+          "totalRecords": {
+            "type": "integer"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChangedQualification"
+            }
+          },
+          "job": {
+            "$ref": "#/components/schemas/Job"
+          }
+        }
+      },
+      "NewQualification": {
+        "type": "object",
+        "properties": {
+          "qualificationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "reference": {
+            "type": "string"
+          },
+          "awardingOrganisation": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "ageGroup": {
+            "$ref": "#/components/schemas/AgeGroup"
+          },
+          "eligibleForFunding": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ChangedQualification": {
+        "type": "object",
+        "properties": {
+          "qualificationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualificationReference": {
+            "type": "string"
+          },
+          "awardingOrganisation": {
+            "type": "string"
+          },
+          "qualificationTitle": {
+            "type": "string"
+          },
+          "qualificationType": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "ageGroup": {
+            "$ref": "#/components/schemas/AgeGroup"
+          },
+          "subject": {
+            "type": "string"
+          },
+          "sectorSubjectArea": {
+            "type": "string"
+          },
+          "changedFieldNames": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "eligibleForFunding": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Job": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "lastRunTime": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,295 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice App API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/apprentices/{id}": {
+      "patch": {
+        "summary": "Update Apprentice",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object"
+              }
+            },
+            "application/json-patch+json": {
+              "schema": {
+                "type": "object"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "type": "object"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/apprentices": {
+      "get": {
+        "summary": "Get Apprentice by Name",
+        "parameters": [
+          {
+            "name": "firstName",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastName",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateOfBirth",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matching apprentices",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprenticeAccount"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/apprentice/{id}/MyApprenticeship": {
+      "patch": {
+        "summary": "Update My Apprenticeship",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "404": {
+            "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/apprentices/{id}/subscriptions": {
+      "post": {
+        "summary": "Add Subscription",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprenticeAddSubscriptionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subscription Added"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Remove Subscription",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprenticeRemoveSubscriptionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Subscription Removed"
+          }
+        }
+      }
+    },
+    "/apprentice/{id}": {
+      "delete": {
+        "summary": "Delete Apprentice Account",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account Deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApprenticeAccount": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "email": {
+            "$ref": "#/components/schemas/Email"
+          },
+          "termsOfUseAccepted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Email": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        }
+      },
+      "ApprenticeAddSubscriptionRequest": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string"
+          },
+          "publicKey": {
+            "type": "string"
+          },
+          "authenticationSecret": {
+            "type": "string"
+          }
+        }
+      },
+      "ApprenticeRemoveSubscriptionRequest": {
+        "type": "object",
+        "properties": {
+          "endpoint": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

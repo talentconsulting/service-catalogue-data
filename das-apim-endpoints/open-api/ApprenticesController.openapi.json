@@ -1,0 +1,299 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentices API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/apprentices/{apprenticeId}/account": {
+      "get": {
+        "summary": "Get apprentice account details",
+        "description": "Retrieves the details of a specific apprentice's account.",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApprenticeAccountQueryResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Apprentice account not found"
+          }
+        }
+      }
+    },
+    "/apprentices/{apprenticeId}": {
+      "get": {
+        "summary": "Get apprentice",
+        "description": "Retrieves details of a specific apprentice.",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApprenticeResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Apprentice not found"
+          }
+        }
+      }
+    },
+    "/apprentices": {
+      "post": {
+        "summary": "Create apprentice member",
+        "description": "Creates a new apprentice member.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApprenticeMemberCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Apprentice member created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateApprenticeMemberCommandResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetApprenticeAccountQueryResult": {
+        "type": "object",
+        "properties": {
+          "ApprenticeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "DateOfBirth": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "ApprenticeId",
+          "FirstName",
+          "LastName",
+          "Email",
+          "DateOfBirth"
+        ]
+      },
+      "GetApprenticeResult": {
+        "type": "object",
+        "properties": {
+          "MemberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "OrganisationName": {
+            "type": "string"
+          },
+          "Status": {
+            "type": "string"
+          },
+          "RegionId": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "MemberId",
+          "FirstName",
+          "LastName",
+          "Email",
+          "OrganisationName",
+          "Status",
+          "RegionId"
+        ]
+      },
+      "CreateApprenticeMemberCommand": {
+        "type": "object",
+        "properties": {
+          "ApprenticeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "JoinedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "RegionId": {
+            "type": "integer"
+          },
+          "OrganisationName": {
+            "type": "string"
+          },
+          "ProfileValues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProfileValue"
+            }
+          },
+          "MemberNotificationEventFormatValues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberNotificationEventFormatValues"
+            }
+          },
+          "MemberNotificationLocationValues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberNotificationLocationValues"
+            }
+          },
+          "ReceiveNotifications": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ApprenticeId",
+          "Email",
+          "FirstName",
+          "LastName",
+          "JoinedDate",
+          "RegionId",
+          "OrganisationName",
+          "ProfileValues",
+          "ReceiveNotifications"
+        ]
+      },
+      "CreateApprenticeMemberCommandResult": {
+        "type": "object",
+        "properties": {
+          "MemberId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "MemberId"
+        ]
+      },
+      "ProfileValue": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer"
+          },
+          "Value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Id",
+          "Value"
+        ]
+      },
+      "MemberNotificationEventFormatValues": {
+        "type": "object",
+        "properties": {
+          "EventFormat": {
+            "type": "string"
+          },
+          "Ordering": {
+            "type": "integer"
+          },
+          "ReceiveNotifications": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "EventFormat",
+          "Ordering",
+          "ReceiveNotifications"
+        ]
+      },
+      "MemberNotificationLocationValues": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "Radius": {
+            "type": "integer"
+          },
+          "Latitude": {
+            "type": "number"
+          },
+          "Longitude": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "Name",
+          "Radius",
+          "Latitude",
+          "Longitude"
+        ]
+      }
+    }
+  }
+}

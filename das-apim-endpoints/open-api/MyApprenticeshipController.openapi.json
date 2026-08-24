@@ -1,0 +1,166 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "My Apprenticeship API",
+    "description": "API for managing My Apprenticeships and related operations.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/MyApprenticeship/{apprenticeId}": {
+      "get": {
+        "summary": "Get My Apprenticeship Details",
+        "operationId": "GetMyApprenticeship",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the apprentice."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the apprentice's apprenticeship.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMyApprenticeshipQueryResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Apprenticeship not found."
+          }
+        }
+      }
+    },
+    "/MyApprenticeship": {
+      "post": {
+        "summary": "Try Create My Apprenticeship",
+        "operationId": "TryCreateMyApprenticeship",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TryCreateMyApprenticeshipRequestModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Apprenticeship found or successfully created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMyApprenticeshipQueryResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Unable to create apprenticeship."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetMyApprenticeshipQueryResult": {
+        "type": "object",
+        "properties": {
+          "Uln": {
+            "type": "integer",
+            "nullable": true
+          },
+          "ApprenticeshipId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "EmployerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "EndDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "TrainingProviderId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "TrainingProviderName": {
+            "type": "string",
+            "nullable": true
+          },
+          "TrainingCourse": {
+            "$ref": "#/components/schemas/TrainingCourse"
+          }
+        }
+      },
+      "TryCreateMyApprenticeshipRequestModel": {
+        "type": "object",
+        "required": [
+          "ApprenticeId",
+          "FirstName",
+          "LastName",
+          "Email",
+          "DateOfBirth"
+        ],
+        "properties": {
+          "ApprenticeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string",
+            "format": "email"
+          },
+          "DateOfBirth": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TrainingCourse": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string",
+            "nullable": true
+          },
+          "Level": {
+            "type": "integer"
+          },
+          "Duration": {
+            "type": "integer",
+            "nullable": true
+          },
+          "Sector": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

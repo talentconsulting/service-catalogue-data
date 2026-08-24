@@ -1,0 +1,116 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Leaving Reasons API",
+    "description": "Provides endpoints for managing leaving reasons",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/LeavingReasons": {
+      "get": {
+        "summary": "Get list of leaving reasons",
+        "description": "Returns a list of leaving reasons grouped by category",
+        "operationId": "GetLeavingReasons",
+        "parameters": [
+          {
+            "name": "cancellationToken",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Token to cancel the operation"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LeavingCategory"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Unexpected error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LeavingCategory": {
+        "type": "object",
+        "properties": {
+          "Category": {
+            "type": "string",
+            "description": "The category of leaving reasons"
+          },
+          "LeavingReasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeavingReason"
+            },
+            "description": "A list of reasons within this category"
+          }
+        },
+        "required": [
+          "Category",
+          "LeavingReasons"
+        ]
+      },
+      "LeavingReason": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "description": "Identifier for the leaving reason"
+          },
+          "Description": {
+            "type": "string",
+            "description": "Detailed description of the leaving reason"
+          },
+          "Ordering": {
+            "type": "integer",
+            "description": "Order in which the leaving reason should appear"
+          }
+        },
+        "required": [
+          "Id",
+          "Description",
+          "Ordering"
+        ]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "integer",
+            "description": "Error code"
+          },
+          "message": {
+            "type": "string",
+            "description": "Error message"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      }
+    }
+  }
+}
