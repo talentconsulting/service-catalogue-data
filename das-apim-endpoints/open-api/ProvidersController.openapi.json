@@ -1,0 +1,152 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Provider API",
+    "description": "API for retrieving information about registered providers.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers": {
+      "get": {
+        "summary": "Retrieve a list of registered providers",
+        "operationId": "getProviders",
+        "responses": {
+          "200": {
+            "description": "A list of registered providers",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvidersApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/providers/status-events": {
+      "get": {
+        "summary": "Retrieve provider status events",
+        "description": "Returns a paginated list of provider status events that occurred since the specified event ID.",
+        "operationId": "getProviderStatusEvents",
+        "parameters": [
+          {
+            "name": "sinceEventId",
+            "in": "query",
+            "description": "The ID of the last received event. Only events with an ID greater than this value are returned. Must be zero or greater.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "The maximum number of events to return in the response. Must be between 1 and 1000. Defaults to 1000.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 1000
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "description": "The page number of results to retrieve. Must be 1 or greater. Defaults to 1.",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of provider status events",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderStatusEvent"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProvidersApiResponse": {
+        "type": "object",
+        "properties": {
+          "providers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderModel"
+            }
+          }
+        }
+      },
+      "ProviderModel": {
+        "type": "object",
+        "properties": {
+          "ukprn": {
+            "type": "integer",
+            "description": "UKPRN of the provider"
+          },
+          "name": {
+            "type": "string",
+            "description": "Registered name of the provider"
+          },
+          "tradingName": {
+            "type": "string",
+            "description": "Registered trading name of the provider"
+          },
+          "providerTypeId": {
+            "type": "integer",
+            "description": "Provider type. `0 -> Main`, `1 -> Employer`, `2 -> Supporting`."
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Provider status. `0 -> Active`, `1 -> ActiveButNotTakingOnApprentices`, `2 -> OnBoarding`."
+          },
+          "canAccessApprenticeshipService": {
+            "type": "boolean",
+            "description": "Indicates if the provider can access the apprenticeship service"
+          }
+        }
+      },
+      "ProviderStatusEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The unique ID of the provider status event"
+          },
+          "providerId": {
+            "type": "integer",
+            "description": "The ID of the associated provider"
+          },
+          "event": {
+            "type": "string",
+            "description": "The type of provider status event"
+          },
+          "createdOn": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The timestamp when the event occurred"
+          }
+        }
+      }
+    }
+  }
+}

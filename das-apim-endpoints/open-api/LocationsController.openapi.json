@@ -1,19 +1,18 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Admin Aan API",
+    "title": "Apprentice Aan Locations API",
     "version": "1.0.0"
   },
   "paths": {
-    "/Locations": {
+    "/locations": {
       "get": {
-        "summary": "Get addresses based on query",
-        "operationId": "GetAddresses",
+        "summary": "Get addresses",
         "parameters": [
           {
             "name": "query",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
               "type": "string"
             }
@@ -21,13 +20,13 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Addresses obtained successfully.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "$ref": "#/components/schemas/Address"
                   }
                 }
               }
@@ -36,14 +35,13 @@
         }
       }
     },
-    "/Locations/search": {
+    "/locations/{postcode}": {
       "get": {
-        "summary": "Search locations based on query",
-        "operationId": "GetLocationsBySearch",
+        "summary": "Get coordinates by postcode",
         "parameters": [
           {
-            "name": "query",
-            "in": "query",
+            "name": "postcode",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "string"
@@ -52,13 +50,44 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Coordinates obtained successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "$ref": "#/components/schemas/Coordinate"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Postcode not found."
+          }
+        }
+      }
+    },
+    "/locations/search": {
+      "get": {
+        "summary": "Search locations",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Locations obtained successfully.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object"
+                    "$ref": "#/components/schemas/Location"
                   }
                 }
               }
@@ -95,34 +124,38 @@
           "longitude": {
             "type": "number",
             "format": "double"
+          },
+          "country": {
+            "type": "string"
           }
         }
       },
-      "ApplicationStatus": {
-        "type": "string",
-        "enum": [
-          "Draft",
-          "Submitted",
-          "Withdrawn",
-          "Successful",
-          "UnSuccessful",
-          "Expired"
-        ]
+      "Coordinate": {
+        "type": "object",
+        "properties": {
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          }
+        }
       },
-      "ApprenticeshipTypes": {
-        "type": "string",
-        "enum": [
-          "Standard",
-          "Foundation"
-        ]
-      },
-      "AvailableWhere": {
-        "type": "string",
-        "enum": [
-          "OneLocation",
-          "MultipleLocations",
-          "AcrossEngland"
-        ]
+      "Location": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          },
+          "coordinates": {
+            "$ref": "#/components/schemas/Coordinate"
+          }
+        }
       }
     }
   }

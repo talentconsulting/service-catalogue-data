@@ -1,0 +1,329 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice KSB Progress API",
+    "version": "1.0.0",
+    "description": "API for managing Knowledge, Skills, and Behaviors (KSB) progress for apprentices."
+  },
+  "paths": {
+    "/apprentices/{apprenticeId}/ksbs": {
+      "post": {
+        "operationId": "AddUpdateKsbProgress",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprenticeKsbProgressData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "KSB progress successfully added or updated."
+          }
+        }
+      },
+      "get": {
+        "operationId": "GetApprenticeshipKsbs",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of apprenticeship KSBs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprenticeKsb"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apprentices/{apprenticeId}/ksbs/guids": {
+      "get": {
+        "operationId": "GetKsbsByApprenticeshipIdAndGuidList",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "guids",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KSB progress items for the specified GUIDs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/KSBProgress"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apprentices/{apprenticeId}/ksbs/taskid/{taskId}": {
+      "get": {
+        "operationId": "GetKsbProgressForTask",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KSB progress for the specified task.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KSBProgress"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apprentices/{apprenticeId}/ksbs/{ksbId}": {
+      "get": {
+        "operationId": "GetApprenticeshipKsbProgress",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ksbId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the specific KSB progress.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprenticeKsb"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/apprentices/{apprenticeId}/ksbs/{ksbProgressId}/taskid/{taskId}": {
+      "delete": {
+        "operationId": "RemoveTaskToKsbProgress",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "ksbProgressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task successfully unlinked from KSB progress."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApprenticeKsbProgressData": {
+        "type": "object",
+        "properties": {
+          "ApprenticeshipId": {
+            "type": "integer"
+          },
+          "KsbProgressId": {
+            "type": "integer"
+          },
+          "KSBProgressType": {
+            "type": "string",
+            "enum": [
+              "Knowledge",
+              "Skill",
+              "Behaviour"
+            ]
+          },
+          "KSBId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "KsbKey": {
+            "type": "string"
+          },
+          "CurrentStatus": {
+            "type": "string",
+            "enum": [
+              "NotStarted",
+              "InProgress",
+              "ReadyForReview",
+              "Completed"
+            ]
+          },
+          "Note": {
+            "type": "string"
+          },
+          "Tasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprenticeTask"
+            }
+          }
+        }
+      },
+      "ApprenticeKsb": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Key": {
+            "type": "string"
+          },
+          "Detail": {
+            "type": "string"
+          },
+          "Type": {
+            "type": "string"
+          },
+          "Progress": {
+            "$ref": "#/components/schemas/KSBProgress"
+          }
+        }
+      },
+      "KSBProgress": {
+        "type": "object",
+        "properties": {
+          "KSBId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Status": {
+            "type": "string"
+          }
+        }
+      },
+      "ApprenticeTask": {
+        "type": "object",
+        "properties": {
+          "TaskId": {
+            "type": "integer"
+          },
+          "ApprenticeshipId": {
+            "type": "integer"
+          },
+          "ApprenticeAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "DueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Note": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
