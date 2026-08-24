@@ -28,7 +28,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with available products",
+            "description": "Successful response with product subscriptions",
             "content": {
               "application/json": {
                 "schema": {
@@ -37,18 +37,15 @@
               }
             }
           },
-          "404": {
-            "description": "Not Found"
-          },
           "500": {
-            "description": "Server Error"
+            "description": "Internal server error"
           }
         }
       }
     },
     "/subscriptions/{id}/products/{productId}": {
       "get": {
-        "summary": "Get specific product subscription details",
+        "summary": "Get product subscription details",
         "parameters": [
           {
             "name": "id",
@@ -90,7 +87,7 @@
             "description": "Not Found"
           },
           "500": {
-            "description": "Server Error"
+            "description": "Internal server error"
           }
         }
       },
@@ -124,20 +121,20 @@
         ],
         "responses": {
           "201": {
-            "description": "Subscription created successfully",
+            "description": "Product subscription created"
+          },
+          "400": {
+            "description": "Bad Request",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "null"
+                  "$ref": "#/components/schemas/HttpRequestContentException"
                 }
               }
             }
           },
-          "400": {
-            "description": "Bad Request"
-          },
           "500": {
-            "description": "Server Error"
+            "description": "Internal server error"
           }
         }
       }
@@ -165,20 +162,27 @@
         ],
         "responses": {
           "204": {
-            "description": "Subscription key renewed successfully"
+            "description": "Subscription key renewed"
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpRequestContentException"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Server Error"
+            "description": "Internal server error"
           }
         }
       }
     },
     "/subscriptions/{id}/delete/{productId}": {
       "delete": {
-        "summary": "Delete a subscription",
+        "summary": "Delete a product subscription",
         "parameters": [
           {
             "name": "id",
@@ -199,13 +203,20 @@
         ],
         "responses": {
           "204": {
-            "description": "Subscription deleted successfully"
+            "description": "Product subscription deleted"
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationException"
+                }
+              }
+            }
           },
           "500": {
-            "description": "Server Error"
+            "description": "Internal server error"
           }
         }
       }
@@ -215,11 +226,42 @@
     "schemas": {
       "ProductSubscriptionsApiResponse": {
         "type": "object",
-        "properties": {}
+        "additionalProperties": true
       },
       "ProductSubscriptionApiResponseItem": {
         "type": "object",
-        "properties": {}
+        "additionalProperties": true
+      },
+      "HttpRequestContentException": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "integer"
+          },
+          "errorContent": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "statusCode",
+          "errorContent"
+        ]
+      },
+      "ValidationException": {
+        "type": "object",
+        "properties": {
+          "validationResult": {
+            "type": "object",
+            "properties": {
+              "errorMessage": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "validationResult"
+        ]
       }
     }
   }

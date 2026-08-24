@@ -2,222 +2,81 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Providers API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API endpoints for retrieving information about registered providers."
   },
   "paths": {
-    "/Providers/": {
+    "/providers": {
       "get": {
-        "summary": "Retrieve all providers",
-        "operationId": "GetAllProviders",
+        "operationId": "GetProviders",
+        "summary": "Retrieves the list of registered providers.",
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "A collection of registered providers.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetProvidersListResponse"
+                  "$ref": "#/components/schemas/ProvidersApiResponse"
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad Request"
           }
         }
       }
     },
-    "/Providers/{ukprn}/users": {
+    "/providers/status-events": {
       "get": {
-        "summary": "Retrieve all users for a provider",
-        "operationId": "GetProviderUsers",
+        "operationId": "GetProviderStatusEvents",
+        "summary": "Retrieves a paginated list of provider status events.",
         "parameters": [
           {
-            "name": "ukprn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetProvidersUsersResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request"
-          }
-        }
-      }
-    },
-    "/Providers/{providerId}/courses/{trainingCode}": {
-      "get": {
-        "summary": "Retrieve delivery models for a specific provider course",
-        "operationId": "GetProviderCoursesDeliveryModel",
-        "parameters": [
-          {
-            "name": "providerId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "trainingCode",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "accountLegalEntityId",
+            "name": "sinceEventId",
             "in": "query",
             "required": false,
             "schema": {
               "type": "integer",
-              "format": "int64",
+              "minimum": 0,
               "default": 0
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        },
-        "deprecated": true
-      }
-    },
-    "/Providers/{providerId}/courses": {
-      "get": {
-        "summary": "Retrieve delivery models for a provider using query parameters",
-        "operationId": "GetProviderCoursesDeliveryModelByQuery",
-        "parameters": [
-          {
-            "name": "providerId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
+            },
+            "description": "The ID of the last received event. Events with an ID greater than this value are returned."
           },
           {
-            "name": "trainingCode",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "accountLegalEntityId",
+            "name": "pageSize",
             "in": "query",
             "required": false,
             "schema": {
               "type": "integer",
-              "format": "int64",
-              "default": 0
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
+              "minimum": 1,
+              "maximum": 1000,
+              "default": 1000
+            },
+            "description": "Maximum number of events to return."
           },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/Providers/{ukprn}/emails": {
-      "post": {
-        "summary": "Send emails to provider users",
-        "operationId": "EmailProviderUsers",
-        "parameters": [
           {
-            "name": "ukprn",
-            "in": "path",
-            "required": true,
+            "name": "pageNumber",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ProviderEmailRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response"
-          },
-          "400": {
-            "description": "Bad Request"
-          }
-        }
-      }
-    },
-    "/Providers/{ukprn}/status": {
-      "get": {
-        "summary": "Retrieve provider status",
-        "operationId": "GetProviderStatus",
-        "parameters": [
-          {
-            "name": "ukprn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
+              "minimum": 1,
+              "default": 1
+            },
+            "description": "Page number of results to retrieve."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "A paginated collection of provider status events.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProviderAccountDetailsResponse"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProviderStatusEvent"
+                  }
                 }
               }
             }
-          },
-          "500": {
-            "description": "Internal Server Error"
           }
         }
       }
@@ -225,60 +84,84 @@
   },
   "components": {
     "schemas": {
-      "GetProvidersListResponse": {
+      "ProvidersApiResponse": {
         "type": "object",
         "properties": {
-          "Providers": {
+          "providers": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/GetProvidersResponse"
+              "$ref": "#/components/schemas/ProviderModel"
             }
           }
-        }
+        },
+        "required": [
+          "providers"
+        ]
       },
-      "GetProvidersResponse": {
-        "type": "object",
-        "properties": {}
-      },
-      "GetProvidersUsersResponse": {
-        "type": "object",
-        "properties": {
-          "Users": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          }
-        }
-      },
-      "ProviderEmailRequest": {
+      "ProviderModel": {
         "type": "object",
         "properties": {
-          "TemplateId": {
-            "type": "string"
-          },
-          "Tokens": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "ExplicitEmailAddresses": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "ProviderAccountDetailsResponse": {
-        "type": "object",
-        "properties": {
-          "ProviderStatusTypeId": {
+          "ukprn": {
             "type": "integer",
-            "format": "int32"
+            "description": "UK Provider Reference Number"
+          },
+          "name": {
+            "type": "string",
+            "description": "Legal name of the provider."
+          },
+          "tradingName": {
+            "type": "string",
+            "description": "Trading name of the provider."
+          },
+          "providerTypeId": {
+            "type": "integer",
+            "description": "Provider Type."
+          },
+          "statusId": {
+            "type": "integer",
+            "description": "Provider status."
+          },
+          "canAccessApprenticeshipService": {
+            "type": "boolean",
+            "description": "Indicates whether the provider can access the Apprenticeship Service."
           }
-        }
+        },
+        "required": [
+          "ukprn",
+          "name",
+          "tradingName",
+          "providerTypeId",
+          "statusId",
+          "canAccessApprenticeshipService"
+        ]
+      },
+      "ProviderStatusEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "Event identifier."
+          },
+          "providerId": {
+            "type": "integer",
+            "description": "ID of the provider."
+          },
+          "event": {
+            "type": "string",
+            "description": "Description of the event."
+          },
+          "createdOn": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the event was created."
+          }
+        },
+        "required": [
+          "id",
+          "providerId",
+          "event",
+          "createdOn"
+        ]
       }
     }
   }

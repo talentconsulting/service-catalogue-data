@@ -1,14 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Admin Aan Calendar Events API",
+    "title": "ApprenticeAan - CalendarEvents API",
     "version": "1.0.0"
   },
   "paths": {
     "/CalendarEvents": {
       "get": {
-        "summary": "Get calendar events",
-        "operationId": "GetCalendarEvents",
+        "summary": "Retrieve calendar events",
+        "operationId": "getCalendarEvents",
         "parameters": [
           {
             "name": "X-RequestedByMemberId",
@@ -20,36 +20,11 @@
             }
           },
           {
-            "name": "Location",
+            "name": "Keyword",
             "in": "query",
             "required": false,
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "Radius",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "OrderBy",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "IsActive",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
             }
           },
           {
@@ -71,14 +46,29 @@
             }
           },
           {
+            "name": "EventFormat",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "InPerson",
+                  "Online",
+                  "Hybrid"
+                ]
+              }
+            }
+          },
+          {
             "name": "CalendarId",
             "in": "query",
             "required": false,
             "schema": {
               "type": "array",
               "items": {
-                "type": "integer",
-                "format": "int32"
+                "type": "integer"
               }
             }
           },
@@ -89,9 +79,32 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "integer",
-                "format": "int32"
+                "type": "integer"
               }
+            }
+          },
+          {
+            "name": "Location",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Radius",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "OrderBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -99,8 +112,7 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "integer"
             }
           },
           {
@@ -108,22 +120,13 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "ShowUserEventsOnly",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean"
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful retrieval of calendar events.",
             "content": {
               "application/json": {
                 "schema": {
@@ -133,49 +136,12 @@
             }
           }
         }
-      },
-      "post": {
-        "summary": "Create new calendar event",
-        "operationId": "PostCalendarEvent",
-        "parameters": [
-          {
-            "name": "X-RequestedByMemberId",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateEventRequestModel"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Event created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PostEventCommandResult"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/CalendarEvents/{calendarEventId}": {
       "get": {
-        "summary": "Get specific calendar event",
-        "operationId": "GetCalendarEvent",
+        "summary": "Retrieve a specific calendar event by ID",
+        "operationId": "getCalendarEventById",
         "parameters": [
           {
             "name": "calendarEventId",
@@ -198,20 +164,25 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful retrieval of the calendar event.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetCalendarEventQueryResult"
+                  "$ref": "#/components/schemas/CalendarEvent"
                 }
               }
             }
+          },
+          "404": {
+            "description": "Calendar event not found."
           }
         }
-      },
+      }
+    },
+    "/CalendarEvents/{calendarEventId}/attendance": {
       "put": {
-        "summary": "Update calendar event",
-        "operationId": "PutCalendarEvent",
+        "summary": "Update attendance for a calendar event",
+        "operationId": "putAttendance",
         "parameters": [
           {
             "name": "calendarEventId",
@@ -237,81 +208,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PutEventRequestModel"
+                "$ref": "#/components/schemas/AttendanceStatus"
               }
             }
           }
         },
         "responses": {
           "204": {
-            "description": "Event updated successfully"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete calendar event",
-        "operationId": "DeleteCalendarEvent",
-        "parameters": [
-          {
-            "name": "calendarEventId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "X-RequestedByMemberId",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Event successfully deleted"
-          }
-        }
-      }
-    },
-    "/CalendarEvents/{calendarEventId}/attendees": {
-      "get": {
-        "summary": "Get attendees of a specific calendar event",
-        "operationId": "GetCalendarEventAttendees",
-        "parameters": [
-          {
-            "name": "calendarEventId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "X-RequestedByMemberId",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetCalendarEventQueryResult"
-                }
-              }
-            }
+            "description": "Attendance updated successfully."
           }
         }
       }
@@ -319,29 +223,29 @@
   },
   "components": {
     "schemas": {
+      "AttendanceStatus": {
+        "type": "object",
+        "additionalProperties": true
+      },
       "GetCalendarEventsQueryResult": {
         "type": "object",
         "properties": {
           "Page": {
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           "PageSize": {
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           "TotalPages": {
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           "TotalCount": {
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           "CalendarEvents": {
             "type": "array",
             "items": {
-              "type": "object"
+              "$ref": "#/components/schemas/CalendarEvent"
             }
           },
           "IsInvalidLocation": {
@@ -350,18 +254,48 @@
           "Regions": {
             "type": "array",
             "items": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "Id": {
+                  "type": "integer"
+                },
+                "Area": {
+                  "type": "string"
+                },
+                "Ordering": {
+                  "type": "integer"
+                }
+              }
             }
           },
           "Calendars": {
             "type": "array",
             "items": {
-              "type": "object"
+              "type": "object",
+              "properties": {
+                "Id": {
+                  "type": "integer"
+                },
+                "CalendarName": {
+                  "type": "string"
+                },
+                "EffectiveFrom": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "EffectiveTo": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "Ordering": {
+                  "type": "integer"
+                }
+              }
             }
           }
         }
       },
-      "GetCalendarEventQueryResult": {
+      "CalendarEvent": {
         "type": "object",
         "properties": {
           "CalendarEventId": {
@@ -371,12 +305,13 @@
           "CalendarName": {
             "type": "string"
           },
-          "CalendarId": {
-            "type": "integer",
-            "format": "int32"
-          },
           "EventFormat": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "InPerson",
+              "Online",
+              "Hybrid"
+            ]
           },
           "StartDate": {
             "type": "string",
@@ -393,24 +328,34 @@
             "type": "string"
           },
           "Summary": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
+          },
+          "RegionId": {
+            "type": "integer",
+            "nullable": true
           },
           "Location": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "Postcode": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "Latitude": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "Longitude": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "nullable": true
           },
           "EventLink": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "ContactName": {
             "type": "string"
@@ -421,80 +366,52 @@
           "IsActive": {
             "type": "boolean"
           },
-          "LastUpdatedDate": {
+          "CancelReason": {
             "type": "string",
-            "format": "date-time"
+            "nullable": true
           },
           "Attendees": {
             "type": "array",
             "items": {
-              "type": "object"
-            }
-          },
-          "CancelledAttendees": {
-            "type": "array",
-            "items": {
-              "type": "object"
+              "$ref": "#/components/schemas/Attendee"
             }
           },
           "EventGuests": {
             "type": "array",
             "items": {
-              "type": "object"
+              "$ref": "#/components/schemas/EventGuest"
             }
-          },
-          "PlannedAttendees": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "CreatedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "Urn": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "SchoolName": {
-            "type": "string"
-          },
-          "RegionId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "RegionName": {
-            "type": "string"
           }
         }
       },
-      "CreateEventRequestModel": {
+      "Attendee": {
         "type": "object",
         "properties": {
-          "EventName": {
-            "type": "string"
-          },
-          "StartDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "EndDate": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "PutEventRequestModel": {
-        "type": "object",
-        "additionalProperties": {
-          "type": "object"
-        }
-      },
-      "PostEventCommandResult": {
-        "type": "object",
-        "properties": {
-          "CalendarEventId": {
+          "MemberId": {
             "type": "string",
             "format": "uuid"
+          },
+          "UserType": {
+            "type": "string"
+          },
+          "MemberName": {
+            "type": "string"
+          },
+          "AddedDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "EventGuest": {
+        "type": "object",
+        "properties": {
+          "GuestName": {
+            "type": "string"
+          },
+          "GuestJobTitle": {
+            "type": "string"
           }
         }
       }

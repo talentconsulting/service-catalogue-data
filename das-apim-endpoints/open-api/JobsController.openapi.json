@@ -1,309 +1,39 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Jobs API",
+    "title": "DAS APIM Endpoints",
     "version": "1.0.0",
-    "description": "API for managing job applications within apprenticeship applications."
+    "description": "An API for managing job-related data."
   },
   "paths": {
-    "/applications/{applicationId}/jobs": {
+    "/api/job": {
       "get": {
-        "summary": "Get all jobs for an application",
-        "operationId": "getJobs",
+        "operationId": "GetByNameAsync",
+        "summary": "Retrieve job details by name",
         "parameters": [
           {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "candidateId",
+            "name": "name",
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
+              "type": "string"
+            },
+            "description": "The name of the job to retrieve"
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of jobs",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetJobsApiResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Application not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "post": {
-        "summary": "Create a new job application",
-        "operationId": "createJob",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostJobApiRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Job created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PostJobApiResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Application not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/applications/{applicationId}/jobs/{jobId}": {
-      "get": {
-        "summary": "Get details of a specific job",
-        "operationId": "getJob",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "jobId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "candidateId",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful retrieval of the job",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetJobApiResponse"
+                  "$ref": "#/components/schemas/GetJobByNameQueryResponse"
                 }
               }
             }
           },
           "404": {
             "description": "Job not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "post": {
-        "summary": "Update details of a job",
-        "operationId": "updateJob",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "jobId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostUpdateJobApiRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Job updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Job not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      }
-    },
-    "/applications/{applicationId}/jobs/{jobId}/delete": {
-      "get": {
-        "summary": "Verify if a job can be deleted",
-        "operationId": "getDeleteJob",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "jobId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "candidateId",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Job deletion verification successful",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetDeleteJobApiResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Job not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "post": {
-        "summary": "Delete a job from an application",
-        "operationId": "deleteJob",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "jobId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostDeleteJobRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Job deleted successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    }
-                  }
-                }
-              }
-            }
           },
           "500": {
             "description": "Internal server error"
@@ -314,178 +44,33 @@
   },
   "components": {
     "schemas": {
-      "PostJobApiRequest": {
+      "GetJobByNameQueryResponse": {
         "type": "object",
         "properties": {
-          "candidateId": {
+          "id": {
             "type": "string",
             "format": "uuid"
           },
-          "employerName": {
+          "name": {
             "type": "string"
           },
-          "jobTitle": {
-            "type": "string"
-          },
-          "jobDescription": {
-            "type": "string"
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "candidateId",
-          "employerName",
-          "jobTitle",
-          "jobDescription",
-          "startDate"
-        ]
-      },
-      "PostUpdateJobApiRequest": {
-        "type": "object",
-        "properties": {
-          "candidateId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "employerName": {
-            "type": "string"
-          },
-          "jobTitle": {
-            "type": "string"
-          },
-          "jobDescription": {
-            "type": "string"
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "candidateId",
-          "employerName",
-          "jobTitle",
-          "jobDescription",
-          "startDate"
-        ]
-      },
-      "PostDeleteJobRequest": {
-        "type": "object",
-        "properties": {
-          "candidateId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "candidateId"
-        ]
-      },
-      "GetJobsApiResponse": {
-        "type": "object",
-        "properties": {
-          "jobs": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "jobId": {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                "jobTitle": {
-                  "type": "string"
-                },
-                "employerName": {
-                  "type": "string"
-                },
-                "startDate": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "endDate": {
-                  "type": "string",
-                  "format": "date-time"
-                }
-              },
-              "required": [
-                "jobId",
-                "jobTitle",
-                "employerName",
-                "startDate"
-              ]
-            }
-          }
-        },
-        "required": [
-          "jobs"
-        ]
-      },
-      "GetJobApiResponse": {
-        "type": "object",
-        "properties": {
-          "jobId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "jobTitle": {
-            "type": "string"
-          },
-          "employerName": {
-            "type": "string"
-          },
-          "jobDescription": {
-            "type": "string"
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "endDate": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "jobId",
-          "jobTitle",
-          "employerName",
-          "jobDescription",
-          "startDate"
-        ]
-      },
-      "GetDeleteJobApiResponse": {
-        "type": "object",
-        "properties": {
-          "isDeletable": {
+          "enabled": {
             "type": "boolean"
-          }
-        },
-        "required": [
-          "isDeletable"
-        ]
-      },
-      "PostJobApiResponse": {
-        "type": "object",
-        "properties": {
-          "jobId": {
+          },
+          "status": {
+            "type": "string"
+          },
+          "lastRunTime": {
             "type": "string",
-            "format": "uuid"
+            "format": "date-time",
+            "nullable": true
           }
         },
         "required": [
-          "jobId"
+          "id",
+          "name",
+          "enabled",
+          "status"
         ]
       }
     }
