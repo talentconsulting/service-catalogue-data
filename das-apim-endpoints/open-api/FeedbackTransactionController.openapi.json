@@ -2,17 +2,17 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Apprentice Feedback API",
-    "version": "1.0.0",
-    "description": "API for managing apprentice feedback transactions."
+    "description": "API for managing apprentice feedback transactions.",
+    "version": "1.0.0"
   },
   "paths": {
     "/FeedbackTransaction/generate-email-transactions": {
       "post": {
+        "summary": "Generate email transactions",
         "operationId": "GenerateEmailTransactions",
-        "summary": "Generates email transactions.",
         "responses": {
           "200": {
-            "description": "Null response indicating success.",
+            "description": "Email transactions generated successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -22,15 +22,15 @@
             }
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/FeedbackTransaction/{feedbackTransactionId}": {
       "post": {
+        "summary": "Process email transaction",
         "operationId": "ProcessEmailTransaction",
-        "summary": "Processes an email transaction.",
         "parameters": [
           {
             "name": "feedbackTransactionId",
@@ -54,7 +54,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success response with email transaction result.",
+            "description": "Transaction processed successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -64,22 +64,15 @@
             }
           },
           "500": {
-            "description": "Internal server error response with email status.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmailStatus"
-                }
-              }
-            }
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/FeedbackTransaction/{feedbackTransactionId}/track-click": {
       "post": {
+        "summary": "Track email transaction click",
         "operationId": "TrackClick",
-        "summary": "Tracks a click on an email transaction link.",
         "parameters": [
           {
             "name": "feedbackTransactionId",
@@ -103,7 +96,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success response indicating the click status.",
+            "description": "Click tracked successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -117,8 +110,8 @@
     },
     "/FeedbackTransaction": {
       "get": {
+        "summary": "Get feedback transactions to email",
         "operationId": "GetFeedbackTransactionsToEmail",
-        "summary": "Retrieves feedback transactions to email.",
         "parameters": [
           {
             "name": "batchSize",
@@ -132,7 +125,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of feedback transactions.",
+            "description": "Feedback transactions retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -152,7 +145,7 @@
     "schemas": {
       "NullResponse": {
         "type": "object",
-        "description": "An empty response object."
+        "properties": {}
       },
       "FeedbackTransaction": {
         "type": "object",
@@ -210,7 +203,12 @@
             "format": "int64"
           },
           "EmailStatus": {
-            "$ref": "#/components/schemas/EmailStatus"
+            "type": "string",
+            "enum": [
+              "Successful",
+              "NotAllowed",
+              "Failed"
+            ]
           }
         },
         "required": [
@@ -230,7 +228,11 @@
             "format": "uuid"
           },
           "ClickStatus": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "Invalid",
+              "Valid"
+            ]
           }
         },
         "required": [
@@ -259,14 +261,6 @@
           "FeedbackTransactionId",
           "ApprenticeId",
           "ApprenticeFeedbackTargetId"
-        ]
-      },
-      "EmailStatus": {
-        "type": "string",
-        "enum": [
-          "Successful",
-          "NotAllowed",
-          "Failed"
         ]
       }
     }
