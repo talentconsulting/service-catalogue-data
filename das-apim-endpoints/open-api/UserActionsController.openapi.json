@@ -2,12 +2,13 @@
   "openapi": "3.1.0",
   "info": {
     "title": "User Actions API",
+    "description": "API for managing user actions and related activities in DAS Admin.",
     "version": "1.0.0"
   },
   "paths": {
     "/user-actions/{code}": {
       "get": {
-        "summary": "Get User Action By Code",
+        "summary": "Retrieve user action by code",
         "operationId": "GetUserActionByCode",
         "parameters": [
           {
@@ -21,7 +22,7 @@
         ],
         "responses": {
           "200": {
-            "description": "User action retrieved successfully",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -31,17 +32,17 @@
             }
           },
           "404": {
-            "description": "User action not found"
+            "description": "Not Found"
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/user-actions/{code}/all-activity": {
       "get": {
-        "summary": "Get All User Activity By Code",
+        "summary": "Retrieve all user activity by code",
         "operationId": "GetAllUserActivityByCode",
         "parameters": [
           {
@@ -55,7 +56,7 @@
         ],
         "responses": {
           "200": {
-            "description": "User activity retrieved successfully",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -65,17 +66,17 @@
             }
           },
           "404": {
-            "description": "User activity not found"
+            "description": "Not Found"
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/user-actions/{code}/search": {
       "post": {
-        "summary": "Check User Action By Code",
+        "summary": "Search user action by code",
         "operationId": "CheckUserActionByCode",
         "parameters": [
           {
@@ -88,6 +89,7 @@
           }
         ],
         "requestBody": {
+          "description": "Request details for checking user action",
           "required": true,
           "content": {
             "application/json": {
@@ -99,7 +101,7 @@
         },
         "responses": {
           "200": {
-            "description": "User action checked successfully",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -109,7 +111,7 @@
             }
           },
           "500": {
-            "description": "Internal server error"
+            "description": "Internal Server Error"
           }
         }
       }
@@ -119,27 +121,59 @@
     "schemas": {
       "GetUserActionByCodeResponse": {
         "type": "object",
-        "description": "Response for getting user action by code.",
-        "properties": {}
+        "properties": {
+          "actionId": {
+            "type": "string"
+          },
+          "actionName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
       },
       "GetAllUserActivityByCodeResponse": {
         "type": "object",
-        "description": "Response for getting all user activity by code.",
-        "properties": {}
+        "properties": {
+          "activities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "activityId": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
       },
       "CheckUserActionByCodeRequest": {
         "type": "object",
         "properties": {
           "username": {
-            "type": "string",
-            "description": "The username of the user."
+            "type": "string"
           }
         }
       },
       "CheckUserActionByCodeResponse": {
         "type": "object",
-        "description": "Response for checking user action by code.",
-        "properties": {}
+        "properties": {
+          "isActionValid": {
+            "type": "boolean"
+          },
+          "validationMessage": {
+            "type": "string"
+          }
+        }
       }
     }
   }
