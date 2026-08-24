@@ -1,0 +1,353 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Campaign Hub API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/Hub/{hub}": {
+      "get": {
+        "summary": "Get Hub",
+        "description": "Retrieve details of a specific hub page.",
+        "parameters": [
+          {
+            "name": "hub",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The identifier for the hub page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Hub details retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetHubResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Hub not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Hub/preview/{hub}": {
+      "get": {
+        "summary": "Get Preview Hub",
+        "description": "Retrieve details of a preview hub page.",
+        "parameters": [
+          {
+            "name": "hub",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The identifier for the preview hub page."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Preview hub details retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetHubResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Preview hub not found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotFoundResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetHubResponse": {
+        "type": "object",
+        "properties": {
+          "Hub": {
+            "$ref": "#/components/schemas/HubPageModel"
+          }
+        }
+      },
+      "NotFoundResponse": {
+        "type": "object",
+        "properties": {
+          "Message": {
+            "type": "string"
+          }
+        }
+      },
+      "HubPageModel": {
+        "type": "object",
+        "properties": {
+          "PageAttributes": {
+            "$ref": "#/components/schemas/PageModel"
+          },
+          "MainContent": {
+            "$ref": "#/components/schemas/HubContent"
+          },
+          "MenuContent": {
+            "$ref": "#/components/schemas/MenuPageModel.MenuPageContent"
+          },
+          "BannerModels": {
+            "$ref": "#/components/schemas/BannerPageModel.BannerPageContent"
+          }
+        }
+      },
+      "PageModel": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string"
+          },
+          "PageType": {
+            "$ref": "#/components/schemas/PageType"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "MetaDescription": {
+            "type": "string"
+          },
+          "Slug": {
+            "type": "string"
+          },
+          "HubType": {
+            "type": "string"
+          },
+          "Summary": {
+            "type": "string"
+          },
+          "ArticleType": {
+            "type": "string"
+          }
+        }
+      },
+      "PageType": {
+        "type": "string",
+        "enum": [
+          "Unknown",
+          "LandingPage",
+          "Article",
+          "Hub",
+          "Tab"
+        ]
+      },
+      "HubContent": {
+        "type": "object",
+        "properties": {
+          "HeaderImage": {
+            "$ref": "#/components/schemas/ContentItem"
+          },
+          "CardsTitle": {
+            "type": "string"
+          },
+          "Cards": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CardPageModel"
+            }
+          },
+          "CardsTitle2": {
+            "type": "string"
+          },
+          "Cards2": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CardPageModel"
+            }
+          },
+          "CardsTitle3": {
+            "type": "string"
+          },
+          "Cards3": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CardPageModel"
+            }
+          }
+        }
+      },
+      "CardPageModel": {
+        "type": "object",
+        "properties": {
+          "LandingPage": {
+            "$ref": "#/components/schemas/UrlDetails"
+          },
+          "CardImage": {
+            "$ref": "#/components/schemas/ContentItem"
+          }
+        }
+      },
+      "UrlDetails": {
+        "type": "object",
+        "properties": {
+          "Slug": {
+            "type": "string"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Hub": {
+            "type": "string"
+          },
+          "PageType": {
+            "type": "string"
+          },
+          "ParentSlug": {
+            "type": "string"
+          }
+        }
+      },
+      "ContentItem": {
+        "type": "object",
+        "properties": {
+          "Values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "Type": {
+            "type": "string"
+          },
+          "TableValue": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "EmbeddedResource": {
+            "$ref": "#/components/schemas/ResourceItem"
+          },
+          "VideoTranscripts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VideoTranscript"
+            }
+          }
+        }
+      },
+      "ResourceItem": {
+        "type": "object",
+        "properties": {
+          "Title": {
+            "type": "string"
+          },
+          "Id": {
+            "type": "string"
+          },
+          "FileName": {
+            "type": "string"
+          },
+          "ContentType": {
+            "type": "string"
+          },
+          "Url": {
+            "type": "string"
+          },
+          "Size": {
+            "type": "integer"
+          },
+          "Description": {
+            "type": "string"
+          }
+        }
+      },
+      "VideoTranscript": {
+        "type": "object",
+        "properties": {
+          "VideoName": {
+            "type": "string"
+          },
+          "Text": {
+            "type": "string"
+          }
+        }
+      },
+      "MenuPageModel.MenuPageContent": {
+        "type": "object",
+        "properties": {
+          "TopLevel": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          },
+          "Apprentices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          },
+          "Employers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          },
+          "Influencers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          }
+        }
+      },
+      "BannerPageModel.BannerPageContent": {
+        "type": "object",
+        "properties": {
+          "Items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentItem"
+            }
+          },
+          "BackgroundColour": {
+            "type": "string"
+          },
+          "AllowUserToHideTheBanner": {
+            "type": "boolean"
+          },
+          "ShowOnTheHomepageOnly": {
+            "type": "boolean"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Id": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

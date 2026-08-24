@@ -1,0 +1,316 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SFA DAS APIs",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/menu": {
+      "get": {
+        "operationId": "GetMenuAsync",
+        "summary": "Retrieve the menu information.",
+        "responses": {
+          "200": {
+            "description": "Menu details retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMenuResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/providers/{providerId}/unapproved/add/learners/select": {
+      "post": {
+        "operationId": "GetLearnersForProvider",
+        "summary": "Retrieve unapproved learners for a provider.",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchLearnersRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Learners data retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLearnersForProviderQueryResult"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/providers/{providerId}/unapproved/add/learners/select/{learnerId}": {
+      "get": {
+        "operationId": "GetLearnerForProvider",
+        "summary": "Retrieve a specific learner record for a provider.",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "learnerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Learner data retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLearnerForProviderQueryResult"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/Ai/vacancies/{vacancyId}/review/{vacancyReviewId}": {
+      "post": {
+        "operationId": "CreateVacancyReviewAsync",
+        "summary": "Create an AI review for a vacancy.",
+        "parameters": [
+          {
+            "name": "vacancyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "vacancyReviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVacancyReviewData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Vacancy review created successfully."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/Ai/vacancies/{vacancyId}/approve": {
+      "post": {
+        "operationId": "AutoApproveVacancyAsync",
+        "summary": "Automatically approve a vacancy review.",
+        "parameters": [
+          {
+            "name": "vacancyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Vacancy review approved successfully."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetMenuResponse": {
+        "type": "object",
+        "properties": {
+          "menu": {
+            "$ref": "#/components/schemas/MenuPageModel"
+          }
+        }
+      },
+      "MenuPageModel": {
+        "type": "object",
+        "properties": {
+          "mainContent": {
+            "$ref": "#/components/schemas/MenuPageContent"
+          }
+        }
+      },
+      "MenuPageContent": {
+        "type": "object",
+        "properties": {
+          "topLevel": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          },
+          "apprentices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          },
+          "employers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          },
+          "influencers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UrlDetails"
+            }
+          }
+        }
+      },
+      "UrlDetails": {
+        "type": "object",
+        "properties": {
+          "slug": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "hub": {
+            "type": "string"
+          },
+          "pageType": {
+            "type": "string"
+          },
+          "parentSlug": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchLearnersRequest": {
+        "type": "object",
+        "properties": {
+          "accountLegalEntityId": {
+            "type": "integer"
+          },
+          "cohortId": {
+            "type": "integer"
+          },
+          "searchTerm": {
+            "type": "string"
+          },
+          "sortColumn": {
+            "type": "string"
+          },
+          "sortDescending": {
+            "type": "boolean"
+          },
+          "page": {
+            "type": "integer"
+          },
+          "pageSize": {
+            "type": "integer"
+          },
+          "startMonth": {
+            "type": "integer"
+          },
+          "startYear": {
+            "type": "integer"
+          },
+          "courseCode": {
+            "type": "string"
+          },
+          "learningType": {
+            "type": "string"
+          },
+          "excludeUlns": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      },
+      "GetLearnersForProviderQueryResult": {
+        "type": "object",
+        "properties": {}
+      },
+      "GetLearnerForProviderQueryResult": {
+        "type": "object",
+        "properties": {}
+      },
+      "CreateVacancyReviewData": {
+        "type": "object",
+        "properties": {
+          "reviewStatus": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,55 +1,38 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "ApprenticeFeedback API",
+    "title": "Providers API",
     "version": "1.0.0"
   },
   "paths": {
-    "/Provider/{ApprenticeId}": {
+    "/Providers/": {
       "get": {
-        "summary": "Retrieve training providers for an apprentice",
-        "operationId": "GetApprenticeTrainingProviders",
-        "parameters": [
-          {
-            "name": "ApprenticeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
+        "summary": "Retrieve all providers",
+        "operationId": "GetAllProviders",
         "responses": {
           "200": {
             "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetApprenticeTrainingProvidersResult"
+                  "$ref": "#/components/schemas/GetProvidersListResponse"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
     },
-    "/Provider/{ApprenticeId}/{Ukprn}": {
+    "/Providers/{ukprn}/users": {
       "get": {
-        "summary": "Retrieve a specific training provider for an apprentice",
-        "operationId": "GetApprenticeTrainingProvider",
+        "summary": "Retrieve all users for a provider",
+        "operationId": "GetProviderUsers",
         "parameters": [
           {
-            "name": "ApprenticeId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "Ukprn",
+            "name": "ukprn",
             "in": "path",
             "required": true,
             "schema": {
@@ -64,10 +47,177 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetApprenticeTrainingProviderResult"
+                  "$ref": "#/components/schemas/GetProvidersUsersResponse"
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/Providers/{providerId}/courses/{trainingCode}": {
+      "get": {
+        "summary": "Retrieve delivery models for a specific provider course",
+        "operationId": "GetProviderCoursesDeliveryModel",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "trainingCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountLegalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "deprecated": true
+      }
+    },
+    "/Providers/{providerId}/courses": {
+      "get": {
+        "summary": "Retrieve delivery models for a provider using query parameters",
+        "operationId": "GetProviderCoursesDeliveryModelByQuery",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "trainingCode",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountLegalEntityId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/Providers/{ukprn}/emails": {
+      "post": {
+        "summary": "Send emails to provider users",
+        "operationId": "EmailProviderUsers",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderEmailRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/Providers/{ukprn}/status": {
+      "get": {
+        "summary": "Retrieve provider status",
+        "operationId": "GetProviderStatus",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderAccountDetailsResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }
@@ -75,73 +225,58 @@
   },
   "components": {
     "schemas": {
-      "GetApprenticeTrainingProvidersResult": {
+      "GetProvidersListResponse": {
         "type": "object",
         "properties": {
-          "RecentDenyPeriodDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "InitialDenyPeriodDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "FinalAllowedPeriodDays": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "TrainingProviders": {
+          "Providers": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/TrainingProvider"
+              "$ref": "#/components/schemas/GetProvidersResponse"
             }
           }
         }
       },
-      "GetApprenticeTrainingProviderResult": {
+      "GetProvidersResponse": {
+        "type": "object",
+        "properties": {}
+      },
+      "GetProvidersUsersResponse": {
         "type": "object",
         "properties": {
-          "TrainingProvider": {
-            "$ref": "#/components/schemas/TrainingProvider"
+          "Users": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
           }
         }
       },
-      "TrainingProvider": {
+      "ProviderEmailRequest": {
         "type": "object",
         "properties": {
-          "ApprenticeFeedbackTargetId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "ProviderName": {
+          "TemplateId": {
             "type": "string"
           },
-          "Ukprn": {
-            "type": "integer",
-            "format": "int64"
+          "Tokens": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
           },
-          "LarsCode": {
+          "ExplicitEmailAddresses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ProviderAccountDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "ProviderStatusTypeId": {
             "type": "integer",
             "format": "int32"
-          },
-          "LastFeedbackSubmittedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "TimeWindow": {
-            "type": "string",
-            "format": "duration"
-          },
-          "SignificantDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "FeedbackEligibility": {
-            "type": "string",
-            "enum": [
-              "Eligible",
-              "NotEligible"
-            ]
           }
         }
       }

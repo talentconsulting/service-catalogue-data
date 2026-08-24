@@ -1,0 +1,88 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employment Checks API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/EmploymentChecks/": {
+      "get": {
+        "summary": "Get employment checks",
+        "operationId": "getEmploymentChecks",
+        "parameters": [
+          {
+            "name": "apprenticeshipIds",
+            "in": "query",
+            "required": true,
+            "description": "List of apprenticeship IDs",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "integer",
+                "format": "int64"
+              },
+              "maxItems": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of employment checks",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetEmploymentChecksQueryResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request parameters"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetEmploymentChecksQueryResponse": {
+        "type": "object",
+        "properties": {
+          "ApprenticeshipIds": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "EmploymentCheckResults": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EmploymentCheckResult"
+            }
+          }
+        }
+      },
+      "EmploymentCheckResult": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/EmploymentCheckStatus"
+          }
+        }
+      },
+      "EmploymentCheckStatus": {
+        "type": "string",
+        "enum": [
+          "Pass",
+          "Fail",
+          "Unknown"
+        ]
+      }
+    }
+  }
+}
