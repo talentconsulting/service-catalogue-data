@@ -1,0 +1,262 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Commitments API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/registrations/{registrationId}": {
+      "get": {
+        "operationId": "GetRegistration",
+        "summary": "Get a registration by registration ID",
+        "parameters": [
+          {
+            "name": "registrationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/registration/registration-details/{registrationId}": {
+      "get": {
+        "operationId": "GetRegistrationById",
+        "summary": "Get registration details by registration ID",
+        "parameters": [
+          {
+            "name": "registrationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/registrations": {
+      "get": {
+        "operationId": "GetRegistrationByAccountDetails",
+        "summary": "Get registrations based on account details",
+        "parameters": [
+          {
+            "name": "firstName",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastName",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "dateOfBirth",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/registrations/email": {
+      "get": {
+        "operationId": "GetRegistrationByEmail",
+        "summary": "Get registrations by email",
+        "parameters": [
+          {
+            "name": "email",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "email"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/registrations/reminders": {
+      "get": {
+        "operationId": "GetRemindersToSend",
+        "summary": "Get reminders to send by an invitation cutoff time",
+        "parameters": [
+          {
+            "name": "invitationCutOffTime",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/registrations/{registrationId}/reminder": {
+      "post": {
+        "operationId": "RegistrationReminderSent",
+        "summary": "Record the sending of a registration reminder",
+        "parameters": [
+          {
+            "name": "registrationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvitationReminderSentData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reminder recorded successfully",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/registrations/{registrationId}/firstseen": {
+      "post": {
+        "operationId": "RegistrationFirstSeen",
+        "summary": "Record the first time a registration was seen",
+        "parameters": [
+          {
+            "name": "registrationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationFirstSeenRequestData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "First seen recorded successfully",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "InvitationReminderSentData": {
+        "type": "object",
+        "properties": {
+          "SentOn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "SentOn"
+        ]
+      },
+      "RegistrationFirstSeenRequestData": {
+        "type": "object",
+        "properties": {
+          "SeenOn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "SeenOn"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,115 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Feedback",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/ApprenticeFeedback/": {
+      "post": {
+        "operationId": "CreateFeedbackTarget",
+        "summary": "Create feedback for apprentice training.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApprenticeFeedbackCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully created feedback",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateApprenticeFeedbackResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateApprenticeFeedbackCommand": {
+        "type": "object",
+        "properties": {
+          "ApprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "OverallRating": {
+            "type": "integer",
+            "description": "Overall satisfaction rating",
+            "enum": [
+              1,
+              2,
+              3,
+              4
+            ]
+          },
+          "AllowContact": {
+            "type": "boolean",
+            "description": "Whether the apprentice consents to being contacted"
+          },
+          "FeedbackAttributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackAttribute"
+            }
+          }
+        },
+        "required": [
+          "ApprenticeFeedbackTargetId",
+          "OverallRating",
+          "AllowContact",
+          "FeedbackAttributes"
+        ]
+      },
+      "FeedbackAttribute": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "description": "Unique identifier for the feedback attribute"
+          },
+          "Name": {
+            "type": "string",
+            "description": "Name of the feedback attribute"
+          },
+          "Status": {
+            "type": "integer",
+            "description": "Feedback attribute status",
+            "enum": [
+              0,
+              1
+            ]
+          }
+        },
+        "required": [
+          "Id",
+          "Name",
+          "Status"
+        ]
+      },
+      "CreateApprenticeFeedbackResponse": {
+        "type": "object",
+        "properties": {
+          "ApprenticeFeedbackResultId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique identifier for the created feedback result"
+          }
+        },
+        "required": [
+          "ApprenticeFeedbackResultId"
+        ]
+      }
+    }
+  }
+}

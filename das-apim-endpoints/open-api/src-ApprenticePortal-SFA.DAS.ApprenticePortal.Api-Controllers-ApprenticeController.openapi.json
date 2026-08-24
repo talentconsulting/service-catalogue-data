@@ -1,0 +1,138 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Portal API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/apprentices/{id}": {
+      "get": {
+        "summary": "Get an apprentice by ID",
+        "operationId": "GetApprentice",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the apprentice"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the apprentice",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApprenticeAccount"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Apprentice not found"
+          }
+        }
+      }
+    },
+    "/apprentices/{apprenticeId}": {
+      "patch": {
+        "summary": "Update an apprentice",
+        "operationId": "UpdateApprentice",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the apprentice to update"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {}
+            },
+            "application/json-patch+json": {
+              "schema": {}
+            },
+            "text/json": {
+              "schema": {}
+            },
+            "application/*+json": {
+              "schema": {}
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Apprentice updated successfully"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApprenticeAccount": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "email": {
+            "$ref": "#/components/schemas/Email"
+          },
+          "termsOfUseAccepted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "email",
+          "termsOfUseAccepted"
+        ]
+      },
+      "Email": {
+        "type": "object",
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "user": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "address"
+        ]
+      }
+    }
+  }
+}

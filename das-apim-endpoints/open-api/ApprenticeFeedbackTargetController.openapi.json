@@ -1,0 +1,223 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Feedback API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/ApprenticeFeedbackTarget/": {
+      "put": {
+        "summary": "Update Feedback Target",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TriggerFeedbackTargetUpdateCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Feedback target updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TriggerFeedbackTargetUpdateResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/ApprenticeFeedbackTarget/requiresupdate": {
+      "get": {
+        "summary": "Get Feedback Targets for Update",
+        "parameters": [
+          {
+            "name": "batchSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback targets requiring update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/ApprenticeFeedbackTarget/{apprenticeId}": {
+      "get": {
+        "summary": "Get Feedback Targets for Apprentice",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback targets for apprentice",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/ApprenticeFeedbackTarget/{id}/exitsurvey": {
+      "get": {
+        "summary": "Get Exit Survey for Feedback Target",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exit survey for feedback target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateApprenticeFeedbackTargetCommand": {
+        "type": "object",
+        "properties": {
+          "ApprenticeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ApprenticeshipId": {
+            "type": "integer"
+          },
+          "ConfirmationId": {
+            "type": "integer"
+          },
+          "ConfirmedOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "CommitmentsApprenticeshipId": {
+            "type": "integer"
+          },
+          "CommitmentsApprovedOn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "ApprenticeId",
+          "ApprenticeshipId",
+          "ConfirmationId",
+          "ConfirmedOn",
+          "CommitmentsApprenticeshipId",
+          "CommitmentsApprovedOn"
+        ]
+      },
+      "CreateApprenticeFeedbackTargetResponse": {
+        "type": "object",
+        "properties": {
+          "ApprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "ApprenticeFeedbackTargetId"
+        ]
+      },
+      "TriggerFeedbackTargetUpdateCommand": {
+        "type": "object",
+        "properties": {
+          "ApprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ApprenticeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ApprenticeshipId": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ApprenticeFeedbackTargetId",
+          "ApprenticeId",
+          "ApprenticeshipId"
+        ]
+      },
+      "TriggerFeedbackTargetUpdateResponse": {
+        "type": "object",
+        "properties": {
+          "Success": {
+            "type": "boolean"
+          },
+          "Message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Success",
+          "Message"
+        ]
+      }
+    }
+  }
+}

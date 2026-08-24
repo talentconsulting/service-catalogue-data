@@ -1,0 +1,211 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Approvals API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/approvals": {
+      "post": {
+        "summary": "Create an approval",
+        "operationId": "ApprovalCreated",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApprovalCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully created an approval",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateApprovalResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an approval",
+        "operationId": "ApprovalUpdated",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateApprovalCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successfully updated an approval"
+          }
+        }
+      }
+    },
+    "/approvals/stopped": {
+      "post": {
+        "summary": "Stop approval registration",
+        "operationId": "StopRegistration",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StopApprovalCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully stopped approval registration"
+          }
+        }
+      }
+    },
+    "/approvals/{commitmentsApprenticeshipId}/registration": {
+      "get": {
+        "summary": "Get approvals registration",
+        "operationId": "GetApprovalsRegistration",
+        "parameters": [
+          {
+            "name": "commitmentsApprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "The ID of the commitments apprenticeship"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved approval registration"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateApprovalCommand": {
+        "type": "object",
+        "properties": {
+          "EmployerAccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "CommitmentsApprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "CommitmentsApprovedOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "EmployerName": {
+            "type": "string"
+          },
+          "EmployerAccountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "TrainingProviderId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "EmployerAccountId",
+          "CommitmentsApprenticeshipId",
+          "CommitmentsApprovedOn",
+          "Email",
+          "EmployerName",
+          "EmployerAccountLegalEntityId",
+          "TrainingProviderId"
+        ]
+      },
+      "CreateApprovalResponse": {
+        "type": "object",
+        "properties": {
+          "RegistrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "GivenName": {
+            "type": "string"
+          },
+          "FamilyName": {
+            "type": "string"
+          },
+          "ApprenticeshipName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "RegistrationId",
+          "Email",
+          "GivenName",
+          "FamilyName",
+          "ApprenticeshipName"
+        ]
+      },
+      "UpdateApprovalCommand": {
+        "type": "object",
+        "properties": {
+          "CommitmentsContinuedApprenticeshipId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "CommitmentsApprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "CommitmentsApprovedOn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "CommitmentsApprenticeshipId",
+          "CommitmentsApprovedOn"
+        ]
+      },
+      "StopApprovalCommand": {
+        "type": "object",
+        "properties": {
+          "CommitmentsApprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "CommitmentsStoppedOn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "CommitmentsApprenticeshipId",
+          "CommitmentsStoppedOn"
+        ]
+      }
+    }
+  }
+}

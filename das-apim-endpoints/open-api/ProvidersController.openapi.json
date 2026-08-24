@@ -1,25 +1,32 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Providers API",
-    "description": "Provides API endpoints for retrieving information about registered providers.",
+    "title": "ApprenticeFeedback API",
     "version": "1.0.0"
   },
   "paths": {
-    "/providers": {
+    "/Provider/{ApprenticeId}": {
       "get": {
-        "summary": "Retrieves the list of registered providers.",
-        "operationId": "GetProviders",
-        "tags": [
-          "Providers"
+        "summary": "Retrieve training providers for an apprentice",
+        "operationId": "GetApprenticeTrainingProviders",
+        "parameters": [
+          {
+            "name": "ApprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved the list of registered providers.",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProvidersApiResponse"
+                  "$ref": "#/components/schemas/GetApprenticeTrainingProvidersResult"
                 }
               }
             }
@@ -27,58 +34,37 @@
         }
       }
     },
-    "/providers/status-events": {
+    "/Provider/{ApprenticeId}/{Ukprn}": {
       "get": {
-        "summary": "Retrieves a paginated list of provider status events since a specific event ID.",
-        "operationId": "GetProviderStatusEvents",
-        "tags": [
-          "Providers"
-        ],
+        "summary": "Retrieve a specific training provider for an apprentice",
+        "operationId": "GetApprenticeTrainingProvider",
         "parameters": [
           {
-            "name": "sinceEventId",
-            "in": "query",
+            "name": "ApprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Ukprn",
+            "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
-              "minimum": 0
-            },
-            "description": "The ID of the last received event. Only events with an ID greater than this value are returned."
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 1000,
-              "minimum": 1,
-              "maximum": 1000
-            },
-            "description": "The maximum number of events to return in the response. Defaults to 1000."
-          },
-          {
-            "name": "pageNumber",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 1,
-              "minimum": 1
-            },
-            "description": "The page number of results to retrieve. Defaults to 1."
+              "format": "int64"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved the provider status events.",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ProviderStatusEvent"
-                  }
+                  "$ref": "#/components/schemas/GetApprenticeTrainingProviderResult"
                 }
               }
             }
@@ -89,84 +75,75 @@
   },
   "components": {
     "schemas": {
-      "ProvidersApiResponse": {
+      "GetApprenticeTrainingProvidersResult": {
         "type": "object",
         "properties": {
-          "providers": {
+          "RecentDenyPeriodDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "InitialDenyPeriodDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "FinalAllowedPeriodDays": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "TrainingProviders": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ProviderModel"
+              "$ref": "#/components/schemas/TrainingProvider"
             }
           }
-        },
-        "required": [
-          "providers"
-        ]
+        }
       },
-      "ProviderModel": {
+      "GetApprenticeTrainingProviderResult": {
         "type": "object",
         "properties": {
-          "ukprn": {
-            "type": "integer",
-            "description": "The UKPRN of the provider."
-          },
-          "name": {
-            "type": "string",
-            "description": "The registered name of the provider."
-          },
-          "tradingName": {
-            "type": "string",
-            "description": "The trading name of the provider."
-          },
-          "providerTypeId": {
-            "type": "integer",
-            "description": "The type of the provider. 0 -> Main, 1 -> Employer, 2 -> Supporting."
-          },
-          "statusId": {
-            "type": "integer",
-            "description": "The status of the provider. 0 -> Active, 1 -> Active but not taking on apprentices, 2 -> Onboarding."
-          },
-          "canAccessApprenticeshipService": {
-            "type": "boolean",
-            "description": "Indicates whether the provider can access apprenticeship services."
+          "TrainingProvider": {
+            "$ref": "#/components/schemas/TrainingProvider"
           }
-        },
-        "required": [
-          "ukprn",
-          "name",
-          "tradingName",
-          "providerTypeId",
-          "statusId",
-          "canAccessApprenticeshipService"
-        ]
+        }
       },
-      "ProviderStatusEvent": {
+      "TrainingProvider": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "description": "The unique identifier of the status event."
-          },
-          "providerId": {
-            "type": "integer",
-            "description": "The UKPRN of the provider associated with the event."
-          },
-          "event": {
+          "ApprenticeFeedbackTargetId": {
             "type": "string",
-            "description": "The type of the event."
+            "format": "uuid"
           },
-          "createdOn": {
+          "ProviderName": {
+            "type": "string"
+          },
+          "Ukprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "LarsCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "LastFeedbackSubmittedDate": {
             "type": "string",
-            "format": "date-time",
-            "description": "The timestamp when the event was created."
+            "format": "date-time"
+          },
+          "TimeWindow": {
+            "type": "string",
+            "format": "duration"
+          },
+          "SignificantDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "FeedbackEligibility": {
+            "type": "string",
+            "enum": [
+              "Eligible",
+              "NotEligible"
+            ]
           }
-        },
-        "required": [
-          "id",
-          "providerId",
-          "event",
-          "createdOn"
-        ]
+        }
       }
     }
   }

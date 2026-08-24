@@ -1,0 +1,154 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Accounts API",
+    "description": "Provides operations related to accounts, including account information and user details.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/Accounts/{hashedAccountId}": {
+      "get": {
+        "summary": "Retrieve account information",
+        "operationId": "GetAccount",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed account ID of the employer account"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of the employer account",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAccountQueryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Employer account not found"
+          },
+          "400": {
+            "description": "Bad request due to an error"
+          }
+        }
+      }
+    },
+    "/Accounts/{hashedAccountId}/users": {
+      "get": {
+        "summary": "Retrieve account users",
+        "operationId": "GetAccountUsers",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The hashed account ID of the employer account"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of account users",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAccountUsersQueryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Account users not found"
+          },
+          "400": {
+            "description": "Bad request due to an error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetAccountQueryResponse": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "description": "The unique identifier for the account"
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the employer account"
+          },
+          "createdDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time when the account was created"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AccountStatus"
+          }
+        }
+      },
+      "GetAccountUsersQueryResponse": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserDetails"
+            }
+          }
+        }
+      },
+      "AccountStatus": {
+        "type": "string",
+        "enum": [
+          "Active",
+          "Inactive",
+          "Closed"
+        ],
+        "description": "The status of the employer account"
+      },
+      "UserDetails": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "The unique identifier for the user"
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "The email address of the user"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "The first name of the user"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "The last name of the user"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "The roles assigned to the user"
+          }
+        }
+      }
+    }
+  }
+}

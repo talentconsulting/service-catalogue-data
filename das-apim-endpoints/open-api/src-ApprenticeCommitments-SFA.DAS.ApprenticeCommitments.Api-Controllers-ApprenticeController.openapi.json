@@ -1,0 +1,147 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Commitments API",
+    "version": "1.0.0",
+    "description": "API managing apprentice commitments."
+  },
+  "paths": {
+    "/apprentices/{id}": {
+      "get": {
+        "summary": "Get Apprentice",
+        "operationId": "GetApprentice",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the apprentice",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Apprentice data retrieved successfully"
+          },
+          "404": {
+            "description": "Apprentice not found"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update Apprentice",
+        "operationId": "UpdateApprentice",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier for the apprentice",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/JsonPatchDocument-Apprentice"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Apprentice was successfully updated"
+          },
+          "400": {
+            "description": "Invalid patch operations"
+          },
+          "404": {
+            "description": "Apprentice not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Apprentice": {
+        "type": "object",
+        "properties": {
+          "ApprenticeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string",
+            "format": "email"
+          },
+          "DateOfBirth": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "TermsOfUseAccepted": {
+            "type": "boolean"
+          },
+          "GovUkIdentifier": {
+            "type": "string"
+          }
+        }
+      },
+      "JsonPatchDocument-Apprentice": {
+        "type": "object",
+        "description": "JSON Patch operations for updating an apprentice.",
+        "properties": {
+          "operations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JsonPatchOperation"
+            }
+          }
+        }
+      },
+      "JsonPatchOperation": {
+        "type": "object",
+        "properties": {
+          "op": {
+            "type": "string",
+            "enum": [
+              "add",
+              "remove",
+              "replace",
+              "move",
+              "copy",
+              "test"
+            ]
+          },
+          "path": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          },
+          "from": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "op",
+          "path"
+        ]
+      }
+    }
+  }
+}

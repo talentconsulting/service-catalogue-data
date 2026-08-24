@@ -1,0 +1,274 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Feedback API",
+    "version": "1.0.0",
+    "description": "API for managing apprentice feedback transactions."
+  },
+  "paths": {
+    "/FeedbackTransaction/generate-email-transactions": {
+      "post": {
+        "operationId": "GenerateEmailTransactions",
+        "summary": "Generates email transactions.",
+        "responses": {
+          "200": {
+            "description": "Null response indicating success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NullResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/FeedbackTransaction/{feedbackTransactionId}": {
+      "post": {
+        "operationId": "ProcessEmailTransaction",
+        "summary": "Processes an email transaction.",
+        "parameters": [
+          {
+            "name": "feedbackTransactionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackTransaction"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success response with email transaction result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessEmailTransactionResult"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error response with email status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmailStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/FeedbackTransaction/{feedbackTransactionId}/track-click": {
+      "post": {
+        "operationId": "TrackClick",
+        "summary": "Tracks a click on an email transaction link.",
+        "parameters": [
+          {
+            "name": "feedbackTransactionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackTransactionClick"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success response indicating the click status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackEmailTransactionClickResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/FeedbackTransaction": {
+      "get": {
+        "operationId": "GetFeedbackTransactionsToEmail",
+        "summary": "Retrieves feedback transactions to email.",
+        "parameters": [
+          {
+            "name": "batchSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of feedback transactions.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/GetFeedbackTransactionsToEmailResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "NullResponse": {
+        "type": "object",
+        "description": "An empty response object."
+      },
+      "FeedbackTransaction": {
+        "type": "object",
+        "properties": {
+          "FeedbackTransactionId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ApprenticeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ApprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "FeedbackTransactionId",
+          "ApprenticeId",
+          "ApprenticeFeedbackTargetId"
+        ]
+      },
+      "FeedbackTransactionClick": {
+        "type": "object",
+        "properties": {
+          "ApprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "LinkName": {
+            "type": "string"
+          },
+          "LinkUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "ClickedOn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "ApprenticeFeedbackTargetId",
+          "LinkName",
+          "LinkUrl",
+          "ClickedOn"
+        ]
+      },
+      "ProcessEmailTransactionResult": {
+        "type": "object",
+        "properties": {
+          "FeedbackTransactionId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "EmailStatus": {
+            "$ref": "#/components/schemas/EmailStatus"
+          }
+        },
+        "required": [
+          "FeedbackTransactionId",
+          "EmailStatus"
+        ]
+      },
+      "TrackEmailTransactionClickResult": {
+        "type": "object",
+        "properties": {
+          "FeedbackTransactionId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ApprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ClickStatus": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "FeedbackTransactionId",
+          "ApprenticeFeedbackTargetId",
+          "ClickStatus"
+        ]
+      },
+      "GetFeedbackTransactionsToEmailResponse": {
+        "type": "object",
+        "properties": {
+          "FeedbackTransactionId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ApprenticeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ApprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "FeedbackTransactionId",
+          "ApprenticeId",
+          "ApprenticeFeedbackTargetId"
+        ]
+      },
+      "EmailStatus": {
+        "type": "string",
+        "enum": [
+          "Successful",
+          "NotAllowed",
+          "Failed"
+        ]
+      }
+    }
+  }
+}

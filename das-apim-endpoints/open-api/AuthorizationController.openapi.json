@@ -1,0 +1,142 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SFA DAS Approvals API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/Authorization/{partyId}/can-access-cohort/{cohortId}": {
+      "get": {
+        "summary": "Check if a party can access a cohort",
+        "parameters": [
+          {
+            "name": "partyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "cohortId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "party",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Party"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cohort access status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCohortAccessResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/Authorization/{partyId}/can-access-apprenticeship/{apprenticeshipId}": {
+      "get": {
+        "summary": "Check if a party can access an apprenticeship",
+        "parameters": [
+          {
+            "name": "partyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "party",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Party"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Apprenticeship access status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApprenticeshipAccessResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Party": {
+        "type": "integer",
+        "description": "Possible values:\n- 0: None\n- 1: Employer\n- 2: Provider\n- 4: TransferSender",
+        "enum": [
+          0,
+          1,
+          2,
+          4
+        ],
+        "example": 1
+      },
+      "GetCohortAccessResponse": {
+        "type": "object",
+        "properties": {
+          "HasCohortAccess": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "HasCohortAccess"
+        ]
+      },
+      "GetApprenticeshipAccessResponse": {
+        "type": "object",
+        "properties": {
+          "HasApprenticeshipAccess": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "HasApprenticeshipAccess"
+        ]
+      }
+    }
+  }
+}
