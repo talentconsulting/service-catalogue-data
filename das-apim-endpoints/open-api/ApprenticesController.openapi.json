@@ -1,17 +1,18 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "ApprenticeAan API",
-    "version": "1.0.0"
+    "title": "Apprentices API",
+    "version": "1.0.0",
+    "description": "API for managing Apprenticeships and related operations."
   },
   "paths": {
-    "/apprentices/{apprenticeId}/account": {
+    "/apprentices/{id}": {
       "get": {
-        "summary": "Get Apprentice Account",
-        "operationId": "GetApprenticeAccount",
+        "operationId": "getApprentice",
+        "summary": "Get apprentice details by ID",
         "parameters": [
           {
-            "name": "apprenticeId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
@@ -26,29 +27,39 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetApprenticeAccountQueryResult"
+                  "type": "object"
                 }
               }
             }
           },
           "404": {
             "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
     },
-    "/apprentices/{apprenticeId}": {
+    "/provider/{providerId}/apprentices/{apprenticeshipId}/change-employer/inform": {
       "get": {
-        "summary": "Get Apprentice Details",
-        "operationId": "GetApprentice",
+        "operationId": "getChangeEmployerInform",
+        "summary": "Get employer change inform details",
         "parameters": [
           {
-            "name": "apprenticeId",
+            "name": "providerId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "format": "uuid"
+              "type": "integer"
+            }
+          },
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
             }
           }
         ],
@@ -58,41 +69,138 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetApprenticeResult"
+                  "type": "object",
+                  "properties": {
+                    "legalEntityName": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
           },
           "404": {
             "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
     },
-    "/apprentices": {
-      "post": {
-        "summary": "Create Apprentice Member",
-        "operationId": "CreateApprenticeMember",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateApprenticeMemberCommand"
-              }
+    "/provider/{providerId}/apprentices/{apprenticeshipId}/change-employer/confirm-employer": {
+      "get": {
+        "operationId": "getChangeEmployerConfirmEmployer",
+        "summary": "Get confirm employer details",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "accountLegalEntityId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CreateApprenticeMemberCommandResult"
+                  "type": "object",
+                  "properties": {
+                    "legalEntityName": {
+                      "type": "string"
+                    },
+                    "accountLegalEntityName": {
+                      "type": "string"
+                    },
+                    "accountName": {
+                      "type": "string"
+                    },
+                    "isFlexiJobAgency": {
+                      "type": "boolean"
+                    },
+                    "deliveryModel": {
+                      "type": "string"
+                    }
+                  }
                 }
               }
             }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/provider/{providerId}/apprentices/{apprenticeshipId}/change-employer/apprenticeship-data": {
+      "get": {
+        "operationId": "getChangeEmployerApprenticeshipData",
+        "summary": "Get apprenticeship data for employer change",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "accountLegalEntityId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "400": {
+            "description": "Bad Request"
           }
         }
       }
@@ -100,199 +208,35 @@
   },
   "components": {
     "schemas": {
-      "GetApprenticeAccountQueryResult": {
+      "ChangePaymentsRequest": {
         "type": "object",
         "properties": {
-          "apprenticeId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "dateOfBirth": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "apprenticeId",
-          "firstName",
-          "lastName",
-          "email",
-          "dateOfBirth"
-        ]
-      },
-      "GetApprenticeResult": {
-        "type": "object",
-        "properties": {
-          "memberId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string"
-          },
-          "organisationName": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "regionId": {
-            "type": "integer"
-          }
-        },
-        "required": [
-          "memberId",
-          "firstName",
-          "lastName",
-          "email",
-          "organisationName",
-          "status",
-          "regionId"
-        ]
-      },
-      "CreateApprenticeMemberCommand": {
-        "type": "object",
-        "properties": {
-          "apprenticeId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "email": {
-            "type": "string"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "joinedDate": {
+          "paymentFreezeDate": {
             "type": "string",
             "format": "date-time"
           },
-          "regionId": {
+          "userInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          },
+          "freezePaymentsReason": {
             "type": "integer"
-          },
-          "organisationName": {
-            "type": "string"
-          },
-          "profileValues": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProfileValue"
-            }
-          },
-          "memberNotificationEventFormatValues": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MemberNotificationEventFormatValues"
-            }
-          },
-          "memberNotificationLocationValues": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/MemberNotificationLocationValues"
-            }
-          },
-          "receiveNotifications": {
-            "type": "boolean"
           }
-        },
-        "required": [
-          "apprenticeId",
-          "email",
-          "firstName",
-          "lastName",
-          "joinedDate",
-          "regionId",
-          "organisationName",
-          "profileValues",
-          "receiveNotifications"
-        ]
+        }
       },
-      "CreateApprenticeMemberCommandResult": {
+      "UserInfo": {
         "type": "object",
         "properties": {
-          "memberId": {
+          "userId": {
+            "type": "string"
+          },
+          "userDisplayName": {
+            "type": "string"
+          },
+          "userEmail": {
             "type": "string",
-            "format": "uuid"
+            "format": "email"
           }
-        },
-        "required": [
-          "memberId"
-        ]
-      },
-      "ProfileValue": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "value": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "value"
-        ]
-      },
-      "MemberNotificationEventFormatValues": {
-        "type": "object",
-        "properties": {
-          "eventFormat": {
-            "type": "string"
-          },
-          "ordering": {
-            "type": "integer"
-          },
-          "receiveNotifications": {
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "eventFormat",
-          "ordering",
-          "receiveNotifications"
-        ]
-      },
-      "MemberNotificationLocationValues": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "radius": {
-            "type": "integer"
-          },
-          "latitude": {
-            "type": "number"
-          },
-          "longitude": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "name",
-          "radius",
-          "latitude",
-          "longitude"
-        ]
+        }
       }
     }
   }

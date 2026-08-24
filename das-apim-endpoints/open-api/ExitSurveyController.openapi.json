@@ -1,0 +1,101 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Feedback API",
+    "version": "1.0.0",
+    "description": "This API provides endpoints for managing apprentice feedback, specifically creating exit surveys."
+  },
+  "paths": {
+    "/ExitSurvey/": {
+      "post": {
+        "summary": "Create an Exit Survey",
+        "operationId": "CreateExitSurvey",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExitSurveyCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully created an exit survey.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateExitSurveyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request. The provided input data is invalid.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error. An unexpected error occurred."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateExitSurveyCommand": {
+        "type": "object",
+        "properties": {
+          "ApprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier for the target apprentice feedback."
+          },
+          "AllowContact": {
+            "type": "boolean",
+            "description": "Indicates whether the apprentice allows to be contacted."
+          },
+          "AttributeIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "description": "List of attribute IDs associated with the exit survey."
+          },
+          "PrimaryReason": {
+            "type": "integer",
+            "description": "The primary reason for the apprentice's feedback."
+          }
+        },
+        "required": [
+          "ApprenticeFeedbackTargetId",
+          "AllowContact",
+          "AttributeIds",
+          "PrimaryReason"
+        ]
+      },
+      "CreateExitSurveyResponse": {
+        "type": "object",
+        "properties": {
+          "ApprenticeExitSurveyId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The unique identifier of the created exit survey."
+          }
+        }
+      }
+    }
+  }
+}

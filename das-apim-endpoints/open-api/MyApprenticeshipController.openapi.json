@@ -1,70 +1,39 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "My Apprenticeship API",
+    "title": "Apprentice Portal API",
     "version": "1.0.0"
   },
   "paths": {
-    "/MyApprenticeship/{apprenticeId}": {
-      "get": {
-        "summary": "Get My Apprenticeship",
-        "operationId": "GetMyApprenticeship",
+    "/apprentices/{id}/my-apprenticeship": {
+      "post": {
+        "summary": "Add or update MyApprenticeship details",
+        "operationId": "PostMyApprenticeship",
         "parameters": [
           {
-            "name": "apprenticeId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The unique identifier of the apprentice"
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Successfully retrieved apprenticeship",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetMyApprenticeshipQueryResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Apprenticeship not found"
-          }
-        }
-      }
-    },
-    "/MyApprenticeship": {
-      "post": {
-        "summary": "Try Create My Apprenticeship",
-        "operationId": "TryCreateMyApprenticeship",
         "requestBody": {
-          "description": "Details needed to create a new apprenticeship",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/TryCreateMyApprenticeshipRequestModel"
+                "$ref": "#/components/schemas/MyApprenticeshipConfirmedRequest"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Apprenticeship already exists or successfully created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetMyApprenticeshipQueryResult"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Apprenticeship could not be created"
+            "description": "Operation completed successfully"
           }
         }
       }
@@ -72,93 +41,24 @@
   },
   "components": {
     "schemas": {
-      "GetMyApprenticeshipQueryResult": {
+      "MyApprenticeshipConfirmedRequest": {
         "type": "object",
         "properties": {
-          "Uln": {
+          "CommitmentsApprenticeshipId": {
             "type": "integer",
-            "nullable": true
+            "format": "int64",
+            "description": "The apprenticeship ID within the commitments system"
           },
-          "ApprenticeshipId": {
-            "type": "integer",
-            "nullable": true
-          },
-          "EmployerName": {
-            "type": "string",
-            "nullable": true
-          },
-          "StartDate": {
+          "ApprovedOn": {
             "type": "string",
             "format": "date-time",
-            "nullable": true
-          },
-          "EndDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "TrainingProviderId": {
-            "type": "integer",
-            "nullable": true
-          },
-          "TrainingProviderName": {
-            "type": "string",
-            "nullable": true
-          },
-          "TrainingCourse": {
-            "$ref": "#/components/schemas/TrainingCourse"
+            "description": "The date and time when the apprenticeship was approved"
           }
-        }
-      },
-      "TrainingCourse": {
-        "type": "object",
-        "properties": {
-          "Name": {
-            "type": "string",
-            "nullable": true
-          },
-          "Level": {
-            "type": "integer"
-          },
-          "Duration": {
-            "type": "integer",
-            "nullable": true
-          },
-          "Sector": {
-            "type": "string",
-            "nullable": true
-          }
-        }
-      },
-      "TryCreateMyApprenticeshipRequestModel": {
-        "type": "object",
+        },
         "required": [
-          "ApprenticeId",
-          "FirstName",
-          "LastName",
-          "Email",
-          "DateOfBirth"
-        ],
-        "properties": {
-          "ApprenticeId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "FirstName": {
-            "type": "string"
-          },
-          "LastName": {
-            "type": "string"
-          },
-          "Email": {
-            "type": "string",
-            "format": "email"
-          },
-          "DateOfBirth": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
+          "CommitmentsApprenticeshipId",
+          "ApprovedOn"
+        ]
       }
     }
   }
