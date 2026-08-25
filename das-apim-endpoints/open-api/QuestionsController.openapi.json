@@ -2,12 +2,14 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Questions API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing questions in forms"
   },
   "paths": {
     "/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions": {
       "post": {
-        "summary": "Create a question",
+        "summary": "Create a new question",
+        "operationId": "createQuestion",
         "parameters": [
           {
             "name": "formVersionId",
@@ -65,130 +67,9 @@
       }
     },
     "/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions/{questionId}": {
-      "put": {
-        "summary": "Update a question",
-        "parameters": [
-          {
-            "name": "formVersionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "sectionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "pageId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "questionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateQuestionCommand"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Question updated successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmptyResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete a question",
-        "parameters": [
-          {
-            "name": "formVersionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "sectionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "pageId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "questionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Question deleted successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmptyResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
       "get": {
         "summary": "Get a question by ID",
+        "operationId": "getQuestionById",
         "parameters": [
           {
             "name": "formVersionId",
@@ -229,7 +110,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Question retrieved successfully",
+            "description": "Retrieved question details successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -246,7 +127,8 @@
     },
     "/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions/{questionId}/MoveDown": {
       "put": {
-        "summary": "Move a question down",
+        "summary": "Move a question down in order",
+        "operationId": "moveQuestionDown",
         "parameters": [
           {
             "name": "formVersionId",
@@ -304,7 +186,8 @@
     },
     "/api/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions/{questionId}/MoveUp": {
       "put": {
-        "summary": "Move a question up",
+        "summary": "Move a question up in order",
+        "operationId": "moveQuestionUp",
         "parameters": [
           {
             "name": "formVersionId",
@@ -366,25 +249,25 @@
       "CreateQuestionCommand": {
         "type": "object",
         "properties": {
-          "FormVersionId": {
+          "formVersionId": {
             "type": "string",
             "format": "uuid"
           },
-          "SectionId": {
+          "sectionId": {
             "type": "string",
             "format": "uuid"
           },
-          "PageId": {
+          "pageId": {
             "type": "string",
             "format": "uuid"
           },
-          "Title": {
+          "title": {
             "type": "string"
           },
-          "Required": {
+          "required": {
             "type": "boolean"
           },
-          "Type": {
+          "type": {
             "type": "string"
           }
         }
@@ -392,7 +275,7 @@
       "CreateQuestionCommandResponse": {
         "type": "object",
         "properties": {
-          "Id": {
+          "id": {
             "type": "string",
             "format": "uuid"
           }
@@ -401,66 +284,75 @@
       "UpdateQuestionCommand": {
         "type": "object",
         "properties": {
-          "Id": {
+          "id": {
             "type": "string",
             "format": "uuid"
           },
-          "FormVersionId": {
+          "formVersionId": {
             "type": "string",
             "format": "uuid"
           },
-          "SectionId": {
+          "sectionId": {
             "type": "string",
             "format": "uuid"
           },
-          "PageId": {
+          "pageId": {
             "type": "string",
             "format": "uuid"
           },
-          "Title": {
+          "title": {
             "type": "string"
           },
-          "Hint": {
-            "type": "string",
-            "nullable": true
+          "hint": {
+            "type": "string"
           },
-          "Helper": {
-            "type": "string",
-            "nullable": true
+          "helper": {
+            "type": "string"
           },
-          "Required": {
+          "required": {
             "type": "boolean"
           }
         }
       },
       "EmptyResponse": {
-        "type": "object"
+        "type": "object",
+        "description": "Empty response schema"
       },
       "GetQuestionByIdQueryResponse": {
         "type": "object",
         "properties": {
-          "Id": {
+          "id": {
             "type": "string",
             "format": "uuid"
           },
-          "PageId": {
+          "pageId": {
             "type": "string",
             "format": "uuid"
           },
-          "Title": {
+          "title": {
             "type": "string"
           },
-          "Hint": {
+          "key": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "hint": {
             "type": "string"
           },
-          "Order": {
+          "helper": {
+            "type": "string"
+          },
+          "order": {
             "type": "integer"
           },
-          "Required": {
+          "required": {
             "type": "boolean"
           },
-          "Type": {
+          "type": {
             "type": "string"
+          },
+          "editable": {
+            "type": "boolean"
           }
         }
       }

@@ -2,12 +2,14 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Provider Available Courses API",
+    "description": "API for querying available courses for a provider.",
     "version": "1.0.0"
   },
   "paths": {
     "/providers/{ukprn}/courses-tobe-allowed": {
       "get": {
         "summary": "Get Provider Available Courses",
+        "description": "Fetches the list of courses available to a provider with an optional filter by course type.",
         "operationId": "GetProviderAvailableCourses",
         "parameters": [
           {
@@ -16,7 +18,8 @@
             "required": true,
             "schema": {
               "type": "integer"
-            }
+            },
+            "description": "Unique identifying number of the provider."
           },
           {
             "name": "courseType",
@@ -24,12 +27,13 @@
             "required": false,
             "schema": {
               "$ref": "#/components/schemas/CourseType"
-            }
+            },
+            "description": "Optional course type filter."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful response with the list of restricted course details.",
             "content": {
               "application/json": {
                 "schema": {
@@ -49,25 +53,31 @@
         "enum": [
           "Apprenticeship",
           "ShortCourse"
-        ]
+        ],
+        "description": "The type of course."
       },
       "RestrictedCourseDetailsModel": {
         "type": "object",
         "properties": {
           "LarsCode": {
-            "type": "string"
+            "type": "string",
+            "description": "Unique code for the Learning Aim Reference Service."
           },
           "IfateReferenceNumber": {
-            "type": "string"
+            "type": "string",
+            "description": "Reference number from the Institute for Apprenticeships and Technical Education."
           },
           "CourseName": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the course."
           },
           "Level": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Level of the course."
           },
           "Route": {
-            "type": "string"
+            "type": "string",
+            "description": "The route of the course."
           },
           "LearningType": {
             "$ref": "#/components/schemas/LearningType"
@@ -76,23 +86,38 @@
             "$ref": "#/components/schemas/CourseType"
           },
           "IsActiveAvailable": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Indicates if the course is actively available."
           },
           "LastDateStarts": {
             "type": "string",
             "format": "date-time",
-            "nullable": true
+            "description": "The last date a start is available for the course."
           },
           "IsCourseRestricted": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Indicates if the course is restricted."
           },
           "Providers": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ProviderModel"
-            }
+            },
+            "description": "List of providers offering the course."
           }
-        }
+        },
+        "required": [
+          "LarsCode",
+          "IfateReferenceNumber",
+          "CourseName",
+          "Level",
+          "Route",
+          "LearningType",
+          "CourseType",
+          "IsActiveAvailable",
+          "IsCourseRestricted",
+          "Providers"
+        ]
       },
       "LearningType": {
         "type": "string",
@@ -100,23 +125,30 @@
           "Apprenticeship",
           "FoundationApprenticeship",
           "ApprenticeshipUnit"
-        ]
+        ],
+        "description": "The type of learning."
       },
       "ProviderModel": {
         "type": "object",
         "properties": {
           "Ukprn": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Unique Provider Reference Number."
           },
           "ProviderName": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the provider."
           },
           "LastDateStarts": {
             "type": "string",
             "format": "date-time",
-            "nullable": true
+            "description": "The last date starts for this provider."
           }
-        }
+        },
+        "required": [
+          "Ukprn",
+          "ProviderName"
+        ]
       }
     }
   }

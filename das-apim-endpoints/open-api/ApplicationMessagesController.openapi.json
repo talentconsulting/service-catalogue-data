@@ -7,7 +7,7 @@
   "paths": {
     "/api/applications/{applicationId}/messages": {
       "get": {
-        "summary": "Get application messages by application ID",
+        "operationId": "GetApplicationMessagesByIdAsync",
         "parameters": [
           {
             "name": "applicationId",
@@ -39,15 +39,15 @@
             }
           },
           "404": {
-            "description": "Not found"
+            "description": "Not Found"
           },
           "500": {
-            "description": "Server error"
+            "description": "Internal Server Error"
           }
         }
       },
       "post": {
-        "summary": "Create a new application message",
+        "operationId": "CreateApplicationMessageAsync",
         "parameters": [
           {
             "name": "applicationId",
@@ -71,7 +71,7 @@
         },
         "responses": {
           "200": {
-            "description": "Message created",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -81,14 +81,14 @@
             }
           },
           "500": {
-            "description": "Server error"
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/api/applications/messages/{messageId}": {
       "get": {
-        "summary": "Get a message by its ID",
+        "operationId": "GetMessageByIdAsync",
         "parameters": [
           {
             "name": "messageId",
@@ -112,17 +112,17 @@
             }
           },
           "404": {
-            "description": "Not found"
+            "description": "Not Found"
           },
           "500": {
-            "description": "Server error"
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/api/applications/{applicationId}/messages/read": {
       "put": {
-        "summary": "Mark all messages as read for an application",
+        "operationId": "MarkAllMessagesAsRead",
         "parameters": [
           {
             "name": "applicationId",
@@ -146,7 +146,7 @@
         },
         "responses": {
           "200": {
-            "description": "Messages marked as read",
+            "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
@@ -156,7 +156,7 @@
             }
           },
           "500": {
-            "description": "Server error"
+            "description": "Internal Server Error"
           }
         }
       }
@@ -211,51 +211,8 @@
             "type": "string"
           },
           "sentByEmail": {
-            "type": "string"
-          },
-          "sentAt": {
             "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "GetApplicationMessageByIdQueryResponse": {
-        "type": "object",
-        "properties": {
-          "messageId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "applicationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "messageText": {
-            "type": "string"
-          },
-          "messageType": {
-            "type": "string"
-          },
-          "messageHeader": {
-            "type": "string"
-          },
-          "sharedWithDfe": {
-            "type": "boolean"
-          },
-          "sharedWithOfqual": {
-            "type": "boolean"
-          },
-          "sharedWithSkillsEngland": {
-            "type": "boolean"
-          },
-          "sharedWithAwardingOrganisation": {
-            "type": "boolean"
-          },
-          "sentByName": {
-            "type": "string"
-          },
-          "sentByEmail": {
-            "type": "string"
+            "format": "email"
           },
           "sentAt": {
             "type": "string",
@@ -283,13 +240,17 @@
             "type": "string"
           },
           "sentByEmail": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           }
         },
         "required": [
           "applicationId",
           "messageText",
-          "messageType"
+          "messageType",
+          "userType",
+          "sentByName",
+          "sentByEmail"
         ]
       },
       "CreateApplicationMessageCommandResponse": {
@@ -327,6 +288,7 @@
           },
           "emailAddress": {
             "type": "string",
+            "format": "email",
             "nullable": true
           }
         },
@@ -334,6 +296,51 @@
           "templateName",
           "recipientKind"
         ]
+      },
+      "GetApplicationMessageByIdQueryResponse": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "messageText": {
+            "type": "string"
+          },
+          "messageType": {
+            "type": "string"
+          },
+          "messageHeader": {
+            "type": "string"
+          },
+          "sharedWithDfe": {
+            "type": "boolean"
+          },
+          "sharedWithOfqual": {
+            "type": "boolean"
+          },
+          "sharedWithSkillsEngland": {
+            "type": "boolean"
+          },
+          "sharedWithAwardingOrganisation": {
+            "type": "boolean"
+          },
+          "sentByName": {
+            "type": "string"
+          },
+          "sentByEmail": {
+            "type": "string",
+            "format": "email"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
       },
       "MarkAllMessagesAsReadCommand": {
         "type": "object",
@@ -347,12 +354,13 @@
           }
         },
         "required": [
-          "applicationId"
+          "applicationId",
+          "userType"
         ]
       },
       "EmptyResponse": {
         "type": "object",
-        "description": "A response with no content"
+        "description": "An empty response indicating success"
       }
     }
   }
