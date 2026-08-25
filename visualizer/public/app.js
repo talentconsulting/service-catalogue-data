@@ -449,7 +449,7 @@ function orgFromRepoUrl(url) {
 }
 
 function relationshipLabel(dependency) {
-  const verb = dependency.direction === 'inbound' ? 'Called by' : 'Calls';
+  const verb = dependency.description || (dependency.direction === 'inbound' ? 'Called by' : 'Calls');
   const kindLabel = dependency.kind === 'http-api' ? 'HTTP' : dependency.kind;
   const seen = new Set();
   const parts = [kindLabel, dependency.technology].filter(Boolean).filter((value) => {
@@ -676,7 +676,13 @@ function wireDiagramControls(onAutoArrange) {
 }
 
 function renderDependencies(resetToolbar = true) {
-  const dependencies = (state.data.dependencies || []).map((dependency, index) => ({ ...dependency, id: String(index) }));
+  const idCounts = new Map();
+  const dependencies = (state.data.dependencies || []).map((dependency, index) => {
+    const baseId = dependency.targetId || String(index);
+    const seenCount = idCounts.get(baseId) || 0;
+    idCounts.set(baseId, seenCount + 1);
+    return { ...dependency, id: seenCount === 0 ? baseId : `${baseId}-${seenCount}` };
+  });
   const operations = dependencies.reduce((sum, dependency) => sum + (dependency.operations?.length || 0), 0);
   const internalCount = dependencies.filter((dependency) => dependency.classification === 'internal').length;
   const messageCount = dependencies.filter((dependency) => dependency.kind === 'message').length;
@@ -777,12 +783,13 @@ function dependencyDetail(dependency) {
   const authentication = dependency.authentication || {};
   const scanKind = dependency.kind === 'message' ? 'eventcatalog' : 'service-dependencies';
   const facts = [
+    dependency.description ? ['Relationship', dependency.description] : null,
     ['Type', c4Type(dependency)],
     ['Client', dependency.client],
     ['Technology', dependency.technology],
     ['Authentication', authentication.type],
     ['Confidence', dependency.confidence]
-  ];
+  ].filter(Boolean);
   return `<article class="dependency-detail">
     <p class="eyebrow">${escapeHtml(dependency.direction || 'Unknown')} dependency</p>
     <h2>${escapeHtml(dependency.name)}</h2>
@@ -1031,10 +1038,11 @@ function sourceLink(path, scanKind = 'eventcatalog') {
 function dependencyTooltipContent(dependency) {
   const ops = dependency.operations || [];
   const title = `<div class="node-tooltip-title">${escapeHtml(splitPascalCase(dependency.name))}${usesRedis(dependency) ? ' <span class="badge danger">Redis</span>' : ''}</div>`;
-  if (!ops.length) return `${title}<p class="node-tooltip-empty">No operations recorded — click the box for full details.</p>`;
+  const subtitle = dependency.description ? `<p class="node-tooltip-subtitle">${escapeHtml(dependency.description)}</p>` : '';
+  if (!ops.length) return `${title}${subtitle}<p class="node-tooltip-empty">No operations recorded — click the box for full details.</p>`;
   const scanKind = dependency.kind === 'message' ? 'eventcatalog' : 'service-dependencies';
   const shown = ops.slice(0, 8);
-  return `${title}<ul class="node-tooltip-list">${shown.map((operation) => {
+  return `${title}${subtitle}<ul class="node-tooltip-list">${shown.map((operation) => {
     const url = githubFileUrl(operation.sourceFile, scanKind);
     const label = operation.path && operation.path !== 'Not resolved' ? operation.path : (operation.methodName || operation.method || 'operation');
     return `<li><span class="method ${escapeHtml((operation.method || '').toLowerCase())}">${escapeHtml(operation.methodName || operation.method || '—')}</span>${url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>` : `<span class="muted">${escapeHtml(label)}</span>`}</li>`;

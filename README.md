@@ -30,3 +30,19 @@ npm start
 
 Set `CATALOGUE_DATA_DIR` when the data repository is not the parent directory.
 Run the API tests with `npm test`.
+
+## Dependabot alert report
+
+The `dependabot-report` workflow (`.github/workflows/dependabot-report.yml`)
+runs weekly (and on manual dispatch), scans every active, non-archived
+repository in the `SkillsFundingAgency` organisation for open Dependabot
+security alerts via `.github/scripts/generate-dependabot-report.mjs`, and
+opens a pull request against this repo updating `dependabot-alerts.json` with
+the results (per-repo alerts, severity breakdown, and org-wide totals).
+
+**Setup:** the workflow needs an `ORG_DEPENDABOT_TOKEN` repository secret — a
+token (fine-grained PAT with `Dependabot alerts: Read-only` across the org, or
+a classic PAT with `repo` + `security_events` scope) belonging to an account
+with Dependabot alert read access across the organisation. The default
+`GITHUB_TOKEN` only covers this repository and can't read alerts elsewhere in
+the org.
