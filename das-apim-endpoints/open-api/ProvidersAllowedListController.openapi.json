@@ -3,31 +3,33 @@
   "info": {
     "title": "Providers Allowed List API",
     "version": "1.0.0",
-    "description": "API for managing the providers allowed list."
+    "description": "API endpoints for managing the providers' allowed list."
   },
   "paths": {
     "/providers/allowedlist": {
       "get": {
+        "summary": "Get Providers Allowed List",
         "operationId": "GetAllowedList",
-        "summary": "Retrieve the list of allowed providers.",
         "parameters": [
           {
             "name": "sortColumn",
             "in": "query",
-            "description": "Column to sort the results on.",
             "required": false,
             "schema": {
-              "type": "string"
-            }
+              "type": "string",
+              "nullable": true
+            },
+            "description": "The column to sort by."
           },
           {
             "name": "sortOrder",
             "in": "query",
-            "description": "Order of sorting (ascending or descending).",
             "required": false,
             "schema": {
-              "type": "string"
-            }
+              "type": "string",
+              "nullable": true
+            },
+            "description": "The sorting order (e.g., ascending, descending)."
           }
         ],
         "responses": {
@@ -45,7 +47,7 @@
             }
           },
           "400": {
-            "description": "Bad request due to invalid parameters.",
+            "description": "Invalid query parameters provided.",
             "content": {
               "application/json": {
                 "schema": {
@@ -66,38 +68,43 @@
       "GetProvidersAllowedListQueryResponse": {
         "type": "object",
         "properties": {
-          "Providers": {
+          "providers": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AllowedProvider"
             }
           }
-        }
+        },
+        "required": [
+          "providers"
+        ]
       },
       "AllowedProvider": {
         "type": "object",
         "properties": {
-          "Ukprn": {
+          "ukprn": {
             "type": "integer",
-            "description": "Unique identifier for the provider."
+            "format": "int32"
           },
-          "StartDateTime": {
+          "startDateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDateTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "addedDateTime": {
             "type": "string",
             "format": "date-time",
-            "description": "Start date and time for the provider."
-          },
-          "EndDateTime": {
-            "type": "string",
-            "format": "date-time",
-            "description": "End date and time for the provider."
-          },
-          "AddedDateTime": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Date and time when the provider was added to the list.",
             "nullable": true
           }
-        }
+        },
+        "required": [
+          "ukprn",
+          "startDateTime",
+          "endDateTime"
+        ]
       }
     }
   }

@@ -2,14 +2,13 @@
   "openapi": "3.1.0",
   "info": {
     "title": "User Actions API",
-    "description": "API for managing user actions and related activities in DAS Admin.",
     "version": "1.0.0"
   },
   "paths": {
     "/user-actions/{code}": {
       "get": {
-        "summary": "Retrieve user action by code",
         "operationId": "GetUserActionByCode",
+        "summary": "Retrieve a user action by its unique code.",
         "parameters": [
           {
             "name": "code",
@@ -42,8 +41,8 @@
     },
     "/user-actions/{code}/all-activity": {
       "get": {
-        "summary": "Retrieve all user activity by code",
         "operationId": "GetAllUserActivityByCode",
+        "summary": "Retrieve all user activity for a specific code.",
         "parameters": [
           {
             "name": "code",
@@ -76,8 +75,8 @@
     },
     "/user-actions/{code}/search": {
       "post": {
-        "summary": "Search user action by code",
         "operationId": "CheckUserActionByCode",
+        "summary": "Check a user action for a specific code.",
         "parameters": [
           {
             "name": "code",
@@ -89,7 +88,6 @@
           }
         ],
         "requestBody": {
-          "description": "Request details for checking user action",
           "required": true,
           "content": {
             "application/json": {
@@ -119,60 +117,68 @@
   },
   "components": {
     "schemas": {
-      "GetUserActionByCodeResponse": {
-        "type": "object",
-        "properties": {
-          "actionId": {
-            "type": "string"
-          },
-          "actionName": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          }
-        }
-      },
-      "GetAllUserActivityByCodeResponse": {
-        "type": "object",
-        "properties": {
-          "activities": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "activityId": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "timestamp": {
-                  "type": "string",
-                  "format": "date-time"
-                }
-              }
-            }
-          }
-        }
-      },
       "CheckUserActionByCodeRequest": {
         "type": "object",
         "properties": {
-          "username": {
+          "Username": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "Username"
+        ]
       },
       "CheckUserActionByCodeResponse": {
         "type": "object",
         "properties": {
-          "isActionValid": {
+          "isValid": {
             "type": "boolean"
-          },
-          "validationMessage": {
-            "type": "string"
           }
+        }
+      },
+      "GetUserActionByCodeResponse": {
+        "type": "object",
+        "properties": {
+          "actionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "actionId",
+          "description",
+          "createdAt"
+        ]
+      },
+      "GetAllUserActivityByCodeResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "activityId": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "action": {
+              "type": "string"
+            },
+            "timestamp": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          "required": [
+            "activityId",
+            "action",
+            "timestamp"
+          ]
         }
       }
     }
