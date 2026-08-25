@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "User Actions API",
-    "description": "API for managing user actions and related activities in DAS Admin.",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing user actions and their associated activities based on unique identifiers."
   },
   "paths": {
     "/user-actions/{code}": {
@@ -17,12 +17,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The unique code identifying the user action."
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response with the user action data.",
             "content": {
               "application/json": {
                 "schema": {
@@ -32,10 +33,10 @@
             }
           },
           "404": {
-            "description": "Not Found"
+            "description": "User action with the given code not found."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error occurred."
           }
         }
       }
@@ -51,12 +52,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The unique code identifying the user action."
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response with all user activity data.",
             "content": {
               "application/json": {
                 "schema": {
@@ -66,17 +68,17 @@
             }
           },
           "404": {
-            "description": "Not Found"
+            "description": "No activity found for the user action with the given code."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error occurred."
           }
         }
       }
     },
     "/user-actions/{code}/search": {
       "post": {
-        "summary": "Search user action by code",
+        "summary": "Search for user action by code",
         "operationId": "CheckUserActionByCode",
         "parameters": [
           {
@@ -85,11 +87,11 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The unique code identifying the user action."
           }
         ],
         "requestBody": {
-          "description": "Request details for checking user action",
           "required": true,
           "content": {
             "application/json": {
@@ -101,7 +103,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response with search results.",
             "content": {
               "application/json": {
                 "schema": {
@@ -111,7 +113,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error occurred."
           }
         }
       }
@@ -122,36 +124,31 @@
       "GetUserActionByCodeResponse": {
         "type": "object",
         "properties": {
-          "actionId": {
+          "code": {
             "type": "string"
           },
           "actionName": {
             "type": "string"
           },
-          "status": {
+          "description": {
             "type": "string"
           }
         }
       },
       "GetAllUserActivityByCodeResponse": {
-        "type": "object",
-        "properties": {
-          "activities": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "activityId": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "timestamp": {
-                  "type": "string",
-                  "format": "date-time"
-                }
-              }
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "activityId": {
+              "type": "string"
+            },
+            "activityName": {
+              "type": "string"
+            },
+            "performedAt": {
+              "type": "string",
+              "format": "date-time"
             }
           }
         }
@@ -167,10 +164,10 @@
       "CheckUserActionByCodeResponse": {
         "type": "object",
         "properties": {
-          "isActionValid": {
+          "isValid": {
             "type": "boolean"
           },
-          "validationMessage": {
+          "message": {
             "type": "string"
           }
         }

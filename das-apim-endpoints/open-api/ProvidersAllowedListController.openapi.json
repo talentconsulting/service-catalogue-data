@@ -1,51 +1,53 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Providers Allowed List API",
+    "title": "AdminRoatp API",
     "version": "1.0.0",
-    "description": "API for managing the providers allowed list."
+    "description": "API operations for managing Providers Allowed List."
   },
   "paths": {
     "/providers/allowedlist": {
       "get": {
+        "summary": "Get Providers Allowed List",
+        "description": "Retrieve a list of allowed providers, optionally sorted by a column and order.",
         "operationId": "GetAllowedList",
-        "summary": "Retrieve the list of allowed providers.",
         "parameters": [
           {
             "name": "sortColumn",
             "in": "query",
-            "description": "Column to sort the results on.",
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Column to sort the results by."
           },
           {
             "name": "sortOrder",
             "in": "query",
-            "description": "Order of sorting (ascending or descending).",
             "required": false,
             "schema": {
-              "type": "string"
-            }
+              "type": "string",
+              "enum": [
+                "Ascending",
+                "Descending"
+              ]
+            },
+            "description": "Order to sort the results. Accepted values: Ascending, Descending."
           }
         ],
         "responses": {
           "200": {
-            "description": "Allowed providers list retrieved successfully.",
+            "description": "Successful retrieval of allowed providers list.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/GetProvidersAllowedListQueryResponse"
-                  }
+                  "$ref": "#/components/schemas/GetProvidersAllowedListQueryResponse"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request due to invalid parameters.",
+            "description": "Invalid request parameters.",
             "content": {
               "application/json": {
                 "schema": {
@@ -70,34 +72,44 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AllowedProvider"
-            }
+            },
+            "description": "List of allowed providers."
           }
-        }
+        },
+        "required": [
+          "Providers"
+        ],
+        "description": "Response containing a list of allowed providers."
       },
       "AllowedProvider": {
         "type": "object",
         "properties": {
           "Ukprn": {
             "type": "integer",
-            "description": "Unique identifier for the provider."
+            "format": "int32",
+            "description": "Unique Provider Reference Number (UKPRN)."
           },
           "StartDateTime": {
             "type": "string",
             "format": "date-time",
-            "description": "Start date and time for the provider."
+            "description": "Start date and time of the provider being allowed."
           },
           "EndDateTime": {
             "type": "string",
             "format": "date-time",
-            "description": "End date and time for the provider."
+            "description": "End date and time of the provider being allowed."
           },
           "AddedDateTime": {
             "type": "string",
             "format": "date-time",
-            "description": "Date and time when the provider was added to the list.",
-            "nullable": true
+            "description": "Date and time when the provider was added to the allowed list."
           }
-        }
+        },
+        "required": [
+          "Ukprn",
+          "StartDateTime",
+          "EndDateTime"
+        ]
       }
     }
   }
