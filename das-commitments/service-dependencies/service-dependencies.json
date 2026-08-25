@@ -4,15 +4,13 @@
   "path": "src",
   "dependencies": [
     {
-      "name": "AddStackExchangeRedisCache",
+      "name": "ICacheStorageService",
       "kind": "cache",
       "classification": "internal",
       "direction": "outbound",
-      "client": null,
-      "technology": "redis",
-      "configurationKeys": [
-        "CommitmentsConfigurationKeys.RedisConnectionString"
-      ],
+      "client": "ICacheStorageService",
+      "technology": null,
+      "configurationKeys": [],
       "authentication": {
         "type": null,
         "configurationKeys": []
@@ -21,25 +19,827 @@
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Caching/ServiceCollectionExtensions.cs",
-          "reason": "Redis configuration detected in AddDasDistributedMemoryCache."
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeshipsFilterValues/GetApprenticeshipsFilterValuesQueryHandler.cs",
+          "reason": "ICacheStorageService is used for caching apprenticeship filter values."
         }
       ],
-      "confidence": "high"
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "cache-icachestorageservice",
+      "description": "Caches data in"
     },
     {
-      "name": "IApprovalsOuterApiClient",
-      "kind": "http-api",
+      "name": "RedisCache",
+      "kind": "cache",
       "classification": "internal",
       "direction": "outbound",
-      "client": "ApprovalsOuterApiClient",
-      "technology": null,
+      "client": null,
+      "technology": "Redis",
       "configurationKeys": [
-        "ApprovalsOuterApiConfiguration"
+        "CommitmentsConfigurationKeys.RedisConnectionString"
       ],
       "authentication": {
         "type": null,
         "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "cache",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Caching/ServiceCollectionExtensions.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Caching/ServiceCollectionExtensions.cs",
+          "reason": "StackExchange.Redis cache client configuration"
+        }
+      ],
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "cache-rediscache",
+      "description": "Caches data in"
+    },
+    {
+      "name": "IRplFundingCalculationService",
+      "kind": "cloud-service",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "IRplFundingCalculationService",
+      "technology": null,
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetCohortPriorLearningError/GetCohortPriorLearningErrorQueryHandler.cs",
+          "reason": "IRplFundingCalculationService is used for funding calculations."
+        }
+      ],
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "cloud-service-irplfundingcalculationservice",
+      "description": "Uses"
+    },
+    {
+      "name": "Commitments DB",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": "SqlServer",
+      "configurationKeys": [
+        "CommitmentsConfigurationKeys.DatabaseConnectionString"
+      ],
+      "authentication": {
+        "type": "ManagedIdentity",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/HealthChecks/ServiceCollectionExtensions.cs",
+          "reason": "Found AddSqlServer health check registration using a connection string configuration key"
+        }
+      ],
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "database-commitments-db",
+      "description": "Reads from and writes to"
+    },
+    {
+      "name": "ProviderCommitmentsDbContext",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ProviderCommitmentsDbContext",
+      "technology": "EntityFrameworkCore",
+      "configurationKeys": [
+        "CommitmentsV2Configuration.DatabaseConnectionString"
+      ],
+      "authentication": {
+        "type": "Azure AD",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "ProviderCommitments",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/CohortWithChangeOfPartyUpdatedEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitments",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/CohortDeletedWithPendingOverlappingTrainingDateEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitments",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateForActiveApprenticeshipEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitments",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateForCompletedApprenticeshipEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitments",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateForStoppedApprenticeshipEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitments",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateRequestRejectedEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitments",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateResolvedEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitments",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ProviderRejectedChangeOfPartyRequestEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitments",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/TransferRequestApprovedEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitments",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/TransferRequestRejectedEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitments",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/TransferRequestWithAutoApprovalCreatedEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitments",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Data/ProviderCommitmentsDbContext.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitmentsDbContext",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/EmployerVerificationStatusSyncService.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitmentsDbContext",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/OverlapCheckService.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitmentsDbContext",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/OverlappingTrainingDateRequestDomainService.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitmentsDbContext",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/ResolveOverlappingTrainingDateRequestService.cs"
+        },
+        {
+          "type": "database",
+          "name": "ProviderCommitmentsDbContext",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/TransferRequestDomainService.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/ProviderSendCohortCommandHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/StoreLearningHistoryCommandHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/SyncLearningDataBatchCommandHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipCreatedEmployerVerificationEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipPausedEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipResumedEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipWithChangeOfPartyCreatedEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ChangeOfPartyRequestCreatedEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/CohortWithChangeOfPartyCreatedEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/CohortWithChangeOfPartyFullyApprovedEventHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAccountLegalEntity/GetAccountLegalEntityQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAccountStatus/GetAccountStatusQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAccountSummary/GetAccountSummaryQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAccountTransferStatus/GetAccountTransferStatusQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAllChangeHistory/GetAllChangeHistoryForProviderQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAllCohortAccountIds/GetAllCohortAccountIdsQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAllCourses/GetAllCoursesQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAllLearners/GetAllLearnersQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAllProviders/GetAllProvidersQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeship/GetApprenticeshipQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeshipUpdate/GetApprenticeshipUpdateQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeships/GetApprenticeshipsQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeships/Search/Services/ApprenticeshipSearchService.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeships/Search/Services/OrderedApprenticeshipSearchService.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeships/Search/Services/ReverseOrderedApprenticeshipSearchService.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeshipsFilterValues/GetApprenticeshipsFilterValuesQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeshipsValidate/GetApprenticeshipsValidateQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetChangeHistory/GetChangeHistoryQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetChangeHistoryForEmployer/GetChangeHistoryForEmployerQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetChangeOfEmployerChain/GetChangeOfEmployerChainQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetChangeOfPartyRequests/GetChangeOfPartyRequestsQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetChangeOfProviderChain/GetChangeOfProviderChainQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetCohortPriorLearningError/GetCohortPriorLearningErrorQueryHandler.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetDataLocks/GetDataLocksQueryHandler.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Data/LinqPad/AzureAdTokenInterceptor.cs",
+          "reason": "Azure AD authentication token configuration for SQL connections"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/OverlapCheckService.cs",
+          "reason": "Database context injected and used"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/OverlappingTrainingDateRequestDomainService.cs",
+          "reason": "Database context injected and used"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/ResolveOverlappingTrainingDateRequestService.cs",
+          "reason": "Database context injected and used"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/TransferRequestDomainService.cs",
+          "reason": "Database context injected and used"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/EmployerVerificationStatusSyncService.cs",
+          "reason": "Database context used for querying"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Data/ProviderCommitmentsDbContext.cs",
+          "reason": "DbContext for interacting with SQL Server database"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/EventHandlers/LearnerDataUpdatedEventHandler.cs",
+          "reason": "Found usage of Entity Framework DbContext for database operations"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/EventHandlers/LearningPausedEventHandler.cs",
+          "reason": "Found usage of Entity Framework DbContext for database operations"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/EventHandlers/LearningWithdrawnEventHandler.cs",
+          "reason": "Found usage of Entity Framework DbContext for database operations"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeships/Search/Services/ApprenticeshipSearchService.cs",
+          "reason": "IProviderCommitmentsDbContext indicates dependency on database with Entity Framework Core."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/RecognisePriorLearning/RecognisePriorLearningHandler.cs",
+          "reason": "Lazy construction of ProviderCommitmentsDbContext"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/Reference/DraftApprenticeshipSetReferenceCommandHandler.cs",
+          "reason": "Lazy construction of ProviderCommitmentsDbContext"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/RejectApprenticeshipUpdates/RejectApprenticeshipUpdatesCommandHandler.cs",
+          "reason": "Lazy construction of ProviderCommitmentsDbContext"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/StopApprenticeship/StopApprenticeshipCommandHandler.cs",
+          "reason": "Lazy construction of ProviderCommitmentsDbContext"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/UndoApprenticeshipUpdates/UndoApprenticeshipUpdatesCommandHandler.cs",
+          "reason": "Lazy construction of ProviderCommitmentsDbContext"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/UpdateApprenticeshipStopDate/UpdateApprenticeshipStopDateCommandHandler.cs",
+          "reason": "Lazy construction of ProviderCommitmentsDbContext"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/UpdateTransferApprovalForSender/UpdateTransferApprovalForSenderCommandHandler.cs",
+          "reason": "Lazy construction of ProviderCommitmentsDbContext"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/CanAccessApprenticeship/CanAccessApprenticeshipQueryHandler.cs",
+          "reason": "Lazy construction of ProviderCommitmentsDbContext"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/CanAccessCohort/CanAccessCohortQueryHandler.cs",
+          "reason": "Lazy construction of ProviderCommitmentsDbContext"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/CreateAccount/CreateAccountCommandHandler.cs",
+          "reason": "Lazy database context used for adding Accounts."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/Email/DraftApprenticeshipAddEmailCommandHandler.cs",
+          "reason": "Lazy database context used for getting draft apprenticeship details."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/DeleteCohort/DeleteCohortHandler.cs",
+          "reason": "Lazy database context used for loading Cohort information."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/PauseApprenticeship/PauseApprenticeshipCommandHandler.cs",
+          "reason": "Lazy database context used for pausing an apprenticeship."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/CocApprovals/PutCocApprovalCommandHandler.cs",
+          "reason": "Lazy database context used for querying and updating ApprovalRequests."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/LearningDataSync/LearningDataSyncCommandHandler.cs",
+          "reason": "Lazy database context used for querying apprenticeship records."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/CocDelete/CocDeleteCommadHandler.cs",
+          "reason": "Lazy database context used for querying latest ApprovalRequest by LearningKey."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/PriorLearningData/RecognisePriorLearningDataHandler.cs",
+          "reason": "Lazy database context used for setting prior learning data on an apprenticeship."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/FileUploadLogUpdateWithErrorContent/FileUploadLogUpdateWithErrorContentCommandHandler.cs",
+          "reason": "Lazy database context used for updating FileUploadLogs."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/PatchApprenticeshipPayments/PatchApprenticeshipPaymentsCommandHandler.cs",
+          "reason": "Lazy database context used for updating apprenticeship payment status."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/EditApprenticeship/EditApprenticeshipCommandHandler.cs",
+          "reason": "Lazy database context used within apprenticeship edits and validations."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/CohortWithChangeOfPartyUpdatedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dependency injection in constructor."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/CohortDeletedWithPendingOverlappingTrainingDateEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dependency injection in constructor."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateForActiveApprenticeshipEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dependency injection in constructor."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateForCompletedApprenticeshipEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dependency injection in constructor."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateForStoppedApprenticeshipEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dependency injection in constructor."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateRequestRejectedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dependency injection in constructor."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateResolvedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dependency injection in constructor."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ProviderRejectedChangeOfPartyRequestEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dependency injection in constructor."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/TransferRequestApprovedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dependency injection in constructor."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/TransferRequestRejectedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dependency injection in constructor."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/TransferRequestWithAutoApprovalCreatedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dependency injection in constructor."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAccountLegalEntity/GetAccountLegalEntityQueryHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> indicates dependency on database via Entity Framework Core."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAccountStatus/GetAccountStatusQueryHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> indicates dependency on database via Entity Framework Core."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAccountSummary/GetAccountSummaryQueryHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> indicates dependency on database via Entity Framework Core."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAccountTransferStatus/GetAccountTransferStatusQueryHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> indicates dependency on database via Entity Framework Core."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAllChangeHistory/GetAllChangeHistoryForProviderQueryHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> indicates dependency on database via Entity Framework Core."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAllCohortAccountIds/GetAllCohortAccountIdsQueryHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> indicates dependency on database via Entity Framework Core."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAllLearners/GetAllLearnersQueryHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> indicates dependency on database via Entity Framework Core."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAllProviders/GetAllProvidersQueryHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> indicates dependency on database via Entity Framework Core."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeship/GetApprenticeshipQueryHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> indicates dependency on database via Entity Framework Core."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeships/GetApprenticeshipsQueryHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> indicates dependency on database via Entity Framework Core."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/CohortWithChangeOfPartyFullyApprovedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> instance used for approving ChangeOfPartyRequest."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ChangeOfPartyRequestCreatedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> instance used for cohort insertion and related database interactions."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/ProviderSendCohortCommandHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> instance used for database operations (e.g., GetCohortAggregate, SaveChangesAsync)."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/SyncLearningDataBatchCommandHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> instance used for operations like GetApprenticeshipAggregateWithNoTracking."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/StoreLearningHistoryCommandHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> instance used for querying (e.g., LearningChangeHistory, Apprenticeships)."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipPausedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> used for accessing apprenticeship aggregate and related checks."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/CohortWithChangeOfPartyCreatedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> used for change-of-party and cohort updates."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipWithChangeOfPartyCreatedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> used for querying changeOfPartyRequest and apprenticeship."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipCreatedEmployerVerificationEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> used for saving EmployerVerificationRequests and handling queries."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetAllCourses/GetAllCoursesQueryHandler.cs",
+          "reason": "ProviderCommitmentsDbContext indicates dependency on database via Entity Framework Core."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeships/Search/Services/OrderedApprenticeshipSearchService.cs",
+          "reason": "ProviderCommitmentsDbContext is injected and used for querying apprenticeships."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeshipsFilterValues/GetApprenticeshipsFilterValuesQueryHandler.cs",
+          "reason": "ProviderCommitmentsDbContext is used for fetching distinct filter values."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeships/Search/Services/ReverseOrderedApprenticeshipSearchService.cs",
+          "reason": "ProviderCommitmentsDbContext is used for querying reverse ordered apprenticeships."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetChangeOfEmployerChain/GetChangeOfEmployerChainQueryHandler.cs",
+          "reason": "ProviderCommitmentsDbContext is used to build change of employer chain."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetChangeOfProviderChain/GetChangeOfProviderChainQueryHandler.cs",
+          "reason": "ProviderCommitmentsDbContext is used to build change of provider chain."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetChangeHistoryForEmployer/GetChangeHistoryForEmployerQueryHandler.cs",
+          "reason": "ProviderCommitmentsDbContext is used to fetch change history for employer."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeshipUpdate/GetApprenticeshipUpdateQueryHandler.cs",
+          "reason": "ProviderCommitmentsDbContext is used to query apprenticeship updates."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetChangeHistory/GetChangeHistoryQueryHandler.cs",
+          "reason": "ProviderCommitmentsDbContext is used to query change history for an apprenticeship."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetDataLocks/GetDataLocksQueryHandler.cs",
+          "reason": "ProviderCommitmentsDbContext is used to query data locks."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetChangeOfPartyRequests/GetChangeOfPartyRequestsQueryHandler.cs",
+          "reason": "ProviderCommitmentsDbContext is used to retrieve change of party requests."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetCohortPriorLearningError/GetCohortPriorLearningErrorQueryHandler.cs",
+          "reason": "ProviderCommitmentsDbContext is used to retrieve draft apprenticeships with prior learning errors."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Queries/GetApprenticeshipsValidate/GetApprenticeshipsValidateQueryHandler.cs",
+          "reason": "ProviderCommitmentsDbContext is used to validate apprenticeships."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipResumedEventHandler.cs",
+          "reason": "ProviderCommitmentsDbContext used for accessing apprenticeship aggregate context."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Startup/EntityFrameworkStartup.cs",
+          "reason": "Service registered with explicit SQL Server connection"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AcceptApprenticeshipUpdates/AcceptApprenticeshipUpdatesCommandHandler.cs",
+          "reason": "Usage of DbContext for database access"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddCohort/AddCohortCommandHandler.cs",
+          "reason": "Usage of DbContext for database access"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddCohort/AddCohortWithOtherPartyHandler.cs",
+          "reason": "Usage of DbContext for database access"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddCohort/AddEmptyCohortHandler.cs",
+          "reason": "Usage of DbContext for database access"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddDraftApprenticeship/AddDraftApprenticeshipCommandHandler.cs",
+          "reason": "Usage of DbContext for database access"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddFileUploadLog/AddFileUploadLogCommandHandler.cs",
+          "reason": "Usage of DbContext for database access"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddHistory/AddHistoryCommandHandler.cs",
+          "reason": "Usage of DbContext for database access"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddLastSubmissionEventId/AddLastSubmissionEventIdCommandHandler.cs",
+          "reason": "Usage of DbContext for database access"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddTransferRequest/AddTransferRequestCommandHandler.cs",
+          "reason": "Usage of DbContext for database access"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/BulkUploadValidateRequest/BulkUploadValidateCommandHandler.cs",
+          "reason": "Usage of DbContext for database access"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/CocApprovals/PostCocApprovalCommandHandler.cs",
+          "reason": "Usage of DbContext for database access"
+        }
+      ],
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "database-providercommitmentsdbcontext",
+      "description": "Reads from and writes to"
+    },
+    {
+      "name": "SynchronizedDatabase",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ProviderCommitmentsDbContext",
+      "technology": "SqlServer",
+      "configurationKeys": [],
+      "authentication": {
+        "type": "chained-token",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Data/SynchronizedDbContextFactory.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Data/SynchronizedDbContextFactory.cs",
+          "reason": "UseSqlServer with synchronized storage session connection"
+        }
+      ],
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "database-synchronizeddatabase",
+      "description": "Reads from and writes to"
+    },
+    {
+      "name": "ApprovalsOuterApi",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IApprovalsOuterApiClient",
+      "technology": "HTTP",
+      "configurationKeys": [
+        "ApprovalsOuterApiConfiguration.BaseUrl",
+        "ApprovalsOuterApiConfiguration.Key"
+      ],
+      "authentication": {
+        "type": "header",
+        "configurationKeys": [
+          "ApprovalsOuterApiConfiguration.Key"
+        ]
       },
       "operations": [
         {
@@ -58,18 +858,50 @@
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/ApprovalsOuterApiClient.cs",
-          "reason": "HttpClient creation and operations for ApprovalsOuterApiClient."
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/TransferRequestWithAutoApprovalCreatedEventHandler.cs",
+          "reason": "Dependency injection of IApprovalsOuterApiClient."
         },
         {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/DependencyResolution/ServiceRegistrationExtensions.cs",
-          "reason": "Service registration for IApprovalsOuterApiClient."
+          "reason": "IApprovalsOuterApiClient registered to ApprovalsOuterApiClient"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/ApprovalsOuterApiClient.cs",
+          "reason": "Uses HttpClient with BaseAddress set from ApprovalsOuterApiConfiguration"
         }
       ],
-      "confidence": "high"
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "http-api-approvalsouterapi",
+      "description": "Calls the API of"
     },
     {
-      "name": "ICommitmentsApiClient",
+      "name": "ApprovalsOuterApiClient",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IApprovalsOuterApiClient",
+      "technology": null,
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddTransferRequest/AddTransferRequestCommandHandler.cs",
+          "reason": "Http client IApprovalsOuterApiClient used for external API call"
+        }
+      ],
+      "confidence": "medium",
+      "sourceId": "this-service",
+      "targetId": "http-api-approvalsouterapiclient",
+      "description": "Calls the API of"
+    },
+    {
+      "name": "CommitmentsApiClient",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
@@ -87,20 +919,87 @@
       "evidence": [
         {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api.Client/CommitmentsApiClientFactory.cs",
-          "reason": "HttpClient creation for CommitmentsApiClient."
+          "reason": "Found client construction using ManagedIdentityHttpClientFactory for CommitmentsApiClient"
         }
       ],
-      "confidence": "high"
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "http-api-commitmentsapiclient",
+      "description": "Calls the API of"
     },
     {
-      "name": "ILevyTransferMatchingApiClient",
+      "name": "IApprovalsOuterApiClient",
+      "kind": "http-api",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "IApprovalsOuterApiClient",
+      "technology": null,
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [
+        {
+          "method": null,
+          "methodName": "Get",
+          "path": "GetEmploymentChecksRequest",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/EmployerVerificationStatusSyncService.cs"
+        }
+      ],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/EmployerVerificationStatusSyncService.cs",
+          "reason": "Http client usage indicating potential HTTP API dependency"
+        }
+      ],
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "http-api-iapprovalsouterapiclient",
+      "description": "Calls the API of"
+    },
+    {
+      "name": "IReservationsApiClient",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IReservationsApiClient",
+      "technology": "HTTP",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "http-api",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ChangeOfPartyRequestCreatedEventHandler.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ChangeOfPartyRequestCreatedEventHandler.cs",
+          "reason": "IReservationsApiClient used to call CreateChangeOfPartyReservation."
+        }
+      ],
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "http-api-ireservationsapiclient",
+      "description": "Calls the API of"
+    },
+    {
+      "name": "LevyTransferMatchingAPI",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
       "client": "LevyTransferMatchingClient",
-      "technology": null,
+      "technology": "HttpClient",
       "configurationKeys": [
-        "LevyTransferMatchingApiConfiguration"
+        "LevyTransferMatchingApiConfiguration.BaseUrl"
       ],
       "authentication": {
         "type": "bearer",
@@ -118,29 +1017,82 @@
       "evidence": [
         {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Infrastructure/LevyTransferMatchingClient.cs",
-          "reason": "HttpClient creation and API call evidence in GetPledgeApplication method."
+          "reason": "HttpClient base address set from configuration and Authorization header added"
         },
         {
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/Configuration/ServiceCollectionExtensions.cs",
-          "reason": "HttpClient registered for ILevyTransferMatchingApiClient."
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/DependencyResolution/ServiceRegistrationExtensions.cs",
+          "reason": "LevyTransferMatchingClient registered in DI"
         }
       ],
-      "confidence": "high"
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "http-api-levytransfermatchingapi",
+      "description": "Calls the API of"
     },
     {
-      "name": "IProviderRelationshipsApiClient",
+      "name": "LevyTransferMatchingClient",
+      "kind": "http-api",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "LevyTransferMatchingClient",
+      "technology": null,
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/Configuration/ServiceCollectionExtensions.cs",
+          "reason": "Found service registration for ILevyTransferMatchingApiClient with AddHttpClient"
+        }
+      ],
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "http-api-levytransfermatchingclient",
+      "description": "Calls the API of"
+    },
+    {
+      "name": "ProviderRelationshipsAPI",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IProviderRelationshipsApiClient",
+      "technology": null,
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/ChangeOfPartyRequestDomainService.cs",
+          "reason": "IProviderRelationshipsApiClient is invoked to fetch permissions"
+        }
+      ],
+      "confidence": "medium",
+      "sourceId": "this-service",
+      "targetId": "http-api-providerrelationshipsapi",
+      "description": "Calls the API of"
+    },
+    {
+      "name": "ProviderRelationshipsApiClient",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
       "client": "ProviderRelationshipsApiClient",
-      "technology": null,
+      "technology": ".NET HttpClient",
       "configurationKeys": [
-        "ProviderRelationshipsApi"
+        "ProviderRelationshipsApi:ApiBaseUrl"
       ],
       "authentication": {
         "type": "managed-identity",
         "configurationKeys": [
-          "ManagedIdentityTokenGenerator"
+          "ProviderRelationshipsApi"
         ]
       },
       "operations": [],
@@ -148,13 +1100,41 @@
       "evidence": [
         {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Shared/ProviderRelationshipsApiClient/AddProviderRelationshipsApiClientExtension.cs",
-          "reason": "HttpClient registration for IProviderRelationshipsApiClient using ProviderRelationshipsApi configuration."
+          "reason": "HttpClient registered for IProviderRelationshipsApiClient with BaseAddress and ManagedIdentityHeadersHandler"
         }
       ],
-      "confidence": "high"
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "http-api-providerrelationshipsapiclient",
+      "description": "Calls the API of"
     },
     {
-      "name": "IReservationsApiClient",
+      "name": "ReservationsAPI",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ReservationsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/DependencyResolution/ServiceRegistrationExtensions.cs",
+          "reason": "IReservationsApiClient is created via ReservationsApiClientFactory"
+        }
+      ],
+      "confidence": "medium",
+      "sourceId": "this-service",
+      "targetId": "http-api-reservationsapi",
+      "description": "Calls the API of"
+    },
+    {
+      "name": "ReservationsApiClient",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
@@ -164,22 +1144,164 @@
         "ReservationsClientApiConfiguration"
       ],
       "authentication": {
-        "type": "managed-identity",
-        "configurationKeys": []
+        "type": "azure-ad",
+        "configurationKeys": [
+          "ReservationsClientApiConfiguration.ClientId",
+          "ReservationsClientApiConfiguration.ClientSecret",
+          "ReservationsClientApiConfiguration.Tenant"
+        ]
       },
       "operations": [],
       "resources": [],
       "evidence": [
         {
           "sourceFile": "src/CommitmentsV2/SFA.DAS.ReservationsV2.Api.Client/ReservationsApiClientFactory.cs",
-          "reason": "HttpClient creation and ReservationsApiClient instantiation."
-        },
-        {
-          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/DependencyResolution/ServiceRegistrationExtensions.cs",
-          "reason": "Service creation and registration for IReservationsApiClient."
+          "reason": "Client factory constructs HTTP client for Reservations API with Azure AD Authentication"
         }
       ],
-      "confidence": "high"
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "http-api-reservationsapiclient",
+      "description": "Calls the API of"
+    },
+    {
+      "name": "messageSession",
+      "kind": "message-broker",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IMessageSession",
+      "technology": "NServiceBus",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/ReplayApprenticeshipCreatedEventsService.cs",
+          "reason": "Message broker client for publishing events via NServiceBus"
+        }
+      ],
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "message-broker-messagesession",
+      "description": "Publishes messages to and consumes messages from"
+    },
+    {
+      "name": "NServiceBus",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "NServiceBus",
+      "technology": "NServiceBus",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/EventHandlers/LearnerDataUpdatedEventHandler.cs",
+          "reason": "Found usage of IHandleMessages with NServiceBus"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/EventHandlers/LearningPausedEventHandler.cs",
+          "reason": "Found usage of IHandleMessages with NServiceBus"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/EventHandlers/LearningResumedEventHandler.cs",
+          "reason": "Found usage of IHandleMessages with NServiceBus"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/EventHandlers/LearningWithdrawnEventHandler.cs",
+          "reason": "Found usage of IHandleMessages with NServiceBus"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/ResendInvitation/ResendInvitationCommandHandler.cs",
+          "reason": "IMessageSession used for sending messages"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/StopApprenticeship/StopApprenticeshipCommandHandler.cs",
+          "reason": "IMessageSession used for sending messages"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/UpdateApprenticeshipStopDate/UpdateApprenticeshipStopDateCommandHandler.cs",
+          "reason": "IMessageSession used for sending messages"
+        }
+      ],
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "message-broker-nservicebus",
+      "description": "Publishes messages to and consumes messages from"
+    },
+    {
+      "name": "NServiceBus IMessageSession",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "IMessageSession",
+      "technology": "NServiceBus",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/PatchApprenticeshipPayments/PatchApprenticeshipPaymentsCommandHandler.cs",
+          "reason": "Message session used for sending StoreLearningHistoryCommand."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/LearningDataSync/LearningDataSyncCommandHandler.cs",
+          "reason": "Message session used to send chunks of SyncLearningDataBatchCommand."
+        }
+      ],
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "message-broker-nservicebus-imessagesession",
+      "description": "Publishes messages to and consumes messages from"
+    },
+    {
+      "name": "BlobStorageService",
+      "kind": "object-storage",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "BlobServiceClient",
+      "technology": "AzureBlobStorage",
+      "configurationKeys": [
+        "CommitmentsV2Configuration.StorageConnectionString"
+      ],
+      "authentication": {
+        "type": "connection-string",
+        "configurationKeys": [
+          "CommitmentsV2Configuration.StorageConnectionString"
+        ]
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "container",
+          "name": "{Container}",
+          "direction": "outbound",
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/BlobStorageService.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Services/BlobStorageService.cs",
+          "reason": "BlobServiceClient created with StorageConnectionString"
+        }
+      ],
+      "confidence": "high",
+      "sourceId": "this-service",
+      "targetId": "object-storage-blobstorageservice",
+      "description": "Stores objects in"
     }
   ]
 }
