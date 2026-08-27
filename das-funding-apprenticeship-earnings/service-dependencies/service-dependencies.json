@@ -2,33 +2,255 @@
   "repository": "SkillsFundingAgency/das-funding-apprenticeship-earnings",
   "ref": "main",
   "path": "src",
+  "systemName": "Funding Apprenticeship Earnings",
+  "containers": [
+    {
+      "id": "funding-apprenticeship-earnings-api",
+      "name": "Funding Apprenticeship Earnings",
+      "type": "api",
+      "evidence": [
+        {
+          "sourceFile": "src/InnerApi/Program.cs",
+          "reason": "ASP.NET Core WebApplication configured with controllers and endpoints."
+        }
+      ]
+    },
+    {
+      "id": "funding-apprenticeship-earnings-command",
+      "name": "Funding Apprenticeship Earnings Command",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/Command/SFA.DAS.Funding.ApprenticeshipEarnings.Command.csproj",
+          "reason": "Project file for a .NET console application, likely background job or command handler."
+        }
+      ]
+    },
+    {
+      "id": "funding-apprenticeship-earnings-jobs",
+      "name": "Funding Apprenticeship Earnings Jobs",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/MessageHandlers/Program.cs",
+          "reason": "Azure Functions Worker entry point"
+        },
+        {
+          "sourceFile": "src/MessageHandlers/SFA.DAS.Funding.ApprenticeshipEarnings.MessageHandlers.csproj",
+          "reason": "Root project file for Azure Functions Worker"
+        }
+      ]
+    }
+  ],
   "dependencies": [
     {
-      "name": "IEarningsOuterApiClient",
-      "kind": "http-api",
-      "classification": "internal",
+      "sourceId": "funding-apprenticeship-earnings-jobs",
+      "name": "Azure Table Storage",
+      "kind": "cloud-service",
+      "classification": "third-party",
       "direction": "outbound",
-      "client": "EarningsOuterApiClient",
-      "technology": "HttpClient",
+      "client": "SFA.DAS.Configuration.AzureTableStorage",
+      "technology": "Azure Table Storage",
       "configurationKeys": [
-        "EarningOuterApiConfiguration.BaseUrl",
-        "EarningOuterApiConfiguration.Key"
+        "ConfigurationStorageConnectionString"
       ],
       "authentication": {
-        "type": "API key",
+        "type": null,
         "configurationKeys": [
-          "EarningOuterApiConfiguration.Key"
+          "ConfigurationStorageConnectionString"
         ]
       },
       "operations": [],
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/Infrastructure/ServiceCollectionExtensions.cs",
-          "reason": "Found HttpClient registration for IEarningsOuterApiClient with specific BaseUrl and subscription key."
+          "sourceFile": "src/MessageHandlers/Startup.cs",
+          "reason": "AddAzureTableStorage for configuration"
+        },
+        {
+          "sourceFile": "src/MessageHandlers/SFA.DAS.Funding.ApprenticeshipEarnings.MessageHandlers.csproj",
+          "reason": "Package reference to SFA.DAS.Configuration.AzureTableStorage"
         }
       ],
-      "confidence": "high"
+      "confidence": "high",
+      "targetId": "cloud-service-azure-table-storage",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "funding-apprenticeship-earnings-jobs",
+      "name": "Payments",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Microsoft Entity Framework Core (SQL Server)",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "sql-server",
+          "name": "Payments",
+          "direction": "outbound",
+          "sourceFile": "src/MessageHandlers/Startup.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/MessageHandlers/Startup.cs",
+          "reason": "AddEntityFrameworkForApprenticeships with database connection"
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-payments",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "funding-apprenticeship-earnings-api",
+      "name": "Payments",
+      "kind": "database",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "DbContext",
+      "technology": "Entity Framework Core",
+      "configurationKeys": [
+        "ApplicationSettings:DbConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "ApplicationSettings:DbConnectionString",
+          "direction": "outbound",
+          "sourceFile": "src/Infrastructure/ServiceCollectionExtensions.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Infrastructure/ServiceCollectionExtensions.cs",
+          "reason": "AddDbContext method registering database dependency."
+        },
+        {
+          "sourceFile": "src/DataAccess/ApprenticeshipEarningsDataContext.cs",
+          "reason": "DbContext for Entity Framework Core."
+        },
+        {
+          "sourceFile": "src/Infrastructure/HealthChecks/DbHealthCheck.cs",
+          "reason": "Direct reference to SQL Server connection string for health checks."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-payments",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "funding-apprenticeship-earnings-api",
+      "name": "Earnings Outer API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "EarningsOuterApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApplicationSettings:EarningOuterApiConfiguration:BaseUrl",
+        "ApplicationSettings:EarningOuterApiConfiguration:Key"
+      ],
+      "authentication": {
+        "type": "API key",
+        "configurationKeys": [
+          "ApplicationSettings:EarningOuterApiConfiguration:Key"
+        ]
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "url",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/Infrastructure/ServiceCollectionExtensions.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Infrastructure/ServiceCollectionExtensions.cs",
+          "reason": "Http client registration with API key and base URL."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-earnings-outer-api",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "funding-apprenticeship-earnings-api",
+      "name": "Azure Service Bus",
+      "kind": "message-broker",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "ServiceBusClient",
+      "technology": "Azure Service Bus",
+      "configurationKeys": [
+        "ApplicationSettings:NServiceBusConnectionString",
+        "ApplicationSettings:NServiceBusConnectionString:GetFullyQualifiedNamespace"
+      ],
+      "authentication": {
+        "type": "Azure AD",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/Infrastructure/ServiceCollectionExtensions.cs",
+          "reason": "NServiceBus transport configuration using Azure Service Bus."
+        },
+        {
+          "sourceFile": "src/Infrastructure/HealthChecks/ServiceBusReceiveHealthCheck.cs",
+          "reason": "ServiceBusClient creation and message peeking for health check."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-azure-service-bus",
+      "description": "Publishes messages to and consumes messages from"
+    },
+    {
+      "sourceId": "funding-apprenticeship-earnings-jobs",
+      "name": "NServiceBus",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "NServiceBus.AzureFunctions.Worker.ServiceBus",
+      "technology": "Azure Service Bus",
+      "configurationKeys": [
+        "ApplicationSettings.NServiceBusConnectionString"
+      ],
+      "authentication": {
+        "type": "namespace",
+        "configurationKeys": [
+          "ApplicationSettings.NServiceBusConnectionString"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/MessageHandlers/Startup.cs",
+          "reason": "Configure NServiceBus for message processing"
+        },
+        {
+          "sourceFile": "src/MessageHandlers/SFA.DAS.Funding.ApprenticeshipEarnings.MessageHandlers.csproj",
+          "reason": "Package reference to NServiceBus.AzureFunctions.Worker.ServiceBus"
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-nservicebus",
+      "description": "Publishes messages to and consumes messages from"
     }
   ]
 }

@@ -1,0 +1,24 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+System_Boundary(sys_SkillsFundingAgency_das_funding_apprenticeship_earnings, "Funding Apprenticeship Earnings") {
+  Container(c_funding_apprenticeship_earnings_api, "Funding Apprenticeship Earnings", "API")
+  Container(c_funding_apprenticeship_earnings_command, "Funding Apprenticeship Earnings Command", "Background Job")
+  Container(c_funding_apprenticeship_earnings_jobs, "Funding Apprenticeship Earnings Jobs", "Background Job")
+}
+
+System_Ext(d_cloud_service_azure_table_storage, "Azure Table Storage", "Azure Table Storage")
+SystemDb_Ext(d_database_payments, "Payments", "Microsoft Entity Framework Core (SQL Server)")
+System_Ext(d_http_api_earnings_outer_api, "Earnings Outer API", "HttpClient")
+SystemQueue_Ext(d_message_broker_azure_service_bus, "Azure Service Bus", "Azure Service Bus")
+SystemQueue_Ext(d_message_broker_nservicebus, "NServiceBus", "Azure Service Bus")
+
+Rel(c_funding_apprenticeship_earnings_jobs, d_cloud_service_azure_table_storage, "Uses", "Azure Table Storage")
+Rel(c_funding_apprenticeship_earnings_jobs, d_database_payments, "Reads from and writes to", "Microsoft Entity Framework Core (SQL Server)")
+Rel(c_funding_apprenticeship_earnings_api, d_database_payments, "Reads from and writes to", "Entity Framework Core")
+Rel(c_funding_apprenticeship_earnings_api, d_http_api_earnings_outer_api, "Calls the API of", "HttpClient")
+Rel(c_funding_apprenticeship_earnings_api, d_message_broker_azure_service_bus, "Publishes messages to and consumes messages from", "Azure Service Bus")
+Rel(c_funding_apprenticeship_earnings_jobs, d_message_broker_nservicebus, "Publishes messages to and consumes messages from", "Azure Service Bus")
+
+@enduml

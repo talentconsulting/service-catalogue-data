@@ -2,14 +2,33 @@
   "repository": "SkillsFundingAgency/das-reservations",
   "ref": "master",
   "path": "src",
+  "systemName": "Reservations",
+  "containers": [
+    {
+      "id": "reservations-web",
+      "name": "Reservations",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/Program.cs",
+          "reason": "Detected web application entry point through ASP.NET Core hosting configuration."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/SFA.DAS.Reservations.Web.csproj",
+          "reason": "Project file uses Microsoft.NET.Sdk.Web, indicating a web application."
+        }
+      ]
+    }
+  ],
   "dependencies": [
     {
-      "name": "StackExchangeRedisCache",
+      "sourceId": "reservations-web",
+      "name": "Redis Cache",
       "kind": "cache",
-      "classification": "internal",
+      "classification": "third-party",
       "direction": "outbound",
       "client": null,
-      "technology": "StackExchange.Redis",
+      "technology": "Redis",
       "configurationKeys": [
         "ReservationsWeb:RedisCacheConnectionString"
       ],
@@ -22,88 +41,59 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Reservations.Web/Startup.cs",
-          "reason": "AddStackExchangeRedisCache registered with configuration from ReservationsWeb:RedisCacheConnectionString."
+          "reason": "Detected StackExchangeRedisCache setup in the service configuration."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/SFA.DAS.Reservations.Web.csproj",
+          "reason": "Project file includes StackExchange.Redis package reference, indicating usage of Redis."
         }
       ],
-      "confidence": "high"
+      "confidence": "high",
+      "targetId": "cache-redis-cache",
+      "description": "Caches data in"
     },
     {
-      "name": "IApiClient",
+      "sourceId": "reservations-web",
+      "name": "Reservations API",
       "kind": "http-api",
       "classification": "internal",
       "direction": "outbound",
-      "client": "ApiClient",
+      "client": "IApiClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "ReservationsApiConfiguration:Id",
-        "ReservationsApiConfiguration:Identifier",
-        "ReservationsApiConfiguration:Secret",
-        "ReservationsApiConfiguration:Tenant",
-        "ReservationsApiConfiguration:Url"
+        "ReservationsWeb:ApiSettings:Url"
       ],
       "authentication": {
-        "type": "bearer",
+        "type": "OAuth2",
         "configurationKeys": [
-          "ReservationsApiConfiguration:Id",
-          "ReservationsApiConfiguration:Identifier",
-          "ReservationsApiConfiguration:Secret",
-          "ReservationsApiConfiguration:Tenant"
+          "ReservationsWeb:ApiSettings:Id",
+          "ReservationsWeb:ApiSettings:Identifier",
+          "ReservationsWeb:ApiSettings:Secret",
+          "ReservationsWeb:ApiSettings:Tenant"
         ]
       },
       "operations": [
-        {
-          "method": "DELETE",
-          "methodName": "Delete",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
-        },
-        {
-          "method": "GET",
-          "methodName": "Get",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
-        },
-        {
-          "method": "GET",
-          "methodName": "GetAll",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
-        },
         {
           "method": "GET",
           "methodName": "Ping",
           "path": "ping",
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs"
-        },
-        {
-          "method": "GET",
-          "methodName": "Search",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
-        },
-        {
-          "method": "POST",
-          "methodName": "Create",
-          "path": null,
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs"
         }
       ],
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClientBase.cs",
-          "reason": "Base class for ApiClient making HTTP calls."
-        },
-        {
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs",
-          "reason": "IApiClient implemented by ApiClient and uses HTTP calls."
+          "reason": "HttpClient used directly to perform HTTP requests to the Reservations API."
         },
         {
           "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
-          "reason": "IApiClient is registered with ApiClient implementation as Singleton."
+          "reason": "IApiClient is registered as a service with configuration tied to the Reservations API."
         }
       ],
-      "confidence": "high"
+      "confidence": "high",
+      "targetId": "http-api-reservations-api",
+      "description": "Calls the API of"
     }
   ]
 }

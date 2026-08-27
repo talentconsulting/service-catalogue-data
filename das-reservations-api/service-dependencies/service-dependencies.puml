@@ -1,0 +1,19 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+System_Boundary(sys_SkillsFundingAgency_das_reservations_api, "Reservations") {
+  Container(c_reservations, "Reservations", "API")
+  Container(c_reservations_nservicebuslistener, "Reservations NServiceBusListener", "Background Job")
+}
+
+System_Ext(d_cloud_service_azure_key_vault, "Azure Key Vault", "Azure Key Vault")
+SystemDb_Ext(d_database_sql_server, "SQL Server", "SQL Server")
+SystemQueue_Ext(d_message_broker_azure_service_bus, "Azure Service Bus", "Azure Service Bus")
+
+Rel(c_reservations, d_cloud_service_azure_key_vault, "Uses", "Azure Key Vault")
+Rel(c_reservations_nservicebuslistener, d_database_sql_server, "Reads from and writes to", "SQL Server")
+Rel(c_reservations, d_database_sql_server, "Reads from and writes to", "SQL Server")
+Rel(c_reservations_nservicebuslistener, d_message_broker_azure_service_bus, "Publishes messages to and consumes messages from", "Azure Service Bus")
+
+@enduml
