@@ -20,6 +20,19 @@ async function getJson(url) {
   return body;
 }
 
+async function getText(url) {
+  const response = await fetch(url);
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.error || `Request failed (${response.status})`);
+  }
+  return response.text();
+}
+
+function toHex(text) {
+  return Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
 function sourceCapabilities() {
   return [
     { id: 'database', label: 'Data schema', enabled: state.source.capabilities.database },
@@ -41,7 +54,7 @@ function setHero() {
   const link = $('#repo-link');
   link.textContent = state.source.repository.replace('https://github.com/', 'github.com/');
   link.href = state.source.repository;
-  const available = Object.values(state.source.capabilities).filter(Boolean).length;
+  const available = sourceCapabilities().filter((tab) => tab.enabled).length;
   const commit = Object.values(state.source.scans)[0]?.['last-commit-hash-scanned'] || '';
   $('#source-stats').innerHTML = `
     <div class="stat"><dt>Views</dt><dd>${available}</dd></div>
@@ -82,6 +95,8 @@ async function loadView() {
   state.selectedModel = null;
   state.diagramPositions = null;
   state.schemaPositions = null;
+  state.depView = 'diagram';
+  state.pumlSource = null;
   try {
     if (state.view === 'dependencies') {
       state.data = await loadDependenciesFor(state.source);
@@ -675,7 +690,55 @@ function wireDiagramControls(onAutoArrange) {
   if (autoArrange) autoArrange.onclick = () => onAutoArrange();
 }
 
+function depViewToggleHtml() {
+  return `<div class="segmented" role="group" aria-label="Dependency view"><button data-dep-view="diagram" aria-pressed="${state.depView === 'diagram'}">Diagram</button><button data-dep-view="puml" aria-pressed="${state.depView === 'puml'}">PlantUML source</button></div>`;
+}
+
+function wireDepViewToggle() {
+  document.querySelectorAll('[data-dep-view]').forEach((button) => {
+    button.onclick = async () => {
+      state.depView = button.dataset.depView;
+      if (state.depView === 'puml' && state.pumlSource === null) {
+        destroyCy();
+        content.innerHTML = '<div class="loading">Loading PlantUML source…</div>';
+        try {
+          state.pumlSource = await getText(`/api/sources/${encodeURIComponent(state.source.id)}/dependency-diagram`);
+        } catch (error) {
+          content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
+          return;
+        }
+      }
+      renderDependencies(true);
+    };
+  });
+}
+
+function pumlSourceView(source) {
+  const hex = toHex(source);
+  const renderUrl = `https://www.plantuml.com/plantuml/svg/~h${hex}`;
+  const editUrl = `https://www.plantuml.com/plantuml/uml/~h${hex}`;
+  return `<div class="dependency-view">
+    <p class="toolbar-meta">Generated C4 PlantUML source for this service. Rendering it sends this text to the public PlantUML server at plantuml.com — nothing is sent unless you open one of the links below.</p>
+    <div class="puml-actions"><a class="plain-button" href="${renderUrl}" target="_blank" rel="noopener noreferrer">Render diagram on plantuml.com ↗</a><a class="plain-button" href="${editUrl}" target="_blank" rel="noopener noreferrer">Open in PlantUML editor ↗</a></div>
+    <pre class="puml-source"><code>${escapeHtml(source)}</code></pre>
+  </div>`;
+}
+
 function renderDependencies(resetToolbar = true) {
+  const hasDiagramSource = state.source.capabilities.dependencyDiagram;
+  if (!state.depView) state.depView = 'diagram';
+  if (resetToolbar) {
+    if (state.depView === 'puml') {
+      toolbar.innerHTML = `${depViewToggleHtml()}`;
+      wireDepViewToggle();
+    }
+  }
+  if (state.depView === 'puml') {
+    destroyCy();
+    content.innerHTML = state.pumlSource ? pumlSourceView(state.pumlSource) : '<div class="empty-state"><h2>PlantUML diagram unavailable</h2></div>';
+    return;
+  }
+
   const idCounts = new Map();
   const dependencies = (state.data.dependencies || []).map((dependency, index) => {
     const baseId = dependency.targetId || String(index);
@@ -687,7 +750,10 @@ function renderDependencies(resetToolbar = true) {
   const internalCount = dependencies.filter((dependency) => dependency.classification === 'internal').length;
   const messageCount = dependencies.filter((dependency) => dependency.kind === 'message').length;
   const redisCount = dependencies.filter(usesRedis).length;
-  if (resetToolbar) toolbar.innerHTML = `${searchControl('Filter dependencies')}${diagramControlsHtml()}<span class="spacer"></span><span class="toolbar-meta">${dependencies.length} dependencies · ${internalCount} internal · ${dependencies.length - internalCount} external · ${messageCount} message-based${redisCount ? ` · ${redisCount} using Redis` : ''} · ${operations} operations</span>`;
+  if (resetToolbar) {
+    toolbar.innerHTML = `${searchControl('Filter dependencies')}${hasDiagramSource ? depViewToggleHtml() : ''}${diagramControlsHtml()}<span class="spacer"></span><span class="toolbar-meta">${dependencies.length} dependencies · ${internalCount} internal · ${dependencies.length - internalCount} external · ${messageCount} message-based${redisCount ? ` · ${redisCount} using Redis` : ''} · ${operations} operations</span>`;
+    if (hasDiagramSource) wireDepViewToggle();
+  }
   const filtered = dependencies.filter((dependency) => `${dependency.name} ${dependency.kind} ${dependency.classification} ${dependency.direction} ${dependency.client} ${dependency.technology}`.toLowerCase().includes(state.filter));
   if (!dependencies.length) {
     content.innerHTML = '<div class="empty-state"><span class="empty-icon" aria-hidden="true">◇</span><h2>No service dependencies recorded</h2><p>The generated dependency catalogue is empty.</p></div>';
@@ -702,7 +768,22 @@ function renderDependencies(resetToolbar = true) {
   const VIEW_W = 1400, VIEW_H = 800;
   const center = { x: VIEW_W / 2, y: VIEW_H / 2 };
   const nodeHalfW = 98, nodeHalfH = 48, pad = 26;
-  const internalRx = 270, internalRy = 150;
+
+  // The commitments-style schema is the pattern being adopted for every service: a top-level
+  // `containers` array plus `sourceId` on each dependency pointing at the container it came
+  // from. Only that top-level array is used to draw the C4 boxes — older sources without it
+  // fall back to a single node representing the whole service, as before. A multi-container
+  // service needs its own ring, sized so the boxes don't overlap each other, and the
+  // dependency ring around it pushed out so it clears that cluster.
+  const topLevelContainers = state.data.containers || [];
+  const hasContainers = topLevelContainers.length > 0;
+  const containerBoxHalfW = 105, containerBoxHalfH = 49, containerGap = 40;
+  const multiContainer = topLevelContainers.length > 1;
+  const containerRadius = multiContainer
+    ? Math.max(180, (containerBoxHalfW * 2 + containerGap) / (2 * Math.sin(Math.PI / topLevelContainers.length)))
+    : 0;
+  const containerClearance = multiContainer ? containerRadius + containerBoxHalfH + nodeHalfH + pad : 0;
+  const internalRx = 270 + containerClearance, internalRy = 150 + containerClearance;
   const boundaryRx = internalRx + nodeHalfW + pad;
   const boundaryRy = internalRy + nodeHalfH + pad;
   const externalScale = 1.4;
@@ -711,13 +792,26 @@ function renderDependencies(resetToolbar = true) {
   const nodes = [...internal, ...external];
   if (!state.diagramPositions) state.diagramPositions = new Map();
   const positions = state.diagramPositions;
-  const centerPos = positionFor(positions, 'center', center);
+
+  const containerNodes = hasContainers
+    ? (multiContainer ? ringLayout(topLevelContainers, center, containerRadius, containerRadius, 0) : [{ ...topLevelContainers[0], x: center.x, y: center.y }])
+    : [{ id: 'center', name: state.source.name, x: center.x, y: center.y }];
+  const containerIds = new Set(containerNodes.map((node) => node.id));
+  containerNodes.forEach((node) => positionFor(positions, node.id, node));
   nodes.forEach((node) => positionFor(positions, node.id, node));
+  const containerIdFor = (dependency) => (containerIds.has(dependency.sourceId) ? dependency.sourceId : containerNodes[0].id);
 
   const orgLabel = orgName(state.data.repository);
   const elements = [
     { data: { id: 'boundary', label: orgLabel.toUpperCase() } },
-    { data: { id: 'center', parent: 'boundary', isLeaf: true, isCenter: true, width: 210, height: 98, label: titleCase(state.source.name) }, position: centerPos },
+    ...containerNodes.map((node) => ({
+      data: {
+        id: node.id, parent: 'boundary', isLeaf: true, isContainer: true, isSystem: !hasContainers,
+        width: 210, height: 98, label: hasContainers ? titleCase(node.name) : titleCase(state.source.name),
+        containerType: node.type
+      },
+      position: positions.get(node.id)
+    })),
     ...nodes.map((node) => ({
       data: {
         id: node.id, isLeaf: true, width: 196, height: 96,
@@ -729,13 +823,14 @@ function renderDependencies(resetToolbar = true) {
     })),
     ...nodes.map((node) => {
       const inbound = node.direction === 'inbound';
-      return { data: { id: `edge-${node.id}`, source: inbound ? node.id : 'center', target: inbound ? 'center' : node.id, label: relationshipLabel(node) }, classes: inbound ? 'inbound' : '' };
+      const containerId = containerIdFor(node);
+      return { data: { id: `edge-${node.id}`, source: inbound ? node.id : containerId, target: inbound ? containerId : node.id, label: relationshipLabel(node) }, classes: inbound ? 'inbound' : '' };
     })
   ];
 
   content.innerHTML = `<div class="dependency-view">
     <div class="c4-legend">
-      <span class="c4-legend-item"><span class="c4-swatch focus"></span>Software system (this service)</span>
+      <span class="c4-legend-item"><span class="c4-swatch focus"></span>${hasContainers ? 'Container (this service)' : 'Software system (this service)'}</span>
       <span class="c4-legend-item"><span class="c4-swatch internal"></span>Container — internal</span>
       <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
       <span class="c4-legend-item"><span class="c4-swatch cache"></span>Uses Redis</span>
@@ -755,7 +850,10 @@ function renderDependencies(resetToolbar = true) {
       query: 'node[?isLeaf]',
       halign: 'center', valign: 'center', halignBox: 'center', valignBox: 'center',
       tpl: (data) => {
-        if (data.isCenter) return `<div class="cy-node service-node" data-node-id="center"><span class="c4-type">Software System</span><strong>${escapeHtml(data.label)}</strong></div>`;
+        if (data.isContainer) {
+          const typeLabel = data.isSystem ? 'Software System' : `Container${data.containerType ? ` · ${escapeHtml(titleCase(data.containerType))}` : ''}`;
+          return `<div class="cy-node service-node" data-node-id="${escapeHtml(data.id)}"><span class="c4-type">${typeLabel}</span><strong>${escapeHtml(data.label)}</strong></div>`;
+        }
         const nodeClass = data.isRedis ? 'cache' : (data.kind === 'message' ? 'message' : (data.classification === 'internal' ? 'internal' : 'external'));
         const typeLabel = data.classification === 'internal' ? 'Container' : 'External System';
         const alreadyMentionsRedis = (data.technology || '').toLowerCase().includes('redis');
@@ -763,7 +861,7 @@ function renderDependencies(resetToolbar = true) {
       }
     }],
     onTapNode: (node) => {
-      if (node.id() === 'center') return;
+      if (containerIds.has(node.id())) return;
       state.selected = node.id();
       markCySelection($('#dep-cy'), state.selected);
       $('#dep-detail').innerHTML = dependencyDetail(dependencies.find((item) => item.id === state.selected));

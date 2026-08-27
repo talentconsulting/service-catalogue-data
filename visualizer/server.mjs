@@ -59,6 +59,7 @@ async function buildCatalog() {
         database: Boolean(entry.dbschema) && await exists(join(sourceDir, 'db-schema', 'database.schema.json')),
         messages: Boolean(entry.eventcatalog) && await exists(join(sourceDir, 'event-catalog', 'events-and-commands.json')),
         dependencies: Boolean(entry['service-dependencies']) && await exists(join(sourceDir, 'service-dependencies', 'service-dependencies.json')),
+        dependencyDiagram: Boolean(entry['service-dependencies']) && await exists(join(sourceDir, 'service-dependencies', 'service-dependencies.puml')),
         openapi: Boolean(entry.specs) && apiFiles.length > 0
       },
       apiFiles,
@@ -87,6 +88,15 @@ function safeChild(base, ...parts) {
 async function handleApi(request, response, url) {
   if (url.pathname === '/api/catalog') {
     return sendJson(response, 200, { sources: await buildCatalog() });
+  }
+
+  const diagramMatch = url.pathname.match(/^\/api\/sources\/([^/]+)\/dependency-diagram$/);
+  if (diagramMatch) {
+    const source = await sourceById(decodeURIComponent(diagramMatch[1]));
+    const file = join(safeChild(dataDir, source.name), 'service-dependencies', 'service-dependencies.puml');
+    if (!await exists(file)) return sendJson(response, 404, { error: 'PlantUML diagram is unavailable' });
+    response.writeHead(200, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' });
+    return createReadStream(file).pipe(response);
   }
 
   const match = url.pathname.match(/^\/api\/sources\/([^/]+)\/(database|messages|dependencies|openapi)$/);
