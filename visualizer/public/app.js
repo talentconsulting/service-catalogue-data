@@ -33,6 +33,50 @@ function toHex(text) {
   return Array.from(new TextEncoder().encode(text)).map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
+// PlantUML's server expects source compressed with raw deflate then packed 3 bytes -> 4 chars,
+// like base64 but with its own alphabet (0-9, A-Z, a-z, -, _). A plain hex-encoded (~h) URL is
+// roughly 2x the source size and reliably 400s on any diagram bigger than a toy example, so this
+// is required for anything real — not an optimization.
+function encode6bit(value) {
+  if (value < 10) return String.fromCharCode(48 + value);
+  value -= 10;
+  if (value < 26) return String.fromCharCode(65 + value);
+  value -= 26;
+  if (value < 26) return String.fromCharCode(97 + value);
+  value -= 26;
+  return value === 0 ? '-' : '_';
+}
+
+function append3bytes(b1, b2, b3) {
+  const c1 = b1 >> 2;
+  const c2 = ((b1 & 0x3) << 4) | (b2 >> 4);
+  const c3 = ((b2 & 0xF) << 2) | (b3 >> 6);
+  const c4 = b3 & 0x3F;
+  return encode6bit(c1) + encode6bit(c2) + encode6bit(c3) + encode6bit(c4);
+}
+
+function encode64(bytes) {
+  let result = '';
+  for (let i = 0; i < bytes.length; i += 3) {
+    if (i + 2 < bytes.length) result += append3bytes(bytes[i], bytes[i + 1], bytes[i + 2]);
+    else if (i + 1 < bytes.length) result += append3bytes(bytes[i], bytes[i + 1], 0);
+    else result += append3bytes(bytes[i], 0, 0);
+  }
+  return result;
+}
+
+async function encodePlantUml(text) {
+  const bytes = new TextEncoder().encode(text);
+  if (typeof CompressionStream === 'function') {
+    try {
+      const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+      const compressed = new Uint8Array(await new Response(stream).arrayBuffer());
+      return encode64(compressed);
+    } catch { /* fall through to the hex scheme below */ }
+  }
+  return `~h${toHex(text)}`;
+}
+
 function sourceCapabilities() {
   return [
     { id: 'database', label: 'Data schema', enabled: state.source.capabilities.database },
@@ -97,6 +141,7 @@ async function loadView() {
   state.schemaPositions = null;
   state.depView = 'diagram';
   state.pumlSource = null;
+  state.pumlEncoded = null;
   try {
     if (state.view === 'dependencies') {
       state.data = await loadDependenciesFor(state.source);
@@ -446,6 +491,31 @@ function c4Type(dependency) {
   return dependency.classification === 'internal' ? 'Container' : 'External System';
 }
 
+function mergeDependencyGroup(id, members) {
+  const first = members[0];
+  const unique = (values) => [...new Set(values.filter(Boolean))];
+  const directions = unique(members.map((member) => member.direction));
+  const technologies = unique(members.map((member) => member.technology));
+  const clients = unique(members.map((member) => member.client));
+  const authTypes = unique(members.map((member) => member.authentication?.type));
+  return {
+    ...first,
+    id,
+    direction: directions.length === 1 ? directions[0] : 'mixed',
+    technology: technologies.join(' / ') || null,
+    client: clients.join(' / ') || null,
+    authentication: {
+      type: authTypes.join(' / ') || null,
+      configurationKeys: unique(members.flatMap((member) => member.authentication?.configurationKeys || []))
+    },
+    configurationKeys: unique(members.flatMap((member) => member.configurationKeys || [])),
+    operations: members.flatMap((member) => member.operations || []),
+    resources: members.flatMap((member) => member.resources || []),
+    evidence: members.flatMap((member) => member.evidence || []),
+    members
+  };
+}
+
 function usesRedis(dependency) {
   const haystack = [
     dependency.name, dependency.technology, dependency.client, dependency.kind,
@@ -691,18 +761,23 @@ function wireDiagramControls(onAutoArrange) {
 }
 
 function depViewToggleHtml() {
-  return `<div class="segmented" role="group" aria-label="Dependency view"><button data-dep-view="diagram" aria-pressed="${state.depView === 'diagram'}">Diagram</button><button data-dep-view="puml" aria-pressed="${state.depView === 'puml'}">PlantUML source</button></div>`;
+  return `<div class="segmented" role="group" aria-label="Dependency view">
+    <button data-dep-view="diagram" aria-pressed="${state.depView === 'diagram'}">Diagram</button>
+    <button data-dep-view="puml" aria-pressed="${state.depView === 'puml'}">PlantUML source</button>
+    <button data-dep-view="puml-live" aria-pressed="${state.depView === 'puml-live'}">Live PlantUML</button>
+  </div>`;
 }
 
 function wireDepViewToggle() {
   document.querySelectorAll('[data-dep-view]').forEach((button) => {
     button.onclick = async () => {
       state.depView = button.dataset.depView;
-      if (state.depView === 'puml' && state.pumlSource === null) {
+      if (state.depView !== 'diagram' && state.pumlEncoded === null) {
         destroyCy();
         content.innerHTML = '<div class="loading">Loading PlantUML source…</div>';
         try {
           state.pumlSource = await getText(`/api/sources/${encodeURIComponent(state.source.id)}/dependency-diagram`);
+          state.pumlEncoded = await encodePlantUml(state.pumlSource);
         } catch (error) {
           content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
           return;
@@ -713,39 +788,66 @@ function wireDepViewToggle() {
   });
 }
 
-function pumlSourceView(source) {
-  const hex = toHex(source);
-  const renderUrl = `https://www.plantuml.com/plantuml/svg/~h${hex}`;
-  const editUrl = `https://www.plantuml.com/plantuml/uml/~h${hex}`;
+function pumlUrls(encoded) {
+  return {
+    svg: `https://www.plantuml.com/plantuml/svg/${encoded}`,
+    edit: `https://www.plantuml.com/plantuml/uml/${encoded}`
+  };
+}
+
+function pumlSourceView(source, encoded) {
+  const { svg, edit } = pumlUrls(encoded);
   return `<div class="dependency-view">
     <p class="toolbar-meta">Generated C4 PlantUML source for this service. Rendering it sends this text to the public PlantUML server at plantuml.com — nothing is sent unless you open one of the links below.</p>
-    <div class="puml-actions"><a class="plain-button" href="${renderUrl}" target="_blank" rel="noopener noreferrer">Render diagram on plantuml.com ↗</a><a class="plain-button" href="${editUrl}" target="_blank" rel="noopener noreferrer">Open in PlantUML editor ↗</a></div>
+    <div class="puml-actions"><a class="plain-button" href="${svg}" target="_blank" rel="noopener noreferrer">Render diagram on plantuml.com ↗</a><a class="plain-button" href="${edit}" target="_blank" rel="noopener noreferrer">Open in PlantUML editor ↗</a></div>
     <pre class="puml-source"><code>${escapeHtml(source)}</code></pre>
+  </div>`;
+}
+
+function pumlLiveView(source, encoded) {
+  const { svg, edit } = pumlUrls(encoded);
+  return `<div class="dependency-view">
+    <p class="toolbar-meta">Live C4 diagram rendered by the public PlantUML server at plantuml.com from the generated source below — the source is sent there automatically to produce this image.</p>
+    <div class="puml-render-wrap">
+      <a href="${svg}" target="_blank" rel="noopener noreferrer" title="Open full-size"><img class="puml-render" src="${svg}" alt="Live PlantUML C4 diagram for ${escapeHtml(titleCase(state.source.name))}" onerror="this.closest('.puml-render-wrap').classList.add('puml-render-error')"></a>
+      <p class="puml-render-fallback muted">Couldn't reach the PlantUML server. <a class="plain-button" href="${edit}" target="_blank" rel="noopener noreferrer">Open in PlantUML editor ↗</a></p>
+    </div>
+    <details class="puml-source-details">
+      <summary>View PlantUML source</summary>
+      <pre class="puml-source"><code>${escapeHtml(source)}</code></pre>
+    </details>
   </div>`;
 }
 
 function renderDependencies(resetToolbar = true) {
   const hasDiagramSource = state.source.capabilities.dependencyDiagram;
   if (!state.depView) state.depView = 'diagram';
-  if (resetToolbar) {
-    if (state.depView === 'puml') {
-      toolbar.innerHTML = `${depViewToggleHtml()}`;
-      wireDepViewToggle();
-    }
+  if (resetToolbar && state.depView !== 'diagram') {
+    toolbar.innerHTML = `${depViewToggleHtml()}`;
+    wireDepViewToggle();
   }
-  if (state.depView === 'puml') {
+  if (state.depView !== 'diagram') {
     destroyCy();
-    content.innerHTML = state.pumlSource ? pumlSourceView(state.pumlSource) : '<div class="empty-state"><h2>PlantUML diagram unavailable</h2></div>';
+    const view = state.depView === 'puml-live' ? pumlLiveView : pumlSourceView;
+    content.innerHTML = state.pumlSource ? view(state.pumlSource, state.pumlEncoded) : '<div class="empty-state"><h2>PlantUML diagram unavailable</h2></div>';
     return;
   }
 
-  const idCounts = new Map();
-  const dependencies = (state.data.dependencies || []).map((dependency, index) => {
-    const baseId = dependency.targetId || String(index);
-    const seenCount = idCounts.get(baseId) || 0;
-    idCounts.set(baseId, seenCount + 1);
-    return { ...dependency, id: seenCount === 0 ? baseId : `${baseId}-${seenCount}` };
+  // Multi-container services (see the containers block below) report the same downstream
+  // dependency once per container that calls it — e.g. six containers all reading the same
+  // database yields six near-identical "Provider Commitments Database" entries. Group by
+  // targetId (or kind+name when there's none, e.g. message-based entries) into one node per
+  // real dependency, keeping every raw entry so a dedicated edge is still drawn from each
+  // container that actually uses it.
+  const rawDependencies = state.data.dependencies || [];
+  const targetKeyFor = (dependency) => dependency.targetId || `${dependency.kind || 'dependency'}:${dependency.name}`;
+  const dependencyGroups = new Map();
+  rawDependencies.forEach((dependency) => {
+    const key = targetKeyFor(dependency);
+    if (!dependencyGroups.has(key)) dependencyGroups.set(key, []);
+    dependencyGroups.get(key).push(dependency);
   });
+  const dependencies = [...dependencyGroups.entries()].map(([id, members]) => mergeDependencyGroup(id, members));
   const operations = dependencies.reduce((sum, dependency) => sum + (dependency.operations?.length || 0), 0);
   const internalCount = dependencies.filter((dependency) => dependency.classification === 'internal').length;
   const messageCount = dependencies.filter((dependency) => dependency.kind === 'message').length;
@@ -821,11 +923,13 @@ function renderDependencies(resetToolbar = true) {
       },
       position: positions.get(node.id)
     })),
-    ...nodes.map((node) => {
-      const inbound = node.direction === 'inbound';
-      const containerId = containerIdFor(node);
-      return { data: { id: `edge-${node.id}`, source: inbound ? node.id : containerId, target: inbound ? containerId : node.id, label: relationshipLabel(node) }, classes: inbound ? 'inbound' : '' };
-    })
+    // One edge per original entry (per container that actually depends on it), not per merged
+    // node — that's what shows the fan-in when several containers share the same dependency.
+    ...nodes.flatMap((node) => node.members.map((member, memberIndex) => {
+      const inbound = member.direction === 'inbound';
+      const containerId = containerIdFor(member);
+      return { data: { id: `edge-${node.id}-${memberIndex}`, source: inbound ? node.id : containerId, target: inbound ? containerId : node.id, label: relationshipLabel(member) }, classes: inbound ? 'inbound' : '' };
+    }))
   ];
 
   content.innerHTML = `<div class="dependency-view">
