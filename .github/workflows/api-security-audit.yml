@@ -1,0 +1,51 @@
+name: API security audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**/open-api/*.json'
+  schedule:
+    - cron: '0 7 * * 1' # Weekly, Monday 07:00 UTC — re-checks specs against ruleset updates
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set branch suffix
+        id: suffix
+        run: echo "value=$(date -u +%Y%m%d-%H%M%S)-$(echo "$GITHUB_SHA" | cut -c1-8)" >> "$GITHUB_OUTPUT"
+
+      - name: Run OWASP API security audit
+        id: audit
+        run: node .github/scripts/generate-api-security-report.mjs
+
+      - name: Open pull request with changes
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          add-paths: |
+            */api-security-audit/report.json
+          commit-message: Update API security audit
+          title: Update API security audit
+          body-path: .github/api-security/summary.md
+          branch: api-security-audit/${{ steps.suffix.outputs.value }}
+
+      - name: Fail if error-level findings exist
+        if: steps.audit.outputs.errors != '0'
+        run: |
+          echo "OWASP audit found ${{ steps.audit.outputs.errors }} error-level finding(s) — see the opened pull request for details."
+          exit 1

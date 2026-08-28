@@ -60,7 +60,8 @@ async function buildCatalog() {
         messages: Boolean(entry.eventcatalog) && await exists(join(sourceDir, 'event-catalog', 'events-and-commands.json')),
         dependencies: Boolean(entry['service-dependencies']) && await exists(join(sourceDir, 'service-dependencies', 'service-dependencies.json')),
         dependencyDiagram: Boolean(entry['service-dependencies']) && await exists(join(sourceDir, 'service-dependencies', 'service-dependencies.puml')),
-        openapi: Boolean(entry.specs) && apiFiles.length > 0
+        openapi: Boolean(entry.specs) && apiFiles.length > 0,
+        security: await exists(join(sourceDir, 'dependency-alerts', 'dependabot-alerts.json'))
       },
       apiFiles,
       scans: Object.fromEntries(Object.entries(entry)
@@ -99,7 +100,7 @@ async function handleApi(request, response, url) {
     return createReadStream(file).pipe(response);
   }
 
-  const match = url.pathname.match(/^\/api\/sources\/([^/]+)\/(database|messages|dependencies|openapi)$/);
+  const match = url.pathname.match(/^\/api\/sources\/([^/]+)\/(database|messages|dependencies|openapi|security)$/);
   if (!match) return sendJson(response, 404, { error: 'Not found' });
 
   const [, id, kind] = match;
@@ -109,6 +110,7 @@ async function handleApi(request, response, url) {
   if (kind === 'database') file = join(sourceDir, 'db-schema', 'database.schema.json');
   if (kind === 'messages') file = join(sourceDir, 'event-catalog', 'events-and-commands.json');
   if (kind === 'dependencies') file = join(sourceDir, 'service-dependencies', 'service-dependencies.json');
+  if (kind === 'security') file = join(sourceDir, 'dependency-alerts', 'dependabot-alerts.json');
   if (kind === 'openapi') {
     const requested = url.searchParams.get('file');
     if (!requested || !source.apiFiles.includes(requested)) {
@@ -121,8 +123,12 @@ async function handleApi(request, response, url) {
   return sendJson(response, 200, await readJson(file));
 }
 
+function isAppRoute(pathname) {
+  return pathname === '/' || pathname === '/landscape' || pathname === '/service' || pathname.startsWith('/service/');
+}
+
 async function serveStatic(response, pathname) {
-  const requested = pathname === '/' || pathname === '/landscape' ? 'index.html' : decodeURIComponent(pathname.slice(1));
+  const requested = isAppRoute(pathname) ? 'index.html' : decodeURIComponent(pathname.slice(1));
   const file = safeChild(publicDir, normalize(requested));
   if (!await exists(file)) {
     response.writeHead(404, { 'content-type': 'text/plain; charset=utf-8' });

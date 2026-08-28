@@ -9,7 +9,9 @@ const sourceSelect = $('#source-select');
 const content = $('#content');
 const toolbar = $('#toolbar');
 const tabs = $('#view-tabs');
+const homeToggle = $('#home-toggle');
 const landscapeToggle = $('#landscape-toggle');
+const serviceToggle = $('#service-toggle');
 const escapeHtml = (value = '') => String(value).replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[char]);
 const titleCase = (value) => value.replace(/(^|[-_])(\w)/g, (_, space, char) => `${space ? ' ' : ''}${char.toUpperCase()}`);
 
@@ -94,6 +96,7 @@ function renderTabs() {
 }
 
 function setHero() {
+  $('#mode-eyebrow').textContent = 'Architecture inventory';
   $('#source-title').textContent = titleCase(state.source.name);
   const link = $('#repo-link');
   link.textContent = state.source.repository.replace('https://github.com/', 'github.com/');
@@ -111,9 +114,10 @@ function defaultView() {
 }
 
 function applyMode() {
-  const isLandscape = state.mode === 'landscape';
-  document.querySelector('main').classList.toggle('landscape-mode', isLandscape);
-  landscapeToggle.toggleAttribute('aria-current', isLandscape);
+  document.body.dataset.mode = state.mode;
+  homeToggle.toggleAttribute('aria-current', state.mode === 'home');
+  landscapeToggle.toggleAttribute('aria-current', state.mode === 'landscape');
+  serviceToggle.toggleAttribute('aria-current', state.mode === 'source');
 }
 
 async function selectSource(id) {
@@ -1024,8 +1028,124 @@ function dependencyEvidence(evidence, scanKind = 'service-dependencies') {
 }
 
 function setLandscapeHero() {
+  $('#mode-eyebrow').textContent = 'Architecture inventory';
   $('#source-title').textContent = 'System landscape';
   $('#source-stats').innerHTML = '';
+}
+
+function setHomeHero() {
+  $('#mode-eyebrow').textContent = 'Service catalogue';
+  $('#source-title').textContent = 'Dashboard';
+  $('#source-stats').innerHTML = '';
+}
+
+const SEVERITY_ORDER = ['critical', 'high', 'medium', 'low'];
+
+function severityRank(severity) {
+  const index = SEVERITY_ORDER.indexOf(severity);
+  return index === -1 ? SEVERITY_ORDER.length : index;
+}
+
+function severityClass(severity) {
+  return SEVERITY_ORDER.includes(severity) ? severity : 'unknown';
+}
+
+function sortedSeverities(counts) {
+  return Object.keys(counts).filter((severity) => counts[severity] > 0).sort((a, b) => severityRank(a) - severityRank(b) || a.localeCompare(b));
+}
+
+function severityPills(counts) {
+  return sortedSeverities(counts).map((severity) => `<span class="severity-pill ${severityClass(severity)}">${counts[severity]} ${escapeHtml(severity)}</span>`).join('');
+}
+
+async function loadHomeDashboard() {
+  destroyCy();
+  toolbar.innerHTML = '';
+  content.innerHTML = '<div class="loading">Reading catalogue data…</div>';
+  state.selected = null;
+  try {
+    state.securityAudit = await Promise.all(state.catalog.map(async (source) => {
+      if (!source.capabilities.security) return { source, alerts: null };
+      try {
+        return { source, alerts: await getJson(`/api/sources/${encodeURIComponent(source.id)}/security`) };
+      } catch {
+        return { source, alerts: null };
+      }
+    }));
+    renderHomeDashboard();
+  } catch (error) {
+    content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function renderHomeDashboard() {
+  const results = state.securityAudit || [];
+  const scanned = results.filter((result) => result.alerts);
+  const totalOpen = scanned.reduce((sum, result) => sum + (result.alerts.openCount || 0), 0);
+  const totalSeverityCounts = {};
+  scanned.forEach((result) => {
+    Object.entries(result.alerts.severityCounts || {}).forEach(([severity, count]) => {
+      totalSeverityCounts[severity] = (totalSeverityCounts[severity] || 0) + count;
+    });
+  });
+  const affectedCount = scanned.filter((result) => (result.alerts.openCount || 0) > 0).length;
+  const worstSeverity = sortedSeverities(totalSeverityCounts)[0];
+
+  $('#source-stats').innerHTML = `
+    <div class="stat"><dt>Repos scanned</dt><dd>${scanned.length}/${results.length}</dd></div>
+    <div class="stat"><dt>Open alerts</dt><dd>${totalOpen}</dd></div>
+    <div class="stat"><dt>Repos affected</dt><dd>${affectedCount}</dd></div>
+    <div class="stat"><dt>Highest severity</dt><dd>${worstSeverity ? titleCase(worstSeverity) : '—'}</dd></div>`;
+
+  toolbar.innerHTML = '<span class="toolbar-meta">Dependabot alert data generated per repository — click a row for the full alert list.</span>';
+
+  const rows = [...results].sort((a, b) => (b.alerts?.openCount || 0) - (a.alerts?.openCount || 0));
+
+  content.innerHTML = `<div class="dashboard">
+    <section class="dashboard-section">
+      <h2>Security audit</h2>
+      <p class="section-sub">Open Dependabot alerts across ${results.length} cataloged repositories.</p>
+      ${totalOpen ? `<div class="severity-summary">${severityPills(totalSeverityCounts)}</div>` : ''}
+      <div class="table-wrap">
+        <table class="data-table repo-alert-table">
+          <thead><tr><th>Repository</th><th>Open alerts</th><th>Severity</th><th>Last scanned</th></tr></thead>
+          <tbody>${rows.map(repoAlertRows).join('')}</tbody>
+        </table>
+      </div>
+    </section>
+  </div>`;
+
+  document.querySelectorAll('[data-toggle-alerts]').forEach((row) => {
+    row.addEventListener('click', () => {
+      const detail = document.querySelector(`[data-detail-for="${row.dataset.toggleAlerts}"]`);
+      if (detail) detail.hidden = !detail.hidden;
+    });
+  });
+}
+
+function repoAlertRows({ source, alerts }) {
+  const openCount = alerts?.openCount || 0;
+  const generatedAt = alerts?.generatedAt ? new Date(alerts.generatedAt).toLocaleDateString() : '—';
+  const severity = alerts ? (severityPills(alerts.severityCounts || {}) || '<span class="muted">None</span>') : '';
+  const summaryRow = `<tr class="repo-alert-row" data-toggle-alerts="${escapeHtml(source.id)}">
+    <td><span class="repo-name">${escapeHtml(titleCase(source.name))}</span><span class="repo-slug">${escapeHtml(orgRepoSlug(source.repository))}</span></td>
+    <td>${alerts ? openCount : '<span class="muted">Not scanned</span>'}</td>
+    <td>${severity}</td>
+    <td>${generatedAt}</td>
+  </tr>`;
+  const detailRow = `<tr class="repo-alert-detail-row" data-detail-for="${escapeHtml(source.id)}" hidden><td colspan="4"><div class="repo-alert-detail">${alertDetailTable(alerts)}</div></td></tr>`;
+  return summaryRow + detailRow;
+}
+
+function alertDetailTable(alerts) {
+  if (!alerts || !alerts.alerts?.length) return '<p class="no-alerts-note">No open alerts.</p>';
+  return `<table class="data-table"><thead><tr><th>Severity</th><th>Package</th><th>Advisory</th><th>Patched version</th><th>Opened</th></tr></thead><tbody>${alerts.alerts.map((alert) => `<tr>
+    <td><span class="severity-pill ${severityClass(alert.severity)}">${escapeHtml(alert.severity || 'unknown')}</span></td>
+    <td><code>${escapeHtml(alert.packageName)}</code></td>
+    <td><a href="${escapeHtml(alert.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(alert.summary || alert.ghsaId || alert.cveId || `#${alert.number}`)}</a></td>
+    <td>${escapeHtml(alert.firstPatchedVersion || 'None available')}</td>
+    <td>${alert.createdAt ? new Date(alert.createdAt).toLocaleDateString() : '—'}</td>
+  </tr>`).join('')}</tbody></table>`;
 }
 
 async function loadLandscape() {
@@ -1213,7 +1333,7 @@ function landscapeDetail(node, graph) {
 async function jumpToSource(sourceId, dependencyIndex = null) {
   const target = state.catalog.find((source) => source.id === sourceId);
   state.mode = 'source';
-  history.pushState({}, '', '/');
+  history.pushState({}, '', `/service/${encodeURIComponent(sourceId)}`);
   applyMode();
   sourceSelect.value = sourceId;
   if (target && (target.capabilities.dependencies || target.capabilities.messages)) state.view = 'dependencies';
@@ -1423,13 +1543,37 @@ tabs.addEventListener('click', async (event) => {
   await loadView();
 });
 
+function modeFromPath(pathname) {
+  if (pathname === '/landscape') return 'landscape';
+  if (pathname === '/service' || pathname.startsWith('/service/')) return 'source';
+  return 'home';
+}
+
+function sourceIdFromPath(pathname) {
+  const match = pathname.match(/^\/service\/([^/]+)$/);
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function resolveSourceId(requestedId) {
+  if (state.catalog.some((source) => source.id === requestedId)) return requestedId;
+  return sourceSelect.value || state.catalog[0].id;
+}
+
 sourceSelect.addEventListener('change', async () => {
-  if (state.mode === 'landscape') {
-    state.mode = 'source';
-    history.pushState({}, '', '/');
-    applyMode();
-  }
+  state.mode = 'source';
+  history.pushState({}, '', `/service/${encodeURIComponent(sourceSelect.value)}`);
+  applyMode();
   await selectSource(sourceSelect.value);
+});
+
+homeToggle.addEventListener('click', async (event) => {
+  if (state.mode === 'home') return;
+  event.preventDefault();
+  state.mode = 'home';
+  history.pushState({}, '', '/');
+  applyMode();
+  setHomeHero();
+  await loadHomeDashboard();
 });
 
 landscapeToggle.addEventListener('click', async (event) => {
@@ -1442,18 +1586,32 @@ landscapeToggle.addEventListener('click', async (event) => {
   await loadLandscape();
 });
 
-window.addEventListener('popstate', async () => {
-  const landscape = window.location.pathname === '/landscape';
-  if (landscape === (state.mode === 'landscape')) return;
-  state.mode = landscape ? 'landscape' : 'source';
+serviceToggle.addEventListener('click', async (event) => {
+  if (state.mode === 'source') return;
+  event.preventDefault();
+  state.mode = 'source';
+  const sourceId = resolveSourceId(sourceSelect.value);
+  history.pushState({}, '', `/service/${encodeURIComponent(sourceId)}`);
   applyMode();
-  if (landscape) {
+  sourceSelect.value = sourceId;
+  await selectSource(sourceId);
+});
+
+window.addEventListener('popstate', async () => {
+  const mode = modeFromPath(window.location.pathname);
+  if (mode === state.mode) return;
+  state.mode = mode;
+  applyMode();
+  if (mode === 'landscape') {
     setLandscapeHero();
     await loadLandscape();
+  } else if (mode === 'source') {
+    const sourceId = resolveSourceId(sourceIdFromPath(window.location.pathname));
+    sourceSelect.value = sourceId;
+    await selectSource(sourceId);
   } else {
-    setHero();
-    renderTabs();
-    await loadView();
+    setHomeHero();
+    await loadHomeDashboard();
   }
 });
 
@@ -1463,12 +1621,19 @@ async function init() {
     state.catalog = catalog.sources;
     if (!state.catalog.length) throw new Error('The manifest does not contain any sources.');
     sourceSelect.innerHTML = state.catalog.map((source) => `<option value="${source.id}">${escapeHtml(titleCase(source.name))}</option>`).join('');
-    state.mode = window.location.pathname === '/landscape' ? 'landscape' : 'source';
+    sourceSelect.value = state.catalog[0].id;
+    state.mode = modeFromPath(window.location.pathname);
     applyMode();
-    await selectSource(state.catalog[0].id);
     if (state.mode === 'landscape') {
       setLandscapeHero();
       await loadLandscape();
+    } else if (state.mode === 'source') {
+      const sourceId = resolveSourceId(sourceIdFromPath(window.location.pathname));
+      sourceSelect.value = sourceId;
+      await selectSource(sourceId);
+    } else {
+      setHomeHero();
+      await loadHomeDashboard();
     }
   } catch (error) {
     content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
