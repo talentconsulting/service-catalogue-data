@@ -411,6 +411,7 @@ function renderDatabaseDiagram(filtered, allEdges, isolatedCount) {
       state.selected = node.id();
       markCySelection($('#erd-cy'), state.selected);
       $('#erd-detail').innerHTML = tableDetailInline(filtered.find((table) => table.name === state.selected));
+      scrollDetailIntoView('erd-detail');
     },
     onDragFree: (node) => { positions.set(node.id(), node.position()); }
   });
@@ -706,6 +707,13 @@ function markCySelection(containerEl, selectedId) {
   });
 }
 
+// Detail panels render below a (often tall) diagram, so clicking a node can update content
+// that's already scrolled off screen. `block: 'nearest'` only moves the page the minimum
+// needed to bring it into view — a no-op if it's already visible, never jarring.
+function scrollDetailIntoView(elementId) {
+  document.getElementById(elementId)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 function wireNodeHoverTooltip(cy, container, buildContent) {
   if (!cy || !container) return;
   let tooltip = null;
@@ -981,6 +989,7 @@ function renderDependencies(resetToolbar = true) {
       state.selected = node.id();
       markCySelection($('#dep-cy'), state.selected);
       $('#dep-detail').innerHTML = dependencyDetail(dependencies.find((item) => item.id === state.selected));
+      scrollDetailIntoView('dep-detail');
     },
     onDragFree: (node) => { positions.set(node.id(), node.position()); }
   });
@@ -1285,6 +1294,7 @@ function renderLandscape() {
       $('#land-detail').innerHTML = landscapeDetail(allNodes.find((item) => item.id === state.selected), graph);
       document.querySelectorAll('#land-detail [data-jump]').forEach((button) => { button.onclick = () => jumpToSource(button.dataset.jump); });
       wireLandscapeRefToggles();
+      scrollDetailIntoView('land-detail');
     },
     onTapEdge: (edge) => {
       const sourceId = edge.data('jumpSourceId');
