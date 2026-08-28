@@ -1,0 +1,178 @@
+{
+  "repository": "SkillsFundingAgency/das-reservations-api",
+  "ref": "master",
+  "path": "src",
+  "localServices": [
+    {
+      "name": "Redis",
+      "kind": "cache",
+      "technology": "redis",
+      "configurationKeys": [
+        "ConnectionStrings:RedisLogging"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Api/appsettings.json",
+          "reason": "appsettings.json contains a ConnectionStrings:RedisLogging key which refers to a Redis cache connection."
+        }
+      ]
+    },
+    {
+      "name": "SQL Server",
+      "kind": "database",
+      "technology": "sqlserver",
+      "configurationKeys": [
+        "Reservations:ConnectionString",
+        "ReservationsConfiguration:ConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Api/AppStart/AddDatabaseExtension.cs",
+          "reason": "Code contains methods using SqlConnection that require a 'ConnectionString' for database connection."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Domain/Configuration/ReservationsConfiguration.cs",
+          "reason": "ReservationsConfiguration class includes a ConnectionString property."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Data/ReservationsDataContext.cs",
+          "reason": "SQL Server connection is set up in ReservationsDataContext and relies on ReservationsConfiguration.ConnectionString."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Api/StartupExtensions/EntityFrameworkStartup.cs",
+          "reason": "The ReservationsDataContext is configured using a SQL Server connection, which refers to ReservationsConfiguration.ConnectionString for database connectivity."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Api/Startup.cs",
+          "reason": "The ReservationsDataContext is configured with UseSqlServer, and the connection string is sourced from Reservations:ConnectionString."
+        }
+      ]
+    },
+    {
+      "name": "Azure Storage Emulator",
+      "kind": "object-storage",
+      "technology": null,
+      "configurationKeys": [
+        "AzureStorageConfiguration:ConfigurationStorageConnectionString",
+        "ConfigurationStorageConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.NServiceBusListener/appsettings.local.json",
+          "reason": "Contains AzureStorageConfiguration:ConfigurationStorageConnectionString with 'UseDevelopmentStorage=true', indicating the use of a local Azure Storage Emulator."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Api/appsettings.json",
+          "reason": "Contains ConfigurationStorageConnectionString specifying 'UseDevelopmentStorage=true', indicating the use of a local Azure Storage Emulator."
+        }
+      ]
+    }
+  ],
+  "configurationKeys": [
+    {
+      "key": "AllowedHosts",
+      "sourceFile": "src/SFA.DAS.Reservations.Api/appsettings.json",
+      "reason": "Allowed hosts configuration defined in appsettings.json."
+    },
+    {
+      "key": "APPINSIGHTS_INSTRUMENTATIONKEY",
+      "sourceFile": "src/SFA.DAS.Reservations.Api/appsettings.json",
+      "reason": "Application Insights instrumentation key defined in appsettings.json."
+    },
+    {
+      "key": "AzureAd:Identifier",
+      "sourceFile": "src/SFA.DAS.Reservations.Api/Startup.cs",
+      "reason": "Used for validating token audiences in JwtBearer authentication."
+    },
+    {
+      "key": "AzureAd:Tenant",
+      "sourceFile": "src/SFA.DAS.Reservations.Api/Startup.cs",
+      "reason": "Used to configure JwtBearer authentication authority."
+    },
+    {
+      "key": "AzureSearchBaseUrl",
+      "sourceFile": "src/SFA.DAS.Reservations.Domain/Configuration/ReservationsConfiguration.cs",
+      "reason": "ReservationsConfiguration defines an AzureSearchBaseUrl property."
+    },
+    {
+      "key": "AzureStorageConfiguration:ConfigNames",
+      "sourceFile": "src/SFA.DAS.Reservations.NServiceBusListener/appsettings.local.json",
+      "reason": "Required configuration for API settings in appsettings.local.json."
+    },
+    {
+      "key": "AzureStorageConfiguration:ConfigurationStorageConnectionString",
+      "sourceFile": "src/SFA.DAS.Reservations.NServiceBusListener/appsettings.local.json",
+      "reason": "Defined under AzureStorageConfiguration in appsettings.local.json for local Azure Storage Emulator."
+    },
+    {
+      "key": "AzureStorageConfiguration:EnvironmentName",
+      "sourceFile": "src/SFA.DAS.Reservations.NServiceBusListener/appsettings.local.json",
+      "reason": "Environment name setting in appsettings.local.json for local development."
+    },
+    {
+      "key": "AzureStorageConfiguration:Version",
+      "sourceFile": "src/SFA.DAS.Reservations.NServiceBusListener/appsettings.local.json",
+      "reason": "Version configuration defined in appsettings.local.json."
+    },
+    {
+      "key": "ConfigNames",
+      "sourceFile": "src/SFA.DAS.Reservations.Api/appsettings.json",
+      "reason": "Required configuration for API settings in appsettings.json."
+    },
+    {
+      "key": "ConfigurationStorageConnectionString",
+      "sourceFile": "src/SFA.DAS.Reservations.Api/appsettings.json",
+      "reason": "Referenced in appsettings.json for Azure Storage Emulator."
+    },
+    {
+      "key": "ConnectionStrings:RedisLogging",
+      "sourceFile": "src/SFA.DAS.Reservations.Api/appsettings.json",
+      "reason": "Defined in appsettings.json as a key for Redis cache."
+    },
+    {
+      "key": "Environment",
+      "sourceFile": "src/SFA.DAS.Reservations.Api/Startup.cs",
+      "reason": "Used to configure application behavior for different environments, such as DEV or LOCAL."
+    },
+    {
+      "key": "Environment",
+      "sourceFile": "src/SFA.DAS.Reservations.Api/appsettings.json",
+      "reason": "Environment setting defined in appsettings.json for local development."
+    },
+    {
+      "key": "NServiceBusConnectionString",
+      "sourceFile": "src/SFA.DAS.Reservations.Domain/Configuration/ReservationsConfiguration.cs",
+      "reason": "ReservationsConfiguration defines a NServiceBusConnectionString property for message broker."
+    },
+    {
+      "key": "NServiceBusConnectionString",
+      "sourceFile": "src/SFA.DAS.Reservations.NServiceBusListener/appsettings.local.json",
+      "reason": "Referenced in appsettings.local.json for connecting to the message broker."
+    },
+    {
+      "key": "Reservations:ConnectionString",
+      "sourceFile": "src/SFA.DAS.Reservations.Api/Startup.cs",
+      "reason": "ReservationsDataContext configuration with SQL Server uses the connection string from Reservations:ConnectionString."
+    },
+    {
+      "key": "Reservations:ConnectionString",
+      "sourceFile": "src/SFA.DAS.Reservations.Api/StartupExtensions/EntityFrameworkStartup.cs",
+      "reason": "Database connection in ReservationsDataContext relies on the ReservationsConfiguration.ConnectionString."
+    },
+    {
+      "key": "Reservations:ConnectionString",
+      "sourceFile": "src/SFA.DAS.Reservations.Data/ReservationsDataContext.cs",
+      "reason": "ReservationsDataContext establishes a SQL Server connection using the ReservationsConfig.ConnectionString property."
+    },
+    {
+      "key": "ReservationsConfiguration:ConnectionString",
+      "sourceFile": "src/SFA.DAS.Reservations.Domain/Configuration/ReservationsConfiguration.cs",
+      "reason": "ReservationsConfiguration defines a ConnectionString property needed to connect to SQL Server."
+    },
+    {
+      "key": "Version",
+      "sourceFile": "src/SFA.DAS.Reservations.Api/appsettings.json",
+      "reason": "Application version defined in appsettings.json."
+    }
+  ]
+}

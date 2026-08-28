@@ -1,0 +1,147 @@
+{
+  "repository": "SkillsFundingAgency/das-funding-apprenticeship-earnings",
+  "ref": "main",
+  "path": "src",
+  "localServices": [
+    {
+      "name": "SQL Server",
+      "kind": "database",
+      "technology": "sqlserver",
+      "configurationKeys": [
+        "ApplicationSettings:DbConnectionString",
+        "DbConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/DataAccess/ApprenticeshipEarningsDataContext.cs",
+          "reason": "DbContextOptions used to configure the EF Core database context."
+        },
+        {
+          "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+          "reason": "The 'DbConnectionString' property indicates a connection string for the database."
+        },
+        {
+          "sourceFile": "src/Infrastructure/HealthChecks/DbHealthCheck.cs",
+          "reason": "SQL Server connection is verified using SqlConnection with injected connection string."
+        },
+        {
+          "sourceFile": "src/Infrastructure/ServiceCollectionExtensions.cs",
+          "reason": "SQL Server is configured using AddDbContext with a connection string from ApplicationSettings.DbConnectionString."
+        },
+        {
+          "sourceFile": "src/TestHelpers/SqlDatabase.cs",
+          "reason": "The code explicitly configures a DbContext to use SQLServer with connection string options and test database setup."
+        }
+      ]
+    },
+    {
+      "name": "Azure Service Bus",
+      "kind": "message-broker",
+      "technology": null,
+      "configurationKeys": [
+        "ApplicationSettings:ServiceBusConnectionString",
+        "FullyQualifiedNamespace"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+          "reason": "The 'ServiceBusConnectionString' property indicates connection details for a message broker."
+        },
+        {
+          "sourceFile": "src/Infrastructure/ServiceCollectionExtensions.cs",
+          "reason": "Azure Service Bus configured using ConfigureNServiceBusForSend with transport requiring fullyQualifiedNamespace."
+        },
+        {
+          "sourceFile": "src/Infrastructure/HealthChecks/ServiceBusReceiveHealthCheck.cs",
+          "reason": "Health check uses Azure Service Bus with connection string for connectivity check."
+        }
+      ]
+    },
+    {
+      "name": "NServiceBus",
+      "kind": "message-broker",
+      "technology": "nservicebus",
+      "configurationKeys": [
+        "ApplicationSettings:LearningTransportStorageDirectory",
+        "ApplicationSettings:NServiceBusConnectionString",
+        "ApplicationSettings:NServiceBusLicense"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+          "reason": "The 'NServiceBusConnectionString', 'NServiceBusLicense', and 'LearningTransportStorageDirectory' properties indicate configuration for NServiceBus."
+        },
+        {
+          "sourceFile": "src/MessageHandlers/AppStart/NServiceBusConfiguration.cs",
+          "reason": "The NServiceBus configuration logic uses 'NServiceBusLicense' for licensing."
+        }
+      ]
+    },
+    {
+      "name": "Azure Blob Storage Emulator",
+      "kind": "object-storage",
+      "technology": "azurite",
+      "configurationKeys": [
+        "ApplicationSettings:AzureWebJobsStorage"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+          "reason": "The 'AzureWebJobsStorage' property indicates the connection string for an Azure Blob Storage emulator."
+        }
+      ]
+    }
+  ],
+  "configurationKeys": [
+    {
+      "key": "ApplicationSettings:AzureWebJobsStorage",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "The 'AzureWebJobsStorage' property indicates a required configuration key."
+    },
+    {
+      "key": "ApplicationSettings:DbConnectionString",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "The 'DbConnectionString' property indicates a required configuration key."
+    },
+    {
+      "key": "ApplicationSettings:LearningTransportStorageDirectory",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "The 'LearningTransportStorageDirectory' property indicates a required configuration key."
+    },
+    {
+      "key": "ApplicationSettings:NServiceBusConnectionString",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "The 'NServiceBusConnectionString' property indicates a required configuration key."
+    },
+    {
+      "key": "ApplicationSettings:NServiceBusLicense",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "The 'NServiceBusLicense' property indicates a required configuration key."
+    },
+    {
+      "key": "ApplicationSettings:ServiceBusConnectionString",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "The 'ServiceBusConnectionString' property indicates a required configuration key."
+    },
+    {
+      "key": "DbConnectionString",
+      "sourceFile": "src/Infrastructure/HealthChecks/DbHealthCheck.cs",
+      "reason": "Required for creating a SqlConnection to verify database health."
+    },
+    {
+      "key": "DbConnectionString",
+      "sourceFile": "src/Infrastructure/ServiceCollectionExtensions.cs",
+      "reason": "Required for AddDbContext to configure SQL Server connection."
+    },
+    {
+      "key": "FullyQualifiedNamespace",
+      "sourceFile": "src/Infrastructure/HealthChecks/ServiceBusReceiveHealthCheck.cs",
+      "reason": "Required for ServiceBusClient initialization in ServiceBusReceiveHealthCheck."
+    },
+    {
+      "key": "FullyQualifiedNamespace",
+      "sourceFile": "src/Infrastructure/ServiceCollectionExtensions.cs",
+      "reason": "Required for Azure Service Bus transport configuration in ConfigureNServiceBusForSend."
+    }
+  ]
+}
