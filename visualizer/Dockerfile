@@ -1,7 +1,7 @@
 FROM node:22-alpine
 
 WORKDIR /app
-COPY package.json server.mjs ./
+COPY package.json server.mjs postman.mjs ./
 COPY public ./public
 
 ENV PORT=8080

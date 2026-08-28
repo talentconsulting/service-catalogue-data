@@ -209,6 +209,7 @@ function messageDependencies(source, messages) {
       kind: 'message',
       classification: matchedSystem ? 'internal' : 'unknown',
       direction: 'inbound',
+      description: 'Consumes events from',
       client: null,
       technology: 'Event',
       configurationKeys: [],
@@ -570,9 +571,15 @@ function canRelate(a, b) {
   return a.size > 0 && b.size > 0 && (isSubset(a, b) || isSubset(b, a));
 }
 
-function edgeLabel(edge) {
+function edgeVerb(edge, isOutboundFromNode) {
+  const isMessage = edge.kinds.includes('message') && !edge.kinds.includes('http-api');
+  if (isOutboundFromNode) return isMessage ? 'Publishes to' : 'Calls';
+  return isMessage ? 'Consumes from' : 'Called by';
+}
+
+function edgeLabel(edge, isOutboundFromNode = true) {
   const technology = edge.technologies.join('/');
-  const verb = edge.kinds.includes('message') && !edge.kinds.includes('http-api') ? 'Publishes to' : 'Calls';
+  const verb = edgeVerb(edge, isOutboundFromNode);
   return `${verb}${technology ? ` [${technology}]` : ''}${edge.count > 1 ? ` ×${edge.count}` : ''}`;
 }
 
@@ -986,7 +993,7 @@ function renderDependencies(resetToolbar = true) {
   });
 }
 
-function dependencyDetail(dependency) {
+function dependencyDetail(dependency, context = null) {
   const authentication = dependency.authentication || {};
   const scanKind = dependency.kind === 'message' ? 'eventcatalog' : 'service-dependencies';
   const facts = [
@@ -1002,16 +1009,16 @@ function dependencyDetail(dependency) {
     <h2>${escapeHtml(dependency.name)}</h2>
     <div class="badges"><span class="badge blue">${escapeHtml(dependency.kind || 'service')}</span><span class="badge ${dependency.classification === 'unknown' ? 'amber' : ''}">${escapeHtml(dependency.classification || 'unknown')}</span>${usesRedis(dependency) ? '<span class="badge danger">Redis</span>' : ''}</div>
     <dl class="dependency-facts">${facts.map(([label, value]) => `<div><dt>${label}</dt><dd>${escapeHtml(value || 'Not recorded')}</dd></div>`).join('')}</dl>
-    <h3>Operations</h3>${dependencyOperations(dependency.operations || [], scanKind)}
+    <h3>Operations</h3>${dependencyOperations(dependency.operations || [], scanKind, context)}
     <h3>Configuration</h3>${dependencyKeys([...(dependency.configurationKeys || []), ...(authentication.configurationKeys || [])])}
     ${(dependency.resources || []).length ? `<h3>Resources</h3>${dependencyResources(dependency.resources)}` : ''}
-    <h3>Evidence</h3>${dependencyEvidence(dependency.evidence || [], scanKind)}
+    <h3>Evidence</h3>${dependencyEvidence(dependency.evidence || [], scanKind, context)}
   </article>`;
 }
 
-function dependencyOperations(operations, scanKind = 'service-dependencies') {
+function dependencyOperations(operations, scanKind = 'service-dependencies', context = null) {
   if (!operations.length) return '<p class="muted">No operations recorded.</p>';
-  return `<div class="table-wrap"><table class="data-table"><thead><tr><th>Method</th><th>Path</th><th>Source</th></tr></thead><tbody>${operations.map((operation) => `<tr><td><span class="method ${escapeHtml((operation.method || '').toLowerCase())}">${escapeHtml(operation.methodName || operation.method || '—')}</span></td><td><code>${escapeHtml(operation.path || 'Not resolved')}</code></td><td>${sourceLink(operation.sourceFile, scanKind)}</td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="table-wrap"><table class="data-table"><thead><tr><th>Method</th><th>Path</th><th>Source</th></tr></thead><tbody>${operations.map((operation) => `<tr><td><span class="method ${escapeHtml((operation.method || '').toLowerCase())}">${escapeHtml(operation.methodName || operation.method || '—')}</span></td><td><code>${escapeHtml(operation.path || 'Not resolved')}</code></td><td>${sourceLink(operation.sourceFile, scanKind, context)}</td></tr>`).join('')}</tbody></table></div>`;
 }
 
 function dependencyKeys(keys) {
@@ -1023,9 +1030,9 @@ function dependencyResources(resources) {
   return `<table class="data-table"><thead><tr><th>Name</th><th>Type</th></tr></thead><tbody>${resources.map((resource) => `<tr><td>${escapeHtml(resource.name || resource.path || 'Unnamed')}</td><td>${escapeHtml(resource.type || resource.kind || 'Not recorded')}</td></tr>`).join('')}</tbody></table>`;
 }
 
-function dependencyEvidence(evidence, scanKind = 'service-dependencies') {
+function dependencyEvidence(evidence, scanKind = 'service-dependencies', context = null) {
   if (!evidence.length) return '<p class="muted">No source evidence recorded.</p>';
-  return `<ol class="evidence-list">${evidence.map((item) => `<li><p>${escapeHtml(item.reason || 'Dependency reference')}</p>${sourceLink(item.sourceFile, scanKind)}</li>`).join('')}</ol>`;
+  return `<ol class="evidence-list">${evidence.map((item) => `<li><p>${escapeHtml(item.reason || 'Dependency reference')}</p>${sourceLink(item.sourceFile, scanKind, context)}</li>`).join('')}</ol>`;
 }
 
 function setLandscapeHero() {
@@ -1158,9 +1165,10 @@ async function loadLandscape() {
   state.landscapeChecked = null;
   try {
     const results = await Promise.all(state.catalog.map((source) => loadDependenciesFor(source)
-      .then((data) => (data.dependencies?.length ? { source, dependencies: data.dependencies } : null))
+      .then((data) => (data.dependencies?.length ? { source, ref: data.ref, dependencies: data.dependencies } : null))
       .catch(() => null)));
-    state.landscape = buildLandscape(state.catalog, results.filter(Boolean));
+    state.landscapeSources = results.filter(Boolean);
+    state.landscape = buildLandscape(state.catalog, state.landscapeSources);
     renderLandscape();
   } catch (error) {
     content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
@@ -1258,7 +1266,7 @@ function renderLandscape() {
     </div>
   </div>`;
 
-  mountCy({
+  const cy = mountCy({
     container: $('#land-cy'),
     elements,
     layout: { name: 'preset' },
@@ -1275,6 +1283,8 @@ function renderLandscape() {
       state.selected = node.id();
       markCySelection($('#land-cy'), state.selected);
       $('#land-detail').innerHTML = landscapeDetail(allNodes.find((item) => item.id === state.selected), graph);
+      document.querySelectorAll('#land-detail [data-jump]').forEach((button) => { button.onclick = () => jumpToSource(button.dataset.jump); });
+      wireLandscapeRefToggles();
     },
     onTapEdge: (edge) => {
       const sourceId = edge.data('jumpSourceId');
@@ -1283,7 +1293,12 @@ function renderLandscape() {
     onDragFree: (node) => { positions.set(node.id(), node.position()); }
   });
   markCySelection($('#land-cy'), state.selected);
+  wireNodeHoverTooltip(cy, $('#land-cy'), (node) => {
+    const item = allNodes.find((candidate) => candidate.id === node.id());
+    return item ? landscapeTooltipContent(item, graph) : null;
+  });
   document.querySelectorAll('[data-jump]').forEach((button) => { button.onclick = () => jumpToSource(button.dataset.jump); });
+  wireLandscapeRefToggles();
   wireDiagramControls(() => { positions.clear(); renderLandscape(); });
   wireLandscapeChecklist(allNodes);
 }
@@ -1302,6 +1317,33 @@ function wireLandscapeChecklist(allNodes) {
   if (deselectAll) deselectAll.onclick = () => { state.landscapeChecked = new Set(); renderLandscape(); };
 }
 
+function contextForSource(sourceId) {
+  const entry = (state.landscapeSources || []).find((item) => item.source.id === sourceId);
+  if (!entry) return null;
+  return { repository: entry.source.repository, ref: entry.ref, scans: entry.source.scans };
+}
+
+function resolveLandscapeReference(reference) {
+  if (!reference) return null;
+  const entry = (state.landscapeSources || []).find((item) => item.source.id === reference.sourceId);
+  const dependency = entry?.dependencies?.[reference.dependencyIndex];
+  return dependency ? { dependency, context: contextForSource(reference.sourceId) } : null;
+}
+
+function landscapeRefDetailRow(rowId, items, colspan) {
+  if (!items.length) return '';
+  return `<tr class="land-ref-detail-row" data-land-ref="${escapeHtml(rowId)}" hidden><td colspan="${colspan}"><div class="landscape-edge-detail">${items.map((item) => dependencyDetail(item.dependency, item.context)).join('')}</div></td></tr>`;
+}
+
+function wireLandscapeRefToggles() {
+  document.querySelectorAll('[data-toggle-land-ref]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const row = document.querySelector(`[data-land-ref="${button.dataset.toggleLandRef}"]`);
+      if (row) row.hidden = !row.hidden;
+    });
+  });
+}
+
 function landscapeDetail(node, graph) {
   if (!node) return '';
   const isSystem = node.id.startsWith('sys:');
@@ -1309,17 +1351,22 @@ function landscapeDetail(node, graph) {
   if (isSystem) {
     const outbound = graph.edges.filter((edge) => edge.from === node.id);
     const inbound = graph.edges.filter((edge) => edge.to === node.id);
-    const rows = (list, otherKey) => list.map((edge) => {
+    const rows = (list, otherKey, groupKey, isOutbound) => list.map((edge, index) => {
       const other = lookup(edge[otherKey]);
-      return `<tr><td>${escapeHtml(other ? titleCase(other.name) : 'Unknown')}</td><td>${escapeHtml(edgeLabel(edge))}</td><td>${edge.names.length} dependenc${edge.names.length === 1 ? 'y' : 'ies'}</td></tr>`;
+      const resolved = (edge.references || []).map(resolveLandscapeReference).filter(Boolean);
+      const rowId = `${groupKey}-${index}`;
+      const dependenciesCell = resolved.length
+        ? `<button class="as-link" type="button" data-toggle-land-ref="${rowId}">${edge.names.length} dependenc${edge.names.length === 1 ? 'y' : 'ies'} ▾</button>`
+        : `${edge.names.length} dependenc${edge.names.length === 1 ? 'y' : 'ies'}`;
+      return `<tr><td>${escapeHtml(other ? titleCase(other.name) : 'Unknown')}</td><td>${escapeHtml(edgeLabel(edge, isOutbound))}</td><td>${dependenciesCell}</td></tr>${landscapeRefDetailRow(rowId, resolved, 3)}`;
     }).join('');
     return `<article class="dependency-detail">
       <p class="eyebrow">Software system</p>
       <h2>${escapeHtml(titleCase(node.name))}</h2>
       <p class="detail-subtitle">${escapeHtml((node.repository || '').replace('https://github.com/', 'github.com/'))}</p>
       <div class="badges"><button class="badge blue as-link" type="button" data-jump="${escapeHtml(node.sourceId)}">View full dependencies →</button></div>
-      <h3>Calls out to</h3>${outbound.length ? `<table class="data-table"><thead><tr><th>Target</th><th>Relationship</th><th>Dependencies</th></tr></thead><tbody>${rows(outbound, 'to')}</tbody></table>` : '<p class="muted">No outbound relationships recorded.</p>'}
-      <h3>Called by</h3>${inbound.length ? `<table class="data-table"><thead><tr><th>Source</th><th>Relationship</th><th>Dependencies</th></tr></thead><tbody>${rows(inbound, 'from')}</tbody></table>` : '<p class="muted">No inbound relationships recorded.</p>'}
+      <h3>Calls out to</h3>${outbound.length ? `<table class="data-table"><thead><tr><th>Target</th><th>Relationship</th><th>Dependencies</th></tr></thead><tbody>${rows(outbound, 'to', 'out', true)}</tbody></table>` : '<p class="muted">No outbound relationships recorded.</p>'}
+      <h3>Called by</h3>${inbound.length ? `<table class="data-table"><thead><tr><th>Source</th><th>Relationship</th><th>Dependencies</th></tr></thead><tbody>${rows(inbound, 'from', 'in', false)}</tbody></table>` : '<p class="muted">No inbound relationships recorded.</p>'}
     </article>`;
   }
   return `<article class="dependency-detail">
@@ -1327,7 +1374,12 @@ function landscapeDetail(node, graph) {
     <h2>${escapeHtml(splitPascalCase(node.name))}</h2>
     <p class="detail-subtitle">Not present in the catalogue — inferred from dependency names that didn't match a cataloged repository.</p>
     <h3>Referenced by</h3>
-    <table class="data-table"><thead><tr><th>Source</th><th>Dependency</th><th>Technology</th><th>Confidence</th></tr></thead><tbody>${node.members.map((member) => `<tr><td><button class="as-link" type="button" data-jump="${escapeHtml(member.source.id)}">${escapeHtml(titleCase(member.source.name))}</button></td><td>${escapeHtml(member.dependency.name)}</td><td>${escapeHtml(member.dependency.technology || member.dependency.kind || '—')}</td><td>${escapeHtml(member.dependency.confidence || '—')}</td></tr>`).join('')}</tbody></table>
+    <table class="data-table"><thead><tr><th>Source</th><th>Dependency</th><th>Technology</th><th>Confidence</th></tr></thead><tbody>${node.members.map((member, index) => `<tr>
+      <td><button class="as-link" type="button" data-jump="${escapeHtml(member.source.id)}">${escapeHtml(titleCase(member.source.name))}</button></td>
+      <td><button class="as-link" type="button" data-toggle-land-ref="ext-${index}">${escapeHtml(member.dependency.name)} ▾</button></td>
+      <td>${escapeHtml(member.dependency.technology || member.dependency.kind || '—')}</td>
+      <td>${escapeHtml(member.dependency.confidence || '—')}</td>
+    </tr>${landscapeRefDetailRow(`ext-${index}`, [{ dependency: member.dependency, context: contextForSource(member.source.id) }], 4)}`).join('')}</tbody></table>
   </article>`;
 }
 
@@ -1345,15 +1397,18 @@ async function jumpToSource(sourceId, dependencyIndex = null) {
   }
 }
 
-function githubFileUrl(path, scanKind = 'eventcatalog') {
+function githubFileUrl(path, scanKind = 'eventcatalog', context = null) {
   if (!path) return null;
-  const revision = state.data?.ref || state.source.scans[scanKind]?.['last-commit-hash-scanned'] || 'HEAD';
+  const repository = context?.repository ?? state.source.repository;
+  const ref = context ? context.ref : state.data?.ref;
+  const scans = context?.scans ?? state.source.scans;
+  const revision = ref || scans?.[scanKind]?.['last-commit-hash-scanned'] || 'HEAD';
   const encodedPath = path.split('/').map(encodeURIComponent).join('/');
-  return `${state.source.repository.replace(/\/$/, '')}/blob/${encodeURIComponent(revision)}/${encodedPath}`;
+  return `${repository.replace(/\/$/, '')}/blob/${encodeURIComponent(revision)}/${encodedPath}`;
 }
 
-function sourceLink(path, scanKind = 'eventcatalog') {
-  const url = githubFileUrl(path, scanKind);
+function sourceLink(path, scanKind = 'eventcatalog', context = null) {
+  const url = githubFileUrl(path, scanKind, context);
   if (!url) return '<span class="muted">Not recorded</span>';
   return `<a class="source-link" href="${escapeHtml(url)}" target="_blank" rel="noreferrer"><code>${escapeHtml(path)}</code><span aria-hidden="true"> ↗</span><span class="sr-only"> (opens on GitHub)</span></a>`;
 }
@@ -1370,6 +1425,57 @@ function dependencyTooltipContent(dependency) {
     const label = operation.path && operation.path !== 'Not resolved' ? operation.path : (operation.methodName || operation.method || 'operation');
     return `<li><span class="method ${escapeHtml((operation.method || '').toLowerCase())}">${escapeHtml(operation.methodName || operation.method || '—')}</span>${url ? `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${escapeHtml(label)}</a>` : `<span class="muted">${escapeHtml(label)}</span>`}</li>`;
   }).join('')}</ul>${ops.length > shown.length ? `<p class="node-tooltip-more">+${ops.length - shown.length} more — click the box for full details</p>` : ''}`;
+}
+
+function messageNamesFor(dependency) {
+  if (dependency?.kind !== 'message') return null;
+  const names = (dependency.operations || []).map((operation) => operation.path).filter(Boolean);
+  return [...new Set(names)];
+}
+
+function dependencyDetailSuffix(dependency) {
+  const messageNames = messageNamesFor(dependency);
+  if (messageNames?.length) {
+    const shown = messageNames.slice(0, 3);
+    return shown.join(', ') + (messageNames.length > shown.length ? ` +${messageNames.length - shown.length} more` : '');
+  }
+  return dependency.technology || dependency.kind || dependency.name;
+}
+
+function edgeDetailSuffix(edge) {
+  const isMessage = edge.kinds.includes('message') && !edge.kinds.includes('http-api');
+  if (isMessage) {
+    const resolved = (edge.references || []).map(resolveLandscapeReference).filter(Boolean);
+    const messageNames = [...new Set(resolved.flatMap((item) => messageNamesFor(item.dependency) || []))];
+    if (messageNames.length) {
+      const shown = messageNames.slice(0, 3);
+      return shown.join(', ') + (messageNames.length > shown.length ? ` +${messageNames.length - shown.length} more` : '');
+    }
+  }
+  return edge.technologies.join('/');
+}
+
+function landscapeTooltipContent(node, graph) {
+  const isSystem = node.id.startsWith('sys:');
+  const lookup = (id) => graph.systems.find((item) => item.id === id) || graph.externals.find((item) => item.id === id);
+  if (isSystem) {
+    const title = `<div class="node-tooltip-title">${escapeHtml(titleCase(node.name))}</div>`;
+    const rows = [
+      ...graph.edges.filter((edge) => edge.from === node.id).map((edge) => ({ verb: edgeVerb(edge, true), other: lookup(edge.to), edge })),
+      ...graph.edges.filter((edge) => edge.to === node.id).map((edge) => ({ verb: edgeVerb(edge, false), other: lookup(edge.from), edge }))
+    ];
+    if (!rows.length) return `${title}<p class="node-tooltip-empty">No relationships recorded — click the box for full details.</p>`;
+    const shown = rows.slice(0, 8);
+    return `${title}<ul class="node-tooltip-list">${shown.map(({ verb, other, edge }) => {
+      const detail = edgeDetailSuffix(edge);
+      return `<li><span class="method">${escapeHtml(verb)}</span><span>${escapeHtml(other ? titleCase(other.name) : 'Unknown')}${detail ? ` <span class="muted">[${escapeHtml(detail)}]</span>` : ''}</span></li>`;
+    }).join('')}</ul>${rows.length > shown.length ? `<p class="node-tooltip-more">+${rows.length - shown.length} more — click the box for full details</p>` : ''}`;
+  }
+  const title = `<div class="node-tooltip-title">${escapeHtml(splitPascalCase(node.name))}${node.isRedis ? ' <span class="badge danger">Redis</span>' : ''}</div>`;
+  const members = node.members || [];
+  if (!members.length) return `${title}<p class="node-tooltip-empty">No references recorded — click the box for full details.</p>`;
+  const shown = members.slice(0, 8);
+  return `${title}<ul class="node-tooltip-list">${shown.map((member) => `<li><span>${escapeHtml(titleCase(member.source.name))}</span><span class="muted">${escapeHtml(dependencyDetailSuffix(member.dependency))}</span></li>`).join('')}</ul>${members.length > shown.length ? `<p class="node-tooltip-more">+${members.length - shown.length} more — click the box for full details</p>` : ''}`;
 }
 
 function operations(spec) {
@@ -1502,7 +1608,8 @@ function renderOpenApi(resetToolbar = true) {
   const ops = operations(state.data);
   const schemaCount = Object.keys(state.data.components?.schemas || {}).length;
   if (resetToolbar) {
-    toolbar.innerHTML = `<label class="source-picker" for="api-file"><span>Specification</span><select id="api-file">${state.source.apiFiles.map((file) => `<option value="${escapeHtml(file)}" ${file === state.apiFile ? 'selected' : ''}>${escapeHtml(file.replace('.openapi.json', ''))}</option>`).join('')}</select></label>${state.apiView === 'operations' ? searchControl('Filter paths or operations') : ''}${schemaCount ? `<div class="segmented" role="group" aria-label="OpenAPI view"><button data-api-view="operations" aria-pressed="${state.apiView === 'operations'}">Operations</button><button data-api-view="schemas" aria-pressed="${state.apiView === 'schemas'}">Schemas</button></div>` : ''}<span class="spacer"></span><span class="toolbar-meta">${ops.length} operations · ${schemaCount} models</span>`;
+    const postmanLinks = `<a class="plain-button" href="/api/sources/${encodeURIComponent(state.source.id)}/postman-collection" title="Downloads all ${state.source.apiFiles.length} specs for this repo as one collection">Postman collection ↓</a><a class="plain-button" href="/api/sources/${encodeURIComponent(state.source.id)}/postman-environment" title="Companion environment with empty baseUrl/auth variable placeholders">Postman environment ↓</a>`;
+    toolbar.innerHTML = `<label class="source-picker" for="api-file"><span>Specification</span><select id="api-file">${state.source.apiFiles.map((file) => `<option value="${escapeHtml(file)}" ${file === state.apiFile ? 'selected' : ''}>${escapeHtml(file.replace('.openapi.json', ''))}</option>`).join('')}</select></label>${state.apiView === 'operations' ? searchControl('Filter paths or operations') : ''}${schemaCount ? `<div class="segmented" role="group" aria-label="OpenAPI view"><button data-api-view="operations" aria-pressed="${state.apiView === 'operations'}">Operations</button><button data-api-view="schemas" aria-pressed="${state.apiView === 'schemas'}">Schemas</button></div>` : ''}${postmanLinks}<span class="spacer"></span><span class="toolbar-meta">${ops.length} operations · ${schemaCount} models</span>`;
     const apiFile = $('#api-file');
     if (apiFile) apiFile.onchange = async (event) => { state.apiFile = event.target.value; state.selected = null; state.selectedModel = null; await loadView(); };
     document.querySelectorAll('[data-api-view]').forEach((button) => { button.onclick = () => { state.apiView = button.dataset.apiView; state.filter = ''; renderOpenApi(true); }; });

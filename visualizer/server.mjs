@@ -3,6 +3,7 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { buildPostmanCollection, buildPostmanEnvironment } from './postman.mjs';
 
 const appDir = fileURLToPath(new URL('.', import.meta.url));
 const publicDir = join(appDir, 'public');
@@ -20,6 +21,15 @@ const mimeTypes = {
 function sendJson(response, status, value) {
   response.writeHead(status, { 'content-type': mimeTypes['.json'], 'cache-control': 'no-store' });
   response.end(JSON.stringify(value));
+}
+
+function sendDownload(response, filename, value) {
+  response.writeHead(200, {
+    'content-type': mimeTypes['.json'],
+    'cache-control': 'no-store',
+    'content-disposition': `attachment; filename="${filename}"`
+  });
+  response.end(JSON.stringify(value, null, 2));
 }
 
 function repoSlug(repositoryUrl) {
@@ -79,6 +89,10 @@ async function sourceById(id) {
   return source;
 }
 
+async function readSpecFiles(sourceDir, apiFiles) {
+  return Promise.all(apiFiles.map(async (name) => ({ name, spec: await readJson(safeChild(join(sourceDir, 'open-api'), name)) })));
+}
+
 function safeChild(base, ...parts) {
   const target = resolve(base, ...parts);
   if (target !== base && !target.startsWith(`${base}${sep}`)) {
@@ -99,6 +113,20 @@ async function handleApi(request, response, url) {
     if (!await exists(file)) return sendJson(response, 404, { error: 'PlantUML diagram is unavailable' });
     response.writeHead(200, { 'content-type': 'text/plain; charset=utf-8', 'cache-control': 'no-store' });
     return createReadStream(file).pipe(response);
+  }
+
+  const postmanMatch = url.pathname.match(/^\/api\/sources\/([^/]+)\/(postman-collection|postman-environment)$/);
+  if (postmanMatch) {
+    const source = await sourceById(decodeURIComponent(postmanMatch[1]));
+    if (!source.apiFiles.length) return sendJson(response, 404, { error: 'No OpenAPI specs available for this source' });
+    const sourceDir = safeChild(dataDir, source.name);
+    const specFiles = await readSpecFiles(sourceDir, source.apiFiles);
+    if (postmanMatch[2] === 'postman-collection') {
+      return sendDownload(response, `${source.name}.postman_collection.json`, buildPostmanCollection(source.name, specFiles));
+    }
+    const localDevFile = join(sourceDir, 'local-dev-config', 'local-dev-config.json');
+    const localDevConfig = await exists(localDevFile) ? await readJson(localDevFile) : null;
+    return sendDownload(response, `${source.name}.postman_environment.json`, buildPostmanEnvironment(source.name, specFiles, localDevConfig));
   }
 
   const match = url.pathname.match(/^\/api\/sources\/([^/]+)\/(database|messages|dependencies|openapi|security|localdev)$/);
