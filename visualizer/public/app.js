@@ -1172,6 +1172,7 @@ async function loadLandscape() {
   state.selected = null;
   state.landscapePositions = null;
   state.landscapeChecked = null;
+  state.landscapeEventFilter = '';
   try {
     const results = await Promise.all(state.catalog.map((source) => loadDependenciesFor(source)
       .then((data) => (data.dependencies?.length ? { source, ref: data.ref, dependencies: data.dependencies } : null))
@@ -1193,22 +1194,59 @@ function landscapeChecklistGroup(title, nodes, formatLabel) {
   </div>`;
 }
 
+function allLandscapeMessageNames(graph) {
+  const names = new Set();
+  graph.edges.forEach((edge) => {
+    (edge.references || []).forEach((reference) => {
+      const resolved = resolveLandscapeReference(reference);
+      (messageNamesFor(resolved?.dependency) || []).forEach((name) => names.add(name));
+    });
+  });
+  return [...names].sort((a, b) => a.localeCompare(b));
+}
+
+function eventFilterControlHtml(eventNames, selected) {
+  return `<label class="source-picker" for="landscape-event-filter"><span>Event/command</span><select id="landscape-event-filter"><option value="">All</option>${eventNames.map((name) => `<option value="${escapeHtml(name)}" ${selected === name ? 'selected' : ''}>${escapeHtml(name)}</option>`).join('')}</select></label>`;
+}
+
+function edgeMatchesEventFilter(edge, eventFilter) {
+  if (!eventFilter) return true;
+  return (edge.references || []).some((reference) => {
+    const resolved = resolveLandscapeReference(reference);
+    return (messageNamesFor(resolved?.dependency) || []).includes(eventFilter);
+  });
+}
+
+function filterMembersByEvent(members, eventFilter) {
+  if (!eventFilter) return members;
+  return members.filter((member) => (messageNamesFor(member.dependency) || []).includes(eventFilter));
+}
+
 function renderLandscape() {
   const graph = state.landscape;
   const allNodes = [...graph.systems, ...graph.externals];
   const redisExternalCount = graph.externals.filter((node) => node.isRedis).length;
+  const eventNames = allLandscapeMessageNames(graph);
+  if (state.landscapeEventFilter && !eventNames.includes(state.landscapeEventFilter)) state.landscapeEventFilter = '';
+  const eventFilter = state.landscapeEventFilter || '';
+  const edgeMatchesFilter = (edge) => edgeMatchesEventFilter(edge, eventFilter);
+
   $('#source-stats').innerHTML = `
     <div class="stat"><dt>Systems</dt><dd>${graph.systems.length}</dd></div>
     <div class="stat"><dt>External</dt><dd>${graph.externals.length}</dd></div>
     <div class="stat"><dt>Relationships</dt><dd>${graph.edges.length}</dd></div>`;
-  toolbar.innerHTML = `${diagramControlsHtml()}<span class="spacer"></span><span class="toolbar-meta">Inferred by matching each repository's outbound service dependencies and handled events/commands against the catalogue, clustering the rest as external systems${redisExternalCount ? ` · ${redisExternalCount} using Redis` : ''}</span>`;
+  toolbar.innerHTML = `${diagramControlsHtml()}${eventNames.length ? eventFilterControlHtml(eventNames, eventFilter) : ''}<span class="spacer"></span><span class="toolbar-meta">Inferred by matching each repository's outbound service dependencies and handled events/commands against the catalogue, clustering the rest as external systems${redisExternalCount ? ` · ${redisExternalCount} using Redis` : ''}${eventFilter ? ` · Showing only containers that publish or consume “${escapeHtml(eventFilter)}”` : ''}</span>`;
+  const eventFilterSelect = $('#landscape-event-filter');
+  if (eventFilterSelect) eventFilterSelect.onchange = (event) => { state.landscapeEventFilter = event.target.value; renderLandscape(); };
   if (!allNodes.length) {
     destroyCy();
     content.innerHTML = '<div class="empty-state"><span class="empty-icon" aria-hidden="true">◇</span><h2>No dependency data available</h2><p>None of the cataloged repositories publish service-dependencies data.</p></div>';
     return;
   }
   if (!state.landscapeChecked) state.landscapeChecked = new Set(allNodes.map((node) => node.id));
-  const visibleNodes = allNodes.filter((node) => state.landscapeChecked.has(node.id));
+  const filterNodeIds = eventFilter ? new Set(graph.edges.filter(edgeMatchesFilter).flatMap((edge) => [edge.from, edge.to])) : null;
+  const isNodeVisible = (node) => state.landscapeChecked.has(node.id) && (!filterNodeIds || filterNodeIds.has(node.id));
+  const visibleNodes = allNodes.filter(isNodeVisible);
   if (!state.selected || !visibleNodes.some((node) => node.id === state.selected)) state.selected = visibleNodes[0]?.id || null;
 
   const checklistHtml = `<aside class="landscape-checklist" aria-label="Services to show">
@@ -1222,7 +1260,10 @@ function renderLandscape() {
 
   if (!visibleNodes.length) {
     destroyCy();
-    content.innerHTML = `<div class="landscape-layout">${checklistHtml}<div class="empty-state"><h2>Nothing selected</h2><p>Check at least one service on the left to see it on the diagram.</p></div></div>`;
+    const emptyMessage = eventFilter
+      ? `<h2>No containers found</h2><p>Nothing checked on the left publishes or consumes “${escapeHtml(eventFilter)}”. Try a different event or clear the filter.</p>`
+      : '<h2>Nothing selected</h2><p>Check at least one service on the left to see it on the diagram.</p>';
+    content.innerHTML = `<div class="landscape-layout">${checklistHtml}<div class="empty-state">${emptyMessage}</div></div>`;
     wireLandscapeChecklist(allNodes);
     return;
   }
@@ -1234,11 +1275,9 @@ function renderLandscape() {
   const boundaryRx = systemsRx + nodeHalfW + pad;
   const boundaryRy = systemsRy + nodeHalfH + pad;
   const externalScale = 1.4;
-  const systemNodes = ringLayout(graph.systems, center, systemsRx, systemsRy, 0)
-    .filter((node) => state.landscapeChecked.has(node.id));
-  const externalNodes = ringLayout(graph.externals, center, boundaryRx * externalScale, boundaryRy * externalScale, graph.externals.length ? Math.PI / graph.externals.length : 0)
-    .filter((node) => state.landscapeChecked.has(node.id));
-  const visibleEdges = graph.edges.filter((edge) => state.landscapeChecked.has(edge.from) && state.landscapeChecked.has(edge.to));
+  const systemNodes = ringLayout(graph.systems, center, systemsRx, systemsRy, 0).filter(isNodeVisible);
+  const externalNodes = ringLayout(graph.externals, center, boundaryRx * externalScale, boundaryRy * externalScale, graph.externals.length ? Math.PI / graph.externals.length : 0).filter(isNodeVisible);
+  const visibleEdges = graph.edges.filter((edge) => state.landscapeChecked.has(edge.from) && state.landscapeChecked.has(edge.to) && edgeMatchesFilter(edge));
   if (!state.landscapePositions) state.landscapePositions = new Map();
   const positions = state.landscapePositions;
   [...systemNodes, ...externalNodes].forEach((node) => positionFor(positions, node.id, node));
@@ -1250,10 +1289,13 @@ function renderLandscape() {
       data: { id: node.id, parent: 'boundary', isLeaf: true, width: 210, height: 98, name: node.name, relCount: visibleEdges.filter((edge) => edge.from === node.id || edge.to === node.id).length },
       position: positions.get(node.id)
     })),
-    ...externalNodes.map((node) => ({
-      data: { id: node.id, isLeaf: true, width: 196, height: 96, name: node.name, memberCount: node.members.length, isRedis: node.isRedis },
-      position: positions.get(node.id)
-    })),
+    ...externalNodes.map((node) => {
+      const memberCount = filterMembersByEvent(node.members, eventFilter).length;
+      return {
+        data: { id: node.id, isLeaf: true, width: 196, height: 96, name: node.name, memberCount, isRedis: node.isRedis },
+        position: positions.get(node.id)
+      };
+    }),
     ...visibleEdges.map((edge, index) => {
       const reference = edge.references[0];
       return { data: { id: `land-edge-${index}`, source: edge.from, target: edge.to, label: edgeLabel(edge), jumpSourceId: reference?.sourceId || '', jumpIndex: reference?.dependencyIndex ?? '' }, classes: [reference ? 'jumpable' : '', edge.isRedis ? 'redis' : ''].filter(Boolean).join(' ') };
@@ -1357,10 +1399,11 @@ function wireLandscapeRefToggles() {
 function landscapeDetail(node, graph) {
   if (!node) return '';
   const isSystem = node.id.startsWith('sys:');
+  const eventFilter = state.landscapeEventFilter || '';
   const lookup = (id) => graph.systems.find((item) => item.id === id) || graph.externals.find((item) => item.id === id);
   if (isSystem) {
-    const outbound = graph.edges.filter((edge) => edge.from === node.id);
-    const inbound = graph.edges.filter((edge) => edge.to === node.id);
+    const outbound = graph.edges.filter((edge) => edge.from === node.id && edgeMatchesEventFilter(edge, eventFilter));
+    const inbound = graph.edges.filter((edge) => edge.to === node.id && edgeMatchesEventFilter(edge, eventFilter));
     const rows = (list, otherKey, groupKey, isOutbound) => list.map((edge, index) => {
       const other = lookup(edge[otherKey]);
       const resolved = (edge.references || []).map(resolveLandscapeReference).filter(Boolean);
@@ -1379,17 +1422,18 @@ function landscapeDetail(node, graph) {
       <h3>Called by</h3>${inbound.length ? `<table class="data-table"><thead><tr><th>Source</th><th>Relationship</th><th>Dependencies</th></tr></thead><tbody>${rows(inbound, 'from', 'in', false)}</tbody></table>` : '<p class="muted">No inbound relationships recorded.</p>'}
     </article>`;
   }
+  const members = filterMembersByEvent(node.members, eventFilter);
   return `<article class="dependency-detail">
     <p class="eyebrow">External system</p>
     <h2>${escapeHtml(splitPascalCase(node.name))}</h2>
     <p class="detail-subtitle">Not present in the catalogue — inferred from dependency names that didn't match a cataloged repository.</p>
     <h3>Referenced by</h3>
-    <table class="data-table"><thead><tr><th>Source</th><th>Dependency</th><th>Technology</th><th>Confidence</th></tr></thead><tbody>${node.members.map((member, index) => `<tr>
+    ${members.length ? `<table class="data-table"><thead><tr><th>Source</th><th>Dependency</th><th>Technology</th><th>Confidence</th></tr></thead><tbody>${members.map((member, index) => `<tr>
       <td><button class="as-link" type="button" data-jump="${escapeHtml(member.source.id)}">${escapeHtml(titleCase(member.source.name))}</button></td>
       <td><button class="as-link" type="button" data-toggle-land-ref="ext-${index}">${escapeHtml(member.dependency.name)} ▾</button></td>
       <td>${escapeHtml(member.dependency.technology || member.dependency.kind || '—')}</td>
       <td>${escapeHtml(member.dependency.confidence || '—')}</td>
-    </tr>${landscapeRefDetailRow(`ext-${index}`, [{ dependency: member.dependency, context: contextForSource(member.source.id) }], 4)}`).join('')}</tbody></table>
+    </tr>${landscapeRefDetailRow(`ext-${index}`, [{ dependency: member.dependency, context: contextForSource(member.source.id) }], 4)}`).join('')}</tbody></table>` : '<p class="muted">No matching references.</p>'}
   </article>`;
 }
 
@@ -1467,12 +1511,13 @@ function edgeDetailSuffix(edge) {
 
 function landscapeTooltipContent(node, graph) {
   const isSystem = node.id.startsWith('sys:');
+  const eventFilter = state.landscapeEventFilter || '';
   const lookup = (id) => graph.systems.find((item) => item.id === id) || graph.externals.find((item) => item.id === id);
   if (isSystem) {
     const title = `<div class="node-tooltip-title">${escapeHtml(titleCase(node.name))}</div>`;
     const rows = [
-      ...graph.edges.filter((edge) => edge.from === node.id).map((edge) => ({ verb: edgeVerb(edge, true), other: lookup(edge.to), edge })),
-      ...graph.edges.filter((edge) => edge.to === node.id).map((edge) => ({ verb: edgeVerb(edge, false), other: lookup(edge.from), edge }))
+      ...graph.edges.filter((edge) => edge.from === node.id && edgeMatchesEventFilter(edge, eventFilter)).map((edge) => ({ verb: edgeVerb(edge, true), other: lookup(edge.to), edge })),
+      ...graph.edges.filter((edge) => edge.to === node.id && edgeMatchesEventFilter(edge, eventFilter)).map((edge) => ({ verb: edgeVerb(edge, false), other: lookup(edge.from), edge }))
     ];
     if (!rows.length) return `${title}<p class="node-tooltip-empty">No relationships recorded — click the box for full details.</p>`;
     const shown = rows.slice(0, 8);
@@ -1482,7 +1527,7 @@ function landscapeTooltipContent(node, graph) {
     }).join('')}</ul>${rows.length > shown.length ? `<p class="node-tooltip-more">+${rows.length - shown.length} more — click the box for full details</p>` : ''}`;
   }
   const title = `<div class="node-tooltip-title">${escapeHtml(splitPascalCase(node.name))}${node.isRedis ? ' <span class="badge danger">Redis</span>' : ''}</div>`;
-  const members = node.members || [];
+  const members = filterMembersByEvent(node.members || [], eventFilter);
   if (!members.length) return `${title}<p class="node-tooltip-empty">No references recorded — click the box for full details.</p>`;
   const shown = members.slice(0, 8);
   return `${title}<ul class="node-tooltip-list">${shown.map((member) => `<li><span>${escapeHtml(titleCase(member.source.name))}</span><span class="muted">${escapeHtml(dependencyDetailSuffix(member.dependency))}</span></li>`).join('')}</ul>${members.length > shown.length ? `<p class="node-tooltip-more">+${members.length - shown.length} more — click the box for full details</p>` : ''}`;
