@@ -1,0 +1,71 @@
+{
+  "repository": "SkillsFundingAgency/das-campaign-api",
+  "ref": "main",
+  "path": "src",
+  "systemName": "Campaign",
+  "containers": [
+    {
+      "id": "campaign",
+      "name": "Campaign",
+      "type": "api",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Api/Program.cs",
+          "reason": "Entry point for the web API application."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Api/SFA.DAS.Campaign.Api.csproj",
+          "reason": "Project file defines a web (API) application."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "campaign",
+      "name": "Azure SQL Database",
+      "kind": "database",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Microsoft SQL Server",
+      "configurationKeys": [
+        "CampaignConfiguration:SqlConnectionString"
+      ],
+      "authentication": {
+        "type": "Azure Active Directory",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Campaign.Api.Data/CampaignDataContext.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Api/AppStart/AddDatabaseExtension.cs",
+          "reason": "AddDbContext registration with SQL Server configured via CampaignConfiguration."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Api.Data/CampaignDataContext.cs",
+          "reason": "DbContext using Microsoft SQL Server with Azure Active Directory token validation."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Api/Startup.cs",
+          "reason": "Health check added for DbContext."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Api/AppStart/DefaultHealthCheck.cs",
+          "reason": "Health check uses DbContext to ping the database."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-azure-sql-database",
+      "description": "Reads from and writes to"
+    }
+  ]
+}
