@@ -1,14 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts API",
+    "title": "Employer Agreements API",
     "version": "1.0.0"
   },
   "paths": {
     "/api/accounts/{hashedAccountId}/legalEntities/{hashedlegalEntityId}/agreements/{agreementId}": {
       "get": {
         "operationId": "GetAgreement",
-        "summary": "Get an agreement by ID",
+        "summary": "Get a specific agreement by ID.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -37,7 +37,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response with the agreement details.",
             "content": {
               "application/json": {
                 "schema": {
@@ -47,37 +47,39 @@
             }
           },
           "404": {
-            "description": "Agreement not found"
+            "description": "Agreement not found."
           }
         },
         "security": [
           {
-            "ApiRoles.ReadAllEmployerAgreements": []
+            "ReadAllEmployerAgreements": []
           }
         ]
       }
     },
     "/api/accounts/internal/{accountId}/minimum-signed-agreement-version": {
       "get": {
-        "operationId": "GetMinimumSignedAgreementVersionInternal",
-        "summary": "Get the minimum signed agreement version for an account internally",
+        "operationId": "GetMinimumSignedAgreementVersion",
+        "summary": "Get the minimum signed agreement version for an internal account.",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response with the minimum signed agreement version.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "integer"
+                  "type": "integer",
+                  "format": "int32"
                 }
               }
             }
@@ -85,7 +87,7 @@
         },
         "security": [
           {
-            "ApiRoles.ReadAllEmployerAgreements": []
+            "ReadAllEmployerAgreements": []
           }
         ]
       }
@@ -93,7 +95,7 @@
     "/api/accounts/{hashedAccountId}/signed-agreement-version": {
       "get": {
         "operationId": "GetMinimumSignedAgreementVersionByHashedId",
-        "summary": "Get the minimum signed agreement version by hashed account ID",
+        "summary": "Get the minimum signed agreement version using a hashed account ID.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -106,7 +108,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response with the minimum signed agreement version.",
             "content": {
               "application/json": {
                 "schema": {
@@ -118,7 +120,7 @@
         },
         "security": [
           {
-            "ApiRoles.ReadAllEmployerAgreements": []
+            "ReadAllEmployerAgreements": []
           }
         ]
       }
@@ -126,24 +128,28 @@
     "/api/accounts/{accountId}/agreements": {
       "get": {
         "operationId": "GetAgreements",
-        "summary": "Get agreements for an account",
+        "summary": "Get all agreements associated with the account ID.",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response with agreements details.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
                 }
               }
             }
@@ -151,7 +157,7 @@
         },
         "security": [
           {
-            "ApiRoles.ReadAllEmployerAgreements": []
+            "ReadAllEmployerAgreements": []
           }
         ]
       }
@@ -163,7 +169,8 @@
         "type": "object",
         "properties": {
           "MinimumSignedAgreementVersion": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           }
         },
         "required": [
@@ -172,9 +179,10 @@
       }
     },
     "securitySchemes": {
-      "ApiRoles.ReadAllEmployerAgreements": {
-        "type": "http",
-        "scheme": "bearer"
+      "ReadAllEmployerAgreements": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
       }
     }
   }

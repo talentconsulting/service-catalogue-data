@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "PreviewEmployerAgreement API",
+    "title": "Preview Employer Agreement API",
     "version": "1.0.0"
   },
   "paths": {
@@ -17,26 +17,25 @@
             "schema": {
               "type": "string"
             },
-            "description": "The encrypted legal entity name to preview in the employer agreement."
+            "description": "Encrypted legal entity name to be decrypted."
           },
           {
             "name": "returnUrl",
             "in": "query",
-            "required": true,
+            "required": false,
             "schema": {
-              "type": "string",
-              "format": "uri"
+              "type": "string"
             },
-            "description": "The URL to return to after previewing the employer agreement."
+            "description": "URL to return to after preview."
           }
         ],
         "responses": {
           "200": {
-            "description": "The employer agreement preview page.",
+            "description": "Employer Agreement preview returned successfully.",
             "content": {
-              "text/html": {
+              "application/json": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/PreviewEmployerAgreementViewModel"
                 }
               }
             }
@@ -44,15 +43,60 @@
         },
         "security": [
           {
-            "oauth2": [
-              "read"
-            ]
+            "oauth2": []
           }
         ]
       }
     }
   },
   "components": {
-    "schemas": {}
+    "schemas": {
+      "PreviewEmployerAgreementViewModel": {
+        "type": "object",
+        "properties": {
+          "ReturnUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "Choice": {
+            "type": "string",
+            "nullable": true
+          },
+          "PreviouslySignedEmployerAgreement": {
+            "type": "string",
+            "nullable": true
+          },
+          "HasAcknowledgedAgreement": {
+            "type": "boolean"
+          },
+          "EmployerAgreement": {
+            "$ref": "#/components/schemas/EmployerAgreementView"
+          }
+        },
+        "required": [
+          "HasAcknowledgedAgreement",
+          "EmployerAgreement"
+        ]
+      },
+      "EmployerAgreementView": {
+        "type": "object",
+        "properties": {
+          "LegalEntityName": {
+            "type": "string"
+          },
+          "TemplateId": {
+            "type": "string",
+            "nullable": true
+          },
+          "TemplatePartialViewName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "LegalEntityName",
+          "TemplatePartialViewName"
+        ]
+      }
+    }
   }
 }

@@ -1,23 +1,31 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "HealthCheckController API",
+    "title": "HealthCheck API",
     "version": "1.0.0"
   },
   "paths": {
     "/healthcheck": {
       "get": {
         "operationId": "getHealthCheck",
-        "summary": "Retrieve health check information.",
-        "parameters": [],
+        "summary": "Retrieve health check information",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Successful response containing health check information.",
+            "description": "Health check data successfully retrieved",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "description": "HealthCheckViewModel"
+                  "$ref": "#/components/schemas/HealthCheckViewModel"
                 }
               }
             }
@@ -26,9 +34,8 @@
       },
       "post": {
         "operationId": "runHealthCheck",
-        "summary": "Trigger a new health check.",
+        "summary": "Run health check operation",
         "requestBody": {
-          "description": "Command to trigger a health check.",
           "required": true,
           "content": {
             "application/json": {
@@ -40,7 +47,7 @@
         },
         "responses": {
           "302": {
-            "description": "Redirect to the health check index after execution."
+            "description": "Health check operation executed successfully, redirecting to index"
           }
         }
       }
@@ -57,9 +64,12 @@
           "UserRef": {
             "type": "string",
             "format": "uuid",
-            "description": "The unique identifier of the user requesting the health check."
+            "nullable": true
           }
         }
+      },
+      "HealthCheckViewModel": {
+        "type": "object"
       }
     }
   }

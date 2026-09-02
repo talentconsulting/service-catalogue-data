@@ -2,14 +2,13 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Team API",
-    "version": "1.0.0",
-    "description": "API for managing teams within employer accounts."
+    "version": "1.0.0"
   },
   "paths": {
     "/accounts/{hashedAccountId}/teams": {
       "get": {
-        "operationId": "getEmployerTeamIndex",
-        "summary": "View the employer team dashboard.",
+        "operationId": "GetEmployerTeamIndex",
+        "summary": "Get the employer team view.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -22,18 +21,20 @@
         ],
         "responses": {
           "200": {
-            "description": "Employer team dashboard displayed successfully."
-          },
-          "302": {
-            "description": "Redirected to account task list."
+            "description": "Employer team view retrieved successfully."
           }
-        }
+        },
+        "security": [
+          {
+            "HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ]
       }
     },
     "/accounts/{hashedAccountId}/teams/view": {
       "get": {
-        "operationId": "getEmployerTeamView",
-        "summary": "View team members for the employer team.",
+        "operationId": "ViewTeam",
+        "summary": "Retrieve team members for a specific account.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -46,15 +47,20 @@
         ],
         "responses": {
           "200": {
-            "description": "Team members displayed successfully."
+            "description": "Team members retrieved."
           }
-        }
+        },
+        "security": [
+          {
+            "HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ]
       }
     },
     "/accounts/{hashedAccountId}/teams/AddedProvider/{providerName}": {
       "get": {
-        "operationId": "getAddedProvider",
-        "summary": "Redirect after adding a training provider.",
+        "operationId": "AddedProvider",
+        "summary": "Adds a notification for adding a provider to the account.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -70,20 +76,26 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The name of the provider."
           }
         ],
         "responses": {
           "302": {
-            "description": "Redirected to the employer team dashboard."
+            "description": "Redirected to the Employer Team Index."
           }
-        }
+        },
+        "security": [
+          {
+            "HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ]
       }
     },
     "/accounts/{hashedAccountId}/teams/invite": {
       "get": {
-        "operationId": "getEmployerTeamInvite",
-        "summary": "Get the team invitation view.",
+        "operationId": "InviteTeamMember",
+        "summary": "Get invitation setup for a team member.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -96,16 +108,19 @@
         ],
         "responses": {
           "200": {
-            "description": "Invitation view displayed successfully."
+            "description": "Retrieved invitation setup."
           }
-        }
+        },
+        "security": [
+          {
+            "HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ]
       },
       "post": {
-        "operationId": "postEmployerTeamInvite",
-        "summary": "Invite a team member.",
-        "parameters": [],
+        "operationId": "SendTeamMemberInvite",
+        "summary": "Send invitation to a team member.",
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
@@ -116,15 +131,20 @@
         },
         "responses": {
           "200": {
-            "description": "Team member invited successfully."
+            "description": "Invitation sent successfully."
           }
-        }
+        },
+        "security": [
+          {
+            "HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ]
       }
     },
     "/accounts/{hashedAccountId}/teams/invite/next": {
       "get": {
-        "operationId": "getInviteNextSteps",
-        "summary": "Next steps after sending an invitation.",
+        "operationId": "InviteNextSteps",
+        "summary": "Retrieve the next steps after invitation.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -137,17 +157,23 @@
         ],
         "responses": {
           "200": {
-            "description": "Next steps displayed successfully."
+            "description": "Next steps retrieved."
           }
-        }
+        },
+        "security": [
+          {
+            "HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ]
       },
       "post": {
-        "operationId": "postInviteNextSteps",
-        "summary": "Handle next steps after sending an invitation.",
+        "operationId": "PostInviteNextSteps",
+        "summary": "Post the user's selection for next steps after invitation.",
         "parameters": [
           {
             "name": "choice",
             "in": "query",
+            "required": false,
             "schema": {
               "type": "integer"
             }
@@ -164,84 +190,13 @@
         "responses": {
           "302": {
             "description": "Redirected based on user choice."
-          },
-          "200": {
-            "description": "Error response displayed if no option is selected."
           }
-        }
-      }
-    },
-    "/accounts/{hashedAccountId}/teams/{hashedInvitationId}/cancel": {
-      "get": {
-        "operationId": "getCancelInvitation",
-        "summary": "View an invitation for cancellation.",
-        "parameters": [
+        },
+        "security": [
           {
-            "name": "hashedAccountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "hashedInvitationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
+            "HasEmployerViewerTransactorOwnerAccount": []
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "Invitation review displayed successfully."
-          }
-        }
-      },
-      "post": {
-        "operationId": "postCancelInvitation",
-        "summary": "Cancel a team member invitation.",
-        "parameters": [
-          {
-            "name": "hashedAccountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "hashedInvitationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "email",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "cancel",
-            "in": "query",
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Cancellation processed successfully."
-          },
-          "302": {
-            "description": "Redirect to the view team page."
-          }
-        }
+        ]
       }
     }
   },
@@ -261,12 +216,6 @@
           },
           "role": {
             "$ref": "#/components/schemas/Role"
-          },
-          "errorDictionary": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
           }
         }
       },
@@ -278,19 +227,13 @@
           "Transactor",
           "Viewer"
         ]
-      },
-      "TriageViewModel": {
-        "type": "object",
-        "properties": {
-          "triageOption": {
-            "type": "string",
-            "enum": [
-              "Yes",
-              "No",
-              "Unknown"
-            ]
-          }
-        }
+      }
+    },
+    "securitySchemes": {
+      "HasEmployerViewerTransactorOwnerAccount": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
       }
     }
   }

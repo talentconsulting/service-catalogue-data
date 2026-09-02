@@ -1,18 +1,17 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "CommitmentsV2 API",
-    "version": "1.0.0",
-    "description": "API for managing course commitments in the SFA DAS system."
+    "title": "Commitments API",
+    "version": "1.0.0"
   },
   "paths": {
     "/api/courses": {
       "get": {
+        "operationId": "GetAllCourses",
         "summary": "Retrieve all courses",
-        "operationId": "getAllCourses",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "A list of all available courses.",
             "content": {
               "application/json": {
                 "schema": {
@@ -20,11 +19,14 @@
                 }
               }
             }
+          },
+          "default": {
+            "description": "Unexpected error"
           }
         },
         "security": [
           {
-            "BearerAuth": []
+            "bearerAuth": []
           }
         ]
       }
@@ -57,7 +59,11 @@
           },
           "LearningType": {
             "type": "string",
-            "description": "Enumeration: Apprenticeship, FoundationApprenticeship, ApprenticeshipUnit"
+            "enum": [
+              "Apprenticeship",
+              "FoundationApprenticeship",
+              "ApprenticeshipUnit"
+            ]
           },
           "MaxFunding": {
             "type": "integer",
@@ -73,11 +79,18 @@
             "format": "date-time",
             "nullable": true
           }
-        }
+        },
+        "required": [
+          "LarsCode",
+          "Title",
+          "Level",
+          "LearningType",
+          "MaxFunding"
+        ]
       }
     },
     "securitySchemes": {
-      "BearerAuth": {
+      "bearerAuth": {
         "type": "http",
         "scheme": "bearer"
       }

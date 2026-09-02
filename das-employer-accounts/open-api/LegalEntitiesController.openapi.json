@@ -1,37 +1,40 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts Legal Entities API",
+    "title": "LegalEntities API",
+    "description": "API for managing legal entities associated with accounts.",
     "version": "1.0.0"
   },
   "paths": {
     "/api/accounts/{accountId}/legalentities": {
       "get": {
+        "summary": "Get Legal Entities for an Account",
+        "description": "Retrieves a list of legal entities for the specified account ID. The response format depends on the `includeDetails` query parameter.",
         "operationId": "GetLegalEntities",
-        "summary": "Retrieve legal entities associated with an account",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
+            "description": "The ID of the account.",
             "schema": {
-              "type": "integer"
-            },
-            "description": "The ID of the account for which legal entities are retrieved"
+              "type": "integer",
+              "format": "int64"
+            }
           },
           {
             "name": "includeDetails",
             "in": "query",
             "required": false,
+            "description": "Indicates whether to include detailed information for each legal entity.",
             "schema": {
               "type": "boolean"
-            },
-            "description": "Flag to include detailed information about legal entities"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "OK. Returns the legal entities for the account.",
             "content": {
               "application/json": {
                 "schema": {
@@ -51,55 +54,55 @@
             }
           },
           "404": {
-            "description": "No legal entities found for the given account ID"
+            "description": "Not Found. No legal entities were found for the given account ID."
           }
         },
         "security": [
           {
-            "ApiRoles": []
+            "ApiRoles_ReadAllEmployerAccountBalances": []
           }
-        ],
-        "tags": [
-          "LegalEntities"
         ]
       }
     },
     "/api/accounts/{accountId}/legalentities/{legalEntityId}": {
       "get": {
+        "summary": "Get a Specific Legal Entity",
+        "description": "Retrieves details for a specific legal entity associated with a given account and legal entity ID.",
         "operationId": "GetLegalEntity",
-        "summary": "Retrieve a specific legal entity by ID",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
+            "description": "The ID of the account.",
             "schema": {
-              "type": "integer"
-            },
-            "description": "The ID of the account to which the legal entity belongs"
+              "type": "integer",
+              "format": "int64"
+            }
           },
           {
             "name": "legalEntityId",
             "in": "path",
             "required": true,
+            "description": "The ID of the legal entity.",
             "schema": {
-              "type": "integer"
-            },
-            "description": "The ID of the legal entity to retrieve"
+              "type": "integer",
+              "format": "int64"
+            }
           },
           {
             "name": "includeAllAgreements",
             "in": "query",
             "required": false,
+            "description": "Flag indicating whether to include all agreements for the legal entity.",
             "schema": {
               "type": "boolean"
-            },
-            "description": "Flag to include all agreements associated with the legal entity"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "OK. Returns the details of the legal entity.",
             "content": {
               "application/json": {
                 "schema": {
@@ -109,77 +112,55 @@
             }
           },
           "404": {
-            "description": "Specified legal entity not found"
+            "description": "Not Found. No legal entity was found for the provided account and legal entity ID."
           }
         },
         "security": [
           {
-            "ApiRoles": []
+            "ApiRoles_ReadAllEmployerAccountBalances": []
           }
-        ],
-        "tags": [
-          "LegalEntities"
         ]
       }
     }
   },
   "components": {
     "schemas": {
-      "ResourceList": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/Resource"
-        }
-      },
       "Resource": {
         "type": "object",
         "properties": {
           "Id": {
             "type": "string",
-            "description": "Identifier for the resource"
+            "description": "The unique identifier for the resource."
           },
           "Href": {
             "type": "string",
-            "description": "URL of the resource"
+            "description": "The hyperlink to access the resource."
           }
-        }
+        },
+        "required": [
+          "Id",
+          "Href"
+        ]
+      },
+      "ResourceList": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/Resource"
+        },
+        "description": "A list of resources."
       },
       "LegalEntity": {
         "type": "object",
-        "properties": {
-          "LegalEntityId": {
-            "type": "integer",
-            "description": "Unique ID for the legal entity"
-          },
-          "Name": {
-            "type": "string",
-            "description": "Name of the legal entity"
-          },
-          "Code": {
-            "type": "string",
-            "description": "Code associated with the legal entity"
-          },
-          "Status": {
-            "type": "string",
-            "description": "Status of the legal entity"
-          },
-          "AgreementDetails": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": true
-            },
-            "description": "Details of associated agreements"
-          }
-        },
-        "additionalProperties": true
+        "description": "Represents a legal entity associated with an account.",
+        "properties": {}
       }
     },
     "securitySchemes": {
-      "ApiRoles": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+      "ApiRoles_ReadAllEmployerAccountBalances": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "API key for accessing protected endpoints with 'ReadAllEmployerAccountBalances' policy."
       }
     }
   }

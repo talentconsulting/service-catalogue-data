@@ -2,7 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Accounts API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API endpoints for managing Employer Accounts."
   },
   "paths": {
     "/api/accountlegalentities": {
@@ -17,6 +18,7 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
+              "maximum": 2147483647,
               "default": 1
             }
           },
@@ -34,11 +36,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response with account legal entities",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PagedApiResponse"
+                  "$ref": "#/components/schemas/GetAccountLegalEntitiesResponse"
                 }
               }
             }
@@ -46,7 +48,7 @@
         },
         "security": [
           {
-            "ApiRoles": []
+            "ApiRoles.ReadUserAccounts": []
           }
         ]
       }
@@ -54,7 +56,7 @@
     "/api/accountlegalentities/GetAll": {
       "post": {
         "operationId": "GetAllAccountLegalEntities",
-        "summary": "Retrieve all account legal entities",
+        "summary": "Retrieve all account legal entities by hashed account ID",
         "requestBody": {
           "required": true,
           "content": {
@@ -67,7 +69,7 @@
         },
         "responses": {
           "200": {
-            "description": "Success",
+            "description": "Successful response with account legal entities.",
             "content": {
               "application/json": {
                 "schema": {
@@ -77,15 +79,15 @@
             }
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Bad request"
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error"
           }
         },
         "security": [
           {
-            "ApiRoles": []
+            "ApiRoles.ReadUserAccounts": []
           }
         ]
       }
@@ -93,6 +95,35 @@
   },
   "components": {
     "schemas": {
+      "GetAccountLegalEntitiesQuery": {
+        "type": "object",
+        "properties": {
+          "PageNumber": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647,
+            "default": 1
+          },
+          "PageSize": {
+            "type": "integer",
+            "minimum": 100,
+            "maximum": 10000,
+            "default": 1000
+          }
+        },
+        "required": [
+          "PageNumber",
+          "PageSize"
+        ]
+      },
+      "GetAccountLegalEntitiesResponse": {
+        "type": "object",
+        "properties": {
+          "AccountLegalEntities": {
+            "$ref": "#/components/schemas/PagedApiResponse"
+          }
+        }
+      },
       "PagedApiResponse": {
         "type": "object",
         "properties": {
@@ -114,16 +145,19 @@
         "type": "object",
         "properties": {
           "AccountId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "AccountLegalEntityId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "AccountLegalEntityPublicHashedId": {
             "type": "string"
           },
           "LegalEntityId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "Name": {
             "type": "string"
@@ -136,7 +170,8 @@
           "AccountIds": {
             "type": "array",
             "items": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int64"
             }
           },
           "SearchTerm": {
@@ -145,12 +180,10 @@
           },
           "PageNumber": {
             "type": "integer",
-            "minimum": 1,
             "default": 1
           },
           "PageSize": {
             "type": "integer",
-            "minimum": 1,
             "default": 10
           },
           "SortColumn": {
@@ -226,7 +259,8 @@
             "type": "string"
           },
           "LegalEntityId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "Name": {
             "type": "string"
@@ -247,7 +281,8 @@
             "type": "string"
           },
           "AccountLegalEntityId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "AccountLegalEntityPublicHashedId": {
             "type": "string"
@@ -261,7 +296,8 @@
         "type": "object",
         "properties": {
           "Id": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "SignedDate": {
             "type": "string",
@@ -271,46 +307,22 @@
             "type": "string"
           },
           "SignedById": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "SignedByEmail": {
             "type": "string"
           },
           "Status": {
-            "$ref": "#/components/schemas/EmployerAgreementStatus"
+            "type": "string"
           },
           "TemplateVersionNumber": {
             "type": "integer"
           },
           "AgreementType": {
-            "$ref": "#/components/schemas/AgreementType"
+            "type": "string"
           }
         }
-      },
-      "EmployerAgreementStatus": {
-        "type": "string",
-        "enum": [
-          "Pending",
-          "Signed",
-          "Expired",
-          "Superseded",
-          "Removed"
-        ]
-      },
-      "AgreementType": {
-        "type": "string",
-        "enum": [
-          "Levy",
-          "Combined",
-          "Unknown"
-        ]
-      }
-    },
-    "securitySchemes": {
-      "ApiRoles": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Authorization"
       }
     }
   }
