@@ -31,6 +31,23 @@ npm start
 Set `CATALOGUE_DATA_DIR` when the data repository is not the parent directory.
 Run the API tests with `npm test`.
 
+### Password protection
+
+The viewer is open by default. To require a login, copy `visualizer/.env.example`
+to `visualizer/.env` (already gitignored — never commit real credentials) and
+set `AUTH_PASSWORD`:
+
+```bash
+cd visualizer
+cp .env.example .env
+# edit .env and set AUTH_PASSWORD (AUTH_USERNAME defaults to "admin")
+docker compose up --build
+```
+
+Docker Compose reads `.env` automatically. Running with `npm start` instead,
+export the same variables in your shell first. Leaving `AUTH_PASSWORD` unset
+(or deleting `.env`) runs the viewer without authentication, as before.
+
 ## Dependabot alert report
 
 The `dependabot-report` workflow (`.github/workflows/dependabot-report.yml`)
