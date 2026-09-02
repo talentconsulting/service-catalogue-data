@@ -1,0 +1,199 @@
+{
+  "repository": "SkillsFundingAgency/das-campaign",
+  "ref": "master",
+  "path": "src",
+  "systemName": "Campaign",
+  "containers": [
+    {
+      "id": "campaign-web",
+      "name": "Campaign",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/Startup.cs",
+          "reason": "Configures ASP.NET Core web pipeline and endpoints."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/Program.cs",
+          "reason": "Contains ASP.NET Core web entry point."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/SFA.DAS.Campaign.Web.csproj",
+          "reason": "Defines a Microsoft.NET.Sdk.Web project."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "campaign-web",
+      "name": "Redis Cache",
+      "kind": "cache",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "StackExchange.Redis",
+      "technology": "Redis",
+      "configurationKeys": [
+        "CampaignConfiguration:ConnectionStrings:SharedRedis"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "redis",
+          "name": "SharedRedis",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Campaign.Web/Helpers/StartupExtensions.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/Helpers/StartupExtensions.cs",
+          "reason": "ConnectionMultiplexer.Connect called for Redis with SharedRedis connection string."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/SFA.DAS.Campaign.Web.csproj",
+          "reason": "Microsoft.Extensions.Caching.StackExchangeRedis package referenced."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis-cache",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "campaign-web",
+      "name": "Application Insights",
+      "kind": "cloud-service",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "ApplicationInsights",
+      "technology": "Microsoft.ApplicationInsights",
+      "configurationKeys": [
+        "APPLICATIONINSIGHTS_CONNECTION_STRING"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/Startup.cs",
+          "reason": "Application Insights configured for telemetry."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/SFA.DAS.Campaign.Web.csproj",
+          "reason": "Microsoft.ApplicationInsights.AspNetCore package referenced."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cloud-service-application-insights",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "campaign-web",
+      "name": "Azure Table Storage",
+      "kind": "database",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "AzureTableStorage",
+      "technology": "Azure.Cosmos.Table",
+      "configurationKeys": [
+        "ConfigurationStorageConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": [
+          "ConfigurationStorageConnectionString"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/Startup.cs",
+          "reason": "Azure Table Storage configured for application configuration keys."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/SFA.DAS.Campaign.Web.csproj",
+          "reason": "Azure.Cosmos.Table package referenced."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-azure-table-storage",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "campaign-web",
+      "name": "Outer API",
+      "kind": "http-api",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "ApiClient",
+      "technology": null,
+      "configurationKeys": [
+        "CampaignConfiguration:OuterApi:BaseUrl",
+        "CampaignConfiguration:OuterApi:Key"
+      ],
+      "authentication": {
+        "type": "subscription-key",
+        "configurationKeys": [
+          "CampaignConfiguration:OuterApi:Key"
+        ]
+      },
+      "operations": [
+        {
+          "method": "GET",
+          "methodName": "Get",
+          "path": null,
+          "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs"
+        }
+      ],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs",
+          "reason": "HttpClient configured with base URL and key for Outer API."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/Startup.cs",
+          "reason": "IApiClient registered with HTTP client factory."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-outer-api",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "campaign-web",
+      "name": "Azure Queue Storage",
+      "kind": "message-broker",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "AzureQueueService",
+      "technology": "Azure.Storage.Queue",
+      "configurationKeys": [
+        "CampaignConfiguration:QueueConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/Helpers/StartupExtensions.cs",
+          "reason": "Adds Azure Queue Storage health check with queue connection string."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-azure-queue-storage",
+      "description": "Publishes messages to and consumes messages from"
+    }
+  ]
+}

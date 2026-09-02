@@ -1,0 +1,39 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+System_Boundary(sys_SkillsFundingAgency_das_employer_accounts, "Employer Accounts") {
+  Container(c_employer_accounts_api, "Employer Accounts", "API")
+  Container(c_employer_accounts_jobs, "Employer Accounts Jobs", "Background Job")
+  Container(c_employer_accounts_messagehandlers, "Employer Accounts MessageHandlers", "Background Job")
+  Container(c_employer_accounts_web, "Employer Accounts", "Web Application")
+}
+
+SystemDb_Ext(d_cache_redis, "Redis", "Redis")
+SystemDb_Ext(d_cache_redis_cache, "Redis Cache", "StackExchange.Redis")
+System_Ext(d_cloud_service_azure_active_directory, "Azure Active Directory", "Azure.Identity")
+SystemDb_Ext(d_database_employer_accounts_db, "Employer Accounts DB", "Microsoft.Data.SqlClient")
+System_Ext(d_http_api_apprenticeship_levy, "Apprenticeship Levy")
+System_Ext(d_http_api_commitments_v2, "Commitments V2")
+System_Ext(d_http_api_content, "Content", "HttpClient")
+System_Ext(d_http_api_employer_accounts_outer_api, "Employer Accounts Outer API")
+System_Ext(d_http_api_token_service, "Token Service", "HttpClient")
+SystemQueue_Ext(d_message_broker_service_bus, "Service Bus", "Azure Service Bus")
+
+Rel(c_employer_accounts_api, d_cache_redis, "Caches data in", "Redis")
+Rel(c_employer_accounts_api, d_cache_redis_cache, "Caches data in", "StackExchange.Redis")
+Rel(c_employer_accounts_api, d_cloud_service_azure_active_directory, "Uses", "Azure.Identity")
+Rel(c_employer_accounts_web, d_database_employer_accounts_db, "Reads from and writes to", "Microsoft.Data.SqlClient")
+Rel(c_employer_accounts_api, d_database_employer_accounts_db, "Reads from and writes to", "SQL Server")
+Rel(c_employer_accounts_web, d_http_api_apprenticeship_levy, "Calls the API of")
+Rel(c_employer_accounts_api, d_http_api_apprenticeship_levy, "Calls the API of", "HttpClient")
+Rel(c_employer_accounts_web, d_http_api_commitments_v2, "Calls the API of")
+Rel(c_employer_accounts_api, d_http_api_commitments_v2, "Calls the API of", "HttpClient")
+Rel(c_employer_accounts_api, d_http_api_content, "Calls the API of", "HttpClient")
+Rel(c_employer_accounts_web, d_http_api_employer_accounts_outer_api, "Calls the API of")
+Rel(c_employer_accounts_api, d_http_api_employer_accounts_outer_api, "Calls the API of", "HttpClient")
+Rel(c_employer_accounts_api, d_http_api_token_service, "Calls the API of", "HttpClient")
+Rel(c_employer_accounts_jobs, d_message_broker_service_bus, "Publishes messages to and consumes messages from", "Azure Service Bus")
+Rel(c_employer_accounts_messagehandlers, d_message_broker_service_bus, "Publishes messages to and consumes messages from", "NServiceBus")
+
+@enduml
