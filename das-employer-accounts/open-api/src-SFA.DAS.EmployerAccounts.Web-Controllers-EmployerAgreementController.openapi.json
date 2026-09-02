@@ -2,14 +2,15 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Agreements API",
-    "version": "1.0.0",
-    "description": "API for managing employer agreements in the DAS employer accounts system"
+    "version": "1.0.0"
   },
   "paths": {
     "/accounts/{hashedAccountId}/agreements": {
       "get": {
-        "summary": "Fetch all agreements for an account",
-        "operationId": "getEmployerAgreements",
+        "tags": [
+          "Employer Agreements"
+        ],
+        "operationId": "getEmployerAgreementIndex",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -30,11 +31,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with list of agreements",
+            "description": "Successfully retrieved agreements",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrchestratorResponse"
+                  "type": "object"
                 }
               }
             }
@@ -44,7 +45,9 @@
     },
     "/accounts/{hashedAccountId}/agreements/{hashedAgreementId}/details": {
       "get": {
-        "summary": "Fetch details of a specific agreement",
+        "tags": [
+          "Employer Agreements"
+        ],
         "operationId": "getAgreementDetails",
         "parameters": [
           {
@@ -66,11 +69,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with agreement details",
+            "description": "Successfully retrieved agreement details",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrchestratorResponse"
+                  "type": "object"
                 }
               }
             }
@@ -80,8 +83,10 @@
     },
     "/accounts/{hashedAccountId}/agreements/{hashedAgreementId}/view": {
       "get": {
-        "summary": "View the signed version of an agreement",
-        "operationId": "getSignedAgreementView",
+        "tags": [
+          "Employer Agreements"
+        ],
+        "operationId": "viewAgreement",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -102,11 +107,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with a view of the signed agreement",
+            "description": "Successfully retrieved the signed agreement view",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrchestratorResponse"
+                  "type": "object"
                 }
               }
             }
@@ -116,7 +121,9 @@
     },
     "/accounts/{hashedAccountId}/agreements/unsigned/view": {
       "get": {
-        "summary": "View next unsigned agreements",
+        "tags": [
+          "Employer Agreements"
+        ],
         "operationId": "viewUnsignedAgreements",
         "parameters": [
           {
@@ -129,16 +136,25 @@
           }
         ],
         "responses": {
-          "302": {
-            "description": "Redirect to the appropriate action based on whether there are unsigned agreements"
+          "200": {
+            "description": "Successfully retrieved unsigned agreements",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
           }
         }
       }
     },
     "/accounts/{hashedAccountId}/agreements/{hashedAgreementId}/about-your-agreement": {
       "get": {
-        "summary": "View information about a specific agreement",
-        "operationId": "getAboutYourAgreement",
+        "tags": [
+          "Employer Agreements"
+        ],
+        "operationId": "aboutYourAgreement",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -161,18 +177,17 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean",
-              "default": true
+              "type": "boolean"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with information about the agreement",
+            "description": "Successfully retrieved agreement details for tasklist",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrchestratorResponse"
+                  "type": "object"
                 }
               }
             }
@@ -182,7 +197,9 @@
     },
     "/accounts/{hashedAccountId}/agreements/{hashedAgreementId}/sign-your-agreement": {
       "get": {
-        "summary": "Initiate signing process for an agreement",
+        "tags": [
+          "Employer Agreements"
+        ],
         "operationId": "signYourAgreement",
         "parameters": [
           {
@@ -204,11 +221,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response to start signing the agreement",
+            "description": "Successfully retrieved agreement signing view",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrchestratorResponse"
+                  "type": "object"
                 }
               }
             }
@@ -218,7 +235,9 @@
     },
     "/accounts/{hashedAccountId}/agreements/{hashedAgreementId}/sign": {
       "post": {
-        "summary": "Sign an agreement",
+        "tags": [
+          "Employer Agreements"
+        ],
         "operationId": "signAgreement",
         "parameters": [
           {
@@ -239,42 +258,35 @@
           }
         ],
         "requestBody": {
-          "description": "Choice to sign the agreement",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "choice": {
-                    "type": "integer"
-                  }
-                }
+                "type": "object"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Agreement signed successfully",
+            "description": "Successfully signed the agreement",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrchestratorResponse"
+                  "type": "object"
                 }
               }
             }
-          },
-          "401": {
-            "description": "Unauthorized to sign the agreement"
           }
         }
       }
     },
     "/accounts/{hashedAccountId}/agreements/{hashedAgreementId}/agreement-pdf": {
       "get": {
-        "summary": "Download the agreement as a PDF",
-        "operationId": "downloadAgreementPdf",
+        "tags": [
+          "Employer Agreements"
+        ],
+        "operationId": "getAgreementPdf",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -295,44 +307,7 @@
         ],
         "responses": {
           "200": {
-            "description": "PDF file stream of the agreement",
-            "content": {
-              "application/pdf": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/accounts/{hashedAccountId}/agreements/{hashedAgreementId}/signed-agreement-pdf": {
-      "get": {
-        "summary": "Download the signed agreement as a PDF",
-        "operationId": "downloadSignedAgreementPdf",
-        "parameters": [
-          {
-            "name": "hashedAccountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "hashedAgreementId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "PDF file stream of the signed agreement",
+            "description": "Successfully retrieved agreement PDF",
             "content": {
               "application/pdf": {
                 "schema": {
@@ -346,117 +321,11 @@
       }
     },
     "/accounts/{hashedAccountId}/agreements/{accountLegalEntityHashedId}/remove": {
-      "post": {
-        "summary": "Remove an organisation from agreements",
-        "operationId": "removeOrganisation",
-        "requestBody": {
-          "description": "Details of the organisation to remove",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ConfirmOrganisationToRemoveViewModel"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Organisation removed successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrchestratorResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/accounts/{hashedAccountId}/agreements/{hashedAgreementId}/whenDoYouWantToView": {
       "get": {
-        "summary": "Determine when to view an agreement",
-        "operationId": "getWhenDoYouWantToView",
-        "parameters": [
-          {
-            "name": "hashedAccountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "hashedAgreementId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
+        "tags": [
+          "Legal Entity Agreements"
         ],
-        "responses": {
-          "200": {
-            "description": "Information about when to view the agreement",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrchestratorResponse"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "summary": "Submit a choice about when to view an agreement",
-        "operationId": "postWhenDoYouWantToView",
-        "parameters": [
-          {
-            "name": "hashedAccountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "hashedAgreementId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "description": "Choice about when to view",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "choice": {
-                    "type": "integer"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "302": {
-            "description": "Redirect to the appropriate resource based on the choice"
-          }
-        }
-      }
-    },
-    "/accounts/{hashedAccountId}/organisations/{accountLegalEntityHashedId}/agreements": {
-      "get": {
-        "summary": "View all agreements for an organisation",
-        "operationId": "viewAllAgreements",
+        "operationId": "confirmRemoveOrganisation",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -477,11 +346,38 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with all agreements for the organisation",
+            "description": "Successfully retrieved confirmation details for removing an organisation",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrchestratorResponse"
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Legal Entity Agreements"
+        ],
+        "operationId": "postConfirmRemoveOrganisation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmOrganisationToRemoveViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully removed organisation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
                 }
               }
             }
@@ -492,100 +388,31 @@
   },
   "components": {
     "schemas": {
-      "OrchestratorResponse": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "integer",
-            "format": "int32",
-            "description": "HTTP status code of the response"
-          },
-          "exception": {
-            "type": "object",
-            "description": "Error details if any"
-          },
-          "flashMessage": {
-            "$ref": "#/components/schemas/FlashMessageViewModel"
-          },
-          "redirectUrl": {
-            "type": "string",
-            "description": "Redirect URL if applicable"
-          },
-          "redirectButtonMessage": {
-            "type": "string",
-            "description": "Message for redirect button"
-          },
-          "data": {
-            "type": "object",
-            "description": "Response data payload",
-            "nullable": true
-          }
-        }
-      },
-      "FlashMessageViewModel": {
-        "type": "object",
-        "properties": {
-          "headline": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "subMessage": {
-            "type": "string"
-          },
-          "severity": {
-            "type": "string",
-            "enum": [
-              "Complete",
-              "Success",
-              "Error",
-              "Danger",
-              "Info",
-              "Warning",
-              "Okay"
-            ]
-          },
-          "severityCssClass": {
-            "type": "string"
-          },
-          "errorMessages": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "redirectButtonMessage": {
-            "type": "string"
-          },
-          "hiddenFlashMessageInformation": {
-            "type": "string"
-          }
-        }
-      },
       "ConfirmOrganisationToRemoveViewModel": {
         "type": "object",
         "properties": {
-          "name": {
+          "Name": {
             "type": "string"
           },
-          "hashedAccountLegalEntitytId": {
+          "HashedAccountLegalEntitytId": {
             "type": "string"
           },
-          "hashedAccountId": {
+          "HashedAccountId": {
             "type": "string"
           },
-          "canBeRemoved": {
+          "CanBeRemoved": {
             "type": "boolean"
           },
-          "hasSignedAgreement": {
+          "HasSignedAgreement": {
             "type": "boolean"
           },
-          "remove": {
-            "type": "boolean",
-            "nullable": true
+          "Remove": {
+            "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "Remove"
+        ]
       }
     }
   }

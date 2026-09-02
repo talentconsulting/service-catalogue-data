@@ -1,13 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Change Of Party API",
+    "title": "Change of Party API",
     "version": "1.0.0"
   },
   "paths": {
     "/api/apprenticeships/{apprenticeshipId}/change-of-party-requests": {
       "get": {
-        "summary": "Retrieve all change of party requests",
+        "summary": "Get all change of party requests for an apprenticeship",
         "operationId": "getChangeOfPartyRequests",
         "parameters": [
           {
@@ -26,15 +26,20 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/GetChangeOfPartyRequestsResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
       },
       "post": {
-        "summary": "Create a new change of party request",
+        "summary": "Create a new change of party request for an apprenticeship",
         "operationId": "createChangeOfPartyRequest",
         "parameters": [
           {
@@ -59,14 +64,19 @@
         },
         "responses": {
           "200": {
-            "description": "Successfully created"
+            "description": "Successful operation"
           }
-        }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
       }
     },
     "/api/apprenticeships/{apprenticeshipId}/change-of-provider-chain": {
       "get": {
-        "summary": "Retrieve the change of provider chain",
+        "summary": "Get the change of provider chain for an apprenticeship",
         "operationId": "getChangeOfProviderChain",
         "parameters": [
           {
@@ -85,17 +95,22 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/GetChangeOfProviderChainResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
       }
     },
     "/api/apprenticeships/{apprenticeshipId}/change-of-employer-chain": {
       "get": {
-        "summary": "Retrieve the change of employer chain",
+        "summary": "Get the change of employer chain for an apprenticeship",
         "operationId": "getChangeOfEmployerChain",
         "parameters": [
           {
@@ -114,12 +129,17 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "$ref": "#/components/schemas/GetChangeOfEmployerChainResponse"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
       }
     }
   },
@@ -137,43 +157,55 @@
           },
           "NewPrice": {
             "type": "integer",
-            "nullable": true
+            "nullable": true,
+            "format": "int32"
           },
           "NewStartDate": {
             "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "nullable": true,
+            "format": "date-time"
           },
           "NewEndDate": {
             "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "nullable": true,
+            "format": "date-time"
           },
           "NewEmploymentEndDate": {
             "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "nullable": true,
+            "format": "date-time"
           },
           "NewEmploymentPrice": {
             "type": "integer",
-            "nullable": true
+            "nullable": true,
+            "format": "int32"
           },
           "DeliveryModel": {
             "$ref": "#/components/schemas/DeliveryModel"
           },
           "HasOverlappingTrainingDates": {
-            "type": "boolean"
+            "type": "boolean",
+            "default": false
           },
           "UserInfo": {
             "$ref": "#/components/schemas/UserInfo"
           }
-        },
-        "required": [
-          "ChangeOfPartyRequestType",
-          "NewPartyId",
-          "HasOverlappingTrainingDates",
-          "UserInfo"
-        ]
+        }
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          },
+          "UserDisplayName": {
+            "type": "string"
+          },
+          "UserEmail": {
+            "type": "string",
+            "format": "email"
+          }
+        }
       },
       "ChangeOfPartyRequestType": {
         "type": "string",
@@ -190,24 +222,23 @@
           "FlexiJobAgency"
         ]
       },
-      "UserInfo": {
+      "GetChangeOfPartyRequestsResponse": {
         "type": "object",
-        "properties": {
-          "UserId": {
-            "type": "string"
-          },
-          "UserDisplayName": {
-            "type": "string"
-          },
-          "UserEmail": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "UserId",
-          "UserDisplayName",
-          "UserEmail"
-        ]
+        "additionalProperties": true
+      },
+      "GetChangeOfProviderChainResponse": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "GetChangeOfEmployerChainResponse": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

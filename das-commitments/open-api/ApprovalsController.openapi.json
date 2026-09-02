@@ -1,25 +1,24 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Commitments V2 Approvals API",
-    "description": "API for managing approvals within the Commitments V2 project.",
+    "title": "SFA.DAS Commitments Approvals API",
     "version": "1.0.0"
   },
   "paths": {
     "/approvals/{learningKey}": {
       "post": {
-        "summary": "Create an approval",
-        "description": "Creates an approval request based on the provided learningKey and approval details.",
+        "summary": "Create a new approval",
+        "operationId": "PostApprovals",
         "parameters": [
           {
             "name": "learningKey",
             "in": "path",
             "required": true,
-            "description": "The unique key identifying the learning.",
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The unique identifier of the learning entity."
           }
         ],
         "requestBody": {
@@ -34,7 +33,7 @@
         },
         "responses": {
           "201": {
-            "description": "Approval created successfully",
+            "description": "Created",
             "content": {
               "application/json": {
                 "schema": {
@@ -47,81 +46,60 @@
             }
           },
           "400": {
-            "description": "Bad request, learningKey mismatch or validation error"
+            "description": "Bad Request if the learningKey in the route does not match the one in the body."
           }
         },
         "security": [
           {
-            "OAuth2": []
+            "BearerAuth": []
           }
         ]
       },
       "delete": {
         "summary": "Delete an approval",
-        "description": "Deletes an existing approval based on the learning key.",
+        "operationId": "DeleteApprovals",
         "parameters": [
           {
             "name": "learningKey",
             "in": "path",
             "required": true,
-            "description": "The unique key identifying the learning.",
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The unique identifier of the learning entity to delete."
           }
         ],
         "responses": {
           "200": {
-            "description": "Approval deleted successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request, validation error.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "OK if the approval is successfully deleted. A message is returned in the response body."
           },
           "404": {
-            "description": "Approval not found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Not Found if the approval is not found."
+          },
+          "400": {
+            "description": "Bad Request if the approval is not pending deletion."
           }
         },
         "security": [
           {
-            "OAuth2": []
+            "BearerAuth": []
           }
         ]
       },
       "put": {
         "summary": "Update an approval",
-        "description": "Updates an existing approval based on the provided learning key.",
+        "operationId": "PutApprovals",
         "parameters": [
           {
             "name": "learningKey",
             "in": "path",
             "required": true,
-            "description": "The unique key identifying the learning.",
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The unique identifier of the learning entity."
           }
         ],
         "requestBody": {
@@ -136,7 +114,7 @@
         },
         "responses": {
           "201": {
-            "description": "Approval updated successfully",
+            "description": "Created",
             "content": {
               "application/json": {
                 "schema": {
@@ -148,16 +126,16 @@
               }
             }
           },
-          "404": {
-            "description": "Approval not found."
-          },
           "400": {
-            "description": "Bad request, validation error."
+            "description": "Bad Request if the learningKey in the route does not match the one in the body."
+          },
+          "404": {
+            "description": "Not Found if no pending approval is found."
           }
         },
         "security": [
           {
-            "OAuth2": []
+            "BearerAuth": []
           }
         ]
       }
@@ -173,10 +151,11 @@
             "format": "uuid"
           },
           "ApprenticeshipId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "LearningType": {
-            "$ref": "#/components/schemas/LearningType"
+            "type": "string"
           },
           "UKPRN": {
             "type": "string"
@@ -185,7 +164,8 @@
             "type": "string"
           },
           "ApprovedUri": {
-            "type": "string"
+            "type": "string",
+            "format": "uri"
           },
           "Changes": {
             "type": "array",
@@ -198,7 +178,8 @@
           "LearningKey",
           "ApprenticeshipId",
           "LearningType",
-          "Changes"
+          "UKPRN",
+          "ULN"
         ]
       },
       "CocApprovalFieldChange": {
@@ -243,27 +224,17 @@
           "Reason": {
             "type": "string"
           }
-        }
-      },
-      "LearningType": {
-        "type": "string",
-        "enum": [
-          "Apprenticeship",
-          "FoundationApprenticeship",
-          "ApprenticeshipUnit"
+        },
+        "required": [
+          "ChangeType",
+          "ApprovalStatus"
         ]
       }
     },
     "securitySchemes": {
-      "OAuth2": {
-        "type": "oauth2",
-        "flows": {
-          "authorizationCode": {
-            "authorizationUrl": "https://auth.skillsfundingagency.gov.uk/oauth/authorize",
-            "tokenUrl": "https://auth.skillsfundingagency.gov.uk/oauth/token",
-            "scopes": {}
-          }
-        }
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }
