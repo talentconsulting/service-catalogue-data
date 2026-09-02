@@ -1,0 +1,21 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+System_Boundary(sys_SkillsFundingAgency_das_campaign, "Campaign") {
+  Container(c_campaign_web, "Campaign", "Web Application")
+}
+
+SystemDb_Ext(d_cache_redis_cache, "Redis Cache", "Redis")
+System_Ext(d_cloud_service_application_insights, "Application Insights", "Microsoft.ApplicationInsights")
+SystemDb_Ext(d_database_azure_table_storage, "Azure Table Storage", "Azure.Cosmos.Table")
+System_Ext(d_http_api_outer_api, "Outer API")
+SystemQueue_Ext(d_message_broker_azure_queue_storage, "Azure Queue Storage", "Azure.Storage.Queue")
+
+Rel(c_campaign_web, d_cache_redis_cache, "Caches data in", "Redis")
+Rel(c_campaign_web, d_cloud_service_application_insights, "Uses", "Microsoft.ApplicationInsights")
+Rel(c_campaign_web, d_database_azure_table_storage, "Reads from and writes to", "Azure.Cosmos.Table")
+Rel(c_campaign_web, d_http_api_outer_api, "Calls the API of")
+Rel(c_campaign_web, d_message_broker_azure_queue_storage, "Publishes messages to and consumes messages from", "Azure.Storage.Queue")
+
+@enduml

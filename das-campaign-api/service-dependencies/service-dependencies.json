@@ -1,0 +1,103 @@
+{
+  "repository": "SkillsFundingAgency/das-campaign-api",
+  "ref": "main",
+  "path": "src",
+  "systemName": "Campaign",
+  "containers": [
+    {
+      "id": "campaign",
+      "name": "Campaign",
+      "type": "api",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Api/Startup.cs",
+          "reason": "ASP.NET configuration and middleware setup"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Api/Program.cs",
+          "reason": "ASP.NET entry point with WebHost and Startup class"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "campaign",
+      "name": "Azure Managed Identity",
+      "kind": "cloud-service",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "DefaultAzureCredential",
+      "technology": "Azure.Identity",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "cloud-scope",
+          "name": "https://database.windows.net/.default",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Campaign.Api.Data/CampaignDataContext.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Api.Data/CampaignDataContext.cs",
+          "reason": "Use of DefaultAzureCredential for Azure AD authentication for SQL Database connection"
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cloud-service-azure-managed-identity",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "campaign",
+      "name": "Campaign SQL Database",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "SqlConnection",
+      "technology": "Microsoft.Data.SqlClient",
+      "configurationKeys": [
+        "CampaignConfiguration.SqlConnectionString"
+      ],
+      "authentication": {
+        "type": "Azure AD Token",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "CampaignConfiguration.SqlConnectionString",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Campaign.Api.Data/CampaignDataContext.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Api/AppStart/AddDatabaseExtension.cs",
+          "reason": "AddDbContext for CampaignDataContext with SQL Server"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "AddDbContext for CampaignDataContext with SQL Server"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Api.Data/CampaignDataContext.cs",
+          "reason": "DbContext configured to use SQL Server connection"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Api/Startup.cs",
+          "reason": "Health check added for CampaignDataContext, indicating SQL database usage"
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-campaign-sql-database",
+      "description": "Reads from and writes to"
+    }
+  ]
+}
