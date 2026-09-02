@@ -1,6 +1,7 @@
 import { createReadStream } from 'node:fs';
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { createServer } from 'node:http';
+import { timingSafeEqual } from 'node:crypto';
 import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildPostmanCollection, buildPostmanEnvironment } from './postman.mjs';
@@ -9,6 +10,41 @@ const appDir = fileURLToPath(new URL('.', import.meta.url));
 const publicDir = join(appDir, 'public');
 const dataDir = resolve(process.env.CATALOGUE_DATA_DIR || join(appDir, '..'));
 const port = Number(process.env.PORT || 8080);
+
+// Basic Auth is opt-in: set AUTH_PASSWORD (e.g. in a local, gitignored .env file — never commit
+// it) to require credentials for every request. With no password configured the server stays
+// open, matching today's default so existing setups aren't broken by this change.
+const authUser = process.env.AUTH_USERNAME || 'admin';
+const authPassword = process.env.AUTH_PASSWORD || '';
+
+function safeEqual(a, b) {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  // timingSafeEqual throws on mismatched lengths, so pad first — the length check itself
+  // being fast isn't a meaningful leak for a username/password pair.
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
+
+function isAuthorized(request) {
+  if (!authPassword) return true;
+  const header = request.headers.authorization || '';
+  if (!header.startsWith('Basic ')) return false;
+  const decoded = Buffer.from(header.slice(6), 'base64').toString('utf8');
+  const separatorIndex = decoded.indexOf(':');
+  if (separatorIndex === -1) return false;
+  const user = decoded.slice(0, separatorIndex);
+  const pass = decoded.slice(separatorIndex + 1);
+  return safeEqual(user, authUser) && safeEqual(pass, authPassword);
+}
+
+function requireAuth(response) {
+  response.writeHead(401, {
+    'content-type': 'text/plain; charset=utf-8',
+    'www-authenticate': 'Basic realm="Service catalogue", charset="UTF-8"'
+  });
+  response.end('Authentication required');
+}
 
 const mimeTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -72,7 +108,8 @@ async function buildCatalog() {
         dependencyDiagram: Boolean(entry['service-dependencies']) && await exists(join(sourceDir, 'service-dependencies', 'service-dependencies.puml')),
         openapi: Boolean(entry.specs) && apiFiles.length > 0,
         security: await exists(join(sourceDir, 'dependency-alerts', 'dependabot-alerts.json')),
-        localdev: await exists(join(sourceDir, 'local-dev-config', 'local-dev-config.json'))
+        localdev: await exists(join(sourceDir, 'local-dev-config', 'local-dev-config.json')),
+        apiSecurity: await exists(join(sourceDir, 'api-security-audit', 'report.json'))
       },
       apiFiles,
       scans: Object.fromEntries(Object.entries(entry)
@@ -129,7 +166,7 @@ async function handleApi(request, response, url) {
     return sendDownload(response, `${source.name}.postman_environment.json`, buildPostmanEnvironment(source.name, specFiles, localDevConfig));
   }
 
-  const match = url.pathname.match(/^\/api\/sources\/([^/]+)\/(database|messages|dependencies|openapi|security|localdev)$/);
+  const match = url.pathname.match(/^\/api\/sources\/([^/]+)\/(database|messages|dependencies|openapi|security|localdev|apisecurity)$/);
   if (!match) return sendJson(response, 404, { error: 'Not found' });
 
   const [, id, kind] = match;
@@ -141,6 +178,7 @@ async function handleApi(request, response, url) {
   if (kind === 'dependencies') file = join(sourceDir, 'service-dependencies', 'service-dependencies.json');
   if (kind === 'security') file = join(sourceDir, 'dependency-alerts', 'dependabot-alerts.json');
   if (kind === 'localdev') file = join(sourceDir, 'local-dev-config', 'local-dev-config.json');
+  if (kind === 'apisecurity') file = join(sourceDir, 'api-security-audit', 'report.json');
   if (kind === 'openapi') {
     const requested = url.searchParams.get('file');
     if (!requested || !source.apiFiles.includes(requested)) {
@@ -173,6 +211,7 @@ async function serveStatic(response, pathname) {
 
 export const server = createServer(async (request, response) => {
   try {
+    if (!isAuthorized(request)) return requireAuth(response);
     const url = new URL(request.url, `http://${request.headers.host || 'localhost'}`);
     if (url.pathname.startsWith('/api/')) await handleApi(request, response, url);
     else await serveStatic(response, url.pathname);
@@ -186,5 +225,6 @@ if (process.env.NODE_ENV !== 'test') {
   server.listen(port, '0.0.0.0', () => {
     console.log(`Service catalogue viewer listening on http://0.0.0.0:${port}`);
     console.log(`Reading catalogue data from ${dataDir}`);
+    console.log(authPassword ? `Basic Auth enabled (user: ${authUser})` : 'Basic Auth disabled — set AUTH_PASSWORD to require credentials');
   });
 }

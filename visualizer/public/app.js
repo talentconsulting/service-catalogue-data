@@ -1057,6 +1057,8 @@ function setHomeHero() {
 }
 
 const SEVERITY_ORDER = ['critical', 'high', 'medium', 'low'];
+const SPECTRAL_SEVERITY_ORDER = ['error', 'warning', 'info', 'hint'];
+const DASHBOARD_PAGE_SIZE = 10;
 
 function severityRank(severity) {
   const index = SEVERITY_ORDER.indexOf(severity);
@@ -1075,11 +1077,97 @@ function severityPills(counts) {
   return sortedSeverities(counts).map((severity) => `<span class="severity-pill ${severityClass(severity)}">${counts[severity]} ${escapeHtml(severity)}</span>`).join('');
 }
 
+function spectralSeverityRank(severity) {
+  const index = SPECTRAL_SEVERITY_ORDER.indexOf(severity);
+  return index === -1 ? SPECTRAL_SEVERITY_ORDER.length : index;
+}
+
+function spectralSeverityClass(severity) {
+  if (severity === 'error') return 'critical';
+  if (severity === 'warning') return 'high';
+  if (severity === 'info') return 'medium';
+  return 'low';
+}
+
+function spectralSeverityPill(severity, count) {
+  return `<span class="severity-pill ${spectralSeverityClass(severity)}">${count} ${escapeHtml(severity)}</span>`;
+}
+
+// Every count/pill on the dashboard is derived from the checked severities only — unchecked
+// severities are excluded from totals, row counts, and the detail lists beneath each row.
+function filteredCounts(counts, activeSet) {
+  const result = {};
+  Object.entries(counts || {}).forEach(([severity, count]) => { if (activeSet.has(severity)) result[severity] = count; });
+  return result;
+}
+
+function severityFilterHtml(filterKey, allSeverities, activeSet, classFn) {
+  return `<div class="severity-filter" role="group" aria-label="Filter by severity">${allSeverities.map((severity) => `
+    <label class="severity-filter-item"><input type="checkbox" data-severity-filter="${escapeHtml(filterKey)}" value="${escapeHtml(severity)}" ${activeSet.has(severity) ? 'checked' : ''}><span class="severity-pill ${classFn(severity)}">${escapeHtml(severity)}</span></label>`).join('')}</div>`;
+}
+
+function wireDashboardSeverityFilters() {
+  document.querySelectorAll('[data-severity-filter]').forEach((checkbox) => {
+    checkbox.onchange = () => {
+      const set = state.dashboardFilters[checkbox.dataset.severityFilter];
+      if (checkbox.checked) set.add(checkbox.value); else set.delete(checkbox.value);
+      state.dashboardPages.clear(); // result sets just changed size — stale page numbers would be confusing
+      renderHomeDashboard();
+    };
+  });
+}
+
+// Pagination state is keyed per table (summary tables, plus one entry per expanded repo's
+// detail table) so paging through one repo's alert list doesn't disturb any other table.
+function paginate(items, pageKey, pageSize = DASHBOARD_PAGE_SIZE) {
+  const totalPages = Math.max(1, Math.ceil(items.length / pageSize));
+  let page = state.dashboardPages.get(pageKey) || 1;
+  page = Math.min(Math.max(page, 1), totalPages);
+  state.dashboardPages.set(pageKey, page);
+  const start = (page - 1) * pageSize;
+  return { pageItems: items.slice(start, start + pageSize), page, totalPages };
+}
+
+function paginationHtml(pageKey, page, totalPages, totalCount) {
+  if (totalPages <= 1) return '';
+  return `<div class="pagination" data-page-key="${escapeHtml(pageKey)}">
+    <button type="button" class="plain-button" data-page-action="prev" ${page <= 1 ? 'disabled' : ''}>← Prev</button>
+    <span class="pagination-status">Page ${page} of ${totalPages} · ${totalCount} total</span>
+    <button type="button" class="plain-button" data-page-action="next" ${page >= totalPages ? 'disabled' : ''}>Next →</button>
+  </div>`;
+}
+
+function wireDashboardPagination() {
+  document.querySelectorAll('[data-page-key]').forEach((container) => {
+    const key = container.dataset.pageKey;
+    container.querySelectorAll('[data-page-action]').forEach((button) => {
+      button.onclick = () => {
+        const current = state.dashboardPages.get(key) || 1;
+        state.dashboardPages.set(key, Math.max(1, current + (button.dataset.pageAction === 'next' ? 1 : -1)));
+        renderHomeDashboard();
+      };
+    });
+  });
+}
+
+function wireDashboardRowToggles() {
+  document.querySelectorAll('[data-toggle-alerts]').forEach((row) => {
+    row.onclick = () => {
+      const key = row.dataset.toggleAlerts;
+      if (state.dashboardExpanded.has(key)) state.dashboardExpanded.delete(key); else state.dashboardExpanded.add(key);
+      renderHomeDashboard();
+    };
+  });
+}
+
 async function loadHomeDashboard() {
   destroyCy();
   toolbar.innerHTML = '';
   content.innerHTML = '<div class="loading">Reading catalogue data…</div>';
   state.selected = null;
+  state.dashboardPages = new Map();
+  state.dashboardExpanded = new Set();
+  state.dashboardFilters = { dependabot: new Set(SEVERITY_ORDER), apiSecurity: new Set(SPECTRAL_SEVERITY_ORDER) };
   try {
     state.securityAudit = await Promise.all(state.catalog.map(async (source) => {
       if (!source.capabilities.security) return { source, alerts: null };
@@ -1087,6 +1175,14 @@ async function loadHomeDashboard() {
         return { source, alerts: await getJson(`/api/sources/${encodeURIComponent(source.id)}/security`) };
       } catch {
         return { source, alerts: null };
+      }
+    }));
+    state.apiSecurityAudit = await Promise.all(state.catalog.map(async (source) => {
+      if (!source.capabilities.apiSecurity) return { source, report: null };
+      try {
+        return { source, report: await getJson(`/api/sources/${encodeURIComponent(source.id)}/apisecurity`) };
+      } catch {
+        return { source, report: null };
       }
     }));
     renderHomeDashboard();
@@ -1097,15 +1193,16 @@ async function loadHomeDashboard() {
 
 function renderHomeDashboard() {
   const results = state.securityAudit || [];
+  const dependabotFilter = state.dashboardFilters.dependabot;
   const scanned = results.filter((result) => result.alerts);
-  const totalOpen = scanned.reduce((sum, result) => sum + (result.alerts.openCount || 0), 0);
   const totalSeverityCounts = {};
   scanned.forEach((result) => {
-    Object.entries(result.alerts.severityCounts || {}).forEach(([severity, count]) => {
+    Object.entries(filteredCounts(result.alerts.severityCounts, dependabotFilter)).forEach(([severity, count]) => {
       totalSeverityCounts[severity] = (totalSeverityCounts[severity] || 0) + count;
     });
   });
-  const affectedCount = scanned.filter((result) => (result.alerts.openCount || 0) > 0).length;
+  const totalOpen = Object.values(totalSeverityCounts).reduce((sum, count) => sum + count, 0);
+  const affectedCount = scanned.filter((result) => Object.values(filteredCounts(result.alerts.severityCounts, dependabotFilter)).some((count) => count > 0)).length;
   const worstSeverity = sortedSeverities(totalSeverityCounts)[0];
 
   $('#source-stats').innerHTML = `
@@ -1114,55 +1211,138 @@ function renderHomeDashboard() {
     <div class="stat"><dt>Repos affected</dt><dd>${affectedCount}</dd></div>
     <div class="stat"><dt>Highest severity</dt><dd>${worstSeverity ? titleCase(worstSeverity) : '—'}</dd></div>`;
 
-  toolbar.innerHTML = '<span class="toolbar-meta">Dependabot alert data generated per repository — click a row for the full alert list.</span>';
+  toolbar.innerHTML = '<span class="toolbar-meta">Dependabot alert data and API security findings generated per repository — click a row for the full breakdown.</span>';
 
-  const rows = [...results].sort((a, b) => (b.alerts?.openCount || 0) - (a.alerts?.openCount || 0));
+  const dependabotRowsAll = [...results].sort((a, b) => (b.alerts?.openCount || 0) - (a.alerts?.openCount || 0));
+  const dependabotPage = paginate(dependabotRowsAll, 'dependabot-summary');
 
   content.innerHTML = `<div class="dashboard">
     <section class="dashboard-section">
-      <h2>Security audit</h2>
+      <h2>Code security audit</h2>
       <p class="section-sub">Open Dependabot alerts across ${results.length} cataloged repositories.</p>
+      ${severityFilterHtml('dependabot', SEVERITY_ORDER, dependabotFilter, severityClass)}
       ${totalOpen ? `<div class="severity-summary">${severityPills(totalSeverityCounts)}</div>` : ''}
       <div class="table-wrap">
         <table class="data-table repo-alert-table">
           <thead><tr><th>Repository</th><th>Open alerts</th><th>Severity</th><th>Last scanned</th></tr></thead>
-          <tbody>${rows.map(repoAlertRows).join('')}</tbody>
+          <tbody>${dependabotPage.pageItems.map((item) => repoAlertRows(item, dependabotFilter)).join('')}</tbody>
         </table>
       </div>
+      ${paginationHtml('dependabot-summary', dependabotPage.page, dependabotPage.totalPages, dependabotRowsAll.length)}
     </section>
+    ${renderApiSecuritySection()}
   </div>`;
 
-  document.querySelectorAll('[data-toggle-alerts]').forEach((row) => {
-    row.addEventListener('click', () => {
-      const detail = document.querySelector(`[data-detail-for="${row.dataset.toggleAlerts}"]`);
-      if (detail) detail.hidden = !detail.hidden;
-    });
-  });
+  wireDashboardRowToggles();
+  wireDashboardPagination();
+  wireDashboardSeverityFilters();
 }
 
-function repoAlertRows({ source, alerts }) {
-  const openCount = alerts?.openCount || 0;
+function repoAlertRows({ source, alerts }, activeFilter) {
+  const filteredSeverity = alerts ? filteredCounts(alerts.severityCounts, activeFilter) : {};
+  const openCount = Object.values(filteredSeverity).reduce((sum, count) => sum + count, 0);
   const generatedAt = alerts?.generatedAt ? new Date(alerts.generatedAt).toLocaleDateString() : '—';
-  const severity = alerts ? (severityPills(alerts.severityCounts || {}) || '<span class="muted">None</span>') : '';
-  const summaryRow = `<tr class="repo-alert-row" data-toggle-alerts="${escapeHtml(source.id)}">
+  const severity = alerts ? (severityPills(filteredSeverity) || '<span class="muted">None</span>') : '';
+  const rowId = source.id;
+  const expanded = state.dashboardExpanded.has(rowId);
+  const summaryRow = `<tr class="repo-alert-row" data-toggle-alerts="${escapeHtml(rowId)}">
     <td><span class="repo-name">${escapeHtml(titleCase(source.name))}</span><span class="repo-slug">${escapeHtml(orgRepoSlug(source.repository))}</span></td>
     <td>${alerts ? openCount : '<span class="muted">Not scanned</span>'}</td>
     <td>${severity}</td>
     <td>${generatedAt}</td>
   </tr>`;
-  const detailRow = `<tr class="repo-alert-detail-row" data-detail-for="${escapeHtml(source.id)}" hidden><td colspan="4"><div class="repo-alert-detail">${alertDetailTable(alerts)}</div></td></tr>`;
+  const detailRow = `<tr class="repo-alert-detail-row" data-detail-for="${escapeHtml(rowId)}" ${expanded ? '' : 'hidden'}><td colspan="4"><div class="repo-alert-detail">${alertDetailTable(alerts, activeFilter, rowId)}</div></td></tr>`;
   return summaryRow + detailRow;
 }
 
-function alertDetailTable(alerts) {
-  if (!alerts || !alerts.alerts?.length) return '<p class="no-alerts-note">No open alerts.</p>';
-  return `<table class="data-table"><thead><tr><th>Severity</th><th>Package</th><th>Advisory</th><th>Patched version</th><th>Opened</th></tr></thead><tbody>${alerts.alerts.map((alert) => `<tr>
+function alertDetailTable(alerts, activeFilter, rowId) {
+  if (!alerts) return '<p class="no-alerts-note">No open alerts.</p>';
+  const filtered = (alerts.alerts || []).filter((alert) => activeFilter.has(alert.severity));
+  if (!filtered.length) return '<p class="no-alerts-note">No alerts match the selected severities.</p>';
+  const pageKey = `dependabot-detail-${rowId}`;
+  const { pageItems, page, totalPages } = paginate(filtered, pageKey);
+  return `<table class="data-table"><thead><tr><th>Severity</th><th>Package</th><th>Advisory</th><th>Patched version</th><th>Opened</th></tr></thead><tbody>${pageItems.map((alert) => `<tr>
     <td><span class="severity-pill ${severityClass(alert.severity)}">${escapeHtml(alert.severity || 'unknown')}</span></td>
     <td><code>${escapeHtml(alert.packageName)}</code></td>
     <td><a href="${escapeHtml(alert.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(alert.summary || alert.ghsaId || alert.cveId || `#${alert.number}`)}</a></td>
     <td>${escapeHtml(alert.firstPatchedVersion || 'None available')}</td>
     <td>${alert.createdAt ? new Date(alert.createdAt).toLocaleDateString() : '—'}</td>
-  </tr>`).join('')}</tbody></table>`;
+  </tr>`).join('')}</tbody></table>${paginationHtml(pageKey, page, totalPages, filtered.length)}`;
+}
+
+function renderApiSecuritySection() {
+  const results = state.apiSecurityAudit || [];
+  const apiFilter = state.dashboardFilters.apiSecurity;
+  const audited = results.filter((result) => result.report);
+  const totalSummary = {};
+  audited.forEach((result) => {
+    Object.entries(filteredCounts(result.report.summary, apiFilter)).forEach(([severity, count]) => {
+      totalSummary[severity] = (totalSummary[severity] || 0) + count;
+    });
+  });
+  const totalFindings = Object.values(totalSummary).reduce((sum, count) => sum + count, 0);
+  const rowsAll = [...results].sort((a, b) => (b.report?.summary?.error || 0) - (a.report?.summary?.error || 0));
+  const page = paginate(rowsAll, 'apiSecurity-summary');
+
+  return `<section class="dashboard-section">
+    <h2>API security audit</h2>
+    <p class="section-sub">OWASP API Security Top 10 findings from linting each repository's generated OpenAPI specs. Click a row for the full breakdown.</p>
+    ${severityFilterHtml('apiSecurity', SPECTRAL_SEVERITY_ORDER, apiFilter, spectralSeverityClass)}
+    ${totalFindings ? `<div class="severity-summary">${SPECTRAL_SEVERITY_ORDER.filter((severity) => totalSummary[severity]).map((severity) => spectralSeverityPill(severity, totalSummary[severity])).join('')}</div>` : ''}
+    <div class="table-wrap">
+      <table class="data-table repo-alert-table">
+        <thead><tr><th>Repository</th><th>Specs audited</th><th>Findings</th><th>Last audited</th></tr></thead>
+        <tbody>${page.pageItems.map((item) => apiAuditRows(item, apiFilter)).join('')}</tbody>
+      </table>
+    </div>
+    ${paginationHtml('apiSecurity-summary', page.page, page.totalPages, rowsAll.length)}
+  </section>`;
+}
+
+function apiAuditRows({ source, report }, activeFilter) {
+  const generatedAt = report?.generatedAt ? new Date(report.generatedAt).toLocaleDateString() : '—';
+  const filteredSummary = report ? filteredCounts(report.summary, activeFilter) : {};
+  const pills = SPECTRAL_SEVERITY_ORDER.filter((severity) => filteredSummary[severity]).map((severity) => spectralSeverityPill(severity, filteredSummary[severity])).join('') || (report ? '<span class="muted">None</span>' : '');
+  const rowId = `api-${source.id}`;
+  const expanded = state.dashboardExpanded.has(rowId);
+  const summaryRow = `<tr class="repo-alert-row" data-toggle-alerts="${escapeHtml(rowId)}">
+    <td><span class="repo-name">${escapeHtml(titleCase(source.name))}</span><span class="repo-slug">${escapeHtml(orgRepoSlug(source.repository))}</span></td>
+    <td>${report ? report.specsAudited : '<span class="muted">Not audited</span>'}</td>
+    <td>${pills}</td>
+    <td>${generatedAt}</td>
+  </tr>`;
+  const detailRow = `<tr class="repo-alert-detail-row" data-detail-for="${escapeHtml(rowId)}" ${expanded ? '' : 'hidden'}><td colspan="4"><div class="repo-alert-detail">${apiAuditDetailTable(report, activeFilter, rowId)}</div></td></tr>`;
+  return summaryRow + detailRow;
+}
+
+function groupApiFindings(findings, activeFilter) {
+  const groups = new Map();
+  for (const finding of findings) {
+    if (!activeFilter.has(finding.severity)) continue;
+    if (!groups.has(finding.code)) groups.set(finding.code, { code: finding.code, severity: finding.severity, message: finding.message, locations: [] });
+    groups.get(finding.code).locations.push({ source: finding.source, line: finding.line });
+  }
+  return [...groups.values()].sort((a, b) => spectralSeverityRank(a.severity) - spectralSeverityRank(b.severity) || b.locations.length - a.locations.length);
+}
+
+function apiAuditDetailTable(report, activeFilter, rowId) {
+  if (!report) return '<p class="no-alerts-note">No findings.</p>';
+  const groups = groupApiFindings(report.findings || [], activeFilter);
+  if (!groups.length) return '<p class="no-alerts-note">No findings match the selected severities.</p>';
+  const pageKey = `apiSecurity-detail-${rowId}`;
+  const { pageItems, page, totalPages } = paginate(groups, pageKey);
+  return `<table class="data-table"><thead><tr><th>Severity</th><th>Rule</th><th>Message</th><th>Occurrences</th><th>Example location</th></tr></thead><tbody>${pageItems.map((group) => {
+    const example = group.locations[0];
+    const exampleLink = example ? `<code>${escapeHtml(example.source)}${example.line ? `:${example.line}` : ''}</code>` : '—';
+    const more = group.locations.length > 1 ? ` <span class="muted">+${group.locations.length - 1} more</span>` : '';
+    return `<tr>
+      <td><span class="severity-pill ${spectralSeverityClass(group.severity)}">${escapeHtml(group.severity)}</span></td>
+      <td><code>${escapeHtml(group.code)}</code></td>
+      <td>${escapeHtml(group.message)}</td>
+      <td>${group.locations.length}</td>
+      <td>${exampleLink}${more}</td>
+    </tr>`;
+  }).join('')}</tbody></table>${paginationHtml(pageKey, page, totalPages, groups.length)}`;
 }
 
 async function loadLandscape() {
