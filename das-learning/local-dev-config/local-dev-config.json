@@ -1,0 +1,193 @@
+{
+  "repository": "SkillsFundingAgency/das-learning",
+  "ref": "main",
+  "path": "src",
+  "localServices": [
+    {
+      "name": "SQL Server",
+      "kind": "database",
+      "technology": "sqlserver",
+      "configurationKeys": [
+        "ApplicationSettings:DbConnectionString",
+        "ConnectionStrings:LearningDataContext",
+        "DatabaseInfo:ConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/DataAccess/ServiceCollectionExtensions.cs",
+          "reason": "AddDbContext uses SQL Server and requires a connection string from ApplicationSettings:DbConnectionString."
+        },
+        {
+          "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+          "reason": "DbConnectionString property is defined in the ApplicationSettings configuration class."
+        },
+        {
+          "sourceFile": "src/DataAccess/SqlAzureIdentityAuthenticationDbConnectionInterceptor.cs",
+          "reason": "Dependent on Microsoft.Data.SqlClient for database connection"
+        },
+        {
+          "sourceFile": "src/Domain/Repositories/LearnerRepository.cs",
+          "reason": "References LearningDataContext and DbSet for ApprenticeshipLearningDbSet and LearnersDbSet"
+        },
+        {
+          "sourceFile": "src/Domain/Repositories/ApprenticeshipLearningRepository.cs",
+          "reason": "References LearningDataContext and DbSet for ApprenticeshipLearningDbSet"
+        },
+        {
+          "sourceFile": "src/Domain/Repositories/ShortCourseLearningRepository.cs",
+          "reason": "References LearningDataContext and DbSet for ShortCourseLearnings"
+        },
+        {
+          "sourceFile": "src/Domain/Repositories/LearningHistoryRepository.cs",
+          "reason": "References LearningDataContext for LearningHistories DbSet"
+        },
+        {
+          "sourceFile": "src/Queries/GetLearningsWithEpisodes/GetLearningsWithEpisodesRequestQueryHandler.cs",
+          "reason": "The code references a DbContext (LearningDataContext) to query the database and includes database joins."
+        },
+        {
+          "sourceFile": "src/Queries/GetApprenticeshipsByAcademicYear/GetLearningsByAcademicYearQueryHandler.cs",
+          "reason": "The code references a DbContext (LearningDataContext) to query the database."
+        },
+        {
+          "sourceFile": "src/Queries/GetLearnings/GetLearningsQueryHandler.cs",
+          "reason": "The code references a DbContext (LearningDataContext) to query the database."
+        },
+        {
+          "sourceFile": "src/Queries/GetShortCoursesByAcademicYear/GetShortCoursesByAcademicYearQueryHandler.cs",
+          "reason": "The code references a DbContext (LearningDataContext) to query the database."
+        },
+        {
+          "sourceFile": "src/Queries/CheckApprovedApprenticeshipExists/CheckApprovedApprenticeshipExistsQueryHandler.cs",
+          "reason": "The code references a DbContext (LearningDataContext) which requires a connection string."
+        },
+        {
+          "sourceFile": "src/TestHelpers/SqlDatabase.cs",
+          "reason": "Creation and usage of a local SQL Server database connection in the test helper."
+        },
+        {
+          "sourceFile": "src/Queries/GetShortCoursesForEarnings/GetShortCoursesForEarningsQueryHandler.cs",
+          "reason": "Dependency on LearningDataContext, which is likely connected to a SQL Server database."
+        }
+      ]
+    },
+    {
+      "name": "Azure Service Bus",
+      "kind": "message-broker",
+      "technology": null,
+      "configurationKeys": [
+        "ApplicationSettings:NServiceBusConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Functions/AppStart/NServiceBusConfiguration.cs",
+          "reason": "NServiceBus configuration references a connection string from ApplicationSettings:NServiceBusConnectionString."
+        },
+        {
+          "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+          "reason": "NServiceBusConnectionString property is defined in the ApplicationSettings configuration class."
+        }
+      ]
+    },
+    {
+      "name": "Azurite",
+      "kind": "object-storage",
+      "technology": "azurite",
+      "configurationKeys": [
+        "ApplicationSettings:AzureWebJobsStorage"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+          "reason": "AzureWebJobsStorage property is defined in the ApplicationSettings configuration class, suggesting local Azure Storage is supported (e.g., Azurite)."
+        },
+        {
+          "sourceFile": "src/InnerApi/appsettings.json",
+          "reason": "ConfigurationStorageConnectionString set to UseDevelopmentStorage, indicating the use of a local Azure Storage emulator."
+        }
+      ]
+    }
+  ],
+  "configurationKeys": [
+    {
+      "key": "AllowedHosts",
+      "sourceFile": "src/InnerApi/appsettings.json",
+      "reason": "appsettings.json explicitly sets AllowedHosts to support CORS and hostname filtering."
+    },
+    {
+      "key": "ApplicationSettings:AzureWebJobsStorage",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "ApplicationSettings class includes a property for AzureWebJobsStorage."
+    },
+    {
+      "key": "ApplicationSettings:DbConnectionString",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "ApplicationSettings class includes a property for DbConnectionString."
+    },
+    {
+      "key": "ApplicationSettings:NServiceBusConnectionString",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "ApplicationSettings class includes a property for NServiceBusConnectionString."
+    },
+    {
+      "key": "ApplicationSettings:NServiceBusLicense",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "ApplicationSettings class includes a property for NServiceBusLicense."
+    },
+    {
+      "key": "ConfigurationStorageConnectionString",
+      "sourceFile": "src/InnerApi/appsettings.json",
+      "reason": "appsettings.json includes ConfigurationStorageConnectionString pointing to use local Azure development storage."
+    },
+    {
+      "key": "ConnectionStrings:LearningDataContext",
+      "sourceFile": "src/Queries/CheckApprovedApprenticeshipExists/CheckApprovedApprenticeshipExistsQueryHandler.cs",
+      "reason": "The DbContext (LearningDataContext) requires a connection string for database access."
+    },
+    {
+      "key": "ConnectionStrings:LearningDataContext",
+      "sourceFile": "src/Queries/GetApprenticeshipsByAcademicYear/GetLearningsByAcademicYearQueryHandler.cs",
+      "reason": "The DbContext (LearningDataContext) requires a connection string for database access."
+    },
+    {
+      "key": "ConnectionStrings:LearningDataContext",
+      "sourceFile": "src/Queries/GetLearnings/GetLearningsQueryHandler.cs",
+      "reason": "The DbContext (LearningDataContext) requires a connection string for database access."
+    },
+    {
+      "key": "ConnectionStrings:LearningDataContext",
+      "sourceFile": "src/Queries/GetLearningsWithEpisodes/GetLearningsWithEpisodesRequestQueryHandler.cs",
+      "reason": "The DbContext (LearningDataContext) requires a connection string for database access."
+    },
+    {
+      "key": "ConnectionStrings:LearningDataContext",
+      "sourceFile": "src/Queries/GetShortCoursesByAcademicYear/GetShortCoursesByAcademicYearQueryHandler.cs",
+      "reason": "The DbContext (LearningDataContext) requires a connection string for database access."
+    },
+    {
+      "key": "DatabaseInfo:ConnectionString",
+      "sourceFile": "src/TestHelpers/SqlDatabase.cs",
+      "reason": "Explicitly set when creating a local SQL Server test database."
+    },
+    {
+      "key": "EnvironmentName",
+      "sourceFile": "src/InnerApi/appsettings.json",
+      "reason": "appsettings.json sets the EnvironmentName configuration to LOCAL."
+    },
+    {
+      "key": "Logging:ApplicationInsights:LogLevel:Default",
+      "sourceFile": "src/InnerApi/appsettings.json",
+      "reason": "appsettings.json includes logging configuration for ApplicationInsights."
+    },
+    {
+      "key": "Logging:LogLevel:Default",
+      "sourceFile": "src/InnerApi/appsettings.json",
+      "reason": "appsettings.json includes logging configuration with a default log level."
+    },
+    {
+      "key": "Logging:LogLevel:Microsoft.AspNetCore",
+      "sourceFile": "src/InnerApi/appsettings.json",
+      "reason": "appsettings.json includes specific logging level configuration for Microsoft.AspNetCore."
+    }
+  ]
+}
