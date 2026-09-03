@@ -1,0 +1,108 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "DAS Courses API",
+    "version": "1.0"
+  },
+  "paths": {
+    "/ops/dataload/": {
+      "post": {
+        "operationId": "queueBackgroundDataLoad",
+        "summary": "Queue data load operation.",
+        "responses": {
+          "202": {
+            "description": "Request accepted for asynchronous processing.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Message": {
+                      "type": "string"
+                    },
+                    "RequestId": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "QueuedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "required": [
+                    "Message",
+                    "RequestId",
+                    "QueuedAt"
+                  ]
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict, another request is already queued or running.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "Message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "Message"
+                  ]
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error when processing the request."
+          }
+        }
+      }
+    },
+    "/ops/dataload/clear-cache": {
+      "post": {
+        "operationId": "clearCache",
+        "summary": "Clear courses cache.",
+        "requestBody": {
+          "required": false
+        },
+        "responses": {
+          "204": {
+            "description": "Cache cleared successfully."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ImportDataCommand": {
+        "type": "object"
+      },
+      "ImportDataCommandResult": {
+        "type": "object",
+        "properties": {
+          "ValidationMessages": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "StandardsLoadedSuccessfully": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ValidationMessages",
+          "StandardsLoadedSuccessfully"
+        ]
+      },
+      "ClearCoursesCacheCommand": {
+        "type": "object"
+      }
+    }
+  }
+}
