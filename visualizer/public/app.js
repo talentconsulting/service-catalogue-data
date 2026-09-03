@@ -1185,13 +1185,27 @@ async function loadHomeDashboard() {
         return { source, report: null };
       }
     }));
+    state.dotnetVersions = await Promise.all(state.catalog.map(async (source) => {
+      if (!source.capabilities.dotnet) return { source, versions: null };
+      try {
+        return { source, versions: await getJson(`/api/sources/${encodeURIComponent(source.id)}/dotnet`) };
+      } catch {
+        return { source, versions: null };
+      }
+    }));
     renderHomeDashboard();
   } catch (error) {
     content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
   }
 }
 
-function renderHomeDashboard() {
+const DASHBOARD_TABS = [
+  { id: 'security', label: 'Code security audit' },
+  { id: 'apiSecurity', label: 'API security audit' },
+  { id: 'dotnet', label: '.NET versions' }
+];
+
+function dependabotStats() {
   const results = state.securityAudit || [];
   const dependabotFilter = state.dashboardFilters.dependabot;
   const scanned = results.filter((result) => result.alerts);
@@ -1203,36 +1217,103 @@ function renderHomeDashboard() {
   });
   const totalOpen = Object.values(totalSeverityCounts).reduce((sum, count) => sum + count, 0);
   const affectedCount = scanned.filter((result) => Object.values(filteredCounts(result.alerts.severityCounts, dependabotFilter)).some((count) => count > 0)).length;
-  const worstSeverity = sortedSeverities(totalSeverityCounts)[0];
+  return { results, scanned, totalSeverityCounts, totalOpen, affectedCount, worstSeverity: sortedSeverities(totalSeverityCounts)[0] };
+}
 
+function renderDashboardStats() {
+  if (state.dashboardTab === 'apiSecurity') {
+    const results = state.apiSecurityAudit || [];
+    const apiFilter = state.dashboardFilters.apiSecurity;
+    const audited = results.filter((result) => result.report);
+    const totalSummary = {};
+    audited.forEach((result) => {
+      Object.entries(filteredCounts(result.report.summary, apiFilter)).forEach(([severity, count]) => {
+        totalSummary[severity] = (totalSummary[severity] || 0) + count;
+      });
+    });
+    const totalFindings = Object.values(totalSummary).reduce((sum, count) => sum + count, 0);
+    const affectedCount = audited.filter((result) => Object.values(filteredCounts(result.report.summary, apiFilter)).some((count) => count > 0)).length;
+    const worst = SPECTRAL_SEVERITY_ORDER.find((severity) => totalSummary[severity]);
+    $('#source-stats').innerHTML = `
+      <div class="stat"><dt>Repos audited</dt><dd>${audited.length}/${results.length}</dd></div>
+      <div class="stat"><dt>Findings</dt><dd>${totalFindings}</dd></div>
+      <div class="stat"><dt>Repos affected</dt><dd>${affectedCount}</dd></div>
+      <div class="stat"><dt>Highest severity</dt><dd>${worst ? titleCase(worst) : '—'}</dd></div>`;
+    return;
+  }
+  if (state.dashboardTab === 'dotnet') {
+    const results = state.dotnetVersions || [];
+    const scanned = results.filter((result) => result.versions);
+    const frameworkCounts = {};
+    scanned.forEach((result) => dotnetFrameworks(result.versions).forEach((framework) => { frameworkCounts[framework] = (frameworkCounts[framework] || 0) + 1; }));
+    const mostCommon = Object.entries(frameworkCounts).sort((a, b) => b[1] - a[1])[0];
+    $('#source-stats').innerHTML = `
+      <div class="stat"><dt>Repos scanned</dt><dd>${scanned.length}/${results.length}</dd></div>
+      <div class="stat"><dt>Distinct frameworks</dt><dd>${Object.keys(frameworkCounts).length}</dd></div>
+      <div class="stat"><dt>Most common</dt><dd>${mostCommon ? mostCommon[0] : '—'}</dd></div>`;
+    return;
+  }
+  const { results, scanned, totalOpen, affectedCount, worstSeverity } = dependabotStats();
   $('#source-stats').innerHTML = `
     <div class="stat"><dt>Repos scanned</dt><dd>${scanned.length}/${results.length}</dd></div>
     <div class="stat"><dt>Open alerts</dt><dd>${totalOpen}</dd></div>
     <div class="stat"><dt>Repos affected</dt><dd>${affectedCount}</dd></div>
     <div class="stat"><dt>Highest severity</dt><dd>${worstSeverity ? titleCase(worstSeverity) : '—'}</dd></div>`;
+}
 
-  toolbar.innerHTML = '<span class="toolbar-meta">Dependabot alert data and API security findings generated per repository — click a row for the full breakdown.</span>';
-
+function renderSecuritySection() {
+  const { results, totalSeverityCounts, totalOpen } = dependabotStats();
+  const dependabotFilter = state.dashboardFilters.dependabot;
   const dependabotRowsAll = [...results].sort((a, b) => (b.alerts?.openCount || 0) - (a.alerts?.openCount || 0));
   const dependabotPage = paginate(dependabotRowsAll, 'dependabot-summary');
 
-  content.innerHTML = `<div class="dashboard">
-    <section class="dashboard-section">
-      <h2>Code security audit</h2>
-      <p class="section-sub">Open Dependabot alerts across ${results.length} cataloged repositories.</p>
-      ${severityFilterHtml('dependabot', SEVERITY_ORDER, dependabotFilter, severityClass)}
-      ${totalOpen ? `<div class="severity-summary">${severityPills(totalSeverityCounts)}</div>` : ''}
-      <div class="table-wrap">
-        <table class="data-table repo-alert-table">
-          <thead><tr><th>Repository</th><th>Open alerts</th><th>Severity</th><th>Last scanned</th></tr></thead>
-          <tbody>${dependabotPage.pageItems.map((item) => repoAlertRows(item, dependabotFilter)).join('')}</tbody>
-        </table>
-      </div>
-      ${paginationHtml('dependabot-summary', dependabotPage.page, dependabotPage.totalPages, dependabotRowsAll.length)}
-    </section>
-    ${renderApiSecuritySection()}
-  </div>`;
+  return `<section class="dashboard-section">
+    <h2>Code security audit</h2>
+    <p class="section-sub">Open Dependabot alerts across ${results.length} cataloged repositories.</p>
+    ${severityFilterHtml('dependabot', SEVERITY_ORDER, dependabotFilter, severityClass)}
+    ${totalOpen ? `<div class="severity-summary">${severityPills(totalSeverityCounts)}</div>` : ''}
+    <div class="table-wrap">
+      <table class="data-table repo-alert-table">
+        <thead><tr><th>Repository</th><th>Open alerts</th><th>Severity</th><th>Last scanned</th></tr></thead>
+        <tbody>${dependabotPage.pageItems.map((item) => repoAlertRows(item, dependabotFilter)).join('')}</tbody>
+      </table>
+    </div>
+    ${paginationHtml('dependabot-summary', dependabotPage.page, dependabotPage.totalPages, dependabotRowsAll.length)}
+  </section>`;
+}
 
+const DASHBOARD_TOOLBAR_META = {
+  security: 'Dependabot alert data generated per repository — click a row for the full breakdown.',
+  apiSecurity: "OWASP API Security Top 10 findings from linting each repository's generated OpenAPI specs — click a row for the full breakdown.",
+  dotnet: "Target framework(s) read from each repository's *.csproj files."
+};
+
+function wireDashboardTabs() {
+  document.querySelectorAll('[data-dashboard-tab]').forEach((button) => {
+    button.onclick = () => {
+      if (button.dataset.dashboardTab === state.dashboardTab) return;
+      state.dashboardTab = button.dataset.dashboardTab;
+      renderHomeDashboard();
+    };
+  });
+}
+
+function renderHomeDashboard() {
+  if (!state.dashboardTab) state.dashboardTab = DASHBOARD_TABS[0].id;
+  renderDashboardStats();
+  toolbar.innerHTML = `<span class="toolbar-meta">${escapeHtml(DASHBOARD_TOOLBAR_META[state.dashboardTab])}</span>`;
+
+  const tabsHtml = `<nav class="tabs dashboard-tabs" aria-label="Dashboard sections">
+    ${DASHBOARD_TABS.map((tab) => `<button class="tab" type="button" data-dashboard-tab="${tab.id}" aria-selected="${state.dashboardTab === tab.id}">${escapeHtml(tab.label)}</button>`).join('')}
+  </nav>`;
+
+  const sectionHtml = state.dashboardTab === 'apiSecurity' ? renderApiSecuritySection()
+    : state.dashboardTab === 'dotnet' ? renderDotnetVersionsSection()
+    : renderSecuritySection();
+
+  content.innerHTML = `<div class="dashboard">${tabsHtml}${sectionHtml}</div>`;
+
+  wireDashboardTabs();
   wireDashboardRowToggles();
   wireDashboardPagination();
   wireDashboardSeverityFilters();
@@ -1343,6 +1424,39 @@ function apiAuditDetailTable(report, activeFilter, rowId) {
       <td>${exampleLink}${more}</td>
     </tr>`;
   }).join('')}</tbody></table>${paginationHtml(pageKey, page, totalPages, groups.length)}`;
+}
+
+function dotnetFrameworks(versions) {
+  return [...new Set((versions?.projects || []).flatMap((project) => project.targetFrameworks || []))].sort();
+}
+
+function renderDotnetVersionsSection() {
+  const results = state.dotnetVersions || [];
+  const scanned = results.filter((result) => result.versions);
+  const rowsAll = [...results].sort((a, b) => a.source.name.localeCompare(b.source.name));
+  const page = paginate(rowsAll, 'dotnet-summary');
+
+  return `<section class="dashboard-section">
+    <h2>.NET versions</h2>
+    <p class="section-sub">Target framework(s) read from each repository's <code>*.csproj</code> files — ${scanned.length}/${results.length} repositories scanned.</p>
+    <div class="table-wrap">
+      <table class="data-table repo-alert-table">
+        <thead><tr><th>Repository</th><th>Target framework(s)</th><th>Projects</th><th>Branch</th></tr></thead>
+        <tbody>${page.pageItems.map(dotnetVersionRows).join('')}</tbody>
+      </table>
+    </div>
+    ${paginationHtml('dotnet-summary', page.page, page.totalPages, rowsAll.length)}
+  </section>`;
+}
+
+function dotnetVersionRows({ source, versions }) {
+  const frameworks = versions ? dotnetFrameworks(versions) : [];
+  return `<tr>
+    <td><span class="repo-name">${escapeHtml(titleCase(source.name))}</span><span class="repo-slug">${escapeHtml(orgRepoSlug(source.repository))}</span></td>
+    <td>${versions ? (frameworks.map((framework) => `<span class="badge">${escapeHtml(framework)}</span>`).join(' ') || '<span class="muted">None found</span>') : '<span class="muted">Not scanned</span>'}</td>
+    <td>${versions ? versions.projects.length : '—'}</td>
+    <td>${versions ? `<code>${escapeHtml(versions.ref)}</code>` : '—'}</td>
+  </tr>`;
 }
 
 async function loadLandscape() {
