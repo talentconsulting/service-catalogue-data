@@ -1,0 +1,27 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+System_Boundary(sys_SkillsFundingAgency_das_learning, "Learning") {
+  Container(c_learning, "Learning", "Component")
+  Container(c_learning_functions, "Learning Functions", "Background Job")
+  Container(c_learning_innerapi, "Learning", "API")
+  Container(c_learning_test_message_publisher, "Learning Test Message Publisher", "Background Job")
+}
+
+System_Ext(d_cloud_service_azure_table_storage, "Azure Table Storage", "Azure Table Storage")
+SystemDb_Ext(d_database_sql_database, "SQL Database", "SQL Server")
+System_Ext(d_http_api_learning_outer, "Learning Outer", "HttpClient")
+SystemQueue_Ext(d_message_broker_azure_service_bus, "Azure Service Bus", "Azure Service Bus")
+SystemQueue_Ext(d_message_broker_nservicebus, "NServiceBus", "NServiceBus")
+
+Rel(c_learning_functions, d_cloud_service_azure_table_storage, "Uses", "Azure Table Storage")
+Rel(c_learning_innerapi, d_cloud_service_azure_table_storage, "Uses", "Azure Table Storage")
+Rel(c_learning, d_database_sql_database, "Reads from and writes to", "SQL Server")
+Rel(c_learning_test_message_publisher, d_database_sql_database, "Reads from and writes to", "Microsoft SQL Server")
+Rel(c_learning_innerapi, d_database_sql_database, "Reads from and writes to", "Entity Framework Core")
+Rel(c_learning, d_http_api_learning_outer, "Calls the API of", "HttpClient")
+Rel(c_learning_functions, d_message_broker_azure_service_bus, "Publishes messages to and consumes messages from", "Azure Service Bus")
+Rel(c_learning_test_message_publisher, d_message_broker_nservicebus, "Publishes messages to and consumes messages from", "NServiceBus")
+
+@enduml
