@@ -187,6 +187,16 @@ function namespaceServiceSegment(namespace) {
   return parts[index] || null;
 }
 
+// Some commands/events don't handle the message named in their own `name` field — they wrap
+// another message as a field (e.g. a generic sync command carrying an `InnerEvent` payload) and
+// really represent handling of that inner type. Surface those wrapped names too, so a repo that
+// only consumes an event indirectly through such a wrapper still shows up connected to it.
+function wrappedMessageNames(message) {
+  return (message.fields || [])
+    .map((field) => field.type)
+    .filter((type) => typeof type === 'string' && /(Event|Command)$/.test(type) && type !== message.name);
+}
+
 function messageDependencies(source, messages) {
   const events = (messages.events || []).map((m) => ({ ...m, messageKind: 'event' }));
   const commands = (messages.commands || []).map((m) => ({ ...m, messageKind: 'command' }));
@@ -214,9 +224,13 @@ function messageDependencies(source, messages) {
       technology: 'Event',
       configurationKeys: [],
       authentication: { type: null, configurationKeys: [] },
-      operations: group.messages.map((message) => ({ method: message.messageKind === 'command' ? 'COMMAND' : 'EVENT', path: message.name, sourceFile: message.handlers[0]?.sourceFile })),
+      operations: group.messages.flatMap((message) => [message.name, ...wrappedMessageNames(message)].map((name) => ({ method: message.messageKind === 'command' ? 'COMMAND' : 'EVENT', path: name, sourceFile: message.handlers[0]?.sourceFile }))),
       resources: [],
-      evidence: group.messages.flatMap((message) => message.handlers.map((handler) => ({ sourceFile: handler.sourceFile, reason: `Handles ${message.messageKind} '${message.name}' published under namespace '${message.namespace}'.` }))),
+      evidence: group.messages.flatMap((message) => {
+        const wrapped = wrappedMessageNames(message);
+        const suffix = wrapped.length ? ` (wrapping ${wrapped.join(', ')})` : '';
+        return message.handlers.map((handler) => ({ sourceFile: handler.sourceFile, reason: `Handles ${message.messageKind} '${message.name}'${suffix} published under namespace '${message.namespace}'.` }));
+      }),
       confidence: 'medium'
     };
   });
