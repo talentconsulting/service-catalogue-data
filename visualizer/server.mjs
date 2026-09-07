@@ -86,7 +86,7 @@ async function exists(path) {
 
 async function buildCatalog() {
   const manifest = await readJson(join(dataDir, 'manifest.json'));
-  return Promise.all(manifest.map(async (entry, index) => {
+  return Promise.all(manifest.map(async (entry) => {
     const slug = repoSlug(entry['github-repo']);
     const sourceDir = join(dataDir, slug);
     const openApiDir = join(sourceDir, 'open-api');
@@ -98,7 +98,7 @@ async function buildCatalog() {
     } catch {}
 
     return {
-      id: String(index),
+      id: slug,
       name: slug,
       repository: entry['github-repo'],
       capabilities: {

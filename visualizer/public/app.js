@@ -546,6 +546,28 @@ function usesRedis(dependency) {
   return haystack.includes('redis');
 }
 
+// The `technology` field alone is often just "Entity Framework Core" (provider-agnostic), so
+// unlike usesRedis this also searches evidence text, where the scanner tends to note the
+// concrete database engine (e.g. "registered with SQL Server", "UseSqlServer").
+function usesSqlServer(dependency) {
+  const haystack = [
+    dependency.name, dependency.technology, dependency.client, dependency.kind,
+    ...(dependency.configurationKeys || []),
+    ...((dependency.resources || []).flatMap((resource) => [resource.type, resource.name, resource.kind])),
+    ...((dependency.evidence || []).map((item) => item.reason))
+  ].filter(Boolean).join(' ').toLowerCase();
+  return /sql\s*server|sqlclient|mssql/.test(haystack);
+}
+
+// Matched on the dependency's own name rather than a broader haystack: a message-broker
+// dependency literally named "Service Bus"/"NServiceBus"/etc. is a generic infrastructure
+// reference, but one named for a specific event (e.g. "Learning Paused Events") that happens
+// to use NServiceBus as its technology is a real, meaningful cross-service edge that must stay.
+function usesServiceBus(dependency) {
+  if (dependency.kind !== 'message-broker') return false;
+  return /^(azure\s+|microsoft\s+)?service\s*bus$|^nservicebus$/i.test((dependency.name || '').trim());
+}
+
 function orgName(repository) {
   return (repository || '').split('/')[0] || 'System';
 }
@@ -604,7 +626,7 @@ function buildLandscape(sources, dependencySets) {
 
   function addEdge(from, to, dependency, reference) {
     const key = `${from}|${to}`;
-    if (!edgeMap.has(key)) edgeMap.set(key, { from, to, count: 0, operations: 0, technologies: new Set(), names: new Set(), kinds: new Set(), references: [], isRedis: false });
+    if (!edgeMap.has(key)) edgeMap.set(key, { from, to, count: 0, operations: 0, technologies: new Set(), names: new Set(), kinds: new Set(), references: [] });
     const edge = edgeMap.get(key);
     edge.count += 1;
     edge.operations += dependency.operations?.length || 0;
@@ -613,13 +635,42 @@ function buildLandscape(sources, dependencySets) {
     edge.names.add(dependency.name);
     if (dependency.kind) edge.kinds.add(dependency.kind);
     if (reference) edge.references.push(reference);
-    if (usesRedis(dependency)) edge.isRedis = true;
   }
 
+  // Redis, SQL Server, and Service Bus are used by nearly every system and clutter the diagram
+  // as their own external nodes with an edge from every system — instead of drawing them, just
+  // flag the system itself so its own box can be marked (a colored outline) as using one.
+  //
+  // The same underlying dependency is sometimes scanned into more than one entry sharing a
+  // `targetId` — one entry names the concrete technology, another is a weaker generic hit with
+  // no technology mentioned. Pre-scan for which targetIds are confirmed for each flag so every
+  // entry sharing one is treated the same way, instead of the weakly-evidenced duplicate
+  // leaking through as its own external node.
+  const INFRA_FLAGS = [
+    { key: 'redis', test: usesRedis },
+    { key: 'sqlServer', test: usesSqlServer },
+    { key: 'serviceBus', test: usesServiceBus }
+  ];
+  const infraTargetIds = new Map(INFRA_FLAGS.map((flag) => [flag.key, new Map()]));
+  for (const { source, dependencies } of dependencySets) {
+    for (const dependency of dependencies) {
+      if (!dependency.targetId) continue;
+      for (const flag of INFRA_FLAGS) {
+        if (!flag.test(dependency)) continue;
+        const bySource = infraTargetIds.get(flag.key);
+        if (!bySource.has(source.id)) bySource.set(source.id, new Set());
+        bySource.get(source.id).add(dependency.targetId);
+      }
+    }
+  }
+
+  const infraSourceIds = new Map(INFRA_FLAGS.map((flag) => [flag.key, new Set()]));
   const externalEntries = [];
   for (const { source, dependencies } of dependencySets) {
     const ownTokens = systemTokenMap.get(source.id);
     for (const [dependencyIndex, dependency] of dependencies.entries()) {
+      const matchedFlag = INFRA_FLAGS.find((flag) => flag.test(dependency) || infraTargetIds.get(flag.key).get(source.id)?.has(dependency.targetId));
+      if (matchedFlag) { infraSourceIds.get(matchedFlag.key).add(source.id); continue; }
       const depTokens = new Set(tokenize(dependency.name));
       if (canRelate(depTokens, ownTokens)) continue;
       const matchedSystem = sources.find((candidate) => candidate.id !== source.id && canRelate(depTokens, systemTokenMap.get(candidate.id)));
@@ -653,15 +704,19 @@ function buildLandscape(sources, dependencySets) {
   for (const members of clusters.values()) {
     const id = `ext:${extIndex++}`;
     const name = members.reduce((best, member) => (member.dependency.name.length > best.length ? member.dependency.name : best), members[0].dependency.name);
-    const isRedis = members.some((member) => usesRedis(member.dependency));
     members.forEach((member) => {
       const [from, to] = member.dependency.direction === 'inbound' ? [id, `sys:${member.source.id}`] : [`sys:${member.source.id}`, id];
       addEdge(from, to, member.dependency, { sourceId: member.source.id, dependencyIndex: member.dependencyIndex });
     });
-    externals.push({ id, name, members, isRedis });
+    externals.push({ id, name, members });
   }
 
-  const systems = sources.map((s) => ({ id: `sys:${s.id}`, sourceId: s.id, name: s.name, repository: s.repository }));
+  const systems = sources.map((s) => ({
+    id: `sys:${s.id}`, sourceId: s.id, name: s.name, repository: s.repository,
+    isRedis: infraSourceIds.get('redis').has(s.id),
+    isSqlServer: infraSourceIds.get('sqlServer').has(s.id),
+    isServiceBus: infraSourceIds.get('serviceBus').has(s.id)
+  }));
   const edges = [...edgeMap.values()].map((edge) => ({ ...edge, technologies: [...edge.technologies], names: [...edge.names], kinds: [...edge.kinds] }));
   return { systems, externals, edges };
 }
@@ -700,8 +755,7 @@ const CY_STYLE = [
       'text-background-color': '#08110f', 'text-background-opacity': 0.9, 'text-background-padding': '3px', 'text-background-shape': 'roundrectangle'
   } },
   { selector: 'edge.inbound', style: { 'line-color': '#7db7ff', 'target-arrow-color': '#7db7ff' } },
-  { selector: 'edge.jumpable', style: { 'line-style': 'solid', 'width': 2.5 } },
-  { selector: 'edge.redis', style: { 'line-color': '#ff8f8f', 'target-arrow-color': '#ff8f8f' } }
+  { selector: 'edge.jumpable', style: { 'line-style': 'solid', 'width': 2.5 } }
 ];
 
 function mountCy({ container, elements, layout, htmlLabels, onTapNode, onTapEdge, onDragFree }) {
@@ -1481,6 +1535,7 @@ async function loadLandscape() {
   state.landscapePositions = null;
   state.landscapeChecked = null;
   state.landscapeEventFilter = '';
+  state.landscapeHighlights = new Set(['redis', 'sqlServer', 'serviceBus']);
   try {
     const results = await Promise.all(state.catalog.map((source) => loadDependenciesFor(source)
       .then((data) => (data.dependencies?.length ? { source, ref: data.ref, dependencies: data.dependencies } : null))
@@ -1530,10 +1585,27 @@ function filterMembersByEvent(members, eventFilter) {
   return members.filter((member) => (messageNamesFor(member.dependency) || []).includes(eventFilter));
 }
 
+function landscapeHighlightLegendItem(key, swatchClass, label) {
+  const checked = state.landscapeHighlights.has(key);
+  return `<label class="c4-legend-item toggleable"><input type="checkbox" data-landscape-highlight="${escapeHtml(key)}" ${checked ? 'checked' : ''}><span class="c4-swatch ${swatchClass}"></span>${escapeHtml(label)}</label>`;
+}
+
+function wireLandscapeHighlightToggles() {
+  document.querySelectorAll('[data-landscape-highlight]').forEach((checkbox) => {
+    checkbox.onchange = () => {
+      const key = checkbox.dataset.landscapeHighlight;
+      if (checkbox.checked) state.landscapeHighlights.add(key); else state.landscapeHighlights.delete(key);
+      renderLandscape();
+    };
+  });
+}
+
 function renderLandscape() {
   const graph = state.landscape;
   const allNodes = [...graph.systems, ...graph.externals];
-  const redisExternalCount = graph.externals.filter((node) => node.isRedis).length;
+  const redisSystemCount = graph.systems.filter((node) => node.isRedis).length;
+  const sqlServerSystemCount = graph.systems.filter((node) => node.isSqlServer).length;
+  const serviceBusSystemCount = graph.systems.filter((node) => node.isServiceBus).length;
   const eventNames = allLandscapeMessageNames(graph);
   if (state.landscapeEventFilter && !eventNames.includes(state.landscapeEventFilter)) state.landscapeEventFilter = '';
   const eventFilter = state.landscapeEventFilter || '';
@@ -1543,7 +1615,7 @@ function renderLandscape() {
     <div class="stat"><dt>Systems</dt><dd>${graph.systems.length}</dd></div>
     <div class="stat"><dt>External</dt><dd>${graph.externals.length}</dd></div>
     <div class="stat"><dt>Relationships</dt><dd>${graph.edges.length}</dd></div>`;
-  toolbar.innerHTML = `${diagramControlsHtml()}${eventNames.length ? eventFilterControlHtml(eventNames, eventFilter) : ''}<span class="spacer"></span><span class="toolbar-meta">Inferred by matching each repository's outbound service dependencies and handled events/commands against the catalogue, clustering the rest as external systems${redisExternalCount ? ` · ${redisExternalCount} using Redis` : ''}${eventFilter ? ` · Showing only containers that publish or consume “${escapeHtml(eventFilter)}”` : ''}</span>`;
+  toolbar.innerHTML = `${diagramControlsHtml()}${eventNames.length ? eventFilterControlHtml(eventNames, eventFilter) : ''}<span class="spacer"></span><span class="toolbar-meta">Inferred by matching each repository's outbound service dependencies and handled events/commands against the catalogue, clustering the rest as external systems${redisSystemCount ? ` · ${redisSystemCount} using Redis` : ''}${sqlServerSystemCount ? ` · ${sqlServerSystemCount} using SQL Server` : ''}${serviceBusSystemCount ? ` · ${serviceBusSystemCount} using Service Bus` : ''}${eventFilter ? ` · Showing only containers that publish or consume “${escapeHtml(eventFilter)}”` : ''}</span>`;
   const eventFilterSelect = $('#landscape-event-filter');
   if (eventFilterSelect) eventFilterSelect.onchange = (event) => { state.landscapeEventFilter = event.target.value; renderLandscape(); };
   if (!allNodes.length) {
@@ -1594,19 +1666,19 @@ function renderLandscape() {
   const elements = [
     { data: { id: 'boundary', label: orgLabel.toUpperCase() } },
     ...systemNodes.map((node) => ({
-      data: { id: node.id, parent: 'boundary', isLeaf: true, width: 210, height: 98, name: node.name, relCount: visibleEdges.filter((edge) => edge.from === node.id || edge.to === node.id).length },
+      data: { id: node.id, parent: 'boundary', isLeaf: true, width: 210, height: 98, name: node.name, relCount: visibleEdges.filter((edge) => edge.from === node.id || edge.to === node.id).length, isRedis: node.isRedis, isSqlServer: node.isSqlServer, isServiceBus: node.isServiceBus },
       position: positions.get(node.id)
     })),
     ...externalNodes.map((node) => {
       const memberCount = filterMembersByEvent(node.members, eventFilter).length;
       return {
-        data: { id: node.id, isLeaf: true, width: 196, height: 96, name: node.name, memberCount, isRedis: node.isRedis },
+        data: { id: node.id, isLeaf: true, width: 196, height: 96, name: node.name, memberCount },
         position: positions.get(node.id)
       };
     }),
     ...visibleEdges.map((edge, index) => {
       const reference = edge.references[0];
-      return { data: { id: `land-edge-${index}`, source: edge.from, target: edge.to, label: edgeLabel(edge), jumpSourceId: reference?.sourceId || '', jumpIndex: reference?.dependencyIndex ?? '' }, classes: [reference ? 'jumpable' : '', edge.isRedis ? 'redis' : ''].filter(Boolean).join(' ') };
+      return { data: { id: `land-edge-${index}`, source: edge.from, target: edge.to, label: edgeLabel(edge), jumpSourceId: reference?.sourceId || '', jumpIndex: reference?.dependencyIndex ?? '' }, classes: reference ? 'jumpable' : '' };
     })
   ];
 
@@ -1616,7 +1688,9 @@ function renderLandscape() {
       <div class="c4-legend">
         <span class="c4-legend-item"><span class="c4-swatch internal"></span>Software system (cataloged)</span>
         <span class="c4-legend-item"><span class="c4-swatch external"></span>External system</span>
-        <span class="c4-legend-item"><span class="c4-swatch cache"></span>Uses Redis</span>
+        ${landscapeHighlightLegendItem('redis', 'cache-outline', 'Uses Redis')}
+        ${landscapeHighlightLegendItem('sqlServer', 'sql-outline', 'Uses SQL Server')}
+        ${landscapeHighlightLegendItem('serviceBus', 'service-outline', 'Uses Service Bus')}
         <span class="c4-legend-item"><span class="c4-boundary-swatch"></span>${escapeHtml(orgLabel)} system boundary</span>
         <span class="c4-legend-item">Click a relationship line to open its dependency</span>
       </div>
@@ -1633,9 +1707,15 @@ function renderLandscape() {
       query: 'node[?isLeaf]',
       halign: 'center', valign: 'center', halignBox: 'center', valignBox: 'center',
       tpl: (data) => {
-        if (data.parent === 'boundary') return `<div class="cy-node internal" data-node-id="${escapeHtml(data.id)}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(data.name))}</strong><span class="c4-meta">${data.relCount} relationship(s)</span></div>`;
-        const nodeClass = data.isRedis ? 'cache' : 'external';
-        return `<div class="cy-node ${nodeClass}" data-node-id="${escapeHtml(data.id)}"><span class="c4-type">${data.isRedis ? 'Redis' : 'External System'}</span><strong>${escapeHtml(splitPascalCase(data.name))}</strong><span class="c4-meta">${data.memberCount} reference(s)</span></div>`;
+        if (data.parent === 'boundary') {
+          const showRedis = data.isRedis && state.landscapeHighlights.has('redis');
+          const showSql = data.isSqlServer && state.landscapeHighlights.has('sqlServer');
+          const showServiceBus = data.isServiceBus && state.landscapeHighlights.has('serviceBus');
+          const modifierClass = [showRedis ? 'uses-redis' : '', showSql ? 'uses-sql' : '', showServiceBus ? 'uses-servicebus' : ''].filter(Boolean).join(' ');
+          const modifierMeta = [showRedis ? 'Redis' : '', showSql ? 'SQL Server' : '', showServiceBus ? 'Service Bus' : ''].filter(Boolean).join(', ');
+          return `<div class="cy-node internal${modifierClass ? ` ${modifierClass}` : ''}" data-node-id="${escapeHtml(data.id)}"><span class="c4-type">Software System</span><strong>${escapeHtml(titleCase(data.name))}</strong><span class="c4-meta">${data.relCount} relationship(s)${modifierMeta ? ` · ${modifierMeta}` : ''}</span></div>`;
+        }
+        return `<div class="cy-node external" data-node-id="${escapeHtml(data.id)}"><span class="c4-type">External System</span><strong>${escapeHtml(splitPascalCase(data.name))}</strong><span class="c4-meta">${data.memberCount} reference(s)</span></div>`;
       }
     }],
     onTapNode: (node) => {
@@ -1661,6 +1741,7 @@ function renderLandscape() {
   wireLandscapeRefToggles();
   wireDiagramControls(() => { positions.clear(); renderLandscape(); });
   wireLandscapeChecklist(allNodes);
+  wireLandscapeHighlightToggles();
 }
 
 function wireLandscapeChecklist(allNodes) {
@@ -1822,7 +1903,7 @@ function landscapeTooltipContent(node, graph) {
   const eventFilter = state.landscapeEventFilter || '';
   const lookup = (id) => graph.systems.find((item) => item.id === id) || graph.externals.find((item) => item.id === id);
   if (isSystem) {
-    const title = `<div class="node-tooltip-title">${escapeHtml(titleCase(node.name))}</div>`;
+    const title = `<div class="node-tooltip-title">${escapeHtml(titleCase(node.name))}${node.isRedis ? ' <span class="badge danger">Redis</span>' : ''}${node.isSqlServer ? ' <span class="badge success">SQL Server</span>' : ''}${node.isServiceBus ? ' <span class="badge amber">Service Bus</span>' : ''}</div>`;
     const rows = [
       ...graph.edges.filter((edge) => edge.from === node.id && edgeMatchesEventFilter(edge, eventFilter)).map((edge) => ({ verb: edgeVerb(edge, true), other: lookup(edge.to), edge })),
       ...graph.edges.filter((edge) => edge.to === node.id && edgeMatchesEventFilter(edge, eventFilter)).map((edge) => ({ verb: edgeVerb(edge, false), other: lookup(edge.from), edge }))
@@ -1834,7 +1915,7 @@ function landscapeTooltipContent(node, graph) {
       return `<li><span class="method">${escapeHtml(verb)}</span><span>${escapeHtml(other ? titleCase(other.name) : 'Unknown')}${detail ? ` <span class="muted">[${escapeHtml(detail)}]</span>` : ''}</span></li>`;
     }).join('')}</ul>${rows.length > shown.length ? `<p class="node-tooltip-more">+${rows.length - shown.length} more — click the box for full details</p>` : ''}`;
   }
-  const title = `<div class="node-tooltip-title">${escapeHtml(splitPascalCase(node.name))}${node.isRedis ? ' <span class="badge danger">Redis</span>' : ''}</div>`;
+  const title = `<div class="node-tooltip-title">${escapeHtml(splitPascalCase(node.name))}</div>`;
   const members = filterMembersByEvent(node.members || [], eventFilter);
   if (!members.length) return `${title}<p class="node-tooltip-empty">No references recorded — click the box for full details.</p>`;
   const shown = members.slice(0, 8);

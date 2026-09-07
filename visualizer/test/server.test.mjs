@@ -16,37 +16,44 @@ after(async () => {
   await new Promise((resolve) => server.close(resolve));
 });
 
-test('catalog is derived from the manifest', async () => {
+test('catalog is derived from the manifest, keyed by repo slug', async () => {
   const response = await fetch(`${baseUrl}/api/catalog`);
   const body = await response.json();
   assert.equal(response.status, 200);
-  assert.equal(body.sources.length, 2);
-  assert.equal(body.sources[0].name, 'talentsuite-bidmanager');
-  assert.equal(body.sources[1].capabilities.messages, true);
+  assert.equal(body.sources.length, 10);
+  assert.equal(body.sources[0].name, 'das-learning');
+  assert.equal(body.sources[0].id, 'das-learning');
+  assert.equal(body.sources[1].name, 'das-courses-api');
+  assert.equal(body.sources[1].capabilities.messages, false);
   assert.equal(body.sources[1].capabilities.dependencies, true);
-  assert.equal(body.sources[0].capabilities.dependencies, false);
+});
+
+test('unknown source id returns 404', async () => {
+  const response = await fetch(`${baseUrl}/api/sources/does-not-exist/database`);
+  assert.equal(response.status, 404);
 });
 
 test('database endpoint returns source tables', async () => {
-  const response = await fetch(`${baseUrl}/api/sources/1/database`);
+  const response = await fetch(`${baseUrl}/api/sources/das-courses-api/database`);
   const body = await response.json();
   assert.equal(response.status, 200);
   assert.ok(body.tables.length > 0);
   assert.ok(body.tables[0].columns.length > 0);
 });
 
-test('OpenAPI endpoint only accepts indexed files', async () => {
-  const bad = await fetch(`${baseUrl}/api/sources/1/openapi?file=../manifest.json`);
+test('OpenAPI endpoint only accepts catalogued files', async () => {
+  const bad = await fetch(`${baseUrl}/api/sources/das-courses-api/openapi?file=../manifest.json`);
   assert.equal(bad.status, 400);
   const catalog = await (await fetch(`${baseUrl}/api/catalog`)).json();
-  const file = catalog.sources[1].apiFiles[0];
-  const good = await fetch(`${baseUrl}/api/sources/1/openapi?file=${encodeURIComponent(file)}`);
+  const source = catalog.sources.find((item) => item.id === 'das-courses-api');
+  const file = source.apiFiles[0];
+  const good = await fetch(`${baseUrl}/api/sources/das-courses-api/openapi?file=${encodeURIComponent(file)}`);
   assert.equal(good.status, 200);
   assert.ok((await good.json()).paths);
 });
 
 test('dependencies endpoint returns the generated dependency catalogue', async () => {
-  const response = await fetch(`${baseUrl}/api/sources/1/dependencies`);
+  const response = await fetch(`${baseUrl}/api/sources/das-commitments/dependencies`);
   const body = await response.json();
   assert.equal(response.status, 200);
   assert.equal(body.repository, 'SkillsFundingAgency/das-commitments');
@@ -54,7 +61,7 @@ test('dependencies endpoint returns the generated dependency catalogue', async (
   assert.ok(body.dependencies.every((dependency) => dependency.name && dependency.direction));
 });
 
-test('dependencies endpoint is unavailable when a source has no generated data', async () => {
-  const response = await fetch(`${baseUrl}/api/sources/0/dependencies`);
+test('security endpoint is unavailable when a source has no generated data', async () => {
+  const response = await fetch(`${baseUrl}/api/sources/das-learning/security`);
   assert.equal(response.status, 404);
 });
