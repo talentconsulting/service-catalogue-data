@@ -1196,6 +1196,60 @@ function paginate(items, pageKey, pageSize = DASHBOARD_PAGE_SIZE) {
   return { pageItems: items.slice(start, start + pageSize), page, totalPages };
 }
 
+function compareText(a, b) {
+  return (a || '').localeCompare(b || '');
+}
+
+// Missing values (null/undefined) always sort to the end, regardless of direction — only real
+// values swap order when the column's sort direction is flipped.
+function compareNumber(a, b) {
+  if (a == null && b == null) return 0;
+  if (a == null) return 1;
+  if (b == null) return -1;
+  return a - b;
+}
+
+function compareDate(a, b) {
+  return compareNumber(a ? new Date(a).getTime() : null, b ? new Date(b).getTime() : null);
+}
+
+function dashboardSortState(tableId, defaultKey, defaultDirection = 'asc') {
+  if (!state.dashboardSort) state.dashboardSort = {};
+  if (!state.dashboardSort[tableId]) state.dashboardSort[tableId] = { key: defaultKey, direction: defaultDirection };
+  return state.dashboardSort[tableId];
+}
+
+function sortRows(rows, sort, comparators) {
+  const comparator = comparators[sort.key];
+  if (!comparator) return rows;
+  const dir = sort.direction === 'desc' ? -1 : 1;
+  return [...rows].sort((a, b) => comparator(a, b) * dir);
+}
+
+function sortIndicator(tableId, key) {
+  const sort = state.dashboardSort?.[tableId];
+  if (!sort || sort.key !== key) return '';
+  return sort.direction === 'desc' ? ' ▼' : ' ▲';
+}
+
+function sortableHeaderCell(tableId, key, label) {
+  return `<th><button type="button" class="sortable-th" data-sort-table="${escapeHtml(tableId)}" data-sort-key="${escapeHtml(key)}" aria-label="Sort by ${escapeHtml(label)}">${escapeHtml(label)}${sortIndicator(tableId, key)}</button></th>`;
+}
+
+function wireSortableHeaders() {
+  document.querySelectorAll('[data-sort-table]').forEach((button) => {
+    button.onclick = () => {
+      const tableId = button.dataset.sortTable;
+      const key = button.dataset.sortKey;
+      const current = state.dashboardSort[tableId];
+      state.dashboardSort[tableId] = current && current.key === key
+        ? { key, direction: current.direction === 'asc' ? 'desc' : 'asc' }
+        : { key, direction: 'asc' };
+      renderHomeDashboard();
+    };
+  });
+}
+
 function paginationHtml(pageKey, page, totalPages, totalCount) {
   if (totalPages <= 1) return '';
   return `<div class="pagination" data-page-key="${escapeHtml(pageKey)}">
@@ -1253,12 +1307,12 @@ async function loadHomeDashboard() {
         return { source, report: null };
       }
     }));
-    state.dotnetVersions = await Promise.all(state.catalog.map(async (source) => {
-      if (!source.capabilities.dotnet) return { source, versions: null };
+    state.repoMetadata = await Promise.all(state.catalog.map(async (source) => {
+      if (!source.capabilities.metadata) return { source, metadata: null };
       try {
-        return { source, versions: await getJson(`/api/sources/${encodeURIComponent(source.id)}/dotnet`) };
+        return { source, metadata: await getJson(`/api/sources/${encodeURIComponent(source.id)}/metadata`) };
       } catch {
-        return { source, versions: null };
+        return { source, metadata: null };
       }
     }));
     renderHomeDashboard();
@@ -1270,7 +1324,7 @@ async function loadHomeDashboard() {
 const DASHBOARD_TABS = [
   { id: 'security', label: 'Code security audit' },
   { id: 'apiSecurity', label: 'API security audit' },
-  { id: 'dotnet', label: '.NET versions' }
+  { id: 'metadata', label: 'Metadata' }
 ];
 
 function dependabotStats() {
@@ -1309,16 +1363,19 @@ function renderDashboardStats() {
       <div class="stat"><dt>Highest severity</dt><dd>${worst ? titleCase(worst) : '—'}</dd></div>`;
     return;
   }
-  if (state.dashboardTab === 'dotnet') {
-    const results = state.dotnetVersions || [];
-    const scanned = results.filter((result) => result.versions);
+  if (state.dashboardTab === 'metadata') {
+    const results = state.repoMetadata || [];
+    const scanned = results.filter((result) => result.metadata);
     const frameworkCounts = {};
-    scanned.forEach((result) => dotnetFrameworks(result.versions).forEach((framework) => { frameworkCounts[framework] = (frameworkCounts[framework] || 0) + 1; }));
+    scanned.forEach((result) => metadataFrameworks(result.metadata).forEach((framework) => { frameworkCounts[framework] = (frameworkCounts[framework] || 0) + 1; }));
     const mostCommon = Object.entries(frameworkCounts).sort((a, b) => b[1] - a[1])[0];
+    const withCommitDate = scanned.filter((result) => result.metadata.lastCommitDate);
+    const stalest = [...withCommitDate].sort((a, b) => new Date(a.metadata.lastCommitDate) - new Date(b.metadata.lastCommitDate))[0];
     $('#source-stats').innerHTML = `
       <div class="stat"><dt>Repos scanned</dt><dd>${scanned.length}/${results.length}</dd></div>
       <div class="stat"><dt>Distinct frameworks</dt><dd>${Object.keys(frameworkCounts).length}</dd></div>
-      <div class="stat"><dt>Most common</dt><dd>${mostCommon ? mostCommon[0] : '—'}</dd></div>`;
+      <div class="stat"><dt>Most common</dt><dd>${mostCommon ? mostCommon[0] : '—'}</dd></div>
+      <div class="stat"><dt>Longest since last commit</dt><dd>${stalest ? titleCase(stalest.source.name) : '—'}</dd></div>`;
     return;
   }
   const { results, scanned, totalOpen, affectedCount, worstSeverity } = dependabotStats();
@@ -1329,10 +1386,19 @@ function renderDashboardStats() {
     <div class="stat"><dt>Highest severity</dt><dd>${worstSeverity ? titleCase(worstSeverity) : '—'}</dd></div>`;
 }
 
+function dependabotOpenCount(result, activeFilter) {
+  return result.alerts ? Object.values(filteredCounts(result.alerts.severityCounts, activeFilter)).reduce((sum, count) => sum + count, 0) : null;
+}
+
 function renderSecuritySection() {
   const { results, totalSeverityCounts, totalOpen } = dependabotStats();
   const dependabotFilter = state.dashboardFilters.dependabot;
-  const dependabotRowsAll = [...results].sort((a, b) => (b.alerts?.openCount || 0) - (a.alerts?.openCount || 0));
+  const sort = dashboardSortState('dependabot-summary', 'openAlerts', 'desc');
+  const dependabotRowsAll = sortRows(results, sort, {
+    name: (a, b) => compareText(a.source.name, b.source.name),
+    openAlerts: (a, b) => compareNumber(dependabotOpenCount(a, dependabotFilter), dependabotOpenCount(b, dependabotFilter)),
+    lastScanned: (a, b) => compareDate(a.alerts?.generatedAt, b.alerts?.generatedAt)
+  });
   const dependabotPage = paginate(dependabotRowsAll, 'dependabot-summary');
 
   return `<section class="dashboard-section">
@@ -1342,7 +1408,7 @@ function renderSecuritySection() {
     ${totalOpen ? `<div class="severity-summary">${severityPills(totalSeverityCounts)}</div>` : ''}
     <div class="table-wrap">
       <table class="data-table repo-alert-table">
-        <thead><tr><th>Repository</th><th>Open alerts</th><th>Severity</th><th>Last scanned</th></tr></thead>
+        <thead><tr>${sortableHeaderCell('dependabot-summary', 'name', 'Repository')}${sortableHeaderCell('dependabot-summary', 'openAlerts', 'Open alerts')}<th>Severity</th>${sortableHeaderCell('dependabot-summary', 'lastScanned', 'Last scanned')}</tr></thead>
         <tbody>${dependabotPage.pageItems.map((item) => repoAlertRows(item, dependabotFilter)).join('')}</tbody>
       </table>
     </div>
@@ -1353,7 +1419,7 @@ function renderSecuritySection() {
 const DASHBOARD_TOOLBAR_META = {
   security: 'Dependabot alert data generated per repository — click a row for the full breakdown.',
   apiSecurity: "OWASP API Security Top 10 findings from linting each repository's generated OpenAPI specs — click a row for the full breakdown.",
-  dotnet: "Target framework(s) read from each repository's *.csproj files."
+  metadata: "Target framework(s) and last commit date read from each repository's generated metadata."
 };
 
 function wireDashboardTabs() {
@@ -1376,7 +1442,7 @@ function renderHomeDashboard() {
   </nav>`;
 
   const sectionHtml = state.dashboardTab === 'apiSecurity' ? renderApiSecuritySection()
-    : state.dashboardTab === 'dotnet' ? renderDotnetVersionsSection()
+    : state.dashboardTab === 'metadata' ? renderMetadataSection()
     : renderSecuritySection();
 
   content.innerHTML = `<div class="dashboard">${tabsHtml}${sectionHtml}</div>`;
@@ -1385,6 +1451,7 @@ function renderHomeDashboard() {
   wireDashboardRowToggles();
   wireDashboardPagination();
   wireDashboardSeverityFilters();
+  wireSortableHeaders();
 }
 
 function repoAlertRows({ source, alerts }, activeFilter) {
@@ -1419,6 +1486,10 @@ function alertDetailTable(alerts, activeFilter, rowId) {
   </tr>`).join('')}</tbody></table>${paginationHtml(pageKey, page, totalPages, filtered.length)}`;
 }
 
+function apiFindingsCount(result, activeFilter) {
+  return result.report ? Object.values(filteredCounts(result.report.summary, activeFilter)).reduce((sum, count) => sum + count, 0) : null;
+}
+
 function renderApiSecuritySection() {
   const results = state.apiSecurityAudit || [];
   const apiFilter = state.dashboardFilters.apiSecurity;
@@ -1430,7 +1501,13 @@ function renderApiSecuritySection() {
     });
   });
   const totalFindings = Object.values(totalSummary).reduce((sum, count) => sum + count, 0);
-  const rowsAll = [...results].sort((a, b) => (b.report?.summary?.error || 0) - (a.report?.summary?.error || 0));
+  const sort = dashboardSortState('apiSecurity-summary', 'findings', 'desc');
+  const rowsAll = sortRows(results, sort, {
+    name: (a, b) => compareText(a.source.name, b.source.name),
+    specsAudited: (a, b) => compareNumber(a.report?.specsAudited, b.report?.specsAudited),
+    findings: (a, b) => compareNumber(apiFindingsCount(a, apiFilter), apiFindingsCount(b, apiFilter)),
+    lastAudited: (a, b) => compareDate(a.report?.generatedAt, b.report?.generatedAt)
+  });
   const page = paginate(rowsAll, 'apiSecurity-summary');
 
   return `<section class="dashboard-section">
@@ -1440,7 +1517,7 @@ function renderApiSecuritySection() {
     ${totalFindings ? `<div class="severity-summary">${SPECTRAL_SEVERITY_ORDER.filter((severity) => totalSummary[severity]).map((severity) => spectralSeverityPill(severity, totalSummary[severity])).join('')}</div>` : ''}
     <div class="table-wrap">
       <table class="data-table repo-alert-table">
-        <thead><tr><th>Repository</th><th>Specs audited</th><th>Findings</th><th>Last audited</th></tr></thead>
+        <thead><tr>${sortableHeaderCell('apiSecurity-summary', 'name', 'Repository')}${sortableHeaderCell('apiSecurity-summary', 'specsAudited', 'Specs audited')}${sortableHeaderCell('apiSecurity-summary', 'findings', 'Findings')}${sortableHeaderCell('apiSecurity-summary', 'lastAudited', 'Last audited')}</tr></thead>
         <tbody>${page.pageItems.map((item) => apiAuditRows(item, apiFilter)).join('')}</tbody>
       </table>
     </div>
@@ -1494,36 +1571,44 @@ function apiAuditDetailTable(report, activeFilter, rowId) {
   }).join('')}</tbody></table>${paginationHtml(pageKey, page, totalPages, groups.length)}`;
 }
 
-function dotnetFrameworks(versions) {
-  return [...new Set((versions?.projects || []).flatMap((project) => project.targetFrameworks || []))].sort();
+function metadataFrameworks(metadata) {
+  return [...new Set((metadata?.projects || []).flatMap((project) => project.targetFrameworks || []))].sort();
 }
 
-function renderDotnetVersionsSection() {
-  const results = state.dotnetVersions || [];
-  const scanned = results.filter((result) => result.versions);
-  const rowsAll = [...results].sort((a, b) => a.source.name.localeCompare(b.source.name));
-  const page = paginate(rowsAll, 'dotnet-summary');
+function renderMetadataSection() {
+  const results = state.repoMetadata || [];
+  const scanned = results.filter((result) => result.metadata);
+  const sort = dashboardSortState('metadata-summary', 'lastCommit', 'asc');
+  const rowsAll = sortRows(results, sort, {
+    name: (a, b) => compareText(a.source.name, b.source.name),
+    projects: (a, b) => compareNumber(a.metadata?.projects?.length, b.metadata?.projects?.length),
+    branch: (a, b) => compareText(a.metadata?.ref, b.metadata?.ref),
+    lastCommit: (a, b) => compareDate(a.metadata?.lastCommitDate, b.metadata?.lastCommitDate)
+  });
+  const page = paginate(rowsAll, 'metadata-summary');
 
   return `<section class="dashboard-section">
-    <h2>.NET versions</h2>
-    <p class="section-sub">Target framework(s) read from each repository's <code>*.csproj</code> files — ${scanned.length}/${results.length} repositories scanned.</p>
+    <h2>Metadata</h2>
+    <p class="section-sub">Target framework(s) and last commit date read from each repository's generated metadata — ${scanned.length}/${results.length} repositories scanned.</p>
     <div class="table-wrap">
       <table class="data-table repo-alert-table">
-        <thead><tr><th>Repository</th><th>Target framework(s)</th><th>Projects</th><th>Branch</th></tr></thead>
-        <tbody>${page.pageItems.map(dotnetVersionRows).join('')}</tbody>
+        <thead><tr>${sortableHeaderCell('metadata-summary', 'name', 'Repository')}<th>Target framework(s)</th>${sortableHeaderCell('metadata-summary', 'projects', 'Projects')}${sortableHeaderCell('metadata-summary', 'branch', 'Branch')}${sortableHeaderCell('metadata-summary', 'lastCommit', 'Last commit')}</tr></thead>
+        <tbody>${page.pageItems.map(metadataRows).join('')}</tbody>
       </table>
     </div>
-    ${paginationHtml('dotnet-summary', page.page, page.totalPages, rowsAll.length)}
+    ${paginationHtml('metadata-summary', page.page, page.totalPages, rowsAll.length)}
   </section>`;
 }
 
-function dotnetVersionRows({ source, versions }) {
-  const frameworks = versions ? dotnetFrameworks(versions) : [];
+function metadataRows({ source, metadata }) {
+  const frameworks = metadata ? metadataFrameworks(metadata) : [];
+  const lastCommit = metadata?.lastCommitDate ? new Date(metadata.lastCommitDate).toLocaleDateString() : '—';
   return `<tr>
     <td><span class="repo-name">${escapeHtml(titleCase(source.name))}</span><span class="repo-slug">${escapeHtml(orgRepoSlug(source.repository))}</span></td>
-    <td>${versions ? (frameworks.map((framework) => `<span class="badge">${escapeHtml(framework)}</span>`).join(' ') || '<span class="muted">None found</span>') : '<span class="muted">Not scanned</span>'}</td>
-    <td>${versions ? versions.projects.length : '—'}</td>
-    <td>${versions ? `<code>${escapeHtml(versions.ref)}</code>` : '—'}</td>
+    <td>${metadata ? (frameworks.map((framework) => `<span class="badge">${escapeHtml(framework)}</span>`).join(' ') || '<span class="muted">None found</span>') : '<span class="muted">Not scanned</span>'}</td>
+    <td>${metadata ? metadata.projects.length : '—'}</td>
+    <td>${metadata ? `<code>${escapeHtml(metadata.ref)}</code>` : '—'}</td>
+    <td>${lastCommit}</td>
   </tr>`;
 }
 
