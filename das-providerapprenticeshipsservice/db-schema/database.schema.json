@@ -1,0 +1,878 @@
+{
+  "database": {
+    "name": null,
+    "engine": null
+  },
+  "tables": [
+    {
+      "name": "ClientOutboxData",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "MessageId",
+          "type": "UNIQUEIDENTIFIER",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "EndpointName",
+          "type": "NVARCHAR(150)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 2
+        },
+        {
+          "name": "CreatedAt",
+          "type": "DATETIME",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 3
+        },
+        {
+          "name": "Dispatched",
+          "type": "BIT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "0",
+          "ordinal": 4
+        },
+        {
+          "name": "DispatchedAt",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 5
+        },
+        {
+          "name": "Operations",
+          "type": "NVARCHAR(MAX)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 6
+        },
+        {
+          "name": "PersistenceVersion",
+          "type": "VARCHAR(23)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "'1.0.0'",
+          "ordinal": 7
+        }
+      ],
+      "relationships": [],
+      "indexes": [
+        {
+          "name": "IX_CreatedAt",
+          "type": "btree",
+          "columns": [
+            "CreatedAt"
+          ],
+          "unique": false,
+          "filter": "[Dispatched] = 0"
+        },
+        {
+          "name": "IX_DispatchedAt",
+          "type": "btree",
+          "columns": [
+            "DispatchedAt"
+          ],
+          "unique": false,
+          "filter": "[Dispatched] = 1"
+        }
+      ]
+    },
+    {
+      "name": "OutboxData",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "MessageId",
+          "type": "NVARCHAR(200)",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "Dispatched",
+          "type": "BIT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "0",
+          "ordinal": 2
+        },
+        {
+          "name": "DispatchedAt",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 3
+        },
+        {
+          "name": "PersistenceVersion",
+          "type": "VARCHAR(23)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 4
+        },
+        {
+          "name": "Operations",
+          "type": "NVARCHAR(MAX)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 5
+        }
+      ],
+      "relationships": [],
+      "indexes": [
+        {
+          "name": "IX_DispatchedAt",
+          "type": "btree",
+          "columns": [
+            "DispatchedAt"
+          ],
+          "unique": false,
+          "filter": "[Dispatched] = 1"
+        }
+      ]
+    },
+    {
+      "name": "Providers",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "Ukprn",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "Name",
+          "type": "NVARCHAR(100)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 2
+        },
+        {
+          "name": "Created",
+          "type": "DATETIME2",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 3
+        },
+        {
+          "name": "Updated",
+          "type": "DATETIME2",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 4
+        },
+        {
+          "name": "UpdatedFromIDAMS",
+          "type": "DATETIME2",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 5
+        }
+      ],
+      "relationships": [],
+      "indexes": [
+        {
+          "name": "IX_Provider_UpdateFromIDAMS",
+          "type": "btree",
+          "columns": [
+            "UpdatedFromIDAMS"
+          ],
+          "unique": false,
+          "filter": null
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "Id",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": true,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "UserRef",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 2
+        },
+        {
+          "name": "DisplayName",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 3
+        },
+        {
+          "name": "Ukprn",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 4
+        },
+        {
+          "name": "Email",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 5
+        },
+        {
+          "name": "IsDeleted",
+          "type": "BIT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "0",
+          "ordinal": 6
+        },
+        {
+          "name": "UserType",
+          "type": "SMALLINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "0",
+          "ordinal": 7
+        },
+        {
+          "name": "LastLogin",
+          "type": "DATETIME2",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 8
+        }
+      ],
+      "relationships": [],
+      "indexes": [
+        {
+          "name": "IX_User_UserRef",
+          "type": "btree",
+          "columns": [
+            "UserRef"
+          ],
+          "unique": true,
+          "filter": null
+        },
+        {
+          "name": "IX_User_Ukprn",
+          "type": "btree",
+          "columns": [
+            "Ukprn"
+          ],
+          "unique": false,
+          "filter": null
+        }
+      ]
+    },
+    {
+      "name": "UserSettings",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "Id",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": true,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "UserId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 2
+        },
+        {
+          "name": "UserRef",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": 3
+        },
+        {
+          "name": "ReceiveNotifications",
+          "type": "BIT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "1",
+          "ordinal": 4
+        }
+      ],
+      "relationships": [
+        {
+          "name": "FK_UserAccountSettings_UserId",
+          "type": "many-to-one",
+          "fromColumns": [
+            "UserId"
+          ],
+          "targetTable": "User",
+          "targetColumns": [
+            "Id"
+          ],
+          "onDelete": null
+        }
+      ],
+      "indexes": []
+    },
+    {
+      "name": "Provider",
+      "schema": null,
+      "entity": "SFA.DAS.ProviderApprenticeshipsService.Domain.Models.ApprenticeshipProvider.Provider",
+      "columns": [
+        {
+          "name": "Ukprn",
+          "type": "bigint",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "ProviderName",
+          "type": "nvarchar",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Email",
+          "type": "nvarchar",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Phone",
+          "type": "nvarchar",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "NationalProvider",
+          "type": "bit",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": []
+    },
+    {
+      "name": "User",
+      "schema": null,
+      "entity": "SFA.DAS.ProviderApprenticeshipsService.Domain.Models.DfESignInUser.User",
+      "columns": [
+        {
+          "name": "Email",
+          "type": "nvarchar",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "FirstName",
+          "type": "nvarchar",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "LastName",
+          "type": "nvarchar",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "UserStatus",
+          "type": "bigint",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": []
+    },
+    {
+      "name": "IdamsUser",
+      "schema": null,
+      "entity": "SFA.DAS.ProviderApprenticeshipsService.Domain.Models.IdamsUser.IdamsUser",
+      "columns": [
+        {
+          "name": "Email",
+          "type": "nvarchar",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "UserType",
+          "type": "UserType",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": []
+    },
+    {
+      "name": "LegalEntity",
+      "schema": null,
+      "entity": "SFA.DAS.ProviderApprenticeshipsService.Domain.Models.Organisation.LegalEntity",
+      "columns": [
+        {
+          "name": "Name",
+          "type": "string",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "RegisteredAddress",
+          "type": "string",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Source",
+          "type": "short",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Id",
+          "type": "long",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Code",
+          "type": "string",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "AccountLegalEntityPublicHashedId",
+          "type": "string",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": []
+    },
+    {
+      "name": "UserNotificationSetting",
+      "schema": null,
+      "entity": "SFA.DAS.ProviderApprenticeshipsService.Domain.Models.Settings.UserNotificationSetting",
+      "columns": [
+        {
+          "name": "UserRef",
+          "type": "string",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Email",
+          "type": "string",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "ReceiveNotifications",
+          "type": "bool",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": []
+    },
+    {
+      "name": "Training",
+      "schema": null,
+      "entity": "SFA.DAS.ProviderApprenticeshipsService.Domain.Models.Training.Training",
+      "columns": [
+        {
+          "name": "TrainingType",
+          "type": "TrainingType",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Title",
+          "type": "string",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Id",
+          "type": "int",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Level",
+          "type": "int",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "PathwayCode",
+          "type": "int",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": []
+    },
+    {
+      "name": "GetProviderSummaryResult",
+      "schema": null,
+      "entity": "SFA.DAS.ProviderApprenticeshipsService.Domain.Models.TrainingProvider.GetProviderSummaryResult",
+      "columns": [
+        {
+          "name": "Ukprn",
+          "type": "int",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Name",
+          "type": "string",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "TradingName",
+          "type": "string",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Email",
+          "type": "string",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Phone",
+          "type": "string",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "ContactUrl",
+          "type": "string",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "ProviderTypeId",
+          "type": "int",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "StatusId",
+          "type": "int",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "CanAccessApprenticeshipService",
+          "type": "bool",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": []
+    },
+    {
+      "name": "UserSetting",
+      "schema": null,
+      "entity": "SFA.DAS.ProviderApprenticeshipsService.Domain.Models.UserSetting.UserSetting",
+      "columns": [
+        {
+          "name": "UserId",
+          "type": "long",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "UserRef",
+          "type": "string",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "ReceiveNotifications",
+          "type": "bool",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": []
+    }
+  ],
+  "types": [
+    {
+      "name": "AcademicYearValidationResult",
+      "kind": "enum",
+      "values": [
+        "Success",
+        "NotWithinFundingPeriod"
+      ]
+    },
+    {
+      "name": "ApprenticeshipStatus",
+      "kind": "enum",
+      "values": [
+        "None",
+        "WaitingToStart",
+        "Live",
+        "Paused",
+        "Stopped",
+        "Finished"
+      ]
+    },
+    {
+      "name": "FundingStatus",
+      "kind": "enum",
+      "values": [
+        "TransferFunded"
+      ]
+    },
+    {
+      "name": "RecordStatus",
+      "kind": "enum",
+      "values": [
+        "NoActionNeeded",
+        "ChangesPending",
+        "ChangesForReview",
+        "ChangeRequested",
+        "IlrDataMismatch",
+        "IlrChangesPending"
+      ]
+    },
+    {
+      "name": "TrainingProgrammeStatus",
+      "kind": "enum",
+      "values": [
+        "Pending",
+        "Active",
+        "Expired"
+      ]
+    },
+    {
+      "name": "TrainingType",
+      "kind": "enum",
+      "values": []
+    },
+    {
+      "name": "UserType",
+      "kind": "enum",
+      "values": []
+    },
+    {
+      "name": "ServiceClaim",
+      "kind": "enum",
+      "values": [
+        "DAA",
+        "DAB",
+        "DAC",
+        "DAV"
+      ]
+    },
+    {
+      "name": "AccountStatus",
+      "kind": "enum",
+      "values": [
+        "Active",
+        "NotListed",
+        "NoAgreement"
+      ]
+    },
+    {
+      "name": "FlashMessageSeverityLevel",
+      "kind": "enum",
+      "values": [
+        "None",
+        "Info",
+        "Okay"
+      ]
+    }
+  ]
+}
