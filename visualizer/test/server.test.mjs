@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { after, before, test } from 'node:test';
 
 process.env.NODE_ENV = 'test';
@@ -20,7 +21,8 @@ test('catalog is derived from the manifest, keyed by repo slug', async () => {
   const response = await fetch(`${baseUrl}/api/catalog`);
   const body = await response.json();
   assert.equal(response.status, 200);
-  assert.equal(body.sources.length, 10);
+  const manifest = JSON.parse(await readFile(new URL('../../manifest.json', import.meta.url), 'utf8'));
+  assert.equal(body.sources.length, manifest.length);
   assert.equal(body.sources[0].name, 'das-learning');
   assert.equal(body.sources[0].id, 'das-learning');
   assert.equal(body.sources[1].name, 'das-courses-api');

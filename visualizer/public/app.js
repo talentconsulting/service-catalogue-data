@@ -1196,21 +1196,28 @@ function paginate(items, pageKey, pageSize = DASHBOARD_PAGE_SIZE) {
   return { pageItems: items.slice(start, start + pageSize), page, totalPages };
 }
 
-function compareText(a, b) {
-  return (a || '').localeCompare(b || '');
+// Missing values (null/undefined/empty) always sort to the end, regardless of direction — only
+// real values swap order when the column's sort direction is flipped, which is why the helpers
+// take the direction rather than having sortRows negate their result.
+function compareMissing(a, b) {
+  const aMissing = a == null || a === '';
+  const bMissing = b == null || b === '';
+  if (aMissing && bMissing) return 0;
+  if (aMissing) return 1;
+  if (bMissing) return -1;
+  return null;
 }
 
-// Missing values (null/undefined) always sort to the end, regardless of direction — only real
-// values swap order when the column's sort direction is flipped.
-function compareNumber(a, b) {
-  if (a == null && b == null) return 0;
-  if (a == null) return 1;
-  if (b == null) return -1;
-  return a - b;
+function compareText(a, b, dir = 1) {
+  return compareMissing(a, b) ?? a.localeCompare(b) * dir;
 }
 
-function compareDate(a, b) {
-  return compareNumber(a ? new Date(a).getTime() : null, b ? new Date(b).getTime() : null);
+function compareNumber(a, b, dir = 1) {
+  return compareMissing(a, b) ?? (a - b) * dir;
+}
+
+function compareDate(a, b, dir = 1) {
+  return compareNumber(a ? new Date(a).getTime() : null, b ? new Date(b).getTime() : null, dir);
 }
 
 function dashboardSortState(tableId, defaultKey, defaultDirection = 'asc') {
@@ -1223,7 +1230,7 @@ function sortRows(rows, sort, comparators) {
   const comparator = comparators[sort.key];
   if (!comparator) return rows;
   const dir = sort.direction === 'desc' ? -1 : 1;
-  return [...rows].sort((a, b) => comparator(a, b) * dir);
+  return [...rows].sort((a, b) => comparator(a, b, dir));
 }
 
 function sortIndicator(tableId, key) {
@@ -1315,6 +1322,14 @@ async function loadHomeDashboard() {
         return { source, metadata: null };
       }
     }));
+    state.databaseSchemas = await Promise.all(state.catalog.map(async (source) => {
+      if (!source.capabilities.database) return { source, schema: null };
+      try {
+        return { source, schema: await getJson(`/api/sources/${encodeURIComponent(source.id)}/database`) };
+      } catch {
+        return { source, schema: null };
+      }
+    }));
     renderHomeDashboard();
   } catch (error) {
     content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
@@ -1324,7 +1339,8 @@ async function loadHomeDashboard() {
 const DASHBOARD_TABS = [
   { id: 'security', label: 'Code security audit' },
   { id: 'apiSecurity', label: 'API security audit' },
-  { id: 'metadata', label: 'Metadata' }
+  { id: 'metadata', label: 'Metadata' },
+  { id: 'databases', label: 'Databases' }
 ];
 
 function dependabotStats() {
@@ -1378,6 +1394,18 @@ function renderDashboardStats() {
       <div class="stat"><dt>Longest since last commit</dt><dd>${stalest ? titleCase(stalest.source.name) : '—'}</dd></div>`;
     return;
   }
+  if (state.dashboardTab === 'databases') {
+    const results = state.databaseSchemas || [];
+    const scanned = results.filter((result) => result.schema);
+    const tables = scanned.flatMap((result) => result.schema.tables || []);
+    const piiRepos = scanned.filter((result) => databasePiiCount(result.schema) > 0).length;
+    $('#source-stats').innerHTML = `
+      <div class="stat"><dt>Repos with schema</dt><dd>${scanned.length}/${results.length}</dd></div>
+      <div class="stat"><dt>Tables</dt><dd>${tables.length}</dd></div>
+      <div class="stat"><dt>Tables with PII</dt><dd>${tables.filter((table) => table.hasPii === true).length}</dd></div>
+      <div class="stat"><dt>Repos with PII</dt><dd>${piiRepos}</dd></div>`;
+    return;
+  }
   const { results, scanned, totalOpen, affectedCount, worstSeverity } = dependabotStats();
   $('#source-stats').innerHTML = `
     <div class="stat"><dt>Repos scanned</dt><dd>${scanned.length}/${results.length}</dd></div>
@@ -1395,9 +1423,9 @@ function renderSecuritySection() {
   const dependabotFilter = state.dashboardFilters.dependabot;
   const sort = dashboardSortState('dependabot-summary', 'openAlerts', 'desc');
   const dependabotRowsAll = sortRows(results, sort, {
-    name: (a, b) => compareText(a.source.name, b.source.name),
-    openAlerts: (a, b) => compareNumber(dependabotOpenCount(a, dependabotFilter), dependabotOpenCount(b, dependabotFilter)),
-    lastScanned: (a, b) => compareDate(a.alerts?.generatedAt, b.alerts?.generatedAt)
+    name: (a, b, dir) => compareText(a.source.name, b.source.name, dir),
+    openAlerts: (a, b, dir) => compareNumber(dependabotOpenCount(a, dependabotFilter), dependabotOpenCount(b, dependabotFilter), dir),
+    lastScanned: (a, b, dir) => compareDate(a.alerts?.generatedAt, b.alerts?.generatedAt, dir)
   });
   const dependabotPage = paginate(dependabotRowsAll, 'dependabot-summary');
 
@@ -1419,7 +1447,8 @@ function renderSecuritySection() {
 const DASHBOARD_TOOLBAR_META = {
   security: 'Dependabot alert data generated per repository — click a row for the full breakdown.',
   apiSecurity: "OWASP API Security Top 10 findings from linting each repository's generated OpenAPI specs — click a row for the full breakdown.",
-  metadata: "Target framework(s) and last commit date read from each repository's generated metadata."
+  metadata: "Target framework(s) and last commit date read from each repository's generated metadata.",
+  databases: "Generated database schemas per repository, with tables flagged as holding PII. Click a row for its tables."
 };
 
 function wireDashboardTabs() {
@@ -1443,12 +1472,14 @@ function renderHomeDashboard() {
 
   const sectionHtml = state.dashboardTab === 'apiSecurity' ? renderApiSecuritySection()
     : state.dashboardTab === 'metadata' ? renderMetadataSection()
+    : state.dashboardTab === 'databases' ? renderDatabasesSection()
     : renderSecuritySection();
 
   content.innerHTML = `<div class="dashboard">${tabsHtml}${sectionHtml}</div>`;
 
   wireDashboardTabs();
   wireDashboardRowToggles();
+  wireDatabaseLinks();
   wireDashboardPagination();
   wireDashboardSeverityFilters();
   wireSortableHeaders();
@@ -1503,10 +1534,10 @@ function renderApiSecuritySection() {
   const totalFindings = Object.values(totalSummary).reduce((sum, count) => sum + count, 0);
   const sort = dashboardSortState('apiSecurity-summary', 'findings', 'desc');
   const rowsAll = sortRows(results, sort, {
-    name: (a, b) => compareText(a.source.name, b.source.name),
-    specsAudited: (a, b) => compareNumber(a.report?.specsAudited, b.report?.specsAudited),
-    findings: (a, b) => compareNumber(apiFindingsCount(a, apiFilter), apiFindingsCount(b, apiFilter)),
-    lastAudited: (a, b) => compareDate(a.report?.generatedAt, b.report?.generatedAt)
+    name: (a, b, dir) => compareText(a.source.name, b.source.name, dir),
+    specsAudited: (a, b, dir) => compareNumber(a.report?.specsAudited, b.report?.specsAudited, dir),
+    findings: (a, b, dir) => compareNumber(apiFindingsCount(a, apiFilter), apiFindingsCount(b, apiFilter), dir),
+    lastAudited: (a, b, dir) => compareDate(a.report?.generatedAt, b.report?.generatedAt, dir)
   });
   const page = paginate(rowsAll, 'apiSecurity-summary');
 
@@ -1580,10 +1611,10 @@ function renderMetadataSection() {
   const scanned = results.filter((result) => result.metadata);
   const sort = dashboardSortState('metadata-summary', 'lastCommit', 'asc');
   const rowsAll = sortRows(results, sort, {
-    name: (a, b) => compareText(a.source.name, b.source.name),
-    projects: (a, b) => compareNumber(a.metadata?.projects?.length, b.metadata?.projects?.length),
-    branch: (a, b) => compareText(a.metadata?.ref, b.metadata?.ref),
-    lastCommit: (a, b) => compareDate(a.metadata?.lastCommitDate, b.metadata?.lastCommitDate)
+    name: (a, b, dir) => compareText(a.source.name, b.source.name, dir),
+    projects: (a, b, dir) => compareNumber(a.metadata?.projects?.length, b.metadata?.projects?.length, dir),
+    branch: (a, b, dir) => compareText(a.metadata?.ref, b.metadata?.ref, dir),
+    lastCommit: (a, b, dir) => compareDate(a.metadata?.lastCommitDate, b.metadata?.lastCommitDate, dir)
   });
   const page = paginate(rowsAll, 'metadata-summary');
 
@@ -1610,6 +1641,114 @@ function metadataRows({ source, metadata }) {
     <td>${metadata ? `<code>${escapeHtml(metadata.ref)}</code>` : '—'}</td>
     <td>${lastCommit}</td>
   </tr>`;
+}
+
+function databasePiiCount(schema) {
+  return schema ? (schema.tables || []).filter((table) => table.hasPii === true).length : null;
+}
+
+function piiBadge(hasPii) {
+  if (hasPii === true) return '<span class="badge danger">Yes</span>';
+  if (hasPii === false) return '<span class="badge success">No</span>';
+  return '<span class="muted">Unclassified</span>';
+}
+
+function databasePiiCell(schema) {
+  if (!schema) return '<span class="muted">Not scanned</span>';
+  const tables = schema.tables || [];
+  if (!tables.length) return '<span class="muted">No tables</span>';
+  const piiCount = databasePiiCount(schema);
+  if (piiCount) return `${piiBadge(true)} <span class="muted">${piiCount} of ${tables.length} tables</span>`;
+  return tables.every((table) => table.hasPii === false) ? piiBadge(false) : piiBadge(null);
+}
+
+function renderDatabasesSection() {
+  const results = state.databaseSchemas || [];
+  const scanned = results.filter((result) => result.schema);
+  const sort = dashboardSortState('databases-summary', 'piiTables', 'desc');
+  const rowsAll = sortRows(results, sort, {
+    name: (a, b, dir) => compareText(a.source.name, b.source.name, dir),
+    database: (a, b, dir) => compareText(a.schema?.database?.name, b.schema?.database?.name, dir),
+    tables: (a, b, dir) => compareNumber(a.schema?.tables?.length, b.schema?.tables?.length, dir),
+    piiTables: (a, b, dir) => compareNumber(databasePiiCount(a.schema), databasePiiCount(b.schema), dir)
+  });
+  const page = paginate(rowsAll, 'databases-summary');
+
+  return `<section class="dashboard-section">
+    <h2>Databases</h2>
+    <p class="section-sub">Generated database schemas across ${results.length} cataloged repositories — ${scanned.length} with a schema. Click a row to see which tables hold PII.</p>
+    <div class="table-wrap">
+      <table class="data-table repo-alert-table">
+        <thead><tr>${sortableHeaderCell('databases-summary', 'name', 'Repository')}${sortableHeaderCell('databases-summary', 'database', 'Database')}${sortableHeaderCell('databases-summary', 'tables', 'Tables')}${sortableHeaderCell('databases-summary', 'piiTables', 'Contains PII')}<th>Links</th></tr></thead>
+        <tbody>${page.pageItems.map(databaseRows).join('')}</tbody>
+      </table>
+    </div>
+    ${paginationHtml('databases-summary', page.page, page.totalPages, rowsAll.length)}
+  </section>`;
+}
+
+function databaseRows({ source, schema }) {
+  const rowId = `db-${source.id}`;
+  const expanded = state.dashboardExpanded.has(rowId);
+  const database = schema?.database;
+  const scanPath = source.scans.dbschema?.['path-to-scan'];
+  const links = schema ? `<div class="badges dashboard-links">
+      <button class="badge blue as-link" type="button" data-open-schema="${escapeHtml(source.id)}">View schema →</button>
+      ${scanPath ? `<a class="badge as-link" href="${escapeHtml(`${source.repository.replace(/\/$/, '')}/${scanPath}`)}" target="_blank" rel="noopener noreferrer">Source ↗</a>` : ''}
+      <a class="badge as-link" href="/api/sources/${encodeURIComponent(source.id)}/database" target="_blank" rel="noopener noreferrer">JSON ↗</a>
+    </div>` : '';
+  const expandable = Boolean(schema?.tables?.length);
+  const summaryRow = `<tr ${expandable ? `class="repo-alert-row" data-toggle-alerts="${escapeHtml(rowId)}"` : ''}>
+    <td><span class="repo-name">${escapeHtml(titleCase(source.name))}</span><span class="repo-slug">${escapeHtml(orgRepoSlug(source.repository))}</span></td>
+    <td>${database?.name ? `<code>${escapeHtml(database.name)}</code>${database.engine ? `<span class="repo-slug">${escapeHtml(database.engine)}</span>` : ''}` : '<span class="muted">—</span>'}</td>
+    <td>${schema ? (schema.tables || []).length : '—'}</td>
+    <td>${databasePiiCell(schema)}</td>
+    <td>${links}</td>
+  </tr>`;
+  if (!expandable) return summaryRow;
+  const detailRow = `<tr class="repo-alert-detail-row" data-detail-for="${escapeHtml(rowId)}" ${expanded ? '' : 'hidden'}><td colspan="5"><div class="repo-alert-detail">${databaseTablesDetail(schema, rowId)}</div></td></tr>`;
+  return summaryRow + detailRow;
+}
+
+function databaseTablesDetail(schema, rowId) {
+  const tables = schema.tables;
+  // PII tables first so the answer to "what holds personal data?" is at the top of the list.
+  const ordered = [...tables].sort((a, b) => Number(b.hasPii === true) - Number(a.hasPii === true) || compareText(tableLabel(a), tableLabel(b)));
+  const pageKey = `databases-detail-${rowId}`;
+  const { pageItems, page, totalPages } = paginate(ordered, pageKey);
+  return `<table class="data-table"><thead><tr><th>Table</th><th>Columns</th><th>Relationships</th><th>Indexes</th><th>Contains PII</th></tr></thead><tbody>${pageItems.map((table) => `<tr>
+    <td><code>${escapeHtml(tableLabel(table))}</code></td>
+    <td>${(table.columns || []).length}</td>
+    <td>${(table.relationships || []).length}</td>
+    <td>${(table.indexes || []).length}</td>
+    <td>${piiBadge(table.hasPii)}</td>
+  </tr>`).join('')}</tbody></table>${paginationHtml(pageKey, page, totalPages, ordered.length)}`;
+}
+
+function tableLabel(table) {
+  return table.schema ? `${table.schema}.${table.name}` : table.name;
+}
+
+function wireDatabaseLinks() {
+  // Links sit inside a clickable summary row; stop the click from also toggling the row.
+  document.querySelectorAll('.dashboard-links a, .dashboard-links button').forEach((link) => {
+    link.addEventListener('click', (event) => event.stopPropagation());
+  });
+  document.querySelectorAll('[data-open-schema]').forEach((button) => {
+    button.onclick = (event) => {
+      event.stopPropagation();
+      openSourceView(button.dataset.openSchema, 'database');
+    };
+  });
+}
+
+async function openSourceView(sourceId, view) {
+  state.mode = 'source';
+  history.pushState({}, '', `/service/${encodeURIComponent(sourceId)}`);
+  applyMode();
+  sourceSelect.value = sourceId;
+  state.view = view;
+  await selectSource(sourceId);
 }
 
 async function loadLandscape() {
@@ -1665,6 +1804,11 @@ function edgeMatchesEventFilter(edge, eventFilter) {
   });
 }
 
+// Nodes at either end of a relationship that carries the event/command, i.e. its publishers and handlers.
+function eventParticipantIds(graph, eventFilter) {
+  return new Set(graph.edges.filter((edge) => edgeMatchesEventFilter(edge, eventFilter)).flatMap((edge) => [edge.from, edge.to]));
+}
+
 function filterMembersByEvent(members, eventFilter) {
   if (!eventFilter) return members;
   return members.filter((member) => (messageNamesFor(member.dependency) || []).includes(eventFilter));
@@ -1702,15 +1846,24 @@ function renderLandscape() {
     <div class="stat"><dt>Relationships</dt><dd>${graph.edges.length}</dd></div>`;
   toolbar.innerHTML = `${diagramControlsHtml()}${eventNames.length ? eventFilterControlHtml(eventNames, eventFilter) : ''}<span class="spacer"></span><span class="toolbar-meta">Inferred by matching each repository's outbound service dependencies and handled events/commands against the catalogue, clustering the rest as external systems${redisSystemCount ? ` · ${redisSystemCount} using Redis` : ''}${sqlServerSystemCount ? ` · ${sqlServerSystemCount} using SQL Server` : ''}${serviceBusSystemCount ? ` · ${serviceBusSystemCount} using Service Bus` : ''}${eventFilter ? ` · Showing only containers that publish or consume “${escapeHtml(eventFilter)}”` : ''}</span>`;
   const eventFilterSelect = $('#landscape-event-filter');
-  if (eventFilterSelect) eventFilterSelect.onchange = (event) => { state.landscapeEventFilter = event.target.value; renderLandscape(); };
+  if (eventFilterSelect) {
+    eventFilterSelect.onchange = (event) => {
+      // Picking an event resets the checklist to just its publishers and handlers (still editable
+      // afterwards); going back to "All" restores everything.
+      state.landscapeEventFilter = event.target.value;
+      state.landscapeChecked = state.landscapeEventFilter
+        ? eventParticipantIds(graph, state.landscapeEventFilter)
+        : new Set(allNodes.map((node) => node.id));
+      renderLandscape();
+    };
+  }
   if (!allNodes.length) {
     destroyCy();
     content.innerHTML = '<div class="empty-state"><span class="empty-icon" aria-hidden="true">◇</span><h2>No dependency data available</h2><p>None of the cataloged repositories publish service-dependencies data.</p></div>';
     return;
   }
   if (!state.landscapeChecked) state.landscapeChecked = new Set(allNodes.map((node) => node.id));
-  const filterNodeIds = eventFilter ? new Set(graph.edges.filter(edgeMatchesFilter).flatMap((edge) => [edge.from, edge.to])) : null;
-  const isNodeVisible = (node) => state.landscapeChecked.has(node.id) && (!filterNodeIds || filterNodeIds.has(node.id));
+  const isNodeVisible = (node) => state.landscapeChecked.has(node.id);
   const visibleNodes = allNodes.filter(isNodeVisible);
   if (!state.selected || !visibleNodes.some((node) => node.id === state.selected)) state.selected = visibleNodes[0]?.id || null;
 
@@ -1726,7 +1879,7 @@ function renderLandscape() {
   if (!visibleNodes.length) {
     destroyCy();
     const emptyMessage = eventFilter
-      ? `<h2>No containers found</h2><p>Nothing checked on the left publishes or consumes “${escapeHtml(eventFilter)}”. Try a different event or clear the filter.</p>`
+      ? `<h2>Nothing selected</h2><p>Check at least one service on the left, or choose a different event/command to reset the selection.</p>`
       : '<h2>Nothing selected</h2><p>Check at least one service on the left to see it on the diagram.</p>';
     content.innerHTML = `<div class="landscape-layout">${checklistHtml}<div class="empty-state">${emptyMessage}</div></div>`;
     wireLandscapeChecklist(allNodes);
