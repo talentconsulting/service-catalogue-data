@@ -7,7 +7,7 @@
     {
       "name": "Account",
       "schema": "dbo",
-      "entity": null,
+      "entity": "Account",
       "columns": [
         {
           "name": "Id",
@@ -57,12 +57,13 @@
           "unique": true,
           "filter": null
         }
-      ]
+      ],
+      "hasPii": false
     },
     {
       "name": "AccountLegalEntity",
       "schema": "dbo",
-      "entity": null,
+      "entity": "AccountLegalEntity",
       "columns": [
         {
           "name": "Id",
@@ -141,7 +142,7 @@
         },
         {
           "name": "IDX_AccountLegalEntity_AccountLegalEntityId",
-          "type": null,
+          "type": "btree",
           "columns": [
             "AccountLegalEntityId"
           ],
@@ -150,7 +151,7 @@
         },
         {
           "name": "IDX_AccountLegalEntity_AccountId",
-          "type": null,
+          "type": "btree",
           "columns": [
             "AccountId"
           ],
@@ -159,7 +160,7 @@
         },
         {
           "name": "IDX_AccountLegalEntity_AccountIdLegalEntityId",
-          "type": null,
+          "type": "btree",
           "columns": [
             "AccountId",
             "LegalEntityId"
@@ -167,12 +168,13 @@
           "unique": false,
           "filter": null
         }
-      ]
+      ],
+      "hasPii": false
     },
     {
       "name": "ClientOutboxData",
       "schema": "dbo",
-      "entity": null,
+      "entity": "ClientOutboxData",
       "columns": [
         {
           "name": "MessageId",
@@ -242,7 +244,7 @@
       "indexes": [
         {
           "name": "IX_CreatedAt_PersistenceVersion",
-          "type": null,
+          "type": "btree",
           "columns": [
             "CreatedAt",
             "PersistenceVersion"
@@ -252,7 +254,7 @@
         },
         {
           "name": "IX_DispatchedAt_PersistenceVersion",
-          "type": null,
+          "type": "btree",
           "columns": [
             "DispatchedAt",
             "PersistenceVersion"
@@ -260,12 +262,13 @@
           "unique": false,
           "filter": "[Dispatched] = 1"
         }
-      ]
+      ],
+      "hasPii": false
     },
     {
       "name": "Course",
       "schema": "dbo",
-      "entity": null,
+      "entity": "Course",
       "columns": [
         {
           "name": "CourseId",
@@ -326,7 +329,7 @@
       "indexes": [
         {
           "name": "IX_Course_EffectiveTo_CourseId",
-          "type": null,
+          "type": "btree",
           "columns": [
             "EffectiveTo",
             "CourseId"
@@ -334,12 +337,13 @@
           "unique": false,
           "filter": null
         }
-      ]
+      ],
+      "hasPii": false
     },
     {
       "name": "GlobalRule",
       "schema": "dbo",
-      "entity": null,
+      "entity": "GlobalRule",
       "columns": [
         {
           "name": "Id",
@@ -388,7 +392,8 @@
         }
       ],
       "relationships": [],
-      "indexes": []
+      "indexes": [],
+      "hasPii": false
     },
     {
       "name": "GlobalRuleAccountExemption",
@@ -440,7 +445,8 @@
           "onDelete": null
         }
       ],
-      "indexes": []
+      "indexes": [],
+      "hasPii": false
     },
     {
       "name": "OutboxData",
@@ -497,14 +503,15 @@
       "indexes": [
         {
           "name": "IX_DispatchedAt",
-          "type": "btree",
+          "type": null,
           "columns": [
             "DispatchedAt"
           ],
           "unique": false,
           "filter": "[Dispatched] = 1"
         }
-      ]
+      ],
+      "hasPii": false
     },
     {
       "name": "ProviderPermission",
@@ -578,7 +585,8 @@
           "unique": false,
           "filter": null
         }
-      ]
+      ],
+      "hasPii": false
     },
     {
       "name": "Reservation",
@@ -783,7 +791,8 @@
           "unique": false,
           "filter": null
         }
-      ]
+      ],
+      "hasPii": true
     },
     {
       "name": "Rule",
@@ -859,7 +868,88 @@
           "onDelete": null
         }
       ],
-      "indexes": []
+      "indexes": [],
+      "hasPii": false
+    },
+    {
+      "name": "UserRuleNotification",
+      "schema": "dbo",
+      "entity": "UserRuleNotification",
+      "columns": [
+        {
+          "name": "Id",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": true,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "CourseRuleId",
+          "type": "BIGINT",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "GlobalRuleId",
+          "type": "BIGINT",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "UkPrn",
+          "type": "INT",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "UserId",
+          "type": "UNIQUEIDENTIFIER",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [
+        {
+          "name": "FK_UserRuleNotification_Rule",
+          "type": "many-to-one",
+          "fromColumns": [
+            "CourseRuleId"
+          ],
+          "targetTable": "Rule",
+          "targetColumns": [
+            "Id"
+          ],
+          "onDelete": null
+        },
+        {
+          "name": "FK_UserRuleNotification_GlobalRule",
+          "type": "many-to-one",
+          "fromColumns": [
+            "GlobalRuleId"
+          ],
+          "targetTable": "GlobalRule",
+          "targetColumns": [
+            "Id"
+          ],
+          "onDelete": null
+        }
+      ],
+      "indexes": [],
+      "hasPii": false
     }
   ],
   "types": []
