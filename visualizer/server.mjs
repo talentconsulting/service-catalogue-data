@@ -110,7 +110,8 @@ async function buildCatalog() {
         security: await exists(join(sourceDir, 'dependency-alerts', 'dependabot-alerts.json')),
         localdev: await exists(join(sourceDir, 'local-dev-config', 'local-dev-config.json')),
         apiSecurity: await exists(join(sourceDir, 'api-security-audit', 'report.json')),
-        metadata: Boolean(entry['repo-metadata']) && await exists(join(sourceDir, 'repo-metadata', 'repo-metadata.json'))
+        metadata: Boolean(entry['repo-metadata']) && await exists(join(sourceDir, 'repo-metadata', 'repo-metadata.json')),
+        topics: await exists(join(sourceDir, 'repo-topics', 'repo-topics.json'))
       },
       apiFiles,
       scans: Object.fromEntries(Object.entries(entry)
@@ -167,7 +168,7 @@ async function handleApi(request, response, url) {
     return sendDownload(response, `${source.name}.postman_environment.json`, buildPostmanEnvironment(source.name, specFiles, localDevConfig));
   }
 
-  const match = url.pathname.match(/^\/api\/sources\/([^/]+)\/(database|messages|dependencies|openapi|security|localdev|apisecurity|metadata)$/);
+  const match = url.pathname.match(/^\/api\/sources\/([^/]+)\/(database|messages|dependencies|openapi|security|localdev|apisecurity|metadata|topics)$/);
   if (!match) return sendJson(response, 404, { error: 'Not found' });
 
   const [, id, kind] = match;
@@ -181,6 +182,7 @@ async function handleApi(request, response, url) {
   if (kind === 'localdev') file = join(sourceDir, 'local-dev-config', 'local-dev-config.json');
   if (kind === 'apisecurity') file = join(sourceDir, 'api-security-audit', 'report.json');
   if (kind === 'metadata') file = join(sourceDir, 'repo-metadata', 'repo-metadata.json');
+  if (kind === 'topics') file = join(sourceDir, 'repo-topics', 'repo-topics.json');
   if (kind === 'openapi') {
     const requested = url.searchParams.get('file');
     if (!requested || !source.apiFiles.includes(requested)) {

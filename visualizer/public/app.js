@@ -1315,11 +1315,15 @@ async function loadHomeDashboard() {
       }
     }));
     state.repoMetadata = await Promise.all(state.catalog.map(async (source) => {
-      if (!source.capabilities.metadata) return { source, metadata: null };
+      // Topics come from a separate job, so they load independently of the metadata file.
+      const topics = source.capabilities.topics
+        ? await getJson(`/api/sources/${encodeURIComponent(source.id)}/topics`).then((data) => data.topics, () => null)
+        : null;
+      if (!source.capabilities.metadata) return { source, metadata: null, topics };
       try {
-        return { source, metadata: await getJson(`/api/sources/${encodeURIComponent(source.id)}/metadata`) };
+        return { source, metadata: await getJson(`/api/sources/${encodeURIComponent(source.id)}/metadata`), topics };
       } catch {
-        return { source, metadata: null };
+        return { source, metadata: null, topics };
       }
     }));
     state.databaseSchemas = await Promise.all(state.catalog.map(async (source) => {
@@ -1447,7 +1451,7 @@ function renderSecuritySection() {
 const DASHBOARD_TOOLBAR_META = {
   security: 'Dependabot alert data generated per repository — click a row for the full breakdown.',
   apiSecurity: "OWASP API Security Top 10 findings from linting each repository's generated OpenAPI specs — click a row for the full breakdown.",
-  metadata: "Target framework(s) and last commit date read from each repository's generated metadata.",
+  metadata: "Target framework(s), GitHub topics and last commit date read from each repository's generated metadata.",
   databases: "Generated database schemas per repository, with tables flagged as holding PII. Click a row for its tables."
 };
 
@@ -1620,10 +1624,10 @@ function renderMetadataSection() {
 
   return `<section class="dashboard-section">
     <h2>Metadata</h2>
-    <p class="section-sub">Target framework(s) and last commit date read from each repository's generated metadata — ${scanned.length}/${results.length} repositories scanned.</p>
+    <p class="section-sub">Target framework(s), GitHub topics and last commit date read from each repository's generated metadata — ${scanned.length}/${results.length} repositories scanned.</p>
     <div class="table-wrap">
       <table class="data-table repo-alert-table">
-        <thead><tr>${sortableHeaderCell('metadata-summary', 'name', 'Repository')}<th>Target framework(s)</th>${sortableHeaderCell('metadata-summary', 'projects', 'Projects')}${sortableHeaderCell('metadata-summary', 'branch', 'Branch')}${sortableHeaderCell('metadata-summary', 'lastCommit', 'Last commit')}</tr></thead>
+        <thead><tr>${sortableHeaderCell('metadata-summary', 'name', 'Repository')}<th>Target framework(s)</th><th>Topics</th>${sortableHeaderCell('metadata-summary', 'projects', 'Projects')}${sortableHeaderCell('metadata-summary', 'branch', 'Branch')}${sortableHeaderCell('metadata-summary', 'lastCommit', 'Last commit')}</tr></thead>
         <tbody>${page.pageItems.map(metadataRows).join('')}</tbody>
       </table>
     </div>
@@ -1631,12 +1635,13 @@ function renderMetadataSection() {
   </section>`;
 }
 
-function metadataRows({ source, metadata }) {
+function metadataRows({ source, metadata, topics }) {
   const frameworks = metadata ? metadataFrameworks(metadata) : [];
   const lastCommit = metadata?.lastCommitDate ? new Date(metadata.lastCommitDate).toLocaleDateString() : '—';
   return `<tr>
     <td><span class="repo-name">${escapeHtml(titleCase(source.name))}</span><span class="repo-slug">${escapeHtml(orgRepoSlug(source.repository))}</span></td>
     <td>${metadata ? (frameworks.map((framework) => `<span class="badge">${escapeHtml(framework)}</span>`).join(' ') || '<span class="muted">None found</span>') : '<span class="muted">Not scanned</span>'}</td>
+    <td>${topics ? (topics.length ? `<span class="topic-list">${topics.map((topic) => `<span class="badge blue">${escapeHtml(topic)}</span>`).join('')}</span>` : '<span class="muted">None</span>') : '<span class="muted">—</span>'}</td>
     <td>${metadata ? metadata.projects.length : '—'}</td>
     <td>${metadata ? `<code>${escapeHtml(metadata.ref)}</code>` : '—'}</td>
     <td>${lastCommit}</td>
