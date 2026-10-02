@@ -1,0 +1,97 @@
+{
+  "repository": "SkillsFundingAgency/das-admin-roatp-web",
+  "ref": "main",
+  "path": "src",
+  "systemName": "Admin Roatp",
+  "containers": [
+    {
+      "id": "admin-roatp",
+      "name": "Admin Roatp",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/Program.cs",
+          "reason": "Detected ASP.NET Core WebApplication builder instantiation and configuration."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/SFA.DAS.Admin.Roatp.Web.csproj",
+          "reason": "Detected use of ASP.NET Web SDK in project file."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "admin-roatp",
+      "name": "Redis",
+      "kind": "cache",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "StackExchange.Redis",
+      "configurationKeys": [
+        "ApplicationConfiguration.RedisConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "cache.endpoint",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/AppStart/AddSessionExtension.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/AppStart/AddDataProtectionExtension.cs",
+          "reason": "Detected ConnectionMultiplexer construction for Redis connection using ApplicationConfiguration.RedisConnectionString."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/AppStart/AddSessionExtension.cs",
+          "reason": "Detected StackExchange.Redis cache client registration with a connection string read from ApplicationConfiguration.RedisConnectionString."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "admin-roatp",
+      "name": "Outer API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IOuterApiClient",
+      "technology": "Refit",
+      "configurationKeys": [
+        "AdminRoatpOuterApiConfiguration.ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "http.endpoint",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/AppStart/AddApplicationRegistrationsExtension.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/AppStart/AddApplicationRegistrationsExtension.cs",
+          "reason": "Detected Refit client registration for IOuterApiClient with a base address using AdminRoatpOuterApiConfiguration.ApiBaseUrl."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-outer-api",
+      "description": "Calls the API of"
+    }
+  ]
+}
