@@ -2146,6 +2146,7 @@ async function loadTopics() {
   state.topicSelected = null;
   state.topicPositions = null;
   state.topicShowOther = true;
+  state.topicEventFilter = '';
   try {
     const [graph, topicEntries] = await Promise.all([
       fetchLandscapeGraph(),
@@ -2158,7 +2159,8 @@ async function loadTopics() {
     // so it starts unticked; everything else starts ticked.
     const counts = topicCounts();
     const taggedCount = [...state.topicsBySource.values()].filter((topics) => topics.length).length;
-    state.topicChecked = new Set([...counts.keys()].filter((topic) => taggedCount < 2 || counts.get(topic) < taggedCount));
+    state.topicDefaultChecked = new Set([...counts.keys()].filter((topic) => taggedCount < 2 || counts.get(topic) < taggedCount));
+    state.topicChecked = new Set(state.topicDefaultChecked);
     renderTopics();
   } catch (error) {
     content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
@@ -2204,6 +2206,18 @@ function buildTopicGraph(landscape, topicsBySource, checked, showOther) {
   sortedNodes.forEach((node) => node.services.sort((a, b) => a.name.localeCompare(b.name)));
   const edges = [...edgeMap.values()].map((edge) => ({ ...edge, technologies: [...edge.technologies], kinds: [...edge.kinds] }));
   return { nodes: sortedNodes, edges };
+}
+
+// The landscape narrowed to one event/command: only the services that publish or handle it and
+// only the relationships that carry it.
+function landscapeForEvent(landscape, eventFilter) {
+  if (!eventFilter) return landscape;
+  const participants = eventParticipantIds(landscape, eventFilter);
+  return {
+    ...landscape,
+    systems: landscape.systems.filter((system) => participants.has(system.id)),
+    edges: landscape.edges.filter((edge) => edgeMatchesEventFilter(edge, eventFilter))
+  };
 }
 
 function systemName(id) {
@@ -2278,13 +2292,33 @@ function renderTopics() {
     content.innerHTML = '<div class="empty-state"><span class="empty-icon" aria-hidden="true">◇</span><h2>No topic data available</h2><p>Run the fetch-repo-topics job to publish each repository\'s GitHub topics.</p></div>';
     return;
   }
-  const graph = buildTopicGraph(state.topicsLandscape, state.topicsBySource, state.topicChecked, state.topicShowOther);
+  const eventNames = allLandscapeMessageNames(state.topicsLandscape);
+  if (state.topicEventFilter && !eventNames.includes(state.topicEventFilter)) state.topicEventFilter = '';
+  const eventFilter = state.topicEventFilter;
+  const landscape = landscapeForEvent(state.topicsLandscape, eventFilter);
+  const graph = buildTopicGraph(landscape, state.topicsBySource, state.topicChecked, state.topicShowOther);
   const crossCount = graph.edges.reduce((sum, edge) => sum + edge.count, 0);
   $('#source-stats').innerHTML = `
     <div class="stat"><dt>Topics shown</dt><dd>${graph.nodes.filter((node) => !node.isOther).length}/${counts.size}</dd></div>
-    <div class="stat"><dt>Services</dt><dd>${state.topicsLandscape.systems.length}</dd></div>
+    <div class="stat"><dt>Services</dt><dd>${landscape.systems.length}</dd></div>
     <div class="stat"><dt>Cross-topic links</dt><dd>${crossCount}</dd></div>`;
-  toolbar.innerHTML = `${diagramControlsHtml()}<span class="spacer"></span><span class="toolbar-meta">Services grouped by GitHub topic, with the landscape's service-to-service relationships rolled up between topics. A service with several topics appears in each.</span>`;
+  toolbar.innerHTML = `${diagramControlsHtml()}${eventNames.length ? eventFilterControlHtml(eventNames, eventFilter) : ''}<span class="spacer"></span><span class="toolbar-meta">Services grouped by GitHub topic, with the landscape's service-to-service relationships rolled up between topics. A service with several topics appears in each.${eventFilter ? ` · Showing only services that publish or consume “${escapeHtml(eventFilter)}”` : ''}</span>`;
+  const eventFilterSelect = $('#landscape-event-filter');
+  if (eventFilterSelect) {
+    eventFilterSelect.onchange = (event) => {
+      // Like the landscape: picking an event resets the checklist to the topics of its publishers
+      // and handlers (minus any unticked by default, such as the org-wide topic); "All" restores
+      // the defaults.
+      state.topicEventFilter = event.target.value;
+      const participants = landscapeForEvent(state.topicsLandscape, state.topicEventFilter).systems;
+      state.topicChecked = state.topicEventFilter
+        ? new Set(participants.flatMap((system) => state.topicsBySource.get(system.sourceId) || []).filter((topic) => state.topicDefaultChecked.has(topic)))
+        : new Set(state.topicDefaultChecked);
+      state.topicSelected = null;
+      state.topicPositions = null;
+      renderTopics();
+    };
+  }
 
   const checklistHtml = `<aside class="landscape-checklist" aria-label="Topics to show">
     <div class="checklist-controls">
@@ -2303,7 +2337,10 @@ function renderTopics() {
 
   if (!graph.nodes.length) {
     destroyCy();
-    content.innerHTML = `<div class="landscape-layout">${checklistHtml}<div class="empty-state"><h2>Nothing selected</h2><p>Tick at least one topic on the left to see it on the diagram.</p></div></div>`;
+    const emptyMessage = eventFilter
+      ? `<h2>Nothing selected</h2><p>Tick at least one topic on the left, or choose a different event/command to reset the selection.</p>`
+      : '<h2>Nothing selected</h2><p>Tick at least one topic on the left to see it on the diagram.</p>';
+    content.innerHTML = `<div class="landscape-layout">${checklistHtml}<div class="empty-state">${emptyMessage}</div></div>`;
     wireTopicChecklist(counts);
     return;
   }
