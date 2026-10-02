@@ -164,17 +164,22 @@ async function loadView() {
 }
 
 async function loadDependenciesFor(source) {
-  let data = { repository: orgRepoSlug(source.repository), dependencies: [] };
-  if (source.capabilities.dependencies) {
-    data = await getJson(`/api/sources/${encodeURIComponent(source.id)}/dependencies`);
+  const dependencies = source.capabilities.dependencies ? await getJson(`/api/sources/${encodeURIComponent(source.id)}/dependencies`) : null;
+  const messages = source.capabilities.messages
+    ? await getJson(`/api/sources/${encodeURIComponent(source.id)}/messages`).catch(() => null) // supplementary; ignore failures
+    : null;
+  return combineDependencies(source, dependencies, messages);
+}
+
+// One source's service dependencies with its handled events/commands appended as message dependencies.
+function combineDependencies(source, dependencies, messages) {
+  const data = dependencies || { repository: orgRepoSlug(source.repository), dependencies: [] };
+  if (!messages) return data;
+  try {
+    return { ...data, dependencies: [...(data.dependencies || []), ...messageDependencies(source, messages)] };
+  } catch {
+    return data;
   }
-  if (source.capabilities.messages) {
-    try {
-      const messages = await getJson(`/api/sources/${encodeURIComponent(source.id)}/messages`);
-      data = { ...data, dependencies: [...(data.dependencies || []), ...messageDependencies(source, messages)] };
-    } catch { /* messages are supplementary; ignore failures */ }
-  }
-  return data;
 }
 
 function orgRepoSlug(repositoryUrl) {
@@ -1355,42 +1360,14 @@ async function loadHomeDashboard() {
   state.dashboardExpanded = new Set();
   state.dashboardFilters = { dependabot: new Set(SEVERITY_ORDER), apiSecurity: new Set(SPECTRAL_SEVERITY_ORDER) };
   try {
-    state.securityAudit = await Promise.all(state.catalog.map(async (source) => {
-      if (!source.capabilities.security) return { source, alerts: null };
-      try {
-        return { source, alerts: await getJson(`/api/sources/${encodeURIComponent(source.id)}/security`) };
-      } catch {
-        return { source, alerts: null };
-      }
-    }));
-    state.apiSecurityAudit = await Promise.all(state.catalog.map(async (source) => {
-      if (!source.capabilities.apiSecurity) return { source, report: null };
-      try {
-        return { source, report: await getJson(`/api/sources/${encodeURIComponent(source.id)}/apisecurity`) };
-      } catch {
-        return { source, report: null };
-      }
-    }));
-    state.repoMetadata = await Promise.all(state.catalog.map(async (source) => {
-      // Topics come from a separate job, so they load independently of the metadata file.
-      const topics = source.capabilities.topics
-        ? await getJson(`/api/sources/${encodeURIComponent(source.id)}/topics`).then((data) => data.topics, () => null)
-        : null;
-      if (!source.capabilities.metadata) return { source, metadata: null, topics };
-      try {
-        return { source, metadata: await getJson(`/api/sources/${encodeURIComponent(source.id)}/metadata`), topics };
-      } catch {
-        return { source, metadata: null, topics };
-      }
-    }));
-    state.databaseSchemas = await Promise.all(state.catalog.map(async (source) => {
-      if (!source.capabilities.databaseScanned) return { source, schema: null };
-      try {
-        return { source, schema: await getJson(`/api/sources/${encodeURIComponent(source.id)}/database`) };
-      } catch {
-        return { source, schema: null };
-      }
-    }));
+    // One request for every tab, rather than one per source per tab.
+    const { sources } = await getJson('/api/dashboard');
+    const byId = new Map(sources.map((entry) => [entry.id, entry]));
+    const rows = state.catalog.map((source) => ({ source, data: byId.get(source.id) || {} }));
+    state.securityAudit = rows.map(({ source, data }) => ({ source, alerts: data.security || null }));
+    state.apiSecurityAudit = rows.map(({ source, data }) => ({ source, report: data.apiSecurity || null }));
+    state.repoMetadata = rows.map(({ source, data }) => ({ source, metadata: data.metadata || null, topics: data.topics || null }));
+    state.databaseSchemas = rows.map(({ source, data }) => ({ source, schema: data.database || null }));
     renderHomeDashboard();
   } catch (error) {
     content.innerHTML = `<div class="error">${escapeHtml(error.message)}</div>`;
@@ -1818,12 +1795,17 @@ async function openSourceView(sourceId, view) {
   await selectSource(sourceId);
 }
 
-// Shared by the landscape and topics pages: every source's dependencies, matched into one graph.
+// Shared by the landscape and topics pages: every source's dependencies, matched into one graph,
+// from a single request. Also keeps each source's topics for the topics page.
 async function fetchLandscapeGraph() {
-  const results = await Promise.all(state.catalog.map((source) => loadDependenciesFor(source)
-    .then((data) => (data.dependencies?.length ? { source, ref: data.ref, dependencies: data.dependencies } : null))
-    .catch(() => null)));
-  state.landscapeSources = results.filter(Boolean);
+  const { sources } = await getJson('/api/landscape');
+  const byId = new Map(sources.map((entry) => [entry.id, entry]));
+  state.landscapeTopicsBySource = new Map(sources.filter((entry) => entry.topics).map((entry) => [entry.id, entry.topics]));
+  state.landscapeSources = state.catalog.map((source) => {
+    const entry = byId.get(source.id);
+    const data = combineDependencies(source, entry?.dependencies, entry?.messages);
+    return data.dependencies?.length ? { source, ref: data.ref, dependencies: data.dependencies } : null;
+  }).filter(Boolean);
   return buildLandscape(state.catalog, state.landscapeSources);
 }
 
@@ -2153,13 +2135,8 @@ async function loadTopics() {
   state.topicShowOther = true;
   state.topicEventFilter = '';
   try {
-    const [graph, topicEntries] = await Promise.all([
-      fetchLandscapeGraph(),
-      Promise.all(state.catalog.filter((source) => source.capabilities.topics).map((source) => getJson(`/api/sources/${encodeURIComponent(source.id)}/topics`)
-        .then((data) => [source.id, data.topics || []], () => [source.id, []])))
-    ]);
-    state.topicsLandscape = graph;
-    state.topicsBySource = new Map(topicEntries);
+    state.topicsLandscape = await fetchLandscapeGraph();
+    state.topicsBySource = state.landscapeTopicsBySource;
     // A topic every tagged repo shares (e.g. the org-wide one) would put every service in one box,
     // so it starts unticked; everything else starts ticked.
     const counts = topicCounts();

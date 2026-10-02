@@ -77,3 +77,37 @@ test('security endpoint is unavailable when a source has no generated data', asy
   const response = await fetch(`${baseUrl}/api/sources/das-learning/security`);
   assert.equal(response.status, 404);
 });
+
+test('dashboard endpoint returns every tab\'s data for every source in one response', async () => {
+  const catalog = await (await fetch(`${baseUrl}/api/catalog`)).json();
+  const body = await (await fetch(`${baseUrl}/api/dashboard`)).json();
+  assert.deepEqual(body.sources.map((item) => item.id), catalog.sources.map((item) => item.id));
+  const courses = body.sources.find((item) => item.id === 'das-courses-api');
+  assert.ok(courses.database.tables.length > 0);
+  assert.ok(Array.isArray(courses.topics));
+  for (const item of body.sources) {
+    assert.deepEqual(Object.keys(item).sort(), ['apiSecurity', 'database', 'id', 'metadata', 'security', 'topics']);
+  }
+});
+
+test('landscape endpoint returns dependencies, messages and topics per source', async () => {
+  const catalog = await (await fetch(`${baseUrl}/api/catalog`)).json();
+  const body = await (await fetch(`${baseUrl}/api/landscape`)).json();
+  assert.equal(body.sources.length, catalog.sources.length);
+  for (const source of catalog.sources) {
+    const item = body.sources.find((entry) => entry.id === source.id);
+    assert.equal(item.dependencies !== null, source.capabilities.dependencies);
+    assert.equal(item.messages !== null, source.capabilities.messages);
+  }
+});
+
+test('JSON responses are gzipped when the client accepts it', async () => {
+  const { request } = await import('node:http');
+  const headers = await new Promise((resolve, reject) => {
+    request(`${baseUrl}/api/landscape`, { headers: { 'accept-encoding': 'gzip' } }, (response) => {
+      response.resume();
+      resolve(response.headers);
+    }).on('error', reject).end();
+  });
+  assert.equal(headers['content-encoding'], 'gzip');
+});

@@ -4,12 +4,15 @@ import { createServer } from 'node:http';
 import { timingSafeEqual } from 'node:crypto';
 import { extname, join, normalize, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { gzipSync } from 'node:zlib';
 import { buildPostmanCollection, buildPostmanEnvironment } from './postman.mjs';
 
 const appDir = fileURLToPath(new URL('.', import.meta.url));
 const publicDir = join(appDir, 'public');
 const dataDir = resolve(process.env.CATALOGUE_DATA_DIR || join(appDir, '..'));
 const port = Number(process.env.PORT || 8080);
+// The catalogue is rebuilt from disk at most this often; data only changes when the repo is pulled.
+const catalogCacheMs = Number(process.env.CATALOG_CACHE_MS ?? 15000);
 
 // Basic Auth is opt-in: set AUTH_PASSWORD (e.g. in a local, gitignored .env file — never commit
 // it) to require credentials for every request. With no password configured the server stays
@@ -55,8 +58,15 @@ const mimeTypes = {
 };
 
 function sendJson(response, status, value) {
-  response.writeHead(status, { 'content-type': mimeTypes['.json'], 'cache-control': 'no-store' });
-  response.end(JSON.stringify(value));
+  const body = JSON.stringify(value);
+  const headers = { 'content-type': mimeTypes['.json'], 'cache-control': 'no-store', vary: 'accept-encoding' };
+  // The aggregate endpoints return a few MB of JSON that compresses ~30x.
+  if (body.length > 1024 && /\bgzip\b/.test(response.req?.headers['accept-encoding'] || '')) {
+    response.writeHead(status, { ...headers, 'content-encoding': 'gzip' });
+    return response.end(gzipSync(body));
+  }
+  response.writeHead(status, headers);
+  response.end(body);
 }
 
 function sendDownload(response, filename, value) {
@@ -133,8 +143,68 @@ async function buildCatalog() {
   }));
 }
 
+let catalogCache = null;
+
+function getCatalog() {
+  if (!catalogCache || Date.now() - catalogCache.builtAt > catalogCacheMs) {
+    const pending = buildCatalog();
+    catalogCache = { builtAt: Date.now(), pending };
+    pending.catch(() => { if (catalogCache?.pending === pending) catalogCache = null; });
+  }
+  return catalogCache.pending;
+}
+
+// Generated data files per source, keyed by the kind used in /api/sources/:id/:kind.
+const DATA_FILES = {
+  database: ['db-schema', 'database.schema.json'],
+  messages: ['event-catalog', 'events-and-commands.json'],
+  dependencies: ['service-dependencies', 'service-dependencies.json'],
+  security: ['dependency-alerts', 'dependabot-alerts.json'],
+  localdev: ['local-dev-config', 'local-dev-config.json'],
+  apisecurity: ['api-security-audit', 'report.json'],
+  metadata: ['repo-metadata', 'repo-metadata.json'],
+  topics: ['repo-topics', 'repo-topics.json']
+};
+
+// One source's data file, or null when it is missing or unreadable.
+async function readSourceFile(source, kind) {
+  const file = join(safeChild(dataDir, source.name), ...DATA_FILES[kind]);
+  if (!await exists(file)) return null;
+  try {
+    return await readJson(file);
+  } catch {
+    return null;
+  }
+}
+
+// Everything the home dashboard's tabs need, in one response instead of one request per source and tab.
+async function buildDashboard(catalog) {
+  return Promise.all(catalog.map(async (source) => {
+    const [security, apiSecurity, metadata, topics, database] = await Promise.all([
+      readSourceFile(source, 'security'),
+      readSourceFile(source, 'apisecurity'),
+      source.capabilities.metadata ? readSourceFile(source, 'metadata') : null,
+      readSourceFile(source, 'topics'),
+      source.capabilities.databaseScanned ? readSourceFile(source, 'database') : null
+    ]);
+    return { id: source.id, security, apiSecurity, metadata, topics: topics?.topics ?? null, database };
+  }));
+}
+
+// Every source's dependencies, events/commands and topics, shared by the landscape and topics pages.
+async function buildLandscapeData(catalog) {
+  return Promise.all(catalog.map(async (source) => {
+    const [dependencies, messages, topics] = await Promise.all([
+      source.capabilities.dependencies ? readSourceFile(source, 'dependencies') : null,
+      source.capabilities.messages ? readSourceFile(source, 'messages') : null,
+      readSourceFile(source, 'topics')
+    ]);
+    return { id: source.id, dependencies, messages, topics: topics?.topics ?? null };
+  }));
+}
+
 async function sourceById(id) {
-  const catalog = await buildCatalog();
+  const catalog = await getCatalog();
   const source = catalog.find((item) => item.id === id);
   if (!source) throw Object.assign(new Error('Unknown source'), { statusCode: 404 });
   return source;
@@ -154,7 +224,13 @@ function safeChild(base, ...parts) {
 
 async function handleApi(request, response, url) {
   if (url.pathname === '/api/catalog') {
-    return sendJson(response, 200, { sources: await buildCatalog() });
+    return sendJson(response, 200, { sources: await getCatalog() });
+  }
+  if (url.pathname === '/api/dashboard') {
+    return sendJson(response, 200, { sources: await buildDashboard(await getCatalog()) });
+  }
+  if (url.pathname === '/api/landscape') {
+    return sendJson(response, 200, { sources: await buildLandscapeData(await getCatalog()) });
   }
 
   const diagramMatch = url.pathname.match(/^\/api\/sources\/([^/]+)\/dependency-diagram$/);
@@ -186,15 +262,7 @@ async function handleApi(request, response, url) {
   const [, id, kind] = match;
   const source = await sourceById(decodeURIComponent(id));
   const sourceDir = safeChild(dataDir, source.name);
-  let file;
-  if (kind === 'database') file = join(sourceDir, 'db-schema', 'database.schema.json');
-  if (kind === 'messages') file = join(sourceDir, 'event-catalog', 'events-and-commands.json');
-  if (kind === 'dependencies') file = join(sourceDir, 'service-dependencies', 'service-dependencies.json');
-  if (kind === 'security') file = join(sourceDir, 'dependency-alerts', 'dependabot-alerts.json');
-  if (kind === 'localdev') file = join(sourceDir, 'local-dev-config', 'local-dev-config.json');
-  if (kind === 'apisecurity') file = join(sourceDir, 'api-security-audit', 'report.json');
-  if (kind === 'metadata') file = join(sourceDir, 'repo-metadata', 'repo-metadata.json');
-  if (kind === 'topics') file = join(sourceDir, 'repo-topics', 'repo-topics.json');
+  let file = DATA_FILES[kind] ? join(sourceDir, ...DATA_FILES[kind]) : null;
   if (kind === 'openapi') {
     const requested = url.searchParams.get('file');
     if (!requested || !source.apiFiles.includes(requested)) {
