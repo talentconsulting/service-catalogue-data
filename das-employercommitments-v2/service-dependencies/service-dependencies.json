@@ -1,0 +1,170 @@
+{
+  "repository": "SkillsFundingAgency/das-employercommitments-v2",
+  "ref": "master",
+  "path": "src",
+  "systemName": "Employer Commitments",
+  "containers": [
+    {
+      "id": "employer-commitments",
+      "name": "Employer Commitments",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Program.cs",
+          "reason": "Entry point for web application detected via WebHost creation."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/SFA.DAS.EmployerCommitmentsV2.Web.csproj",
+          "reason": "Project file indicating an ASP.NET Core web application."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "employer-commitments",
+      "name": "Redis Cache",
+      "kind": "cache",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "StackExchangeRedis",
+      "technology": "Redis",
+      "configurationKeys": [
+        "ConnectionStrings:RedisConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "Cache setup included in Startup class."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Extensions/CacheStartupExtensions.cs",
+          "reason": "Redis cache configured with an AddStackExchangeRedisCache call using ConnectionStrings:RedisConnectionString."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis-cache",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Approvals API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ApprovalsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "endpoint",
+          "name": "ApprovalsApiClientConfiguration:ApiBaseUrl",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-approvals-api",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Commitment Permissions API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "CommitmentPermissionsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "CommitmentPermissionsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "unknown",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "endpoint",
+          "name": "CommitmentPermissionsApiClientConfiguration:ApiBaseUrl",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/CommitmentPermissionsApiClientFactory.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "CommitmentPermissionsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/CommitmentPermissionsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from CommitmentPermissionsApiClientConfiguration:ApiBaseUrl."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-commitment-permissions-api",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Commitments API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "CommitmentsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "CommitmentsClientApiConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "Basic",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "endpoint",
+          "name": "CommitmentsClientApiConfiguration:ApiBaseUrl",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/CommitmentApiClientFactory.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "CommitmentsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/CommitmentApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from CommitmentsClientApiConfiguration:ApiBaseUrl and Basic Authentication."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-commitments-api",
+      "description": "Calls the API of"
+    }
+  ]
+}

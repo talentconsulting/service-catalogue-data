@@ -11,11 +11,11 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Reservations.Web/Program.cs",
-          "reason": "Detected web application entry point through ASP.NET Core hosting configuration."
+          "reason": "ASP.NET web application entry point"
         },
         {
           "sourceFile": "src/SFA.DAS.Reservations.Web/SFA.DAS.Reservations.Web.csproj",
-          "reason": "Project file uses Microsoft.NET.Sdk.Web, indicating a web application."
+          "reason": "Project uses Microsoft.NET.Sdk.Web SDK"
         }
       ]
     }
@@ -27,7 +27,7 @@
       "kind": "cache",
       "classification": "third-party",
       "direction": "outbound",
-      "client": null,
+      "client": "StackExchangeRedisCache",
       "technology": "Redis",
       "configurationKeys": [
         "ReservationsWeb:RedisCacheConnectionString"
@@ -41,16 +41,47 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Reservations.Web/Startup.cs",
-          "reason": "Detected StackExchangeRedisCache setup in the service configuration."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.Reservations.Web/SFA.DAS.Reservations.Web.csproj",
-          "reason": "Project file includes StackExchange.Redis package reference, indicating usage of Redis."
+          "reason": "AddStackExchangeRedisCache registration"
         }
       ],
       "confidence": "high",
       "targetId": "cache-redis-cache",
       "description": "Caches data in"
+    },
+    {
+      "sourceId": "reservations-web",
+      "name": "Commitments API",
+      "kind": "http-api",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": null,
+      "configurationKeys": [
+        "CommitmentsApi"
+      ],
+      "authentication": {
+        "type": "unknown",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/Startup.cs",
+          "reason": "AddCommitmentsApi registration"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Domain/SFA.DAS.Reservations.Domain.csproj",
+          "reason": "Uses SFA.DAS.CommitmentsV2.Types package"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/SFA.DAS.Reservations.Infrastructure.csproj",
+          "reason": "Uses SFA.DAS.CommitmentsV2.Types package"
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-commitments-api",
+      "description": "Calls the API of"
     },
     {
       "sourceId": "reservations-web",
@@ -61,34 +92,37 @@
       "client": "IApiClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "ReservationsWeb:ApiSettings:Url"
+        "ReservationsApiConfiguration"
       ],
       "authentication": {
-        "type": "OAuth2",
+        "type": "client credentials",
         "configurationKeys": [
-          "ReservationsWeb:ApiSettings:Id",
-          "ReservationsWeb:ApiSettings:Identifier",
-          "ReservationsWeb:ApiSettings:Secret",
-          "ReservationsWeb:ApiSettings:Tenant"
+          "ReservationsApiConfiguration.Id",
+          "ReservationsApiConfiguration.Secret",
+          "ReservationsApiConfiguration.Tenant"
         ]
       },
       "operations": [
         {
           "method": "GET",
           "methodName": "Ping",
-          "path": "ping",
+          "path": "/ping",
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs"
         }
       ],
       "resources": [],
       "evidence": [
         {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/Startup.cs",
+          "reason": "Configured health check for Reservations API"
+        },
+        {
           "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs",
-          "reason": "HttpClient used directly to perform HTTP requests to the Reservations API."
+          "reason": "HttpClient instance for Reservations API calls"
         },
         {
           "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
-          "reason": "IApiClient is registered as a service with configuration tied to the Reservations API."
+          "reason": "Registered IApiClient with dependency injection"
         }
       ],
       "confidence": "high",

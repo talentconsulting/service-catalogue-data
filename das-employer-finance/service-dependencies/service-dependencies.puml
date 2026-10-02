@@ -1,0 +1,45 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+System_Boundary(sys_SkillsFundingAgency_das_employer_finance, "Employer Finance") {
+  Container(c_employer_finance, "Employer Finance", "API")
+  Container(c_employer_finance_jobs, "Employer Finance Jobs", "Background Job")
+  Container(c_employer_finance_messagehandlers, "Employer Finance MessageHandlers", "Background Job")
+  Container(c_employer_finance_web, "Employer Finance Web", "Web Application")
+}
+
+SystemDb_Ext(d_cache_redis, "Redis", "StackExchange.Redis")
+SystemDb_Ext(d_cache_stackexchange_redis, "StackExchange Redis", "Microsoft.AspNetCore.DataProtection.StackExchangeRedis")
+System_Ext(d_cloud_service_azure_application_insights, "Azure Application Insights", "Azure Application Insights")
+System_Ext(d_cloud_service_azure_identity, "Azure Identity", "Azure.Identity")
+System_Ext(d_cloud_service_azure_managed_identity, "Azure Managed Identity", "Azure SDK")
+SystemDb_Ext(d_database_sql_server, "SQL Server", "Microsoft.EntityFrameworkCore.SqlServer")
+System_Ext(d_http_api_apprenticeship_levy, "Apprenticeship Levy", "HMRC.ESFA.Levy.Api.Client")
+System_Ext(d_http_api_commitments_v2, "Commitments V2", "HttpClient")
+System_Ext(d_http_api_content_api, "Content API", "HttpClient")
+System_Ext(d_http_api_http_wrapper, "HTTP Wrapper", "HttpClient")
+System_Ext(d_http_api_outer_api, "Outer API", "HttpClient")
+System_Ext(d_http_api_payments_events, "Payments Events", "HttpClient")
+SystemQueue_Ext(d_message_broker_azure_service_bus, "Azure Service Bus", "Azure.Messaging.ServiceBus")
+
+Rel(c_employer_finance, d_cache_redis, "Caches data in", "StackExchange.Redis")
+Rel(c_employer_finance, d_cache_stackexchange_redis, "Caches data in", "Microsoft.AspNetCore.DataProtection.StackExchangeRedis")
+Rel(c_employer_finance_web, d_cloud_service_azure_application_insights, "Uses", "Azure Application Insights")
+Rel(c_employer_finance, d_cloud_service_azure_identity, "Uses", "Azure.Identity")
+Rel(c_employer_finance, d_cloud_service_azure_managed_identity, "Uses", "Azure SDK")
+Rel(c_employer_finance, d_database_sql_server, "Reads from and writes to", "Microsoft.EntityFrameworkCore.SqlServer")
+Rel(c_employer_finance_web, d_database_sql_server, "Reads from and writes to", "Entity Framework Core")
+Rel(c_employer_finance_messagehandlers, d_database_sql_server, "Reads from and writes to", "Entity Framework Core")
+Rel(c_employer_finance, d_http_api_apprenticeship_levy, "Calls the API of", "HMRC.ESFA.Levy.Api.Client")
+Rel(c_employer_finance_messagehandlers, d_http_api_apprenticeship_levy, "Calls the API of", "HttpClient")
+Rel(c_employer_finance_web, d_http_api_commitments_v2, "Calls the API of", "HttpClient")
+Rel(c_employer_finance, d_http_api_content_api, "Calls the API of", "HttpClient")
+Rel(c_employer_finance_web, d_http_api_content_api, "Calls the API of", "HttpClient")
+Rel(c_employer_finance, d_http_api_http_wrapper, "Calls the API of", "HttpClient")
+Rel(c_employer_finance, d_http_api_outer_api, "Calls the API of", "HttpClient")
+Rel(c_employer_finance_messagehandlers, d_http_api_payments_events, "Calls the API of", "HttpClient")
+Rel(c_employer_finance, d_message_broker_azure_service_bus, "Publishes messages to and consumes messages from", "Azure.Messaging.ServiceBus")
+Rel(c_employer_finance_messagehandlers, d_message_broker_azure_service_bus, "Publishes messages to and consumes messages from", "Azure Service Bus")
+
+@enduml

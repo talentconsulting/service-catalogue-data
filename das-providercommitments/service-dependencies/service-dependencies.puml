@@ -1,0 +1,25 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+System_Boundary(sys_SkillsFundingAgency_das_providercommitments, "Provider Commitments") {
+  Container(c_provider_commitments, "Provider Commitments", "API")
+  Container(c_provider_commitments_web, "Provider Commitments", "Web Application")
+}
+
+SystemDb_Ext(d_cache_redis_cache, "Redis Cache", "StackExchangeRedis")
+System_Ext(d_http_api_approvals_outer_api, "Approvals Outer API", "HttpClient")
+System_Ext(d_http_api_commitment_permissions, "Commitment Permissions", "HttpClient")
+System_Ext(d_http_api_commitments, "Commitments", "HttpClient")
+System_Ext(d_http_api_pas_account, "PAS Account", "HttpClient")
+SystemDb_Ext(d_object_storage_blob_storage, "Blob Storage", "Azure Blob Storage")
+
+Rel(c_provider_commitments_web, d_cache_redis_cache, "Caches data in", "StackExchangeRedis")
+Rel(c_provider_commitments, d_http_api_approvals_outer_api, "Calls the API of", "HttpClient")
+Rel(c_provider_commitments_web, d_http_api_approvals_outer_api, "Calls the API of", "HttpClient")
+Rel(c_provider_commitments_web, d_http_api_commitment_permissions, "Calls the API of", "HttpClient")
+Rel(c_provider_commitments_web, d_http_api_commitments, "Calls the API of", "HttpClient")
+Rel(c_provider_commitments_web, d_http_api_pas_account, "Calls the API of", "HttpClient")
+Rel(c_provider_commitments_web, d_object_storage_blob_storage, "Stores objects in", "Azure Blob Storage")
+
+@enduml
