@@ -215,7 +215,7 @@ function messageDependencies(source, messages) {
     groups.get(key).messages.push(message);
   }
   return [...groups.values()].map((group) => {
-    const matchedSystem = state.catalog.find((candidate) => candidate.id !== source.id && canRelate(group.tokens, new Set(tokenize(candidate.name))));
+    const matchedSystem = bestMatchingSystem(group.tokens, state.catalog.filter((candidate) => candidate.id !== source.id), (candidate) => new Set(tokenize(candidate.name)));
     return {
       name: matchedSystem ? titleCase(matchedSystem.name) : splitPascalCase(group.label),
       kind: 'message',
@@ -593,12 +593,19 @@ function relationshipLabel(dependency) {
 
 const LANDSCAPE_STOPWORDS = new Set(['das', 'sfa', 'api', 'apis', 'client', 'clients', 'service', 'services', 'http', 'https', 'httpclient', 'httphelper', 'httpservice', 'wrapper', 'outer', 'inner', 'the', 'a', 'an', 'i', 'v1', 'v2', 'v3']);
 
+// Light stemming so word forms of one name agree, e.g. "Certificates" and "certification".
+function stemToken(word) {
+  const base = word.length > 6 && word.endsWith('ion') ? word.slice(0, -3) : word;
+  return base.length > 5 && base.endsWith('e') ? base.slice(0, -1) : base;
+}
+
 function tokenize(value) {
   return splitPascalCase(String(value || ''))
     .split(/[^a-zA-Z0-9]+/)
     .map((word) => word.toLowerCase())
     .map((word) => (word.length > 4 && word.endsWith('s') ? word.slice(0, -1) : word))
-    .filter((word) => word.length > 1 && !LANDSCAPE_STOPWORDS.has(word));
+    .filter((word) => word.length > 1 && !LANDSCAPE_STOPWORDS.has(word))
+    .map(stemToken);
 }
 
 function isSubset(small, big) {
@@ -606,8 +613,52 @@ function isSubset(small, big) {
   return true;
 }
 
+// Repo slugs often run words together ("das-findapprenticeship-api") where dependency names
+// keep them apart ("Find Apprenticeship API"), so a token set also matches the joined form of
+// any run of adjacent tokens.
+function expandTokens(tokens) {
+  const list = [...tokens];
+  const expanded = new Set(list);
+  for (let start = 0; start < list.length; start++) {
+    let joined = list[start];
+    for (let end = start + 1; end < list.length; end++) {
+      joined += list[end];
+      expanded.add(joined);
+      expanded.add(stemToken(joined));
+    }
+  }
+  return expanded;
+}
+
 function canRelate(a, b) {
-  return a.size > 0 && b.size > 0 && (isSubset(a, b) || isSubset(b, a));
+  return a.size > 0 && b.size > 0 && (isSubset(a, expandTokens(b)) || isSubset(b, expandTokens(a)));
+}
+
+// When several catalogued systems relate to a name, pick the closest one. A system whose whole
+// name appears in the dependency name wins, the longest such name first ("Provider Commitments"
+// is das-providercommitments, not das-commitments); otherwise the system with the fewest words
+// the dependency name doesn't mention ("Accounts" is das-employer-accounts, not
+// das-apprentice-accounts-web). Ties keep manifest order.
+function bestMatchingSystem(tokens, candidates, tokensFor) {
+  const expanded = expandTokens(tokens);
+  let best = null;
+  let bestScore = -Infinity;
+  for (const candidate of candidates) {
+    const candidateTokens = tokensFor(candidate);
+    if (!canRelate(tokens, candidateTokens)) continue;
+    const extra = [...candidateTokens].filter((token) => !expanded.has(token));
+    const score = extra.length ? -extra.length : 1000 + [...candidateTokens].join('').length;
+    if (score > bestScore) { best = candidate; bestScore = score; }
+  }
+  return best;
+}
+
+// Outer APIs are all hosted in one repository; a dependency named "<Something> Outer API" is a
+// call to that repository, whatever it is called.
+const OUTER_API_SOURCE_ID = 'das-apim-endpoints';
+
+function isOuterApiDependency(dependency) {
+  return dependency.kind === 'http-api' && /\bouter\b/i.test(splitPascalCase(String(dependency.name || '')));
 }
 
 function edgeVerb(edge, isOutboundFromNode) {
@@ -673,9 +724,13 @@ function buildLandscape(sources, dependencySets) {
     for (const [dependencyIndex, dependency] of dependencies.entries()) {
       const matchedFlag = INFRA_FLAGS.find((flag) => flag.test(dependency) || infraTargetIds.get(flag.key).get(source.id)?.has(dependency.targetId));
       if (matchedFlag) { infraSourceIds.get(matchedFlag.key).add(source.id); continue; }
+      const outerApiSystem = source.id !== OUTER_API_SOURCE_ID && isOuterApiDependency(dependency)
+        ? sources.find((candidate) => candidate.id === OUTER_API_SOURCE_ID)
+        : null;
       const depTokens = new Set(tokenize(dependency.name));
-      if (canRelate(depTokens, ownTokens)) continue;
-      const matchedSystem = sources.find((candidate) => candidate.id !== source.id && canRelate(depTokens, systemTokenMap.get(candidate.id)));
+      if (!outerApiSystem && canRelate(depTokens, ownTokens)) continue;
+      const matchedSystem = outerApiSystem
+        || bestMatchingSystem(depTokens, sources.filter((candidate) => candidate.id !== source.id), (candidate) => systemTokenMap.get(candidate.id));
       if (matchedSystem) {
         const [from, to] = dependency.direction === 'inbound' ? [`sys:${matchedSystem.id}`, `sys:${source.id}`] : [`sys:${source.id}`, `sys:${matchedSystem.id}`];
         addEdge(from, to, dependency, { sourceId: source.id, dependencyIndex });
