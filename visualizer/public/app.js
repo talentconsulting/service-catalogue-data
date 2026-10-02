@@ -1456,12 +1456,11 @@ function renderDashboardStats() {
     return;
   }
   if (state.dashboardTab === 'databases') {
-    const results = state.databaseSchemas || [];
-    const scanned = results.filter((result) => result.schema);
-    const tables = scanned.flatMap((result) => result.schema.tables || []);
-    const piiRepos = scanned.filter((result) => databasePiiCount(result.schema) > 0).length;
+    const { results, withTables } = databaseCoverage();
+    const tables = withTables.flatMap((result) => result.schema.tables);
+    const piiRepos = withTables.filter((result) => databasePiiCount(result.schema) > 0).length;
     $('#source-stats').innerHTML = `
-      <div class="stat"><dt>Repos with schema</dt><dd>${scanned.length}/${results.length}</dd></div>
+      <div class="stat"><dt>Repos with a database</dt><dd>${withTables.length}/${results.length}</dd></div>
       <div class="stat"><dt>Tables</dt><dd>${tables.length}</dd></div>
       <div class="stat"><dt>Tables with PII</dt><dd>${tables.filter((table) => table.hasPii === true).length}</dd></div>
       <div class="stat"><dt>Repos with PII</dt><dd>${piiRepos}</dd></div>`;
@@ -1716,19 +1715,27 @@ function piiBadge(hasPii) {
 }
 
 function databasePiiCell(schema) {
-  if (!schema) return '<span class="muted">Not scanned</span>';
-  const tables = schema.tables || [];
-  if (!tables.length) return '<span class="muted">No tables</span>';
+  const tables = schema.tables;
   const piiCount = databasePiiCount(schema);
   if (piiCount) return `${piiBadge(true)} <span class="muted">${piiCount} of ${tables.length} tables</span>`;
   return tables.every((table) => table.hasPii === false) ? piiBadge(false) : piiBadge(null);
 }
 
-function renderDatabasesSection() {
+// Only repos whose schema has tables are listed; the rest are summarised in one line.
+function databaseCoverage() {
   const results = state.databaseSchemas || [];
-  const scanned = results.filter((result) => result.schema);
+  return {
+    results,
+    withTables: results.filter((result) => result.schema?.tables?.length),
+    noTables: results.filter((result) => result.schema && !result.schema.tables?.length),
+    notScanned: results.filter((result) => !result.schema)
+  };
+}
+
+function renderDatabasesSection() {
+  const { withTables, noTables, notScanned } = databaseCoverage();
   const sort = dashboardSortState('databases-summary', 'piiTables', 'desc');
-  const rowsAll = sortRows(results, sort, {
+  const rowsAll = sortRows(withTables, sort, {
     name: (a, b, dir) => compareText(a.source.name, b.source.name, dir),
     database: (a, b, dir) => compareText(a.schema?.database?.name, b.schema?.database?.name, dir),
     tables: (a, b, dir) => compareNumber(a.schema?.tables?.length, b.schema?.tables?.length, dir),
@@ -1738,7 +1745,7 @@ function renderDatabasesSection() {
 
   return `<section class="dashboard-section">
     <h2>Databases</h2>
-    <p class="section-sub">Generated database schemas across ${results.length} cataloged repositories — ${scanned.length} with a schema. Click a row to see which tables hold PII.</p>
+    <p class="section-sub">${withTables.length} ${withTables.length === 1 ? 'repository has' : 'repositories have'} a database${noTables.length ? `; ${noTables.length} scanned with no tables` : ''}${notScanned.length ? `; ${notScanned.length} not scanned` : ''}. Click a row to see which tables hold PII.</p>
     <div class="table-wrap">
       <table class="data-table repo-alert-table">
         <thead><tr>${sortableHeaderCell('databases-summary', 'name', 'Repository')}${sortableHeaderCell('databases-summary', 'database', 'Database')}${sortableHeaderCell('databases-summary', 'tables', 'Tables')}${sortableHeaderCell('databases-summary', 'piiTables', 'Contains PII')}<th>Links</th></tr></thead>
@@ -1752,22 +1759,20 @@ function renderDatabasesSection() {
 function databaseRows({ source, schema }) {
   const rowId = `db-${source.id}`;
   const expanded = state.dashboardExpanded.has(rowId);
-  const database = schema?.database;
+  const database = schema.database;
   const scanPath = source.scans.dbschema?.['path-to-scan'];
-  const links = schema ? `<div class="badges dashboard-links">
+  const links = `<div class="badges dashboard-links">
       <button class="badge blue as-link" type="button" data-open-schema="${escapeHtml(source.id)}">View schema →</button>
       ${scanPath ? `<a class="badge as-link" href="${escapeHtml(`${source.repository.replace(/\/$/, '')}/${scanPath}`)}" target="_blank" rel="noopener noreferrer">Source ↗</a>` : ''}
       <a class="badge as-link" href="/api/sources/${encodeURIComponent(source.id)}/database" target="_blank" rel="noopener noreferrer">JSON ↗</a>
-    </div>` : '';
-  const expandable = Boolean(schema?.tables?.length);
-  const summaryRow = `<tr ${expandable ? `class="repo-alert-row" data-toggle-alerts="${escapeHtml(rowId)}"` : ''}>
+    </div>`;
+  const summaryRow = `<tr class="repo-alert-row" data-toggle-alerts="${escapeHtml(rowId)}">
     <td><span class="repo-name">${escapeHtml(titleCase(source.name))}</span><span class="repo-slug">${escapeHtml(orgRepoSlug(source.repository))}</span></td>
     <td>${database?.name ? `<code>${escapeHtml(database.name)}</code>${database.engine ? `<span class="repo-slug">${escapeHtml(database.engine)}</span>` : ''}` : '<span class="muted">—</span>'}</td>
-    <td>${schema ? (schema.tables || []).length : '—'}</td>
+    <td>${schema.tables.length}</td>
     <td>${databasePiiCell(schema)}</td>
     <td>${links}</td>
   </tr>`;
-  if (!expandable) return summaryRow;
   const detailRow = `<tr class="repo-alert-detail-row" data-detail-for="${escapeHtml(rowId)}" ${expanded ? '' : 'hidden'}><td colspan="5"><div class="repo-alert-detail">${databaseTablesDetail(schema, rowId)}</div></td></tr>`;
   return summaryRow + detailRow;
 }
