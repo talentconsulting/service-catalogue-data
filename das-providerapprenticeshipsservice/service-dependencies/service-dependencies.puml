@@ -1,0 +1,24 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+System_Boundary(sys_SkillsFundingAgency_das_providerapprenticeshipsservice, "Provider Apprenticeships Service") {
+  Container(c_provider_apprenticeships_service_api, "Provider Apprenticeships Service", "API")
+  Container(c_provider_apprenticeships_service_jobs, "Provider Apprenticeships Service Jobs", "Background Job")
+  Container(c_provider_apprenticeships_service_web, "Provider Apprenticeships Service", "Web Application")
+}
+
+System_Ext(d_cloud_service_azure_table_storage, "Azure Table Storage", "Azure Table Storage")
+System_Ext(d_cloud_service_opentelemetry_application_insights, "OpenTelemetry Application Insights", "Azure Application Insights")
+SystemDb_Ext(d_database_azure_sql_database, "Azure SQL Database", "Microsoft.Data.SqlClient")
+System_Ext(d_http_api_roatp_api, "RoATP API", "Refit")
+SystemQueue_Ext(d_message_broker_nservicebus, "NServiceBus", "NServiceBus")
+
+Rel(c_provider_apprenticeships_service_jobs, d_cloud_service_azure_table_storage, "Uses", "Azure Table Storage")
+Rel(c_provider_apprenticeships_service_web, d_cloud_service_opentelemetry_application_insights, "Uses", "Azure Application Insights")
+Rel(c_provider_apprenticeships_service_web, d_database_azure_sql_database, "Reads from and writes to", "Microsoft.Data.SqlClient")
+Rel(c_provider_apprenticeships_service_api, d_database_azure_sql_database, "Reads from and writes to", "SQL Server")
+Rel(c_provider_apprenticeships_service_jobs, d_http_api_roatp_api, "Calls the API of", "Refit")
+Rel(c_provider_apprenticeships_service_web, d_message_broker_nservicebus, "Publishes messages to and consumes messages from", "NServiceBus")
+
+@enduml

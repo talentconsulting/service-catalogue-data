@@ -10,16 +10,12 @@
       "type": "web",
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.Campaign.Web/Startup.cs",
-          "reason": "Configures ASP.NET Core web pipeline and endpoints."
-        },
-        {
           "sourceFile": "src/SFA.DAS.Campaign.Web/Program.cs",
-          "reason": "Contains ASP.NET Core web entry point."
+          "reason": "ASP.NET Core web entry point (IWebHostBuilder)."
         },
         {
           "sourceFile": "src/SFA.DAS.Campaign.Web/SFA.DAS.Campaign.Web.csproj",
-          "reason": "Defines a Microsoft.NET.Sdk.Web project."
+          "reason": "Project targeting `Microsoft.NET.Sdk.Web`."
         }
       ]
     }
@@ -27,12 +23,12 @@
   "dependencies": [
     {
       "sourceId": "campaign-web",
-      "name": "Redis Cache",
+      "name": "Redis",
       "kind": "cache",
-      "classification": "unknown",
+      "classification": "third-party",
       "direction": "outbound",
-      "client": "StackExchange.Redis",
-      "technology": "Redis",
+      "client": "IConnectionMultiplexer",
+      "technology": "StackExchange.Redis",
       "configurationKeys": [
         "CampaignConfiguration:ConnectionStrings:SharedRedis"
       ],
@@ -41,106 +37,68 @@
         "configurationKeys": []
       },
       "operations": [],
-      "resources": [
-        {
-          "type": "redis",
-          "name": "SharedRedis",
-          "direction": "outbound",
-          "sourceFile": "src/SFA.DAS.Campaign.Web/Helpers/StartupExtensions.cs"
-        }
-      ],
+      "resources": [],
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Campaign.Web/Helpers/StartupExtensions.cs",
-          "reason": "ConnectionMultiplexer.Connect called for Redis with SharedRedis connection string."
+          "reason": "ConnectionMultiplexer configuration for StackExchange.Redis, with a named connection string."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Domain/SFA.DAS.Campaign.Domain.csproj",
+          "reason": "Redis client package `StackExchange.Redis` referenced."
         },
         {
           "sourceFile": "src/SFA.DAS.Campaign.Web/SFA.DAS.Campaign.Web.csproj",
-          "reason": "Microsoft.Extensions.Caching.StackExchangeRedis package referenced."
+          "reason": "Redis client package `StackExchange.Redis` referenced."
         }
       ],
       "confidence": "high",
-      "targetId": "cache-redis-cache",
+      "targetId": "cache-redis",
       "description": "Caches data in"
     },
     {
       "sourceId": "campaign-web",
-      "name": "Application Insights",
+      "name": "Azure Key Vault",
       "kind": "cloud-service",
       "classification": "third-party",
       "direction": "outbound",
-      "client": "ApplicationInsights",
-      "technology": "Microsoft.ApplicationInsights",
+      "client": "TokenCredential",
+      "technology": "Azure.Identity",
       "configurationKeys": [
-        "APPLICATIONINSIGHTS_CONNECTION_STRING"
+        "TenantId"
       ],
       "authentication": {
-        "type": null,
-        "configurationKeys": []
-      },
-      "operations": [],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.Campaign.Web/Startup.cs",
-          "reason": "Application Insights configured for telemetry."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.Campaign.Web/SFA.DAS.Campaign.Web.csproj",
-          "reason": "Microsoft.ApplicationInsights.AspNetCore package referenced."
-        }
-      ],
-      "confidence": "high",
-      "targetId": "cloud-service-application-insights",
-      "description": "Uses"
-    },
-    {
-      "sourceId": "campaign-web",
-      "name": "Azure Table Storage",
-      "kind": "database",
-      "classification": "unknown",
-      "direction": "outbound",
-      "client": "AzureTableStorage",
-      "technology": "Azure.Cosmos.Table",
-      "configurationKeys": [
-        "ConfigurationStorageConnectionString"
-      ],
-      "authentication": {
-        "type": null,
+        "type": "oidc",
         "configurationKeys": [
-          "ConfigurationStorageConnectionString"
+          "TenantId"
         ]
       },
       "operations": [],
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.Campaign.Web/Startup.cs",
-          "reason": "Azure Table Storage configured for application configuration keys."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.Campaign.Web/SFA.DAS.Campaign.Web.csproj",
-          "reason": "Azure.Cosmos.Table package referenced."
+          "sourceFile": "src/SFA.DAS.Campaign.Web/Helpers/StartupExtensions.cs",
+          "reason": "Azure Key Vault client configured with TenantId using Azure.Identity library."
         }
       ],
       "confidence": "high",
-      "targetId": "database-azure-table-storage",
-      "description": "Reads from and writes to"
+      "targetId": "cloud-service-azure-key-vault",
+      "description": "Uses"
     },
     {
       "sourceId": "campaign-web",
       "name": "Outer API",
       "kind": "http-api",
-      "classification": "unknown",
+      "classification": "internal",
       "direction": "outbound",
-      "client": "ApiClient",
-      "technology": null,
+      "client": "IApiClient",
+      "technology": "HttpClient",
       "configurationKeys": [
         "CampaignConfiguration:OuterApi:BaseUrl",
         "CampaignConfiguration:OuterApi:Key"
       ],
       "authentication": {
-        "type": "subscription-key",
+        "type": "key",
         "configurationKeys": [
           "CampaignConfiguration:OuterApi:Key"
         ]
@@ -149,19 +107,22 @@
         {
           "method": "GET",
           "methodName": "Get",
-          "path": null,
+          "path": "{request.GetUrl}",
           "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs"
         }
       ],
-      "resources": [],
+      "resources": [
+        {
+          "type": "endpoint",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs"
+        }
+      ],
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs",
-          "reason": "HttpClient configured with base URL and key for Outer API."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.Campaign.Web/Startup.cs",
-          "reason": "IApiClient registered with HTTP client factory."
+          "reason": "HttpClient configured with BaseAddress from CampaignConfiguration and subscription key is set in headers."
         }
       ],
       "confidence": "high",
@@ -172,10 +133,10 @@
       "sourceId": "campaign-web",
       "name": "Azure Queue Storage",
       "kind": "message-broker",
-      "classification": "unknown",
+      "classification": "third-party",
       "direction": "outbound",
-      "client": "AzureQueueService",
-      "technology": "Azure.Storage.Queue",
+      "client": null,
+      "technology": "Azure Storage Queue",
       "configurationKeys": [
         "CampaignConfiguration:QueueConnectionString"
       ],
@@ -188,7 +149,7 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Campaign.Web/Helpers/StartupExtensions.cs",
-          "reason": "Adds Azure Queue Storage health check with queue connection string."
+          "reason": "Azure Queue Storage health check configured with campaign QueueConnectionString."
         }
       ],
       "confidence": "high",

@@ -1,0 +1,22 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+System_Boundary(sys_SkillsFundingAgency_das_findapprenticeship_web, "Find An Apprenticeship") {
+  Container(c_find_an_apprenticeship, "Find An Apprenticeship", "Component")
+  Container(c_findanapprenticeship_mockserver, "FindAnApprenticeship MockServer", "Component")
+  Container(c_findanapprenticeship_web, "FindAnApprenticeship", "Web Application")
+}
+
+SystemDb_Ext(d_cache_redis, "Redis", "StackExchange.Redis")
+System_Ext(d_cloud_service_azure_key_vault, "Azure Key Vault", "Azure SDK")
+System_Ext(d_http_api_find_an_apprenticeship_outer, "Find An Apprenticeship Outer", "HttpClient")
+System_Ext(d_http_api_find_an_apprenticeship_outer_api, "Find An Apprenticeship Outer API", "HttpClient")
+
+Rel(c_findanapprenticeship_web, d_cache_redis, "Caches data in", "StackExchange.Redis")
+Rel(c_find_an_apprenticeship, d_cloud_service_azure_key_vault, "Uses", "Azure SDK")
+Rel(c_findanapprenticeship_web, d_cloud_service_azure_key_vault, "Uses", "Azure SDK")
+Rel(c_findanapprenticeship_web, d_http_api_find_an_apprenticeship_outer, "Calls the API of", "HttpClient")
+Rel(c_find_an_apprenticeship, d_http_api_find_an_apprenticeship_outer_api, "Calls the API of", "HttpClient")
+
+@enduml

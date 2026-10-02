@@ -11,11 +11,11 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Courses.Api/Program.cs",
-          "reason": "ASP.NET Core entry point identified via WebHost configuration."
+          "reason": "ASP.NET entry point detected using CreateHostBuilder."
         },
         {
           "sourceFile": "src/SFA.DAS.Courses.Api/SFA.DAS.Courses.Api.csproj",
-          "reason": "Project file for the main API container."
+          "reason": "Project SDK is Web, indicating an API or web application."
         }
       ]
     }
@@ -23,12 +23,12 @@
   "dependencies": [
     {
       "sourceId": "courses",
-      "name": "SFA DAS Courses Redis Cache",
+      "name": "Redis Cache",
       "kind": "cache",
       "classification": "internal",
       "direction": "outbound",
       "client": null,
-      "technology": "StackExchange.Redis",
+      "technology": "Redis",
       "configurationKeys": [
         "Courses:RedisConnectionString"
       ],
@@ -41,45 +41,16 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Courses.Api/Startup.cs",
-          "reason": "AddStackExchangeRedisOutputCache registered with configuration key: Courses:RedisConnectionString."
+          "reason": "AddStackExchangeRedisOutputCache call with configuration from Courses:RedisConnectionString."
         }
       ],
       "confidence": "high",
-      "targetId": "cache-sfa-das-courses-redis-cache",
+      "targetId": "cache-redis-cache",
       "description": "Caches data in"
     },
     {
       "sourceId": "courses",
-      "name": "Azure Identity",
-      "kind": "cloud-service",
-      "classification": "internal",
-      "direction": "outbound",
-      "client": "DefaultAzureCredential",
-      "technology": "Azure SDK",
-      "configurationKeys": [],
-      "authentication": {
-        "type": null,
-        "configurationKeys": []
-      },
-      "operations": [],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.Courses.Api/AppStart/AddDatabaseExtension.cs",
-          "reason": "DefaultAzureCredential registered for token-based access to Azure services."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.Courses.Data/CoursesDataContext.cs",
-          "reason": "DefaultAzureCredential used for token authentication integration with Azure SQL Database."
-        }
-      ],
-      "confidence": "high",
-      "targetId": "cloud-service-azure-identity",
-      "description": "Uses"
-    },
-    {
-      "sourceId": "courses",
-      "name": "SFA DAS Courses Database",
+      "name": "Courses Database",
       "kind": "database",
       "classification": "internal",
       "direction": "outbound",
@@ -89,16 +60,14 @@
         "Courses:ConnectionString"
       ],
       "authentication": {
-        "type": "token",
-        "configurationKeys": [
-          "Courses:ConnectionString"
-        ]
+        "type": "Azure Default Credential",
+        "configurationKeys": []
       },
       "operations": [],
       "resources": [
         {
-          "type": "database",
-          "name": "SFA.DAS.Courses",
+          "type": "sql-server",
+          "name": null,
           "direction": "outbound",
           "sourceFile": "src/SFA.DAS.Courses.Api/AppStart/AddDatabaseExtension.cs"
         }
@@ -106,15 +75,15 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Courses.Api/AppStart/AddDatabaseExtension.cs",
-          "reason": "CoursesDataContext registered with SQL Server or in-memory database based on configuration."
+          "reason": "AddDbContext call for CoursesDataContext with optional SQL Server and in-memory database configurations."
         },
         {
           "sourceFile": "src/SFA.DAS.Courses.Data/CoursesDataContext.cs",
-          "reason": "CoursesDataContext uses EF Core for database access with connection-string and token authentication."
+          "reason": "Entity Framework Core DbContext subclass CoursesDataContext detected."
         }
       ],
       "confidence": "high",
-      "targetId": "database-sfa-das-courses-database",
+      "targetId": "database-courses-database",
       "description": "Reads from and writes to"
     },
     {
@@ -135,10 +104,10 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Courses.Api/AppStart/AddServiceRegistrationExtension.cs",
-          "reason": "HttpClient registration for IDataDownloadService and DataDownloadService."
+          "reason": "HttpClient registration for IDataDownloadService detected."
         }
       ],
-      "confidence": "medium",
+      "confidence": "high",
       "targetId": "http-api-data-download",
       "description": "Calls the API of"
     },
@@ -160,10 +129,10 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Courses.Api/AppStart/AddServiceRegistrationExtension.cs",
-          "reason": "HttpClient registration for IQualificationSectorSubjectAreaService and QualificationSectorSubjectAreaService."
+          "reason": "HttpClient registration for IQualificationSectorSubjectAreaService detected."
         }
       ],
-      "confidence": "medium",
+      "confidence": "high",
       "targetId": "http-api-qualification-sector-subject-area",
       "description": "Calls the API of"
     },
@@ -171,7 +140,7 @@
       "sourceId": "courses",
       "name": "Skills England",
       "kind": "http-api",
-      "classification": "third-party",
+      "classification": "unknown",
       "direction": "outbound",
       "client": "SkillsEnglandService",
       "technology": "HttpClient",
@@ -185,7 +154,7 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Courses.Api/AppStart/AddServiceRegistrationExtension.cs",
-          "reason": "HttpClient registration for ISkillsEnglandService and SkillsEnglandService."
+          "reason": "HttpClient registration for ISkillsEnglandService detected."
         }
       ],
       "confidence": "high",
@@ -196,7 +165,7 @@
       "sourceId": "courses",
       "name": "Slack Notification",
       "kind": "http-api",
-      "classification": "third-party",
+      "classification": "unknown",
       "direction": "outbound",
       "client": "SlackNotificationService",
       "technology": "HttpClient",
@@ -210,7 +179,7 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Courses.Api/AppStart/AddServiceRegistrationExtension.cs",
-          "reason": "HttpClient registration for ISlackNotificationService and SlackNotificationService."
+          "reason": "HttpClient registration for ISlackNotificationService detected."
         }
       ],
       "confidence": "high",

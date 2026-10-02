@@ -1,0 +1,135 @@
+{
+  "repository": "SkillsFundingAgency/das-payments-v2-providerpayments",
+  "ref": "main",
+  "path": "src",
+  "systemName": "SFA.DAS.Payments.ProviderPayments",
+  "containers": [
+    {
+      "id": "provider-payments-application",
+      "name": "Provider Payments Application",
+      "type": "other",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Application/SFA.DAS.Payments.ProviderPayments.Application.csproj",
+          "reason": "Project file indicates a library or non-deployable project used within the system."
+        }
+      ]
+    },
+    {
+      "id": "provider-payments-legacy-export-service",
+      "name": "Provider Payments Legacy Export Service",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.LegacyExportService/Program.cs",
+          "reason": "File contains the entry point for a background service implementing a stateful Service Fabric service."
+        }
+      ]
+    },
+    {
+      "id": "provider-payments-provider-payments-service",
+      "name": "Provider Payments Provider Payments Service",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.ProviderPaymentsService/Program.cs",
+          "reason": "File contains the entry point for a background service implementing a stateful Service Fabric service."
+        }
+      ]
+    },
+    {
+      "id": "sfa-das-payments-providerpayments-specs",
+      "name": "SFA.DAS.Payments.ProviderPayments Specs",
+      "type": "other",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Specs/SFA.DAS.Payments.ProviderPayments.Specs.csproj",
+          "reason": "Project file with SDK: Microsoft.NET.Sdk and test-related references, indicating a test project."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "sfa-das-payments-providerpayments-specs",
+      "name": "SQL Server",
+      "kind": "database",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": null,
+      "technology": "EF Core",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "Payments2",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Specs/Data/TestSessionDataContext.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Specs/Data/TestSessionDataContext.cs",
+          "reason": "DbContext subclass with a SQL Server connection using 'Payments2' schema."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-sql-server",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "provider-payments-application",
+      "name": "SQL Server",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "SqlConnection",
+      "technology": "SQL Server",
+      "configurationKeys": [
+        "DasPeriodEndConnectionString",
+        "PaymentsConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "connection-string",
+          "name": "DasPeriodEndConnectionString",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Application/Repositories/LegacyPaymentsRepository.cs"
+        },
+        {
+          "type": "connection-string",
+          "name": "PaymentsConnectionString",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Application/Infrastructure/ioc/ProviderPaymentsModule.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Application/Infrastructure/ioc/ProviderPaymentsModule.cs",
+          "reason": "Database context constructed explicitly using a connection string configuration key."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Application/Data/ProviderPaymentsDataContext.cs",
+          "reason": "DbContext for Provider Payments application uses SQL Server."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Application/Repositories/LegacyPaymentsRepository.cs",
+          "reason": "SqlConnection used with a connection string configuration key."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-sql-server",
+      "description": "Reads from and writes to"
+    }
+  ]
+}

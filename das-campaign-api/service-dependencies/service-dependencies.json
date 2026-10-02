@@ -10,12 +10,12 @@
       "type": "api",
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.Campaign.Api/Startup.cs",
-          "reason": "ASP.NET configuration and middleware setup"
+          "sourceFile": "src/SFA.DAS.Campaign.Api/Program.cs",
+          "reason": "ASP.NET Core entry point for the web application."
         },
         {
-          "sourceFile": "src/SFA.DAS.Campaign.Api/Program.cs",
-          "reason": "ASP.NET entry point with WebHost and Startup class"
+          "sourceFile": "src/SFA.DAS.Campaign.Api/SFA.DAS.Campaign.Api.csproj",
+          "reason": "Project file uses `Microsoft.NET.Sdk.Web` indicating a web application."
         }
       ]
     }
@@ -23,56 +23,24 @@
   "dependencies": [
     {
       "sourceId": "campaign",
-      "name": "Azure Managed Identity",
-      "kind": "cloud-service",
-      "classification": "third-party",
-      "direction": "outbound",
-      "client": "DefaultAzureCredential",
-      "technology": "Azure.Identity",
-      "configurationKeys": [],
-      "authentication": {
-        "type": null,
-        "configurationKeys": []
-      },
-      "operations": [],
-      "resources": [
-        {
-          "type": "cloud-scope",
-          "name": "https://database.windows.net/.default",
-          "direction": "outbound",
-          "sourceFile": "src/SFA.DAS.Campaign.Api.Data/CampaignDataContext.cs"
-        }
-      ],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.Campaign.Api.Data/CampaignDataContext.cs",
-          "reason": "Use of DefaultAzureCredential for Azure AD authentication for SQL Database connection"
-        }
-      ],
-      "confidence": "high",
-      "targetId": "cloud-service-azure-managed-identity",
-      "description": "Uses"
-    },
-    {
-      "sourceId": "campaign",
-      "name": "Campaign SQL Database",
+      "name": "SQL Server",
       "kind": "database",
       "classification": "internal",
       "direction": "outbound",
-      "client": "SqlConnection",
-      "technology": "Microsoft.Data.SqlClient",
+      "client": null,
+      "technology": "Entity Framework Core",
       "configurationKeys": [
         "CampaignConfiguration.SqlConnectionString"
       ],
       "authentication": {
-        "type": "Azure AD Token",
+        "type": "DefaultAzureCredential",
         "configurationKeys": []
       },
       "operations": [],
       "resources": [
         {
           "type": "database",
-          "name": "CampaignConfiguration.SqlConnectionString",
+          "name": null,
           "direction": "outbound",
           "sourceFile": "src/SFA.DAS.Campaign.Api.Data/CampaignDataContext.cs"
         }
@@ -80,23 +48,19 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.Campaign.Api/AppStart/AddDatabaseExtension.cs",
-          "reason": "AddDbContext for CampaignDataContext with SQL Server"
-        },
-        {
-          "sourceFile": "src/SFA.DAS.Campaign.Api/AppStart/AddServiceRegistrationExtension.cs",
-          "reason": "AddDbContext for CampaignDataContext with SQL Server"
+          "reason": "Database registration using SQL Server configuration."
         },
         {
           "sourceFile": "src/SFA.DAS.Campaign.Api.Data/CampaignDataContext.cs",
-          "reason": "DbContext configured to use SQL Server connection"
+          "reason": "Entity Framework Core DbContext configured with SQL Server."
         },
         {
           "sourceFile": "src/SFA.DAS.Campaign.Api/Startup.cs",
-          "reason": "Health check added for CampaignDataContext, indicating SQL database usage"
+          "reason": "Health checks configured for SQL Server database."
         }
       ],
       "confidence": "high",
-      "targetId": "database-campaign-sql-database",
+      "targetId": "database-sql-server",
       "description": "Reads from and writes to"
     }
   ]

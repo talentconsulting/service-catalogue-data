@@ -1,0 +1,127 @@
+{
+  "repository": "SkillsFundingAgency/das-digital-certification-web",
+  "ref": "main",
+  "path": "src",
+  "systemName": "Digital Certificates",
+  "containers": [
+    {
+      "id": "digital-certificates-web",
+      "name": "Digital Certificates",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Web/Program.cs",
+          "reason": "ASP.NET Core web application entry point."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Web/SFA.DAS.DigitalCertificates.Web.csproj",
+          "reason": "Project file with Web SDK."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "digital-certificates-web",
+      "name": "Redis",
+      "kind": "cache",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "StackExchange.Redis",
+      "configurationKeys": [
+        "RedisConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "cache",
+          "name": "DataProtection-Keys",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Web/StartupExtensions/DataProtectionStartupExtensions.cs"
+        },
+        {
+          "type": "cache",
+          "name": "RedisConnectionString",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Web/StartupExtensions/CacheStartupExtensions.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Web/StartupExtensions/DataProtectionStartupExtensions.cs",
+          "reason": "Redis connection is configured for ASP.NET Data Protection."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Web/StartupExtensions/CacheStartupExtensions.cs",
+          "reason": "StackExchange.Redis cache is configured using AddStackExchangeRedisCache."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "digital-certificates-web",
+      "name": "Digital Certificates Outer API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IDigitalCertificatesOuterApi",
+      "technology": "RestEase",
+      "configurationKeys": [
+        "DigitalCertificatesOuterApiConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Web/StartupExtensions/AddServiceRegistrationExtensions.cs",
+          "reason": "RestEase client IDigitalCertificatesOuterApi is registered with API Base URL from configuration."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-digital-certificates-outer-api",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "digital-certificates-web",
+      "name": "Azure Blob Storage",
+      "kind": "object-storage",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "BlobServiceClient",
+      "technology": "Azure.Storage.Blobs",
+      "configurationKeys": [
+        "StorageConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Web/StartupExtensions/AddServiceRegistrationExtensions.cs",
+          "reason": "BlobServiceClient is registered with StorageConnectionString."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Web/Services/BlobService.cs",
+          "reason": "BlobServiceClient is used to interact with Azure Blob Storage."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "object-storage-azure-blob-storage",
+      "description": "Stores objects in"
+    }
+  ]
+}
