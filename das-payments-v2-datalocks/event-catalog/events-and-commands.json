@@ -16,12 +16,7 @@
           "description": null
         }
       ],
-      "handlers": [
-        {
-          "name": "ManageReceivedDataLockEvent",
-          "sourceFile": "src/SFA.DAS.Payments.DataLocks.Application/Services/ManageReceivedDataLockEvent.cs"
-        }
-      ]
+      "handlers": []
     },
     {
       "name": "ResetActorsCommand",
@@ -66,6 +61,34 @@
   ],
   "events": [
     {
+      "name": "ApprenticeshipUpdated",
+      "namespace": null,
+      "sourceFile": "src/SFA.DAS.Payments.DataLocks.Application/Services/ApprenticeshipProcessor.cs",
+      "description": null,
+      "fields": [
+        {
+          "name": "Duplicates",
+          "type": "List<ApprenticeshipDuplicate>",
+          "required": true,
+          "description": null
+        }
+      ],
+      "handlers": [
+        {
+          "name": "PublishApprenticeshipUpdate",
+          "sourceFile": "src/SFA.DAS.Payments.DataLocks.Application/Services/ApprenticeshipProcessor.cs"
+        },
+        {
+          "name": "Process",
+          "sourceFile": "src/SFA.DAS.Payments.DataLocks.Application/Services/ApprenticeshipProcessor.cs"
+        },
+        {
+          "name": "ProcessIsLevyPayerFlagForEmployer",
+          "sourceFile": "src/SFA.DAS.Payments.DataLocks.Application/Services/ApprenticeshipProcessor.cs"
+        }
+      ]
+    },
+    {
       "name": "ApprenticeshipCreatedEvent",
       "namespace": "SFA.DAS.CommitmentsV2.Messages.Events",
       "sourceFile": "src/SFA.DAS.Payments.DataLocks.ApprovalsService/Handlers/ApprenticeshipCreatedHandler.cs",
@@ -102,14 +125,7 @@
       "namespace": "SFA.DAS.CommitmentsV2.Messages.Events",
       "sourceFile": "src/SFA.DAS.Payments.DataLocks.ApprovalsService/Handlers/ApprenticeshipPausedEventHandler.cs",
       "description": null,
-      "fields": [
-        {
-          "name": "ApprenticeshipId",
-          "type": "long",
-          "required": true,
-          "description": null
-        }
-      ],
+      "fields": [],
       "handlers": [
         {
           "name": "ApprenticeshipPausedEventHandler",
@@ -122,14 +138,7 @@
       "namespace": "SFA.DAS.CommitmentsV2.Messages.Events",
       "sourceFile": "src/SFA.DAS.Payments.DataLocks.ApprovalsService/Handlers/ApprenticeshipResumedEventHandler.cs",
       "description": null,
-      "fields": [
-        {
-          "name": "ApprenticeshipId",
-          "type": "long",
-          "required": true,
-          "description": null
-        }
-      ],
+      "fields": [],
       "handlers": [
         {
           "name": "ApprenticeshipResumedEventHandler",
@@ -142,14 +151,7 @@
       "namespace": "SFA.DAS.CommitmentsV2.Messages.Events",
       "sourceFile": "src/SFA.DAS.Payments.DataLocks.ApprovalsService/Handlers/ApprenticeshipStopDateChangedEventHandler.cs",
       "description": null,
-      "fields": [
-        {
-          "name": "ApprenticeshipId",
-          "type": "long",
-          "required": true,
-          "description": null
-        }
-      ],
+      "fields": [],
       "handlers": [
         {
           "name": "ApprenticeshipStopDateChangedEventHandler",
@@ -162,14 +164,7 @@
       "namespace": "SFA.DAS.CommitmentsV2.Messages.Events",
       "sourceFile": "src/SFA.DAS.Payments.DataLocks.ApprovalsService/Handlers/ApprenticeshipStoppedEventHandler.cs",
       "description": null,
-      "fields": [
-        {
-          "name": "ApprenticeshipId",
-          "type": "long",
-          "required": true,
-          "description": null
-        }
-      ],
+      "fields": [],
       "handlers": [
         {
           "name": "ApprenticeshipStoppedEventHandler",
@@ -202,14 +197,7 @@
       "namespace": "SFA.DAS.CommitmentsV2.Messages.Events",
       "sourceFile": "src/SFA.DAS.Payments.DataLocks.ApprovalsService/Handlers/DataLockTriageApprovedEventHandler.cs",
       "description": null,
-      "fields": [
-        {
-          "name": "ApprenticeshipId",
-          "type": "long",
-          "required": true,
-          "description": null
-        }
-      ],
+      "fields": [],
       "handlers": [
         {
           "name": "DataLockTriageApprovedEventHandler",
@@ -222,14 +210,7 @@
       "namespace": "SFA.DAS.CommitmentsV2.Messages.Events",
       "sourceFile": "src/SFA.DAS.Payments.DataLocks.ApprovalsService/Handlers/PaymentOrderChangedEventHandler.cs",
       "description": null,
-      "fields": [
-        {
-          "name": "AccountId",
-          "type": "long",
-          "required": true,
-          "description": null
-        }
-      ],
+      "fields": [],
       "handlers": [
         {
           "name": "PaymentOrderChangedEventHandler",
@@ -463,7 +444,7 @@
         {
           "name": "StartDate",
           "type": "DateTime",
-          "required": null,
+          "required": true,
           "description": null
         }
       ],
@@ -478,29 +459,34 @@
         {
           "name": "EmployerAccountId",
           "type": "long",
-          "required": null,
+          "required": true,
           "description": null
         },
         {
           "name": "OrderedProviders",
           "type": "List<long>",
-          "required": null,
+          "required": true,
           "description": null
         },
         {
           "name": "EventId",
           "type": "Guid",
-          "required": null,
+          "required": true,
           "description": null
         },
         {
           "name": "EventTime",
           "type": "DateTimeOffset",
-          "required": null,
+          "required": true,
           "description": null
         }
       ],
-      "handlers": []
+      "handlers": [
+        {
+          "name": "ProcessPaymentOrderChange",
+          "sourceFile": "src/SFA.DAS.Payments.DataLocks.Application/Services/ApprenticeshipProcessor.cs"
+        }
+      ]
     },
     {
       "name": "FoundLevyPayerEmployerAccount",
@@ -511,7 +497,7 @@
         {
           "name": "AccountId",
           "type": "long",
-          "required": null,
+          "required": true,
           "description": null
         }
       ],
@@ -531,7 +517,7 @@
         {
           "name": "AccountId",
           "type": "long",
-          "required": null,
+          "required": true,
           "description": null
         }
       ],
@@ -543,45 +529,11 @@
       ]
     },
     {
-      "name": "FunctionalSkillDataLockEvent",
-      "namespace": "SFA.DAS.Payments.DataLocks.Messages.Events",
-      "sourceFile": "src/SFA.DAS.Payments.Datalocks.Messages/Events/FunctionalSkillDataLockEvent.cs",
-      "description": null,
-      "fields": [
-        {
-          "name": "Earnings",
-          "type": "ReadOnlyCollection<FunctionalSkillEarning>",
-          "required": null,
-          "description": null
-        },
-        {
-          "name": "StartDate",
-          "type": "DateTime",
-          "required": null,
-          "description": null
-        },
-        {
-          "name": "ContractType",
-          "type": "ContractType",
-          "required": null,
-          "description": null
-        }
-      ],
-      "handlers": []
-    },
-    {
       "name": "FunctionalSkillEarningFailedDataLockMatching",
       "namespace": "SFA.DAS.Payments.DataLocks.Messages.Events",
       "sourceFile": "src/SFA.DAS.Payments.Datalocks.Messages/Events/FunctionalSkillEarningFailedDataLockMatching.cs",
       "description": null,
-      "fields": [
-        {
-          "name": "ContractType",
-          "type": "ContractType",
-          "required": null,
-          "description": null
-        }
-      ],
+      "fields": [],
       "handlers": []
     },
     {
@@ -593,7 +545,7 @@
         {
           "name": "StartDate",
           "type": "DateTime",
-          "required": null,
+          "required": true,
           "description": null
         },
         {
@@ -610,14 +562,7 @@
       "namespace": "SFA.DAS.Payments.DataLocks.Messages.Events",
       "sourceFile": "src/SFA.DAS.Payments.Datalocks.Messages/Events/PayableFunctionalSkillEarningEvent.cs",
       "description": null,
-      "fields": [
-        {
-          "name": "ContractType",
-          "type": "ContractType",
-          "required": null,
-          "description": null
-        }
-      ],
+      "fields": [],
       "handlers": []
     },
     {
@@ -625,14 +570,7 @@
       "namespace": "SFA.DAS.Payments.DataLocks.Messages.Events",
       "sourceFile": "src/SFA.DAS.Payments.DataLocks.DataLockEventService/Handlers/PriceEpisodeStatusChangeEventHandler.cs",
       "description": null,
-      "fields": [
-        {
-          "name": "DataLock",
-          "type": "DataLock",
-          "required": true,
-          "description": null
-        }
-      ],
+      "fields": [],
       "handlers": [
         {
           "name": "PriceEpisodeStatusChangeEventHandler",
@@ -645,20 +583,7 @@
       "namespace": "SFA.DAS.Payments.EarningEvents.Messages.Events",
       "sourceFile": "src/SFA.DAS.Payments.DataLocks.DataLockProxyService/Handlers/ApprenticeshipContractType1FunctionalSkillEarningEventHandler.cs",
       "description": null,
-      "fields": [
-        {
-          "name": "Learner",
-          "type": "Learner",
-          "required": true,
-          "description": null
-        },
-        {
-          "name": "JobId",
-          "type": "string",
-          "required": true,
-          "description": null
-        }
-      ],
+      "fields": [],
       "handlers": [
         {
           "name": "ApprenticeshipContractType1FunctionalSkillEarningEventHandler",
@@ -671,20 +596,7 @@
       "namespace": "SFA.DAS.Payments.EarningEvents.Messages.Events",
       "sourceFile": "src/SFA.DAS.Payments.DataLocks.DataLockProxyService/Handlers/ApprenticeshipContractType1EarningEventHandler.cs",
       "description": null,
-      "fields": [
-        {
-          "name": "Learner",
-          "type": "Learner",
-          "required": true,
-          "description": null
-        },
-        {
-          "name": "JobId",
-          "type": "string",
-          "required": true,
-          "description": null
-        }
-      ],
+      "fields": [],
       "handlers": [
         {
           "name": "ApprenticeshipContractType1EarningEventHandler",
@@ -697,26 +609,7 @@
       "namespace": "SFA.DAS.Payments.EarningEvents.Messages.Events",
       "sourceFile": "src/SFA.DAS.Payments.DataLocks.DataLockProxyService/Handlers/SubmissionSucceededEventHandler.cs",
       "description": null,
-      "fields": [
-        {
-          "name": "Ukprn",
-          "type": "long",
-          "required": null,
-          "description": null
-        },
-        {
-          "name": "JobId",
-          "type": "Guid",
-          "required": null,
-          "description": null
-        },
-        {
-          "name": "AcademicYear",
-          "type": "short",
-          "required": null,
-          "description": null
-        }
-      ],
+      "fields": [],
       "handlers": [
         {
           "name": "SubmissionSucceededEventHandler",
