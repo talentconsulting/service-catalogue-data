@@ -84,6 +84,17 @@ async function exists(path) {
   }
 }
 
+// A scan can produce a schema file with no tables (e.g. a web app with no database of its own);
+// that isn't worth a Data schema tab.
+async function hasTables(path) {
+  if (!await exists(path)) return false;
+  try {
+    return ((await readJson(path)).tables || []).length > 0;
+  } catch {
+    return false;
+  }
+}
+
 async function buildCatalog() {
   const manifest = await readJson(join(dataDir, 'manifest.json'));
   return Promise.all(manifest.map(async (entry) => {
@@ -102,7 +113,8 @@ async function buildCatalog() {
       name: slug,
       repository: entry['github-repo'],
       capabilities: {
-        database: Boolean(entry.dbschema) && await exists(join(sourceDir, 'db-schema', 'database.schema.json')),
+        database: Boolean(entry.dbschema) && await hasTables(join(sourceDir, 'db-schema', 'database.schema.json')),
+        databaseScanned: Boolean(entry.dbschema) && await exists(join(sourceDir, 'db-schema', 'database.schema.json')),
         messages: Boolean(entry.eventcatalog) && await exists(join(sourceDir, 'event-catalog', 'events-and-commands.json')),
         dependencies: Boolean(entry['service-dependencies']) && await exists(join(sourceDir, 'service-dependencies', 'service-dependencies.json')),
         dependencyDiagram: Boolean(entry['service-dependencies']) && await exists(join(sourceDir, 'service-dependencies', 'service-dependencies.puml')),

@@ -43,6 +43,16 @@ test('database endpoint returns source tables', async () => {
   assert.ok(body.tables[0].columns.length > 0);
 });
 
+test('database capability needs at least one table, but an empty schema still counts as scanned', async () => {
+  const catalog = await (await fetch(`${baseUrl}/api/catalog`)).json();
+  const withTables = catalog.sources.find((item) => item.id === 'das-courses-api');
+  assert.equal(withTables.capabilities.database, true);
+  assert.equal(withTables.capabilities.databaseScanned, true);
+  const empty = catalog.sources.find((item) => item.id === 'das-payments-v2-common');
+  assert.equal(empty.capabilities.database, false);
+  assert.equal(empty.capabilities.databaseScanned, true);
+});
+
 test('OpenAPI endpoint only accepts catalogued files', async () => {
   const bad = await fetch(`${baseUrl}/api/sources/das-courses-api/openapi?file=../manifest.json`);
   assert.equal(bad.status, 400);

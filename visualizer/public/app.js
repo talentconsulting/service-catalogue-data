@@ -1384,7 +1384,7 @@ async function loadHomeDashboard() {
       }
     }));
     state.databaseSchemas = await Promise.all(state.catalog.map(async (source) => {
-      if (!source.capabilities.database) return { source, schema: null };
+      if (!source.capabilities.databaseScanned) return { source, schema: null };
       try {
         return { source, schema: await getJson(`/api/sources/${encodeURIComponent(source.id)}/database`) };
       } catch {
