@@ -1,0 +1,178 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Restricted Course Details API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/restricted-courses/{larsCode}": {
+      "get": {
+        "summary": "Get restricted course details",
+        "description": "Retrieve detailed information about a restricted course by its LARS code.",
+        "operationId": "getRestrictedCourseDetails",
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The LARS code of the course."
+          },
+          {
+            "name": "SearchTerm",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter providers by search term."
+          },
+          {
+            "name": "DeliveryStatus",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": [
+                  "OpenToNewStarts",
+                  "LastStartDateAdded",
+                  "ClosedToNewStarts"
+                ]
+              }
+            },
+            "description": "Filter providers by delivery status."
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Pagination - page number to retrieve."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Restricted course details retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestrictedCourseDetailsViewModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Course not found."
+          }
+        },
+        "security": [
+          {
+            "roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RestrictedCourseDetailsViewModel": {
+        "type": "object",
+        "properties": {
+          "LarsCode": {
+            "type": "string",
+            "description": "The LARS code of the course."
+          },
+          "CourseName": {
+            "type": "string",
+            "description": "The name of the course."
+          },
+          "Level": {
+            "type": "integer",
+            "description": "The level of the course."
+          },
+          "Title": {
+            "type": "string",
+            "description": "The title of the course."
+          },
+          "Sector": {
+            "type": "string",
+            "description": "The sector associated with the course."
+          },
+          "LearningType": {
+            "type": "string",
+            "description": "The type of learning for the course."
+          },
+          "IsCourseRestricted": {
+            "type": "boolean",
+            "description": "Indicates if the course is restricted."
+          },
+          "RestrictedCourseDetailsPageUrl": {
+            "type": "string",
+            "description": "URL for the restricted course details page."
+          },
+          "AddProviderUrl": {
+            "type": "string",
+            "description": "URL to add a provider to the restricted course."
+          },
+          "HasActiveFilters": {
+            "type": "boolean",
+            "description": "Indicates if active filters are applied."
+          },
+          "Filters": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "description": "List of filters applied."
+            }
+          },
+          "SuccessBannerMessage": {
+            "type": "string",
+            "description": "Success message to display in the banner."
+          },
+          "TotalProviderCount": {
+            "type": "integer",
+            "description": "Total count of providers for the course."
+          },
+          "AllowedProviders": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllowedProviderViewModel"
+            },
+            "description": "List of allowed providers."
+          },
+          "Pagination": {
+            "type": "object",
+            "description": "Pagination details."
+          }
+        }
+      },
+      "AllowedProviderViewModel": {
+        "type": "object",
+        "properties": {
+          "ProviderName": {
+            "type": "string",
+            "description": "Name of the provider."
+          },
+          "Ukprn": {
+            "type": "string",
+            "description": "UKPRN of the provider."
+          },
+          "HasLastDateStarts": {
+            "type": "boolean",
+            "description": "Indicates if the provider has a last date for starts."
+          },
+          "ChangeUrl": {
+            "type": "string",
+            "description": "URL to change the course restriction details for the provider."
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,155 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Restricted Apprenticeships API",
+    "version": "1.0.0",
+    "description": "API for managing restricted apprenticeships for a provider."
+  },
+  "paths": {
+    "/providers/{ukprn}/restricted-courses": {
+      "get": {
+        "operationId": "GetRestrictedCourses",
+        "summary": "Retrieve restricted apprenticeships for the specified provider.",
+        "description": "Fetches a list of restricted apprenticeships for a specific provider using their UKPRN.",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The unique provider reference number."
+          },
+          {
+            "name": "SearchTerm",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search term to filter apprenticeships by title or other criteria."
+          },
+          {
+            "name": "DeliveryStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DeliveryStatus"
+              }
+            },
+            "description": "Delivery statuses to filter apprenticeships (e.g., OpenToNewStarts, ClosedToNewStarts)."
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number for pagination."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of restricted apprenticeships.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRestrictedApprenticeshipsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Provider not found or no restricted apprenticeships available."
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetRestrictedApprenticeshipsRequestModel": {
+        "type": "object",
+        "properties": {
+          "SearchTerm": {
+            "type": "string",
+            "description": "Search term to filter apprenticeships."
+          },
+          "DeliveryStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeliveryStatus"
+            },
+            "description": "List of delivery statuses to filter apprenticeships."
+          },
+          "PageNumber": {
+            "type": "integer",
+            "description": "Page number for pagination.",
+            "default": 1
+          },
+          "HasSearchTermFilter": {
+            "type": "boolean",
+            "description": "Indicates whether the search term filter is applied."
+          },
+          "HasDeliveryStatusFilter": {
+            "type": "boolean",
+            "description": "Indicates whether the delivery status filter is applied."
+          },
+          "HasFilters": {
+            "type": "boolean",
+            "description": "Indicates whether any filters are applied."
+          }
+        }
+      },
+      "DeliveryStatus": {
+        "type": "string",
+        "enum": [
+          "OpenToNewStarts",
+          "LastStartDateAdded",
+          "ClosedToNewStarts"
+        ],
+        "description": "Enumeration representing possible delivery statuses of apprenticeships."
+      },
+      "GetRestrictedApprenticeshipsResponse": {
+        "type": "object",
+        "properties": {
+          "Courses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RestrictedApprenticeshipModel"
+            },
+            "description": "List of restricted apprenticeships for the provider."
+          }
+        }
+      },
+      "RestrictedApprenticeshipModel": {
+        "type": "object",
+        "properties": {
+          "Title": {
+            "type": "string",
+            "description": "Title of the apprenticeship."
+          },
+          "Level": {
+            "type": "integer",
+            "description": "Level of the apprenticeship."
+          },
+          "LarsCode": {
+            "type": "integer",
+            "description": "Unique code for the apprenticeship."
+          }
+        },
+        "description": "Representation of a restricted apprenticeship model."
+      }
+    }
+  }
+}

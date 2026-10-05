@@ -1,0 +1,110 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Provider Type Update API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers/{ukprn}/route": {
+      "get": {
+        "summary": "Get Provider Type Update View",
+        "description": "Retrieves the provider type and available options for updating it.",
+        "operationId": "getProviderTypeUpdateView",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the provider type update view details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderTypeUpdateViewModel"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to the home route if provider not found."
+          }
+        }
+      },
+      "post": {
+        "summary": "Update Provider Type",
+        "description": "Updates the provider type and redirects to the appropriate route based on the type.",
+        "operationId": "updateProviderType",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderTypeUpdateViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to next step based on updated provider type."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProviderTypeUpdateViewModel": {
+        "type": "object",
+        "properties": {
+          "ProviderTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderTypeSelectionModel"
+            }
+          },
+          "ProviderTypeId": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "ProviderTypeId"
+        ]
+      },
+      "ProviderTypeSelectionModel": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "IsSelected": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Id",
+          "Description"
+        ]
+      }
+    }
+  }
+}

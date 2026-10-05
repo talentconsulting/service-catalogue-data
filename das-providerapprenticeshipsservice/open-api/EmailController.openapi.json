@@ -1,0 +1,89 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Provider Apprenticeships Service API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/email/{ukprn}/send": {
+      "post": {
+        "summary": "Send Email to All Provider Recipients",
+        "description": "Sends an email to all provider recipients using the specified email template and parameters.",
+        "operationId": "SendEmailToAllProviderRecipients",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "The UK Provider Reference Number (UKPRN)."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderEmailRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The request was successful and the email was sent."
+          },
+          "500": {
+            "description": "An error occurred while sending the email."
+          }
+        },
+        "security": [
+          {
+            "ApiRoles": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProviderEmailRequest": {
+        "type": "object",
+        "properties": {
+          "TemplateId": {
+            "type": "string",
+            "description": "The ID of the email template to be used."
+          },
+          "Tokens": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Key-value pairs used as tokens for the email template."
+          },
+          "ExplicitEmailAddresses": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "email"
+            },
+            "description": "List of explicit email addresses to send the email to."
+          }
+        },
+        "required": [
+          "TemplateId"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "ApiRoles": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization scheme required to access the endpoint."
+      }
+    }
+  }
+}

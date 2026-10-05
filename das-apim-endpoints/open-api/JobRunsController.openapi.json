@@ -1,0 +1,269 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Job Runs API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/job/{jobName}/runs": {
+      "get": {
+        "operationId": "GetJobRuns",
+        "parameters": [
+          {
+            "name": "jobName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetJobRunsQueryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/job/jobruns/{id}": {
+      "get": {
+        "operationId": "GetJobRunById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetJobRunByIdQueryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/job/request-run": {
+      "post": {
+        "operationId": "RequestJobRun",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RequestJobRunCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "message"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetJobRunsQueryResponse": {
+        "type": "object",
+        "properties": {
+          "JobRuns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JobRun"
+            }
+          }
+        },
+        "required": [
+          "JobRuns"
+        ]
+      },
+      "JobRun": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Status": {
+            "type": "string"
+          },
+          "StartTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EndTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "User": {
+            "type": "string"
+          },
+          "RecordsProcessed": {
+            "type": "integer",
+            "nullable": true
+          },
+          "JobId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "Id",
+          "Status",
+          "StartTime",
+          "User",
+          "JobId"
+        ]
+      },
+      "GetJobRunByIdQueryResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Status": {
+            "type": "string"
+          },
+          "StartTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EndTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "User": {
+            "type": "string"
+          },
+          "RecordsProcessed": {
+            "type": "integer",
+            "nullable": true
+          },
+          "JobId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "Id",
+          "Status",
+          "StartTime",
+          "User",
+          "JobId"
+        ]
+      },
+      "RequestJobRunCommand": {
+        "type": "object",
+        "properties": {
+          "JobName": {
+            "type": "string"
+          },
+          "UserName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "JobName",
+          "UserName"
+        ]
+      },
+      "EmptyResponse": {
+        "type": "object",
+        "properties": {}
+      }
+    }
+  }
+}

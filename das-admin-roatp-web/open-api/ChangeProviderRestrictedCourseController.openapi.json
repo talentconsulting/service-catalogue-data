@@ -1,0 +1,130 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Change Provider Restricted Course API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers/{ukprn}/restricted-courses/{larsCode}/change-restriction": {
+      "get": {
+        "summary": "Display the form for changing the restriction status of a course.",
+        "operationId": "getChangeProviderRestrictedCourse",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to the provider restricted courses page if the data is not found."
+          },
+          "200": {
+            "description": "The form is displayed.",
+            "content": {
+              "text/html": {
+                "examples": {
+                  "view": {
+                    "value": "HTML content of the form view"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "RoatpAdminTeam": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Submit a change to the restriction status of a course.",
+        "operationId": "postChangeProviderRestrictedCourse",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeProviderRestrictedCourseSubmitModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to the provider restricted courses page if validation fails or data is not found."
+          },
+          "200": {
+            "description": "The updated form is displayed.",
+            "content": {
+              "text/html": {
+                "examples": {
+                  "view": {
+                    "value": "HTML content of the updated form view"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "RoatpAdminTeam": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChangeProviderRestrictedCourseSubmitModel": {
+        "type": "object",
+        "properties": {
+          "SelectedOption": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "RoatpAdminTeam": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

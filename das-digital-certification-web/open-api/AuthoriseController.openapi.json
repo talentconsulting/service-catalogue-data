@@ -1,0 +1,442 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Digital Certificates API",
+    "version": "1.0.0",
+    "description": "API for authorisation and management of digital certificates."
+  },
+  "paths": {
+    "/authorise/need-more-information": {
+      "get": {
+        "operationId": "NeedMoreInformation",
+        "description": "Displays a page for users to provide additional information.",
+        "security": [
+          {
+            "VerifiedAndNotUlnAuthorised": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response."
+          },
+          "302": {
+            "description": "Redirect to NotFound."
+          }
+        }
+      },
+      "post": {
+        "operationId": "NeedMoreInformationContinue",
+        "description": "Handles 'need more information' and redirects to the 'know your ULN' page.",
+        "security": [
+          {
+            "VerifiedAndNotUlnAuthorised": []
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to KnowYourUln."
+          }
+        }
+      }
+    },
+    "/authorise/know-your-uln": {
+      "get": {
+        "operationId": "KnowYourUln",
+        "description": "Displays the 'know your ULN' page.",
+        "security": [
+          {
+            "VerifiedAndNotUlnAuthorised": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowYourUlnViewModel"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "KnowYourUlnPost",
+        "description": "Processes 'know your ULN' submission.",
+        "security": [
+          {
+            "VerifiedAndNotUlnAuthorised": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowYourUlnViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to next step based on match outcome."
+          }
+        }
+      }
+    },
+    "/authorise/select-course": {
+      "get": {
+        "operationId": "SelectCourse",
+        "description": "Displays the 'select course' page.",
+        "security": [
+          {
+            "VerifiedAndNotUlnAuthorised": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelectCourseViewModel"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to NotFound."
+          }
+        }
+      },
+      "post": {
+        "operationId": "SelectCoursePost",
+        "description": "Processes 'select course' submission.",
+        "security": [
+          {
+            "VerifiedAndNotUlnAuthorised": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectCourseViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to next step based on match outcome."
+          }
+        }
+      }
+    },
+    "/authorise/select-provider": {
+      "get": {
+        "operationId": "SelectProvider",
+        "description": "Displays the 'select provider' page.",
+        "security": [
+          {
+            "VerifiedAndNotUlnAuthorised": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelectProviderViewModel"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to NotFound."
+          }
+        }
+      },
+      "post": {
+        "operationId": "SelectProviderPost",
+        "description": "Processes 'select provider' submission.",
+        "security": [
+          {
+            "VerifiedAndNotUlnAuthorised": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectProviderViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to check answers page."
+          }
+        }
+      }
+    },
+    "/authorise/check-answers": {
+      "get": {
+        "operationId": "CheckAnswers",
+        "description": "Displays the 'check answers' page.",
+        "security": [
+          {
+            "VerifiedAndNotUlnAuthorised": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to NeedMoreInformation."
+          }
+        }
+      },
+      "post": {
+        "operationId": "CheckAnswersPost",
+        "description": "Processes 'check answers' submission.",
+        "security": [
+          {
+            "VerifiedAndNotUlnAuthorised": []
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to appropriate page based on match outcome."
+          }
+        }
+      }
+    },
+    "/authorise/cannot-match": {
+      "get": {
+        "operationId": "CannotMatch",
+        "description": "Displays the 'cannot match' page.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to appropriate page based on user authentication status."
+          }
+        }
+      }
+    },
+    "/authorise/not-found": {
+      "get": {
+        "operationId": "NotFoundPage",
+        "description": "Displays the 'not found' page.",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to appropriate page based on user authentication status."
+          }
+        }
+      }
+    },
+    "/authorise/know-year": {
+      "get": {
+        "operationId": "KnowYear",
+        "description": "Displays the 'know year' page.",
+        "security": [
+          {
+            "VerifiedAndNotUlnAuthorised": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/KnowYearViewModel"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to NeedMoreInformation."
+          }
+        }
+      },
+      "post": {
+        "operationId": "KnowYearPost",
+        "description": "Processes 'know year' submission.",
+        "security": [
+          {
+            "VerifiedAndNotUlnAuthorised": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/KnowYearViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to next step based on provider selection."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "VerifiedAndNotUlnAuthorised": {
+        "type": "openIdConnect",
+        "openIdConnectUrl": "https://example.com/.well-known/openid-configuration"
+      }
+    },
+    "schemas": {
+      "KnowYearViewModel": {
+        "type": "object",
+        "properties": {
+          "KnowYear": {
+            "type": "boolean"
+          },
+          "YearCompleted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ProviderSelected": {
+            "type": "boolean"
+          },
+          "IsReturningToCheck": {
+            "type": "boolean"
+          },
+          "IsShortJourney": {
+            "type": "boolean"
+          }
+        }
+      },
+      "KnowYourUlnViewModel": {
+        "type": "object",
+        "properties": {
+          "KnowUln": {
+            "type": "boolean"
+          },
+          "Uln": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "IsReturningToCheck": {
+            "type": "boolean"
+          },
+          "IsShortJourney": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SelectCourseViewModel": {
+        "type": "object",
+        "properties": {
+          "SelectedCourseCode": {
+            "type": "string"
+          },
+          "Courses": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "CourseCode": {
+                  "type": "string"
+                },
+                "CourseName": {
+                  "type": "string"
+                },
+                "CourseLevel": {
+                  "type": "string"
+                },
+                "CertificateType": {
+                  "$ref": "#/components/schemas/CertificateType"
+                },
+                "DisplayName": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "IsReturningToCheck": {
+            "type": "boolean"
+          },
+          "IsShortJourney": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SelectProviderViewModel": {
+        "type": "object",
+        "properties": {
+          "SelectedProviderName": {
+            "type": "string"
+          },
+          "SelectedProviderUnknown": {
+            "type": "boolean"
+          },
+          "Providers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Ukprn": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "ProviderName": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "IsReturningToCheck": {
+            "type": "boolean"
+          },
+          "IsShortJourney": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CertificateType": {
+        "type": "string",
+        "enum": [
+          "Unknown",
+          "Standard",
+          "Framework"
+        ]
+      }
+    }
+  }
+}

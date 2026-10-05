@@ -1,0 +1,210 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Provider Apprenticeships Service API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/signout": {
+      "get": {
+        "operationId": "ProviderSignOut",
+        "parameters": [
+          {
+            "name": "autoSignOut",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Sign-out successful"
+          }
+        }
+      }
+    },
+    "/account": {
+      "get": {
+        "operationId": "AccountHome",
+        "parameters": [
+          {
+            "name": "message",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account Home View",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notification-settings": {
+      "get": {
+        "operationId": "GetNotificationSettings",
+        "responses": {
+          "200": {
+            "description": "Notification Settings View",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotificationSettingsViewModel"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostNotificationSettings",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationSettingsViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Redirect after settings update"
+          }
+        }
+      }
+    },
+    "/notifications/unsubscribe": {
+      "get": {
+        "operationId": "UnsubscribeNotifications",
+        "responses": {
+          "200": {
+            "description": "Notification Unsubscribe View",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/change-signin-details": {
+      "get": {
+        "operationId": "ChangeSignInDetails",
+        "responses": {
+          "200": {
+            "description": "Change Sign-In Details View",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeOfDetailsViewModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChangeOfDetailsViewModel": {
+        "type": "object",
+        "properties": {
+          "profilePageLink": {
+            "type": "string",
+            "description": "DfESignIn profile service link"
+          }
+        },
+        "required": [
+          "profilePageLink"
+        ]
+      },
+      "NotificationSettingsViewModel": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "description": "Provider ID"
+          },
+          "notificationSettings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserNotificationSetting"
+            }
+          }
+        },
+        "required": [
+          "providerId",
+          "notificationSettings"
+        ]
+      },
+      "UserNotificationSetting": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User email"
+          },
+          "userRef": {
+            "type": "string",
+            "description": "User reference"
+          },
+          "receiveNotifications": {
+            "type": "boolean",
+            "description": "Receive notifications flag"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the user"
+          }
+        },
+        "required": [
+          "email",
+          "userRef",
+          "receiveNotifications"
+        ]
+      },
+      "FlashMessageViewModel": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Flash message details"
+          },
+          "severity": {
+            "$ref": "#/components/schemas/FlashMessageSeverityLevel"
+          }
+        },
+        "required": [
+          "message",
+          "severity"
+        ]
+      },
+      "FlashMessageSeverityLevel": {
+        "type": "string",
+        "enum": [
+          "None",
+          "Info",
+          "Okay"
+        ]
+      }
+    }
+  }
+}

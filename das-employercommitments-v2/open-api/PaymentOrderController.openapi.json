@@ -1,0 +1,141 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Payment Order API",
+    "description": "API for managing provider payment orders.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/accounts/{accountHashedId}/apprentices/manage/paymentorder": {
+      "get": {
+        "operationId": "ProviderPaymentOrder_Get",
+        "summary": "Fetch the Provider Payment Order.",
+        "parameters": [
+          {
+            "name": "accountHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment Order data fetched successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentOrderViewModel"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "ProviderPaymentOrder_Post",
+        "summary": "Update the Provider Payment Order.",
+        "parameters": [
+          {
+            "name": "accountHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentOrderViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to another page after successful update."
+          },
+          "500": {
+            "description": "Failed to update the Provider Payment Order."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PaymentOrderRequest": {
+        "type": "object",
+        "properties": {
+          "AccountHashedId": {
+            "type": "string"
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "AccountHashedId",
+          "AccountId"
+        ]
+      },
+      "PaymentOrderViewModel": {
+        "type": "object",
+        "properties": {
+          "AccountHashedId": {
+            "type": "string"
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "PaymentOrderItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PaymentOrderItem"
+            }
+          },
+          "ProviderPaymentOrder": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "AccountHashedId",
+          "AccountId",
+          "PaymentOrderItems",
+          "ProviderPaymentOrder"
+        ]
+      },
+      "PaymentOrderItem": {
+        "type": "object",
+        "properties": {
+          "ProviderName": {
+            "type": "string"
+          },
+          "ProviderId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Priority": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "ProviderName",
+          "ProviderId",
+          "Priority"
+        ]
+      }
+    }
+  }
+}

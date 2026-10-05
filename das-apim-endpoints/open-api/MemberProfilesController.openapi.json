@@ -1,0 +1,182 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Aan Member Profiles API",
+    "version": "1.0.0",
+    "description": "API for managing member profiles in the Apprentice Aan system."
+  },
+  "paths": {
+    "/members/{memberId}/profile": {
+      "get": {
+        "operationId": "GetMemberProfileWithPreferences",
+        "summary": "Retrieve member profile and preferences",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-RequestedByMemberId",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "public",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Whether to retrieve public-facing profile information."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of the member profile and preferences.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMemberProfileWithPreferencesModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetMemberProfileWithPreferencesModel": {
+        "type": "object",
+        "properties": {
+          "FullName": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "Email": {
+            "type": "string",
+            "format": "email",
+            "example": "john.doe@example.com"
+          },
+          "FirstName": {
+            "type": "string",
+            "example": "John"
+          },
+          "LastName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "OrganisationName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Example Organization"
+          },
+          "RegionId": {
+            "type": "integer",
+            "nullable": true,
+            "example": 1
+          },
+          "RegionName": {
+            "type": "string",
+            "example": "North West"
+          },
+          "JoinedDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2023-01-01"
+          },
+          "UserType": {
+            "type": "string",
+            "example": "Apprentice"
+          },
+          "IsRegionalChair": {
+            "type": "boolean",
+            "example": true
+          },
+          "Apprenticeship": {
+            "$ref": "#/components/schemas/Apprenticeship"
+          },
+          "Profiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberProfile"
+            }
+          },
+          "Preferences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberPreference"
+            }
+          }
+        }
+      },
+      "Apprenticeship": {
+        "type": "object",
+        "properties": {
+          "Sector": {
+            "type": "string",
+            "example": "Technology"
+          },
+          "Programme": {
+            "type": "string",
+            "example": "Software Engineering"
+          },
+          "Level": {
+            "type": "string",
+            "example": "Level 3"
+          },
+          "ActiveApprenticesCount": {
+            "type": "integer",
+            "example": 5
+          },
+          "Sectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": [
+              "Healthcare",
+              "Education"
+            ]
+          }
+        }
+      },
+      "MemberProfile": {
+        "type": "object",
+        "properties": {
+          "ProfileId": {
+            "type": "integer",
+            "example": 1
+          },
+          "Name": {
+            "type": "string",
+            "example": "Example Profile"
+          }
+        }
+      },
+      "MemberPreference": {
+        "type": "object",
+        "properties": {
+          "PreferenceId": {
+            "type": "integer",
+            "example": 3
+          },
+          "Value": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      }
+    }
+  }
+}

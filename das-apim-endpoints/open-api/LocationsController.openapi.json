@@ -1,21 +1,19 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "AdminAan API",
-    "version": "1.0.0",
-    "description": "API for Locations management in AdminAan."
+    "title": "Locations API",
+    "version": "1.0.0"
   },
   "paths": {
-    "/Locations": {
+    "/locations": {
       "get": {
-        "summary": "Get Addresses",
-        "description": "Retrieve a list of addresses based on a search query.",
+        "summary": "Retrieve addresses based on search query",
+        "operationId": "GetAddresses",
         "parameters": [
           {
             "name": "query",
             "in": "query",
             "required": true,
-            "description": "Search query for addresses.",
             "schema": {
               "type": "string"
             }
@@ -23,7 +21,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with matched addresses.",
+            "description": "Addresses retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -35,16 +33,15 @@
         }
       }
     },
-    "/Locations/search": {
+    "/locations/{postcode}": {
       "get": {
-        "summary": "Get Locations by Search",
-        "description": "Retrieve a list of locations based on a search query.",
+        "summary": "Retrieve coordinates for a postcode",
+        "operationId": "GetCoordinates",
         "parameters": [
           {
-            "name": "query",
-            "in": "query",
+            "name": "postcode",
+            "in": "path",
             "required": true,
-            "description": "Search query for locations.",
             "schema": {
               "type": "string"
             }
@@ -52,7 +49,38 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with matched locations.",
+            "description": "Coordinates retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPostcodeCoordinatesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Postcode not found"
+          }
+        }
+      }
+    },
+    "/locations/search": {
+      "get": {
+        "summary": "Retrieve locations based on search query",
+        "operationId": "GetLocationsBySearch",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Locations retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -69,64 +97,15 @@
     "schemas": {
       "GetAddressesResponse": {
         "type": "object",
-        "properties": {
-          "addresses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Address"
-            }
-          }
-        }
+        "properties": {}
+      },
+      "GetPostcodeCoordinatesResponse": {
+        "type": "object",
+        "properties": {}
       },
       "GetLocationsBySearchResponse": {
         "type": "object",
-        "properties": {
-          "locations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Location"
-            }
-          }
-        }
-      },
-      "Address": {
-        "type": "object",
-        "properties": {
-          "addressLine1": {
-            "type": "string"
-          },
-          "addressLine2": {
-            "type": "string"
-          },
-          "addressLine3": {
-            "type": "string"
-          },
-          "postcode": {
-            "type": "string"
-          },
-          "latitude": {
-            "type": "number",
-            "format": "float"
-          },
-          "longitude": {
-            "type": "number",
-            "format": "float"
-          }
-        }
-      },
-      "Location": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "address": {
-            "$ref": "#/components/schemas/Address"
-          }
-        }
+        "properties": {}
       }
     }
   }

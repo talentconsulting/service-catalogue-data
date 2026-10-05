@@ -1,0 +1,269 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Saved Searches API",
+    "version": "2.0"
+  },
+  "paths": {
+    "/api/SavedSearches/": {
+      "get": {
+        "operationId": "GetSavedSearches",
+        "parameters": [
+          {
+            "name": "lastRunDateFilter",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1000
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSavedSearchesResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/SavedSearches/{id}": {
+      "get": {
+        "operationId": "GetSavedSearchById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSavedSearchResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "PatchSavedSearch",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json-patch+json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "404": {
+            "description": "Resource not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteSavedSearch",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SavedSearchDto": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "UserReference": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "DateCreated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "LastRunDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EmailLastSendDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "UnsubscribeToken": {
+            "type": "string"
+          },
+          "SearchParameters": {
+            "$ref": "#/components/schemas/SearchParametersDto"
+          }
+        }
+      },
+      "SearchParametersDto": {
+        "type": "object",
+        "properties": {
+          "SearchTerm": {
+            "type": "string"
+          },
+          "SelectedRouteIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "Distance": {
+            "type": "integer"
+          },
+          "DisabilityConfident": {
+            "type": "boolean"
+          },
+          "ExcludeNational": {
+            "type": "boolean"
+          },
+          "SelectedLevelIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "Location": {
+            "type": "string"
+          },
+          "Latitude": {
+            "type": "string"
+          },
+          "Longitude": {
+            "type": "string"
+          },
+          "SelectedApprenticeshipTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprenticeshipTypes"
+            }
+          }
+        }
+      },
+      "GetSavedSearchResponse": {
+        "type": "object",
+        "properties": {
+          "SavedSearch": {
+            "$ref": "#/components/schemas/SavedSearchDto"
+          }
+        }
+      },
+      "GetSavedSearchesResponse": {
+        "type": "object",
+        "properties": {
+          "SavedSearches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SavedSearchDto"
+            }
+          },
+          "TotalCount": {
+            "type": "integer"
+          },
+          "PageIndex": {
+            "type": "integer"
+          },
+          "PageSize": {
+            "type": "integer"
+          },
+          "TotalPages": {
+            "type": "integer"
+          }
+        }
+      },
+      "ApprenticeshipTypes": {
+        "type": "string",
+        "enum": [
+          "Standard",
+          "Foundation"
+        ]
+      }
+    }
+  }
+}

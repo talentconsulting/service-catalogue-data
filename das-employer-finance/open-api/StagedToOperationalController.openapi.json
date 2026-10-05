@@ -7,9 +7,13 @@
   "paths": {
     "/api/staging/staged-to-operational": {
       "post": {
-        "summary": "Transfer staged data to operational",
-        "description": "Transfers data from staged to operational.",
-        "operationId": "StagedToOperational",
+        "summary": "Transfer staged to operational",
+        "operationId": "stagedToOperational",
+        "security": [
+          {
+            "ReadAllEmployerAccountBalances": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -21,6 +25,32 @@
           }
         },
         "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "isSuccess": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "processedCount": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "isSuccess",
+                    "message",
+                    "processedCount"
+                  ]
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -59,39 +89,8 @@
                 }
               }
             }
-          },
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "isSuccess": {
-                      "type": "boolean"
-                    },
-                    "message": {
-                      "type": "string"
-                    },
-                    "processedCount": {
-                      "type": "integer"
-                    }
-                  },
-                  "required": [
-                    "isSuccess",
-                    "message",
-                    "processedCount"
-                  ]
-                }
-              }
-            }
           }
-        },
-        "security": [
-          {
-            "ApiKeyAuth": []
-          }
-        ]
+        }
       }
     }
   },
@@ -102,15 +101,13 @@
         "properties": {
           "AccountId": {
             "type": "integer",
-            "description": "The ID of the account."
+            "format": "int64"
           },
           "PeriodEnd": {
-            "type": "string",
-            "description": "The period end identifier."
+            "type": "string"
           },
           "CorrelationId": {
-            "type": "string",
-            "description": "Correlation ID for tracking requests."
+            "type": "string"
           }
         },
         "required": [
@@ -121,10 +118,10 @@
       }
     },
     "securitySchemes": {
-      "ApiKeyAuth": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Authorization"
+      "ReadAllEmployerAccountBalances": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }

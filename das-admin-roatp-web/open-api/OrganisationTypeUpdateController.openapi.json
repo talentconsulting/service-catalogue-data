@@ -1,0 +1,122 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Organisation Type Update API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers/{ukprn}/type": {
+      "get": {
+        "summary": "Retrieve organisation type update view",
+        "operationId": "GetOrganisationTypeUpdateView",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "description": "The unique provider reference number",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganisationTypeUpdateViewModel"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to home if organisation not found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Update organisation type",
+        "operationId": "UpdateOrganisationType",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "description": "The unique provider reference number",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrganisationTypeUpdateViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to provider summary after update"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "OrganisationTypeUpdateViewModel": {
+        "type": "object",
+        "properties": {
+          "LegalName": {
+            "type": "string",
+            "description": "The legal name of the organisation"
+          },
+          "OrganisationTypes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganisationTypeModel"
+            },
+            "description": "List of organisation types"
+          },
+          "OrganisationTypeId": {
+            "type": "integer",
+            "description": "Selected organisation type ID"
+          }
+        },
+        "required": [
+          "LegalName",
+          "OrganisationTypes",
+          "OrganisationTypeId"
+        ]
+      },
+      "OrganisationTypeModel": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "description": "Organisation type ID"
+          },
+          "Description": {
+            "type": "string",
+            "description": "Description of the organisation type"
+          },
+          "IsSelected": {
+            "type": "boolean",
+            "description": "Indicates whether this type is selected"
+          }
+        },
+        "required": [
+          "Id",
+          "Description",
+          "IsSelected"
+        ]
+      }
+    }
+  }
+}

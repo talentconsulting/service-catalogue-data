@@ -1,0 +1,115 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Course Restrictions API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/restricted-courses/{larsCode}/providers/confirm-add": {
+      "get": {
+        "summary": "Get provider confirmation view for restricted course",
+        "operationId": "getConfirmAddProviderToRestrictedCourseView",
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The LARS code of the restricted course."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "302": {
+            "description": "Redirect to restricted course details if session is not found."
+          }
+        },
+        "security": [
+          {
+            "roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Confirm add provider to restricted course",
+        "operationId": "postConfirmAddProviderToRestrictedCourse",
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The LARS code of the restricted course."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response after provider is added."
+          },
+          "302": {
+            "description": "Redirect to restricted course details if session is not found."
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertProviderAllowedCourseRequest"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpsertProviderAllowedCourseRequest": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string",
+            "description": "The ID of the user performing the operation."
+          },
+          "UserDisplayName": {
+            "type": "string",
+            "description": "The display name of the user performing the operation."
+          },
+          "LastDateStarts": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Optional last date starts for the course."
+          }
+        },
+        "required": [
+          "UserId",
+          "UserDisplayName"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "roles": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Roles required to access this endpoint."
+      }
+    }
+  }
+}

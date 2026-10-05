@@ -1,0 +1,98 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Add Provider API",
+    "description": "API for managing adding providers.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers/new/select": {
+      "get": {
+        "operationId": "getAddProviderSelection",
+        "summary": "Render the provider selection view",
+        "responses": {
+          "200": {
+            "description": "The provider selection view was rendered successfully"
+          }
+        }
+      },
+      "post": {
+        "operationId": "submitAddProviderSelection",
+        "summary": "Handle provider selection form submission",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectProviderSubmitModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Provider information successfully submitted but had validation errors, form redisplayed with errors"
+          },
+          "302": {
+            "description": "Redirects to various routes, depending on outcome",
+            "headers": {
+              "Location": {
+                "description": "The redirect URL",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Unexpected error during submission"
+          }
+        }
+      }
+    },
+    "/providers/new/not-found": {
+      "get": {
+        "operationId": "getProviderNotFound",
+        "summary": "Render provider not found view",
+        "responses": {
+          "200": {
+            "description": "The provider not found view was rendered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderNotFoundInUkrlpViewModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SelectProviderSubmitModel": {
+        "type": "object",
+        "properties": {
+          "Ukprn": {
+            "type": "string",
+            "nullable": true,
+            "description": "The UKPRN of the provider being added"
+          }
+        }
+      },
+      "ProviderNotFoundInUkrlpViewModel": {
+        "type": "object",
+        "properties": {
+          "AddANewTrainingProviderUrl": {
+            "type": "string",
+            "description": "URL for adding a new training provider"
+          }
+        },
+        "required": [
+          "AddANewTrainingProviderUrl"
+        ]
+      }
+    }
+  }
+}

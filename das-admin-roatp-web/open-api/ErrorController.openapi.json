@@ -1,0 +1,82 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ErrorController",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/Error/{status}": {
+      "get": {
+        "summary": "Error handler",
+        "description": "Handles error pages based on status code.",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "HTTP status code to handle."
+          },
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional return URL."
+          }
+        ],
+        "responses": {
+          "403": {
+            "description": "Access denied.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessDeniedViewModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Page not found.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Service error.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccessDeniedViewModel": {
+        "type": "object",
+        "properties": {
+          "helpUrl": {
+            "type": "string",
+            "description": "URL for help related to DfE sign-in service."
+          }
+        },
+        "required": [
+          "helpUrl"
+        ]
+      }
+    }
+  }
+}

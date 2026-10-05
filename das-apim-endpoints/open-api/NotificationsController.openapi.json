@@ -1,0 +1,140 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Notifications API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/Notifications/{id}": {
+      "get": {
+        "summary": "Get a notification by ID",
+        "operationId": "GetNotificationById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Notification ID"
+          },
+          {
+            "name": "X-RequestedByMemberId",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID of the member requesting the notification"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNotificationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Notification not found"
+          }
+        }
+      }
+    },
+    "/Notifications": {
+      "post": {
+        "summary": "Create a new notification",
+        "operationId": "CreateNotification",
+        "parameters": [
+          {
+            "name": "X-RequestedByMemberId",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID of the member requesting to create the notification"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateNotificationModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNotificationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Notification creation failed due to missing resources"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "MemberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "TemplateName": {
+            "type": "string"
+          },
+          "SentTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ReferenceId": {
+            "type": "string",
+            "nullable": true
+          },
+          "EmployerAccountId": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        }
+      },
+      "CreateNotificationModel": {
+        "type": "object",
+        "properties": {
+          "MemberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "NotificationTemplateId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "MemberId",
+          "NotificationTemplateId"
+        ]
+      }
+    }
+  }
+}
