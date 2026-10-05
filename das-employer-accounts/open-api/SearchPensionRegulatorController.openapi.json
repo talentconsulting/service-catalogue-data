@@ -1,16 +1,17 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts API - Search Pension Regulator",
+    "title": "SearchPensionRegulator API",
     "version": "1.0.0"
   },
   "paths": {
-    "/accounts/{HashedAccountId}/pensionregulator": {
+    "/accounts/{hashedAccountId}/pensionregulator": {
       "get": {
-        "summary": "Search Pension Regulator for an Employer's Account",
+        "summary": "Search Pension Regulator",
+        "operationId": "searchPensionRegulator",
         "parameters": [
           {
-            "name": "HashedAccountId",
+            "name": "hashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
@@ -19,27 +20,17 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "text/html": {}
-            }
-          },
-          "302": {
-            "description": "Redirect response"
+          "default": {
+            "description": "Process outcome based on data availability."
           }
-        },
-        "security": [
-          {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ]
+        }
       },
       "post": {
-        "summary": "Submit Search Results for Pension Regulator",
+        "summary": "Submit Pension Regulator Search Results",
+        "operationId": "submitSearchPensionRegulatorResults",
         "parameters": [
           {
-            "name": "HashedAccountId",
+            "name": "hashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
@@ -58,45 +49,81 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "text/html": {}
+          "default": {
+            "description": "Redirect or return view based on selected organization."
+          }
+        }
+      }
+    },
+    "/accounts/{hashedAccountId}/pensionregulator/aorn": {
+      "get": {
+        "summary": "Search Pension Regulator By AORN",
+        "operationId": "searchPensionRegulatorByAORN",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
             }
           },
-          "302": {
-            "description": "Redirect response"
+          {
+            "name": "payeRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "aorn",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "Generate view based on AORN search input."
+          }
+        }
+      },
+      "post": {
+        "summary": "Perform AORN-based Pension Regulator Search",
+        "operationId": "performSearchPensionRegulatorByAORN",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchPensionRegulatorByAornViewModel"
+              }
+            }
           }
         },
-        "security": [
-          {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
+        "responses": {
+          "default": {
+            "description": "Perform AORN-based search and return the outcome."
           }
-        ]
+        }
       }
     },
     "/accounts/pensionregulator": {
       "get": {
-        "summary": "Search Pension Regulator for New Account Creation",
+        "summary": "Search Pension Regulator for a new account",
+        "operationId": "searchPensionRegulatorNewAccount",
         "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "text/html": {}
-            }
-          },
-          "302": {
-            "description": "Redirect response"
+          "default": {
+            "description": "Process outcome based on availability of data."
           }
-        },
-        "security": [
-          {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ]
+        }
       },
       "post": {
-        "summary": "Submit Search Results for Pension Regulator on New Account",
+        "summary": "Submit Pension Regulator Search Results for a new account",
+        "operationId": "submitSearchPensionRegulatorNewAccountResults",
         "requestBody": {
           "required": true,
           "content": {
@@ -108,96 +135,16 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "text/html": {}
-            }
-          },
-          "302": {
-            "description": "Redirect response"
+          "default": {
+            "description": "Redirect or return view based on selected organization."
           }
-        },
-        "security": [
-          {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ]
-      }
-    },
-    "/accounts/{HashedAccountId}/pensionregulator/aorn": {
-      "get": {
-        "summary": "Search Pension Regulator by AORN for Employer's Account",
-        "parameters": [
-          {
-            "name": "HashedAccountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "payeRef",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "aorn",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "text/html": {}
-            }
-          }
-        },
-        "security": [
-          {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ]
-      },
-      "post": {
-        "summary": "Submit Search Results for Pension Regulator by AORN on Employer's Account",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SearchPensionRegulatorByAornViewModel"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "text/html": {}
-            }
-          }
-        },
-        "security": [
-          {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ]
+        }
       }
     },
     "/accounts/pensionregulator/aorn": {
       "get": {
-        "summary": "Search Pension Regulator by AORN for New Account Creation",
+        "summary": "Search Pension Regulator by AORN for a new account",
+        "operationId": "searchPensionRegulatorByAORNNewAccount",
         "parameters": [
           {
             "name": "payeRef",
@@ -217,21 +164,14 @@
           }
         ],
         "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "text/html": {}
-            }
+          "default": {
+            "description": "Generate view based on AORN search input."
           }
-        },
-        "security": [
-          {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ]
+        }
       },
       "post": {
-        "summary": "Submit Search Results for Pension Regulator by AORN on New Account",
+        "summary": "Perform AORN-based Pension Regulator Search for a new account",
+        "operationId": "performSearchPensionRegulatorByAORNNewAccount",
         "requestBody": {
           "required": true,
           "content": {
@@ -243,18 +183,10 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "text/html": {}
-            }
+          "default": {
+            "description": "Process search and return the outcome."
           }
-        },
-        "security": [
-          {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ]
+        }
       }
     }
   },
@@ -270,24 +202,22 @@
             "type": "string"
           },
           "RemainingAttempts": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "AllowedAttempts": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "RemainingLock": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "IsLocked": {
             "type": "boolean"
-          },
-          "AornError": {
-            "type": "string"
-          },
-          "PayeRefError": {
-            "type": "string"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "SearchPensionRegulatorResultsViewModel": {
         "type": "object",
@@ -309,32 +239,33 @@
           },
           "SelectedOrganisation": {
             "type": "integer",
+            "format": "int64",
             "nullable": true
           }
-        }
+        },
+        "additionalProperties": false
       },
       "PensionRegulatorDetailsViewModel": {
         "type": "object",
         "properties": {
-          "HashedId": {
-            "type": "string"
-          },
-          "Type": {
-            "$ref": "#/components/schemas/OrganisationType"
-          },
           "Name": {
             "type": "string"
           },
           "Address": {
-            "$ref": "#/components/schemas/Address"
+            "type": "string"
           },
           "ReferenceNumber": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "Status": {
             "type": "string"
+          },
+          "Type": {
+            "$ref": "#/components/schemas/OrganisationType"
           }
-        }
+        },
+        "additionalProperties": false
       },
       "OrganisationType": {
         "type": "string",
@@ -345,29 +276,6 @@
           "Other",
           "PensionsRegulator"
         ]
-      },
-      "Address": {
-        "type": "object",
-        "properties": {
-          "Line1": {
-            "type": "string"
-          },
-          "Line2": {
-            "type": "string"
-          },
-          "Line3": {
-            "type": "string"
-          },
-          "Line4": {
-            "type": "string"
-          },
-          "Line5": {
-            "type": "string"
-          },
-          "Postcode": {
-            "type": "string"
-          }
-        }
       }
     }
   }

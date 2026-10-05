@@ -1,22 +1,24 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Settings API",
+    "title": "Employer Accounts Settings API",
     "version": "1.0.0"
   },
   "paths": {
     "/settings/notifications": {
       "get": {
+        "summary": "Retrieve notification settings",
         "operationId": "getNotificationSettings",
-        "summary": "Retrieve notification settings.",
         "security": [
           {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
+            "Policy": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
           }
         ],
         "responses": {
           "200": {
-            "description": "Notification settings retrieved.",
+            "description": "Notification settings view model returned",
             "content": {
               "application/json": {
                 "schema": {
@@ -28,11 +30,13 @@
         }
       },
       "post": {
+        "summary": "Update notification settings",
         "operationId": "updateNotificationSettings",
-        "summary": "Update notification settings.",
         "security": [
           {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
+            "Policy": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
           }
         ],
         "requestBody": {
@@ -46,19 +50,21 @@
           }
         },
         "responses": {
-          "302": {
-            "description": "Notification settings updated. Redirect to notification settings page."
+          "204": {
+            "description": "Notification settings updated successfully"
           }
         }
       }
     },
     "/settings/notifications/unsubscribe/{hashedAccountId}": {
       "get": {
+        "summary": "Unsubscribe from notifications",
         "operationId": "unsubscribeNotifications",
-        "summary": "Unsubscribe from notifications.",
         "security": [
           {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
+            "Policy": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
           }
         ],
         "parameters": [
@@ -68,18 +74,16 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The hashed account ID to unsubscribe from notifications"
           }
         ],
         "responses": {
           "200": {
-            "description": "Unsubscribe confirmation screen.",
+            "description": "Unsubscribe view model returned",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
-                }
+                "schema": {}
               }
             }
           }
@@ -99,22 +103,6 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/UserNotificationSetting"
-            }
-          },
-          "PublicHashedAccountId": {
-            "type": "string"
-          },
-          "UserId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "Valid": {
-            "type": "boolean"
-          },
-          "ErrorDictionary": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
             }
           }
         }

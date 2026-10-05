@@ -1,0 +1,115 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Services API",
+    "description": "API for managing stub authentication services.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/account-details": {
+      "get": {
+        "operationId": "getAccountDetails",
+        "summary": "Retrieve account details for stub authentication.",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Account details view rendered successfully."
+          },
+          "404": {
+            "description": "Resource not found if environment is PRD."
+          }
+        }
+      },
+      "post": {
+        "operationId": "postAccountDetails",
+        "summary": "Post account details for stub authentication.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StubAuthenticationViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirected to the StubSignedIn route upon successful authentication."
+          },
+          "404": {
+            "description": "Resource not found if environment is PRD."
+          }
+        }
+      }
+    },
+    "/Stub-Auth": {
+      "get": {
+        "operationId": "getStubSignedIn",
+        "summary": "Retrieve stub signed-in view.",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Stub signed-in view rendered successfully."
+          },
+          "404": {
+            "description": "Resource not found if environment is PRD."
+          }
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "StubAuthenticationViewModel": {
+        "type": "object",
+        "properties": {
+          "ReturnUrl": {
+            "type": "string",
+            "description": "The URL to return to after authentication."
+          },
+          "Email": {
+            "type": "string",
+            "nullable": true,
+            "description": "Email of the authenticated user."
+          },
+          "Id": {
+            "type": "string",
+            "nullable": true,
+            "description": "ID of the authenticated user."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": ".AspNetCore.Cookies"
+      }
+    }
+  }
+}

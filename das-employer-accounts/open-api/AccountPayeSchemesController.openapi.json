@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SFA DAS Employer Accounts API",
+    "title": "Employer Accounts API",
     "version": "1.0.0"
   },
   "paths": {
@@ -9,21 +9,22 @@
       "get": {
         "operationId": "GetPayeSchemes",
         "summary": "Get PAYE schemes for an account",
+        "description": "Retrieves a list of PAYE schemes associated with a specified employer account.",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
+            "description": "The ID of the employer account.",
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "The ID of the account"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "List of PAYE schemes",
+            "description": "Successful response containing the list of PAYE schemes.",
             "content": {
               "application/json": {
                 "schema": {
@@ -33,47 +34,47 @@
             }
           },
           "404": {
-            "description": "Account not found"
+            "description": "No PAYE schemes found for the specified account."
           }
         },
         "security": [
           {
-            "ApiRolesReadAllEmployerAccountBalances": []
+            "ApiRoles": [
+              "ReadAllEmployerAccountBalances"
+            ]
           }
-        ],
-        "tags": [
-          "PAYE Schemes"
         ]
       }
     },
     "/api/accounts/{accountId}/payeschemes/scheme": {
       "get": {
         "operationId": "GetPayeScheme",
-        "summary": "Get a specific PAYE scheme by reference",
+        "summary": "Get a specific PAYE scheme for an account",
+        "description": "Retrieves details of a specific PAYE scheme associated with a specified employer account.",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
+            "description": "The ID of the employer account.",
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "The ID of the account"
+            }
           },
           {
             "name": "payeSchemeRef",
             "in": "query",
             "required": true,
+            "description": "The reference identifier of the PAYE scheme.",
             "schema": {
               "type": "string"
-            },
-            "description": "The reference of the PAYE scheme"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Details of the requested PAYE scheme",
+            "description": "Successful response containing the PAYE scheme details.",
             "content": {
               "application/json": {
                 "schema": {
@@ -84,16 +85,15 @@
             }
           },
           "404": {
-            "description": "PAYE scheme not found"
+            "description": "The PAYE scheme was not found for the specified account and reference."
           }
         },
         "security": [
           {
-            "ApiRolesReadAllEmployerAccountBalances": []
+            "ApiRoles": [
+              "ReadAllEmployerAccountBalances"
+            ]
           }
-        ],
-        "tags": [
-          "PAYE Schemes"
         ]
       }
     }
@@ -103,16 +103,18 @@
       "Resource": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string"
+          "Id": {
+            "type": "string",
+            "description": "The identifier of the resource."
           },
-          "href": {
-            "type": "string"
+          "Href": {
+            "type": "string",
+            "description": "The URI of the resource."
           }
         },
         "required": [
-          "id",
-          "href"
+          "Id",
+          "Href"
         ]
       },
       "ResourceList": {
@@ -123,10 +125,16 @@
       }
     },
     "securitySchemes": {
-      "ApiRolesReadAllEmployerAccountBalances": {
-        "type": "apiKey",
-        "name": "Authorization",
-        "in": "header"
+      "ApiRoles": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://your-auth-server/authorize",
+            "scopes": {
+              "ReadAllEmployerAccountBalances": "Permission to read all employer account balances."
+            }
+          }
+        }
       }
     }
   }

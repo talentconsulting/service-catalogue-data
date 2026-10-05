@@ -1,105 +1,24 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SFA.DAS Commitments Approvals API",
+    "title": "Approvals API",
     "version": "1.0.0"
   },
   "paths": {
     "/approvals/{learningKey}": {
-      "post": {
-        "summary": "Create a new approval",
-        "operationId": "PostApprovals",
-        "parameters": [
-          {
-            "name": "learningKey",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "The unique identifier of the learning entity."
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CocApprovalRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/ApprovalFieldChange"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request if the learningKey in the route does not match the one in the body."
-          }
-        },
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ]
-      },
-      "delete": {
-        "summary": "Delete an approval",
-        "operationId": "DeleteApprovals",
-        "parameters": [
-          {
-            "name": "learningKey",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "The unique identifier of the learning entity to delete."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK if the approval is successfully deleted. A message is returned in the response body."
-          },
-          "404": {
-            "description": "Not Found if the approval is not found."
-          },
-          "400": {
-            "description": "Bad Request if the approval is not pending deletion."
-          }
-        },
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ]
-      },
       "put": {
-        "summary": "Update an approval",
-        "operationId": "PutApprovals",
+        "summary": "Create or update approvals",
+        "operationId": "putApprovals",
         "parameters": [
           {
             "name": "learningKey",
             "in": "path",
             "required": true,
+            "description": "Unique identifier for learning",
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "The unique identifier of the learning entity."
+            }
           }
         ],
         "requestBody": {
@@ -114,7 +33,20 @@
         },
         "responses": {
           "201": {
-            "description": "Created",
+            "description": "Approval has been created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprovalFieldChange"
+                  }
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Approval has been updated",
             "content": {
               "application/json": {
                 "schema": {
@@ -127,17 +59,9 @@
             }
           },
           "400": {
-            "description": "Bad Request if the learningKey in the route does not match the one in the body."
-          },
-          "404": {
-            "description": "Not Found if no pending approval is found."
+            "description": "Bad request - LearningKey in route does not match LearningKey in body"
           }
-        },
-        "security": [
-          {
-            "BearerAuth": []
-          }
-        ]
+        }
       }
     }
   },
@@ -179,7 +103,9 @@
           "ApprenticeshipId",
           "LearningType",
           "UKPRN",
-          "ULN"
+          "ULN",
+          "ApprovedUri",
+          "Changes"
         ]
       },
       "CocApprovalFieldChange": {
@@ -222,19 +148,14 @@
             "type": "string"
           },
           "Reason": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
           "ChangeType",
           "ApprovalStatus"
         ]
-      }
-    },
-    "securitySchemes": {
-      "BearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
       }
     }
   }

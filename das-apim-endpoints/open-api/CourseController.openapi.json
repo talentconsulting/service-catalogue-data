@@ -1,0 +1,200 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Course Management API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/courses": {
+      "get": {
+        "summary": "Retrieve all courses",
+        "operationId": "getAllCourses",
+        "responses": {
+          "200": {
+            "description": "A list of all courses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllCoursesQueryResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/courses/{larsCode}/providers/allowed": {
+      "get": {
+        "summary": "Retrieve providers allowed to deliver a course",
+        "operationId": "getAllowedProvidersByCourse",
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The LARS code of the course."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Allowed providers for the specified course",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestrictedCourseDetailsModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Course not found"
+          }
+        }
+      }
+    },
+    "/courses/{larsCode}/providers/not-allowed": {
+      "get": {
+        "summary": "Retrieve providers not allowed to deliver a course",
+        "operationId": "getProvidersNotAllowedByCourse",
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The LARS code of the course."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Providers not allowed to deliver the specified course",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestrictedCourseDetailsModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Course not found"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetAllCoursesQueryResult": {
+        "type": "object",
+        "properties": {
+          "Courses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CourseModel"
+            }
+          }
+        }
+      },
+      "CourseModel": {
+        "type": "object",
+        "properties": {
+          "LarsCode": {
+            "type": "string"
+          },
+          "CourseType": {
+            "$ref": "#/components/schemas/CourseType"
+          },
+          "LearningType": {
+            "$ref": "#/components/schemas/LearningType"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Level": {
+            "type": "integer"
+          }
+        }
+      },
+      "RestrictedCourseDetailsModel": {
+        "type": "object",
+        "properties": {
+          "LarsCode": {
+            "type": "string"
+          },
+          "IfateReferenceNumber": {
+            "type": "string"
+          },
+          "CourseName": {
+            "type": "string"
+          },
+          "Level": {
+            "type": "integer"
+          },
+          "Route": {
+            "type": "string"
+          },
+          "LearningType": {
+            "$ref": "#/components/schemas/LearningType"
+          },
+          "CourseType": {
+            "$ref": "#/components/schemas/CourseType"
+          },
+          "IsActiveAvailable": {
+            "type": "boolean"
+          },
+          "LastDateStarts": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "IsCourseRestricted": {
+            "type": "boolean"
+          },
+          "Providers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderModel"
+            }
+          }
+        }
+      },
+      "CourseType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "ShortCourse"
+        ]
+      },
+      "LearningType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "FoundationApprenticeship",
+          "ApprenticeshipUnit"
+        ]
+      },
+      "ProviderModel": {
+        "type": "object",
+        "properties": {
+          "Ukprn": {
+            "type": "integer"
+          },
+          "ProviderName": {
+            "type": "string"
+          },
+          "LastDateStarts": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Restricted Courses API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/restricted-courses": {
+      "get": {
+        "operationId": "GetRestrictedCourses",
+        "summary": "Retrieve restricted courses",
+        "parameters": [
+          {
+            "name": "restricted",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            },
+            "description": "Indicator to filter restricted courses"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAllRestrictedCoursesResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "AddRestrictedCourse",
+        "summary": "Add a new restricted course",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddRestrictedCourseCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Course successfully added"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetAllRestrictedCoursesResponse": {
+        "type": "object",
+        "properties": {
+          "Courses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RestrictedCourseModel"
+            }
+          }
+        },
+        "required": [
+          "Courses"
+        ]
+      },
+      "RestrictedCourseModel": {
+        "type": "object",
+        "properties": {
+          "LarsCode": {
+            "type": "string"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Level": {
+            "type": "integer"
+          },
+          "LearningType": {
+            "$ref": "#/components/schemas/LearningType"
+          }
+        },
+        "required": [
+          "LarsCode",
+          "Title",
+          "Level",
+          "LearningType"
+        ]
+      },
+      "LearningType": {
+        "type": "string",
+        "enum": [
+          "Formal",
+          "NonFormal"
+        ]
+      },
+      "AddRestrictedCourseCommand": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          },
+          "UserDisplayName": {
+            "type": "string"
+          },
+          "LarsCode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "UserId",
+          "UserDisplayName",
+          "LarsCode"
+        ]
+      }
+    }
+  }
+}

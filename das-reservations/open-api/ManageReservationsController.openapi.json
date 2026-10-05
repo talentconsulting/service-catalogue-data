@@ -2,14 +2,12 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Manage Reservations API",
-    "version": "1.0.0",
-    "description": "API for managing apprenticeship reservations."
+    "version": "1.0.0"
   },
   "paths": {
     "/accounts/{employerAccountId}/reservations/manage": {
       "get": {
         "operationId": "EmployerManage",
-        "summary": "Manage reservations for an employer account.",
         "parameters": [
           {
             "name": "employerAccountId",
@@ -18,19 +16,40 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "cohortReference",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "providerId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns the reservations management view."
+            "description": "Returns a view for managing employer reservations."
           }
-        }
+        },
+        "security": [
+          {
+            "HasEmployerViewerUserRoleOrIsProvider": []
+          }
+        ]
       }
     },
     "/{ukPrn}/reservations/manage": {
       "get": {
         "operationId": "ProviderManage",
-        "summary": "Manage reservations for a provider.",
         "parameters": [
           {
             "name": "ukPrn",
@@ -38,11 +57,11 @@
             "required": true,
             "schema": {
               "type": "integer",
-              "format": "uint32"
+              "format": "int32"
             }
           },
           {
-            "name": "CohortReference",
+            "name": "searchTerm",
             "in": "query",
             "required": false,
             "schema": {
@@ -50,7 +69,7 @@
             }
           },
           {
-            "name": "SearchTerm",
+            "name": "selectedCourse",
             "in": "query",
             "required": false,
             "schema": {
@@ -58,7 +77,7 @@
             }
           },
           {
-            "name": "SortField",
+            "name": "selectedEmployer",
             "in": "query",
             "required": false,
             "schema": {
@@ -66,28 +85,50 @@
             }
           },
           {
-            "name": "ReverseSort",
+            "name": "selectedStartDate",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean"
+              "type": "string"
+            }
+          },
+          {
+            "name": "selectedLearningType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Returns the provider reservations management view."
+            "description": "Returns a view for managing provider reservations."
           },
           "403": {
-            "description": "Provider not authorized to view manage page."
+            "description": "Provider not authorized."
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderGotViewerOrHigherRoleOrIsEmployer": []
+          }
+        ]
       }
     },
     "/{ukPrn}/reservations/{id}/delete": {
       "get": {
         "operationId": "ProviderDelete",
-        "summary": "Prepare provider reservation for deletion.",
         "parameters": [
           {
             "name": "ukPrn",
@@ -95,7 +136,7 @@
             "required": true,
             "schema": {
               "type": "integer",
-              "format": "uint32"
+              "format": "int32"
             }
           },
           {
@@ -110,13 +151,23 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns the delete reservation view."
+            "description": "Returns a view for deleting a provider reservation."
+          },
+          "400": {
+            "description": "Bad request, reservation ID missing."
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderGotContributorOrHigherRoleOrIsEmployer": []
+          },
+          {
+            "HasProviderOrEmployerAccount": []
+          }
+        ]
       },
       "post": {
         "operationId": "PostProviderDelete",
-        "summary": "Delete a provider reservation.",
         "parameters": [
           {
             "name": "ukPrn",
@@ -124,7 +175,7 @@
             "required": true,
             "schema": {
               "type": "integer",
-              "format": "uint32"
+              "format": "int32"
             }
           },
           {
@@ -149,18 +200,28 @@
         },
         "responses": {
           "200": {
-            "description": "Reservation deleted successfully."
+            "description": "Reservation was successfully deleted."
           },
           "400": {
-            "description": "Validation error trying to delete the reservation."
+            "description": "Validation error or bad request."
+          },
+          "500": {
+            "description": "Server error occurred."
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderGotContributorOrHigherRoleOrIsEmployer": []
+          },
+          {
+            "HasProviderOrEmployerAccount": []
+          }
+        ]
       }
     },
     "/accounts/{employerAccountId}/reservations/{id}/delete": {
       "get": {
         "operationId": "EmployerDelete",
-        "summary": "Prepare employer reservation for deletion.",
         "parameters": [
           {
             "name": "employerAccountId",
@@ -182,13 +243,23 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns the delete reservation view."
+            "description": "Returns a view for deleting an employer reservation."
+          },
+          "400": {
+            "description": "Bad request, reservation ID missing."
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderGotContributorOrHigherRoleOrIsEmployer": []
+          },
+          {
+            "HasProviderOrEmployerAccount": []
+          }
+        ]
       },
       "post": {
         "operationId": "PostEmployerDelete",
-        "summary": "Delete an employer reservation.",
         "parameters": [
           {
             "name": "employerAccountId",
@@ -220,57 +291,28 @@
         },
         "responses": {
           "200": {
-            "description": "Reservation deleted successfully."
+            "description": "Reservation was successfully deleted."
           },
           "400": {
-            "description": "Validation error trying to delete the reservation."
+            "description": "Validation error or bad request."
+          },
+          "500": {
+            "description": "Server error occurred."
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderGotContributorOrHigherRoleOrIsEmployer": []
+          },
+          {
+            "HasProviderOrEmployerAccount": []
+          }
+        ]
       }
     },
     "/{ukPrn}/reservations/{id}/delete-completed": {
-      "post": {
-        "operationId": "PostProviderDeleteCompleted",
-        "summary": "Post deletion actions for provider reservation.",
-        "parameters": [
-          {
-            "name": "ukPrn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "uint32"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteCompletedViewModel"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Post-deletion action processed successfully."
-          }
-        }
-      },
       "get": {
         "operationId": "ProviderDeleteCompleted",
-        "summary": "Delete completed view for provider.",
         "parameters": [
           {
             "name": "ukPrn",
@@ -278,7 +320,7 @@
             "required": true,
             "schema": {
               "type": "integer",
-              "format": "uint32"
+              "format": "int32"
             }
           },
           {
@@ -293,53 +335,19 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns the provider delete completed view."
+            "description": "Returns a view indicating that the provider reservation has been successfully deleted."
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderGotContributorOrHigherRoleOrIsEmployer": []
+          }
+        ]
       }
     },
     "/accounts/{employerAccountId}/reservations/{id}/delete-completed": {
-      "post": {
-        "operationId": "PostEmployerDeleteCompleted",
-        "summary": "Post deletion actions for employer reservation.",
-        "parameters": [
-          {
-            "name": "employerAccountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DeleteCompletedViewModel"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Post-deletion action processed successfully."
-          }
-        }
-      },
       "get": {
         "operationId": "EmployerDeleteCompleted",
-        "summary": "Delete completed view for employer.",
         "parameters": [
           {
             "name": "employerAccountId",
@@ -361,9 +369,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Returns the employer delete completed view."
+            "description": "Returns a view indicating that the employer reservation has been successfully deleted."
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderGotContributorOrHigherRoleOrIsEmployer": []
+          }
+        ]
       }
     }
   },
@@ -374,7 +387,7 @@
         "properties": {
           "UkPrn": {
             "type": "integer",
-            "format": "uint32",
+            "format": "int32",
             "nullable": true
           },
           "Delete": {
@@ -407,10 +420,25 @@
             "type": "boolean",
             "nullable": true
           }
-        },
-        "required": [
-          "Manage"
-        ]
+        }
+      }
+    },
+    "securitySchemes": {
+      "HasEmployerViewerUserRoleOrIsProvider": {
+        "type": "openIdConnect",
+        "openIdConnectUrl": "https://example.com/auth"
+      },
+      "HasProviderGotViewerOrHigherRoleOrIsEmployer": {
+        "type": "openIdConnect",
+        "openIdConnectUrl": "https://example.com/auth"
+      },
+      "HasProviderGotContributorOrHigherRoleOrIsEmployer": {
+        "type": "openIdConnect",
+        "openIdConnectUrl": "https://example.com/auth"
+      },
+      "HasProviderOrEmployerAccount": {
+        "type": "openIdConnect",
+        "openIdConnectUrl": "https://example.com/auth"
       }
     }
   }

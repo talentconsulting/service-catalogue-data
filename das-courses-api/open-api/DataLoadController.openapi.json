@@ -2,16 +2,16 @@
   "openapi": "3.1.0",
   "info": {
     "title": "DAS Courses API",
-    "version": "1.0"
+    "version": "1.0.0"
   },
   "paths": {
-    "/ops/dataload/": {
+    "/ops/dataload": {
       "post": {
-        "operationId": "queueBackgroundDataLoad",
-        "summary": "Queue data load operation.",
+        "operationId": "queueDataLoad",
+        "summary": "Queue a data load operation",
         "responses": {
           "202": {
-            "description": "Request accepted for asynchronous processing.",
+            "description": "Data load operation successfully queued",
             "content": {
               "application/json": {
                 "schema": {
@@ -21,8 +21,7 @@
                       "type": "string"
                     },
                     "RequestId": {
-                      "type": "string",
-                      "format": "uuid"
+                      "type": "string"
                     },
                     "QueuedAt": {
                       "type": "string",
@@ -39,7 +38,7 @@
             }
           },
           "409": {
-            "description": "Conflict, another request is already queued or running.",
+            "description": "Conflict occurred while queuing the operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -57,21 +56,32 @@
             }
           },
           "500": {
-            "description": "Server error when processing the request."
+            "description": "Internal server error"
           }
         }
       }
     },
     "/ops/dataload/clear-cache": {
       "post": {
-        "operationId": "clearCache",
-        "summary": "Clear courses cache.",
-        "requestBody": {
-          "required": false
-        },
+        "operationId": "clearCoursesCache",
+        "summary": "Clear courses cache",
+        "parameters": [
+          {
+            "name": "cancellationToken",
+            "in": "query",
+            "required": false,
+            "description": "Cancellation token",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "204": {
-            "description": "Cache cleared successfully."
+            "description": "Cache cleared successfully"
+          },
+          "500": {
+            "description": "Internal server error"
           }
         }
       }
@@ -80,7 +90,8 @@
   "components": {
     "schemas": {
       "ImportDataCommand": {
-        "type": "object"
+        "type": "object",
+        "additionalProperties": false
       },
       "ImportDataCommandResult": {
         "type": "object",
@@ -101,7 +112,8 @@
         ]
       },
       "ClearCoursesCacheCommand": {
-        "type": "object"
+        "type": "object",
+        "additionalProperties": false
       }
     }
   }

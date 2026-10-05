@@ -2,28 +2,31 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Learning API",
-    "version": "1.0.0",
-    "description": "API for managing learning records for apprenticeships."
+    "description": "API for managing apprenticeship learning and related data.",
+    "version": "1.0.0"
   },
   "paths": {
     "/{ukprn}/apprenticeships": {
       "post": {
-        "summary": "Create draft apprenticeship learning",
-        "operationId": "CreateDraftLearning",
+        "summary": "Creates a draft apprenticeship",
+        "description": "Creates a draft apprenticeship learning record associated with a given provider.",
+        "tags": [
+          "Apprenticeships"
+        ],
+        "operationId": "createDraftLearning",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
+            "description": "UK provider reference number.",
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "UK provider reference number."
+            }
           }
         ],
         "requestBody": {
-          "description": "Details of the learning to create.",
           "required": true,
           "content": {
             "application/json": {
@@ -35,7 +38,7 @@
         },
         "responses": {
           "200": {
-            "description": "A result of the draft creation.",
+            "description": "The draft apprenticeship was created successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -50,55 +53,59 @@
         }
       },
       "head": {
-        "summary": "Check approved apprenticeship exists",
-        "operationId": "CheckApprovedApprenticeshipExists",
+        "summary": "Checks if an apprenticeship record exists",
+        "description": "Validates whether an apprenticeship record exists for a given ULN, training code, start date, and approval status.",
+        "tags": [
+          "Apprenticeships"
+        ],
+        "operationId": "checkApprovedApprenticeshipExists",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
+            "description": "UK provider reference number.",
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "UK provider reference number."
+            }
           },
           {
             "name": "uln",
             "in": "query",
             "required": true,
+            "description": "Unique learner number.",
             "schema": {
               "type": "string"
-            },
-            "description": "Unique learner number."
+            }
           },
           {
             "name": "trainingCode",
             "in": "query",
             "required": true,
+            "description": "Training code of the apprenticeship.",
             "schema": {
               "type": "string"
-            },
-            "description": "Training code of the apprenticeship."
+            }
           },
           {
             "name": "startDate",
             "in": "query",
             "required": true,
+            "description": "Start date of the apprenticeship.",
             "schema": {
               "type": "string",
-              "format": "date-time"
-            },
-            "description": "Start date of the apprenticeship."
+              "format": "date"
+            }
           },
           {
             "name": "isApproved",
             "in": "query",
             "required": true,
+            "description": "Approval status to match against.",
             "schema": {
               "type": "boolean"
-            },
-            "description": "Approval status to match against."
+            }
           }
         ],
         "responses": {
@@ -113,32 +120,27 @@
     },
     "/{ukprn}/learnings": {
       "get": {
-        "summary": "Get summary of learnings",
-        "operationId": "GetAll",
+        "summary": "Retrieve all apprenticeship learnings",
+        "description": "Fetches summary data for all apprenticeships associated with a given provider.",
+        "tags": [
+          "Learnings"
+        ],
+        "operationId": "getAllLearnings",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
+            "description": "Unique provider reference number.",
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "Filter by training provider using the unique provider number."
-          },
-          {
-            "name": "fundingPlatform",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "$ref": "#/components/schemas/FundingPlatform"
-            },
-            "description": "Filter by the funding platform. This parameter is optional."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Apprenticeships retrieved.",
+            "description": "Apprenticeships retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -153,165 +155,37 @@
         }
       }
     },
-    "/{ukprn:long}/academicyears/{academicYear:int}/learnings": {
-      "get": {
-        "summary": "Get learnings by academic year",
-        "operationId": "GetByAcademicYear",
-        "parameters": [
-          {
-            "name": "ukprn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Unique provider reference number."
-          },
-          {
-            "name": "academicYear",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "description": "Academic year in yyyy format."
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 1
-            },
-            "description": "Page number."
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "default": 20
-            },
-            "description": "Number of items per page."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Paginated learnings retrieved.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetLearningsByAcademicYearResponse"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/{ukprn}/{collectionYear}/{collectionPeriod}": {
-      "get": {
-        "summary": "Get FM36 learnings with episodes",
-        "operationId": "GetLearningsForFm36",
-        "parameters": [
-          {
-            "name": "ukprn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Unique provider reference number."
-          },
-          {
-            "name": "collectionYear",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "description": "Collection year."
-          },
-          {
-            "name": "collectionPeriod",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            },
-            "description": "Collection period."
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "Page number."
-          },
-          {
-            "name": "pageSize",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer"
-            },
-            "description": "Number of items per page."
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Learnings with episodes data retrieved.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetLearningsWithEpisodesResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found."
-          }
-        }
-      }
-    },
     "/{ukprn}/{learnerKey}": {
       "put": {
-        "summary": "Update a learner's details",
-        "operationId": "UpdateLearning",
+        "summary": "Update learner details",
+        "description": "Updates the details of a learner for a given learner key and provider.",
+        "tags": [
+          "Learners"
+        ],
+        "operationId": "updateLearning",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
+            "description": "UK provider reference number.",
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "UK provider reference number."
+            }
           },
           {
             "name": "learnerKey",
             "in": "path",
             "required": true,
+            "description": "Unique identifier for the learner record.",
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "Unique identifier for the learner."
+            }
           }
         ],
         "requestBody": {
-          "description": "Updated details of the learner.",
           "required": true,
           "content": {
             "application/json": {
@@ -323,7 +197,7 @@
         },
         "responses": {
           "200": {
-            "description": "Updated learner details successfully.",
+            "description": "Learner details updated successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -335,42 +209,47 @@
         }
       },
       "delete": {
-        "summary": "Remove a learner",
-        "operationId": "RemoveLearning",
+        "summary": "Remove learner details",
+        "description": "Deletes a learner record for a given learner key, scoped to a specific provider and academic year.",
+        "tags": [
+          "Learners"
+        ],
+        "operationId": "removeLearning",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
+            "description": "UK provider reference number.",
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "UK provider reference number."
+            }
           },
           {
             "name": "learnerKey",
             "in": "path",
             "required": true,
+            "description": "Unique identifier for the learner record.",
             "schema": {
               "type": "string",
               "format": "uuid"
-            },
-            "description": "The unique identifier for the learner record."
+            }
           },
           {
             "name": "academicYear",
             "in": "query",
             "required": true,
+            "description": "Academic year in yyyy format.",
             "schema": {
-              "type": "integer"
-            },
-            "description": "Academic year in yyyy format (e.g., 2425)."
+              "type": "integer",
+              "format": "int32"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "The learning keys removed successfully.",
+            "description": "Learner record removed successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -385,6 +264,145 @@
           }
         }
       }
+    },
+    "/{ukprn:long}/academicyears/{academicYear:int}/learnings": {
+      "get": {
+        "summary": "Retrieve paginated learnings by academic year",
+        "description": "Fetches apprenticeship data for a provider filtered by academic year with support for pagination.",
+        "tags": [
+          "Learnings"
+        ],
+        "operationId": "getByAcademicYear",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "description": "UK provider reference number.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "academicYear",
+            "in": "path",
+            "required": true,
+            "description": "Academic year in yyyy format.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page number for pagination.",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "description": "Number of items per page.",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Learnings retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLearningsByAcademicYearResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{ukprn}/{collectionYear}/{collectionPeriod}": {
+      "get": {
+        "summary": "Retrieve FM36 learnings data",
+        "description": "Fetches all FM36 learnings data for a provider including episodes and price data with optional pagination.",
+        "tags": [
+          "Learnings"
+        ],
+        "operationId": "getLearningsForFm36",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "description": "UK provider reference number.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "collectionYear",
+            "in": "path",
+            "required": true,
+            "description": "Collection year (e.g., 2023).",
+            "schema": {
+              "type": "integer",
+              "format": "int16"
+            }
+          },
+          {
+            "name": "collectionPeriod",
+            "in": "path",
+            "required": true,
+            "description": "Collection period (month).",
+            "schema": {
+              "type": "integer",
+              "format": "int8"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page number for pagination.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "description": "Number of items per page.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Learnings retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetLearningsWithEpisodesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No learnings data found."
+          }
+        }
+      }
     }
   },
   "components": {
@@ -393,7 +411,8 @@
         "type": "object",
         "properties": {
           "AcademicYear": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "Delivery": {
             "$ref": "#/components/schemas/Delivery"
@@ -416,12 +435,7 @@
           "OnProgramme": {
             "$ref": "#/components/schemas/OnProgrammeDetails"
           }
-        },
-        "required": [
-          "AcademicYear",
-          "Delivery",
-          "Learner"
-        ]
+        }
       },
       "Delivery": {
         "type": "object",
@@ -446,21 +460,24 @@
           },
           "CompletionDate": {
             "type": "string",
+            "format": "date-time"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "DateOfBirth": {
+            "type": "string",
             "format": "date"
-          }
-        }
-      },
-      "CareDetails": {
-        "type": "object",
-        "properties": {
-          "HasEHCP": {
-            "type": "boolean"
           },
-          "IsCareLeaver": {
-            "type": "boolean"
+          "Uln": {
+            "type": "integer",
+            "format": "int64"
           },
-          "CareLeaverEmployerConsentGiven": {
-            "type": "boolean"
+          "EmailAddress": {
+            "type": "string"
           }
         }
       },
@@ -493,36 +510,9 @@
             "type": "string",
             "format": "date-time"
           },
-          "CombinedFundingAdjustmentPercentage": {
-            "type": "number",
-            "format": "float"
-          },
           "Amount": {
             "type": "number",
-            "format": "float"
-          },
-          "BreaksInLearning": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BreakInLearning"
-            }
-          }
-        }
-      },
-      "BreakInLearning": {
-        "type": "object",
-        "properties": {
-          "StartDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "EndDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "PriorPeriodExpectedEndDate": {
-            "type": "string",
-            "format": "date-time"
+            "format": "decimal"
           }
         }
       },
@@ -542,12 +532,6 @@
       "OnProgrammeDetails": {
         "type": "object",
         "properties": {
-          "Costs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Cost"
-            }
-          },
           "AchievementDate": {
             "type": "string",
             "format": "date-time"
@@ -555,48 +539,8 @@
           "ExpectedEndDate": {
             "type": "string",
             "format": "date-time"
-          },
-          "PauseDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "BreaksInLearning": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BreakInLearning"
-            }
           }
         }
-      },
-      "Cost": {
-        "type": "object",
-        "properties": {
-          "TrainingPrice": {
-            "type": "integer"
-          },
-          "EpaoPrice": {
-            "type": "integer"
-          },
-          "FromDate": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "LearningType": {
-        "type": "string",
-        "enum": [
-          "Apprenticeship",
-          "FoundationApprenticeship",
-          "ApprenticeshipUnit"
-        ]
-      },
-      "FundingPlatform": {
-        "type": "string",
-        "enum": [
-          "DAS",
-          "SLD"
-        ]
       },
       "LearnerSummary": {
         "type": "object",
@@ -612,84 +556,66 @@
           }
         }
       },
+      "UpdateLearnerRequest": {
+        "type": "object",
+        "properties": {
+          "AcademicYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Delivery": {
+            "$ref": "#/components/schemas/Delivery"
+          },
+          "Learner": {
+            "$ref": "#/components/schemas/ApprenticeshipLearnerUpdateDetails"
+          }
+        }
+      },
       "GetLearningsByAcademicYearResponse": {
         "type": "object",
         "properties": {
           "Page": {
             "type": "integer"
           },
-          "TotalItems": {
+          "PageSize": {
             "type": "integer"
           },
-          "PageSize": {
+          "TotalItems": {
             "type": "integer"
           },
           "Items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/GetLearningsByDatesResponseItem"
+              "$ref": "#/components/schemas/LearnerSummary"
             }
+          }
+        }
+      },
+      "LearningType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "FoundationApprenticeship",
+          "ApprenticeshipUnit"
+        ]
+      },
+      "CareDetails": {
+        "type": "object",
+        "properties": {
+          "HasEHCP": {
+            "type": "boolean"
+          },
+          "IsCareLeaver": {
+            "type": "boolean"
+          },
+          "CareLeaverEmployerConsentGiven": {
+            "type": "boolean"
           }
         }
       },
       "GetLearningsWithEpisodesResponse": {
         "type": "object",
-        "properties": {
-          "Items": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          }
-        }
-      },
-      "GetLearningsByDatesResponseItem": {
-        "type": "object",
-        "properties": {
-          "Uln": {
-            "type": "string"
-          },
-          "Key": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "UpdateLearnerRequest": {
-        "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/CreateDraftApprenticeship"
-          }
-        ]
-      },
-      "LearningUpdateChanges": {
-        "type": "array",
-        "items": {
-          "type": "string",
-          "enum": [
-            "CompletionDate",
-            "EnglishAndMaths",
-            "LearningSupport",
-            "Prices",
-            "ExpectedEndDate",
-            "Withdrawal",
-            "ReverseWithdrawal",
-            "PersonalDetails",
-            "BreakInLearningStarted",
-            "BreakInLearningRemoved",
-            "EnglishAndMathsWithdrawal",
-            "BreaksInLearningUpdated",
-            "DateOfBirthChanged",
-            "Care",
-            "EnglishAndMathsBreaksInLearningUpdated",
-            "AchievementDateChanged",
-            "Reinstated"
-          ]
-        }
-      },
-      "CreateDraftApprenticeshipLearningCommandResult": {
-        "type": "object"
+        "additionalProperties": true
       }
     }
   }

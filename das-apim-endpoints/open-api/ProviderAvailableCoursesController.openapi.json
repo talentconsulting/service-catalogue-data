@@ -1,0 +1,145 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AdminRoatp API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers/{ukprn}/courses-tobe-allowed": {
+      "get": {
+        "summary": "Get a list of available courses for a provider",
+        "operationId": "GetProviderAvailableCourses",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "description": "The UKPRN of the provider",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "courseType",
+            "in": "query",
+            "required": false,
+            "description": "The type of course to filter by",
+            "schema": {
+              "$ref": "#/components/schemas/CourseType"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of provider's available courses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestrictedCourseDetailsModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CourseType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "ShortCourse"
+        ],
+        "description": "Represents the types of courses."
+      },
+      "RestrictedCourseDetailsModel": {
+        "type": "object",
+        "properties": {
+          "LarsCode": {
+            "type": "string",
+            "description": "The LARS code for the course."
+          },
+          "IfateReferenceNumber": {
+            "type": "string",
+            "description": "The IFATE reference number of the course."
+          },
+          "CourseName": {
+            "type": "string",
+            "description": "The name of the course."
+          },
+          "Level": {
+            "type": "integer",
+            "description": "The level of the course."
+          },
+          "Route": {
+            "type": "string",
+            "description": "The route or pathway of the course."
+          },
+          "LearningType": {
+            "type": "string",
+            "description": "The type of learning."
+          },
+          "CourseType": {
+            "$ref": "#/components/schemas/CourseType"
+          },
+          "IsActiveAvailable": {
+            "type": "boolean",
+            "description": "Indicates if the course is actively available."
+          },
+          "LastDateStarts": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The last date the course starts."
+          },
+          "IsCourseRestricted": {
+            "type": "boolean",
+            "description": "Indicates if the course is restricted."
+          },
+          "Providers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderModel"
+            },
+            "description": "List of providers for the course."
+          }
+        },
+        "required": [
+          "LarsCode",
+          "IfateReferenceNumber",
+          "CourseName",
+          "Level",
+          "Route",
+          "LearningType",
+          "CourseType",
+          "IsActiveAvailable",
+          "IsCourseRestricted",
+          "Providers"
+        ]
+      },
+      "ProviderModel": {
+        "type": "object",
+        "properties": {
+          "Ukprn": {
+            "type": "integer",
+            "description": "The UKPRN of the provider."
+          },
+          "ProviderName": {
+            "type": "string",
+            "description": "The name of the provider."
+          },
+          "LastDateStarts": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The last date the provider starts."
+          }
+        },
+        "required": [
+          "Ukprn",
+          "ProviderName"
+        ]
+      }
+    }
+  }
+}

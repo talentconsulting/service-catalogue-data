@@ -1,14 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SearchOrganisation API",
+    "title": "Search Organisation API",
     "version": "1.0.0"
   },
   "paths": {
     "/accounts/{hashedAccountId}/organisations/search": {
       "get": {
-        "operationId": "SearchForOrganisation",
-        "summary": "Searches for an organisation for a specific account.",
+        "summary": "Search for an organisation",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -21,13 +20,12 @@
         ],
         "responses": {
           "200": {
-            "description": "The search organisation view."
+            "description": "Search organisation page rendered"
           }
         }
       },
       "post": {
-        "operationId": "SearchForOrganisationPost",
-        "summary": "Submits a search for organisations for a specific account.",
+        "summary": "Search for an organisation using a search term",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -36,75 +34,26 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "searchTerm",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "searchTerm": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "searchTerm"
-                ]
-              }
-            }
-          }
-        },
         "responses": {
           "302": {
-            "description": "Redirect to the search results page."
-          }
-        }
-      }
-    },
-    "/accounts/organisations/search": {
-      "get": {
-        "operationId": "SearchForOrganisationRoot",
-        "summary": "Search for an organisation without providing an account ID.",
-        "responses": {
-          "200": {
-            "description": "The search organisation view."
-          }
-        }
-      },
-      "post": {
-        "operationId": "SearchForOrganisationPostRoot",
-        "summary": "Submit a search for organisations without an account ID.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "searchTerm": {
-                    "type": "string"
-                  }
-                },
-                "required": [
-                  "searchTerm"
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "302": {
-            "description": "Redirect to the search results page."
+            "description": "Redirects to results page"
           }
         }
       }
     },
     "/accounts/{hashedAccountId}/organisations/search/results": {
       "get": {
-        "operationId": "SearchForOrganisationResults",
-        "summary": "Fetches search results for organisations for a specific account.",
+        "summary": "View results for organisation search",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -125,15 +74,16 @@
           {
             "name": "pageNumber",
             "in": "query",
+            "required": false,
             "schema": {
               "type": "integer",
-              "format": "int32",
               "default": 1
             }
           },
           {
             "name": "organisationType",
             "in": "query",
+            "required": false,
             "schema": {
               "$ref": "#/components/schemas/OrganisationType"
             }
@@ -141,52 +91,14 @@
         ],
         "responses": {
           "200": {
-            "description": "The search organisation results view."
-          }
-        }
-      }
-    },
-    "/accounts/organisations/search/results": {
-      "get": {
-        "operationId": "SearchForOrganisationResultsRoot",
-        "summary": "Fetch search results without providing an account ID.",
-        "parameters": [
-          {
-            "name": "searchTerm",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "pageNumber",
-            "in": "query",
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 1
-            }
-          },
-          {
-            "name": "organisationType",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/OrganisationType"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "The search organisation results view."
+            "description": "Search results page rendered"
           }
         }
       }
     },
     "/accounts/{hashedAccountId}/organisations/search/confirm": {
       "post": {
-        "operationId": "ConfirmOrganisation",
-        "summary": "Confirm the selection of an organisation.",
+        "summary": "Confirm organisation details",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -209,28 +121,10 @@
         },
         "responses": {
           "200": {
-            "description": "The confirmation organisation details view."
-          }
-        }
-      }
-    },
-    "/accounts/organisations/search/confirm": {
-      "post": {
-        "operationId": "ConfirmOrganisationRoot",
-        "summary": "Confirm the selection of an organisation without an account ID.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OrganisationDetailsViewModel"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "The confirmation organisation details view."
+            "description": "Confirmation page rendered"
+          },
+          "302": {
+            "description": "Redirects to summary or another page"
           }
         }
       }
@@ -249,7 +143,7 @@
           },
           "publicSectorDataSource": {
             "type": "integer",
-            "format": "int32"
+            "nullable": true
           },
           "name": {
             "type": "string"
@@ -259,16 +153,14 @@
           },
           "dateOfInception": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "referenceNumber": {
             "type": "string"
           },
           "status": {
             "type": "string"
-          },
-          "addedToAccount": {
-            "type": "boolean"
           },
           "sector": {
             "type": "string"

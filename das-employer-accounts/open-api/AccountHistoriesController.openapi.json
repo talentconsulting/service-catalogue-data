@@ -7,8 +7,8 @@
   "paths": {
     "/api/accounthistories": {
       "get": {
+        "summary": "Get account history by PAYE reference",
         "operationId": "GetAccountHistoryByRef",
-        "summary": "Retrieve account history by PAYE reference",
         "parameters": [
           {
             "name": "payeRef",
@@ -16,13 +16,12 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Encoded PAYE reference"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Account history retrieved successfully",
+            "description": "Successful response with account history",
             "content": {
               "application/json": {
                 "schema": {
@@ -32,13 +31,16 @@
             }
           },
           "404": {
-            "description": "Account history not found"
+            "description": "PAYE reference not found"
           }
         },
         "security": [
           {
-            "ApiKeyAuth": []
+            "ReadAllEmployerAccountBalances": []
           }
+        ],
+        "tags": [
+          "AccountHistories"
         ]
       }
     }
@@ -49,7 +51,8 @@
         "type": "object",
         "properties": {
           "AccountId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "AddedDate": {
             "type": "string",
@@ -59,14 +62,19 @@
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "AccountId",
+          "AddedDate",
+          "RemovedDate"
+        ]
       }
     },
     "securitySchemes": {
-      "ApiKeyAuth": {
-        "type": "apiKey",
-        "name": "Authorization",
-        "in": "header"
+      "ReadAllEmployerAccountBalances": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization required with the 'ReadAllEmployerAccountBalances' role"
       }
     }
   }

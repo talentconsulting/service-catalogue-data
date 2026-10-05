@@ -1,70 +1,81 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Commitments V2 API",
-    "version": "1.0.0"
+    "title": "CommitmentsV2 API",
+    "version": "1.0.0",
+    "description": "API exposing endpoints for managing commitments, cohorts, apprenticeships, and related resources."
   },
   "paths": {
     "/api/test/provider": {
       "get": {
-        "operationId": "GetProvider",
-        "security": [
-          {
-            "ProviderAuth": []
-          }
-        ],
+        "summary": "Retrieve Provider Secure Endpoint",
+        "description": "Returns a response indicating access to the provider secure endpoint.",
+        "operationId": "getProvider",
         "responses": {
           "200": {
             "description": "Successful response",
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "Provider Secure Endpoint reached"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Provider": []
+          }
+        ],
+        "tags": [
+          "Test"
+        ]
       }
     },
     "/api/test/employer": {
       "get": {
-        "operationId": "GetEmployer",
-        "security": [
-          {
-            "EmployerAuth": []
-          }
-        ],
+        "summary": "Retrieve Employer Secure Endpoint",
+        "description": "Returns a response indicating access to the employer secure endpoint.",
+        "operationId": "getEmployer",
         "responses": {
           "200": {
             "description": "Successful response",
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "Employer Secure Endpoint reached"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "Employer": []
+          }
+        ],
+        "tags": [
+          "Test"
+        ]
       }
     },
     "/api/test": {
       "get": {
-        "operationId": "GetSecureEndpoint",
+        "summary": "Retrieve Secure Endpoint",
+        "description": "Returns a response indicating access to a secure endpoint.",
+        "operationId": "getSecure",
         "parameters": [
           {
             "name": "id",
             "in": "query",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "example": 123
             }
-          }
-        ],
-        "security": [
-          {
-            "defaultAuth": []
           }
         ],
         "responses": {
@@ -73,22 +84,152 @@
             "content": {
               "text/plain": {
                 "schema": {
-                  "type": "string"
+                  "type": "string",
+                  "example": "Secure Endpoint reached"
                 }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "defaultAuth": []
+          }
+        ],
+        "tags": [
+          "Test"
+        ]
       }
     }
   },
   "components": {
+    "schemas": {
+      "Provider": {
+        "type": "object",
+        "properties": {
+          "Ukprn": {
+            "type": "integer"
+          },
+          "Name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Ukprn",
+          "Name"
+        ]
+      },
+      "GetAllProvidersResponse": {
+        "type": "object",
+        "properties": {
+          "Providers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Provider"
+            }
+          }
+        },
+        "required": [
+          "Providers"
+        ]
+      },
+      "ChangeOfPartyRequest": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer"
+          },
+          "ChangeOfPartyType": {
+            "type": "string",
+            "enum": [
+              "ChangeEmployer",
+              "ChangeProvider"
+            ]
+          },
+          "OriginatingParty": {
+            "type": "string",
+            "enum": [
+              "Employer",
+              "Provider",
+              "TransferSender",
+              "None"
+            ]
+          },
+          "Status": {
+            "type": "string",
+            "enum": [
+              "Pending",
+              "Approved",
+              "Rejected",
+              "Withdrawn"
+            ]
+          },
+          "EmployerName": {
+            "type": "string"
+          },
+          "StartDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "EndDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "Price": {
+            "type": "integer"
+          },
+          "CohortId": {
+            "type": "integer"
+          },
+          "WithParty": {
+            "type": "string",
+            "enum": [
+              "Employer",
+              "Provider",
+              null
+            ]
+          },
+          "NewApprenticeshipId": {
+            "type": "integer"
+          },
+          "ProviderId": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "Id",
+          "ChangeOfPartyType",
+          "OriginatingParty",
+          "Status"
+        ]
+      },
+      "UserInfo": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string"
+          },
+          "UserDisplayName": {
+            "type": "string"
+          },
+          "UserEmail": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "UserId",
+          "UserDisplayName",
+          "UserEmail"
+        ]
+      }
+    },
     "securitySchemes": {
-      "ProviderAuth": {
+      "Provider": {
         "type": "http",
         "scheme": "bearer"
       },
-      "EmployerAuth": {
+      "Employer": {
         "type": "http",
         "scheme": "bearer"
       },
