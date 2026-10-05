@@ -48,18 +48,18 @@ Docker Compose reads `.env` automatically. Running with `npm start` instead,
 export the same variables in your shell first. Leaving `AUTH_PASSWORD` unset
 (or deleting `.env`) runs the viewer without authentication, as before.
 
-## Dependabot alert report
+## Generated security reports
 
-The `dependabot-report` workflow (`.github/workflows/dependabot-report.yml`)
-runs weekly (and on manual dispatch), scans every active, non-archived
-repository in the `SkillsFundingAgency` organisation for open Dependabot
-security alerts via `.github/scripts/generate-dependabot-report.mjs`, and
-opens a pull request against this repo updating `dependabot-alerts.json` with
-the results (per-repo alerts, severity breakdown, and org-wide totals).
+This repository only stores the security reports; the AI services in
+[`talentconsulting-azure-foundry`](https://github.com/talentconsulting/talentconsulting-azure-foundry)
+generate them and open pull requests here:
 
-**Setup:** the workflow needs an `ORG_DEPENDABOT_TOKEN` repository secret — a
-token (fine-grained PAT with `Dependabot alerts: Read-only` across the org, or
-a classic PAT with `repo` + `security_events` scope) belonging to an account
-with Dependabot alert read access across the organisation. The default
-`GITHUB_TOKEN` only covers this repository and can't read alerts elsewhere in
-the org.
+- **Dependabot alerts** — `<repo>/dependency-alerts/dependabot-alerts.json` for
+  every manifest repository, from the weekly (or manually run) **Check Dependabot
+  Alerts** workflow (`scripts/check_dependabot_alerts.py`). It needs the
+  `DEPENDABOT_ALERTS_TOKEN` secret in that repository.
+- **API security audit** — `<repo>/api-security-audit/report.json`, from the weekly
+  (or manually run) **API Security Audit** workflow, which lints every generated
+  OpenAPI spec against the OWASP API Security Top 10
+  (`scripts/api-security/`). It reads and writes here with
+  `SERVICE_CATALOGUE_PR_TOKEN`.
