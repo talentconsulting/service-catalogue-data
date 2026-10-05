@@ -1,0 +1,192 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Service API",
+    "version": "1.0.0",
+    "description": "API for handling authentication and service-related operations in the SFA.DAS.FAA.Web project."
+  },
+  "paths": {
+    "/signout": {
+      "get": {
+        "operationId": "SignOut",
+        "summary": "Signs the user out of the service.",
+        "parameters": [],
+        "responses": {
+          "302": {
+            "description": "Redirects the user to the configured sign-out page."
+          }
+        }
+      }
+    },
+    "/service/signout": {
+      "get": {
+        "operationId": "ServiceSignOut",
+        "deprecated": true,
+        "summary": "Deprecated version of signout endpoint.",
+        "parameters": [],
+        "responses": {
+          "302": {
+            "description": "Redirects the user to the configured sign-out page.",
+            "deprecated": true
+          }
+        }
+      }
+    },
+    "/signin": {
+      "get": {
+        "security": [
+          {
+            "PolicyNames_IsFaaUser": []
+          }
+        ],
+        "operationId": "SignIn",
+        "summary": "Signs the user in to the service with optional redirection logic.",
+        "parameters": [
+          {
+            "name": "signInValue",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "A query string containing encoded sign-in redirect data."
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to the specified action and controller as needed."
+          }
+        }
+      }
+    },
+    "/account-unavailable": {
+      "get": {
+        "security": [
+          {
+            "PolicyNames_IsAuthenticated": []
+          }
+        ],
+        "operationId": "AccountUnavailable",
+        "summary": "Displays the account unavailable page for authenticated users.",
+        "responses": {
+          "200": {
+            "description": "HTML view of account unavailable page."
+          }
+        }
+      }
+    },
+    "/account-details": {
+      "get": {
+        "operationId": "GetAccountDetails",
+        "summary": "Displays account details for debugging or stub purposes in non-PRD environments.",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "URL to return to after viewing account details."
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not found if the environment is PRD."
+          },
+          "200": {
+            "description": "HTML view showing stub account details.",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostAccountDetails",
+        "summary": "Handles submission of form inputs and sign-in for stub authentication in non-PRD environments.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StubAuthenticationViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "404": {
+            "description": "Not found if the environment is PRD."
+          },
+          "302": {
+            "description": "Redirects to the provided returnUrl from input form."
+          }
+        }
+      }
+    },
+    "/Stub-Auth": {
+      "get": {
+        "security": [
+          {
+            "PolicyNames_IsAuthenticated": []
+          }
+        ],
+        "operationId": "StubSignedIn",
+        "summary": "Displays signed-in state for stubbed authentication views.",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "description": "URL to redirect to after verifying signed-in stub details."
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Not found if the environment is PRD."
+          },
+          "200": {
+            "description": "HTML view showing sign-in state for stubbed authentication.",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "StubAuthenticationViewModel": {
+        "type": "object",
+        "properties": {
+          "MobilePhone": {
+            "type": "integer",
+            "description": "Stub user's mobile phone number."
+          },
+          "ReturnUrl": {
+            "type": "string",
+            "description": "The URL to which the user should be redirected after submitting the form."
+          }
+        },
+        "required": [
+          "MobilePhone"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "PolicyNames_IsFaaUser": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "PolicyNames_IsAuthenticated": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

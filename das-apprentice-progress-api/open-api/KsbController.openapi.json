@@ -1,0 +1,240 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Progress API",
+    "version": "1.0"
+  },
+  "paths": {
+    "/apprenticeships/{apprenticeshipIdentifier}/ksbs/": {
+      "post": {
+        "summary": "Add or Update KSB Progress",
+        "operationId": "AddUpdateKsbProgress",
+        "parameters": [
+          {
+            "name": "apprenticeshipIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprenticeKsbProgressData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "KSB progress successfully added or updated"
+          }
+        }
+      }
+    },
+    "/apprenticeships/{apprenticeshipIdentifier}/ksbs/{ksbProgressId}/taskid/{taskId}": {
+      "delete": {
+        "summary": "Remove Task from KSB Progress",
+        "operationId": "RemoveTaskToKsbProgress",
+        "parameters": [
+          {
+            "name": "apprenticeshipIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "ksbProgressId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task successfully removed from KSB progress"
+          }
+        }
+      }
+    },
+    "/apprenticeships/{apprenticeshipIdentifier}/ksbsguids": {
+      "get": {
+        "summary": "Get KSBs by Apprenticeship ID and Guid List",
+        "operationId": "GetKsbsByApprenticeshipIdAndGuidList",
+        "parameters": [
+          {
+            "name": "apprenticeshipIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "guids",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of KSBs successfully retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No KSBs found for the provided apprenticeship ID and guid list"
+          }
+        }
+      }
+    },
+    "/apprenticeships/{apprenticeshipIdentifier}/ksbs": {
+      "get": {
+        "summary": "Get KSBs by Apprenticeship ID",
+        "operationId": "GetKsbsByApprenticeshipId",
+        "parameters": [
+          {
+            "name": "apprenticeshipIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of KSBs successfully retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No KSBs found for the provided apprenticeship ID"
+          }
+        }
+      }
+    },
+    "/apprenticeships/{apprenticeshipIdentifier}/ksbs/taskid/{taskId}": {
+      "get": {
+        "summary": "Get KSBs Progress for Task",
+        "operationId": "GetKsbsProgressForTask",
+        "parameters": [
+          {
+            "name": "apprenticeshipIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "KSB progress for the task successfully retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No KSB progress found for the provided task ID and apprenticeship ID"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApprenticeKsbProgressData": {
+        "type": "object",
+        "properties": {
+          "ApprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "KSBProgressType": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "KSBId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "KsbKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "Note": {
+            "type": "string",
+            "nullable": true
+          },
+          "CurrentStatus": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

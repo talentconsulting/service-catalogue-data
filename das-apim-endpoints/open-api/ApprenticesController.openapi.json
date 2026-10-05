@@ -1,0 +1,265 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentices API",
+    "description": "API for managing apprentices and their accounts.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/apprentices/{apprenticeId}/account": {
+      "get": {
+        "summary": "Get Apprentice Account",
+        "description": "Fetch the account details of an apprentice.",
+        "operationId": "getApprenticeAccount",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the apprentice."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApprenticeAccountQueryResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Apprentice not found."
+          }
+        }
+      }
+    },
+    "/apprentices/{apprenticeId}": {
+      "get": {
+        "summary": "Get Apprentice",
+        "description": "Retrieve apprentice details.",
+        "operationId": "getApprentice",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The ID of the apprentice."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApprenticeResult"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Apprentice not found."
+          }
+        }
+      }
+    },
+    "/apprentices": {
+      "post": {
+        "summary": "Create Apprentice Member",
+        "description": "Register a new apprentice member.",
+        "operationId": "createApprenticeMember",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApprenticeMemberCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Apprentice member created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateApprenticeMemberCommandResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetApprenticeAccountQueryResult": {
+        "type": "object",
+        "properties": {
+          "apprenticeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GetApprenticeResult": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "organisationName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "regionId": {
+            "type": "integer"
+          }
+        }
+      },
+      "CreateApprenticeMemberCommand": {
+        "type": "object",
+        "properties": {
+          "apprenticeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "joinedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "regionId": {
+            "type": "integer"
+          },
+          "organisationName": {
+            "type": "string"
+          },
+          "profileValues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProfileValue"
+            }
+          },
+          "memberNotificationEventFormatValues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberNotificationEventFormatValues"
+            }
+          },
+          "memberNotificationLocationValues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberNotificationLocationValues"
+            }
+          },
+          "receiveNotifications": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateApprenticeMemberCommandResult": {
+        "type": "object",
+        "properties": {
+          "memberId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ProfileValue": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "value": {
+            "type": "string"
+          }
+        }
+      },
+      "MemberNotificationEventFormatValues": {
+        "type": "object",
+        "properties": {
+          "eventFormat": {
+            "type": "string"
+          },
+          "ordering": {
+            "type": "integer"
+          },
+          "receiveNotifications": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MemberNotificationLocationValues": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "radius": {
+            "type": "integer"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      }
+    }
+  }
+}

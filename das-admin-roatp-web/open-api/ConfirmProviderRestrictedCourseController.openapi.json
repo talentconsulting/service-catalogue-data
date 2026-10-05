@@ -1,0 +1,113 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Confirm Provider Restricted Course API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers/{ukprn}/restricted-courses/add/confirm": {
+      "get": {
+        "summary": "View confirmation page for adding a restricted course to a provider",
+        "operationId": "getConfirmProviderRestrictedCourse",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "description": "The UKPRN of the provider",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmation page loaded successfully"
+          },
+          "302": {
+            "description": "Redirected to the provider restricted courses route"
+          }
+        },
+        "security": [
+          {
+            "Roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Confirm and add a restricted course to the provider",
+        "operationId": "postConfirmProviderRestrictedCourse",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "description": "The UKPRN of the provider",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Optional body for upserting provider allowed course",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertProviderAllowedCourseRequest"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "302": {
+            "description": "Redirected to the provider restricted courses route"
+          }
+        },
+        "security": [
+          {
+            "Roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpsertProviderAllowedCourseRequest": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string",
+            "description": "The ID of the user making the request"
+          },
+          "UserDisplayName": {
+            "type": "string",
+            "description": "The display name of the user making the request"
+          },
+          "LastDateStarts": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "The last date starts restriction, if applicable"
+          },
+          "IsStartRestricted": {
+            "type": "boolean",
+            "description": "Indicates if course starts are restricted"
+          }
+        },
+        "required": [
+          "UserId",
+          "UserDisplayName",
+          "IsStartRestricted"
+        ]
+      }
+    }
+  }
+}

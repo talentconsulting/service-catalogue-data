@@ -1,0 +1,358 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Commitments Transfer Request API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/{accountHashedId}/sender/transfers/{transferRequestHashedId}": {
+      "get": {
+        "operationId": "GetTransferDetailsForSender",
+        "summary": "Retrieve transfer details for sender",
+        "parameters": [
+          {
+            "name": "accountHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transferRequestHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transfer details for the sender successfully retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferRequestForSenderViewModel"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "UpdateTransferDetailsForSender",
+        "summary": "Update transfer details for sender",
+        "parameters": [
+          {
+            "name": "accountHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transferRequestHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferRequestForSenderViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to transfer confirmation screen"
+          },
+          "500": {
+            "description": "Failed to update transfer request"
+          }
+        }
+      }
+    },
+    "/{accountHashedId}/sender/transfers/{transferRequestHashedId}/confirmation": {
+      "get": {
+        "operationId": "GetTransferConfirmation",
+        "summary": "Retrieve transfer confirmation details for sender",
+        "parameters": [
+          {
+            "name": "accountHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transferRequestHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transfer confirmation details successfully retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferConfirmationViewModel"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostTransferConfirmation",
+        "summary": "Redirect after transfer confirmation",
+        "parameters": [
+          {
+            "name": "accountHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transferRequestHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferConfirmationViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to the specified WhatNextUrl"
+          }
+        }
+      }
+    },
+    "/{accountHashedId}/receiver/transfers/{transferRequestHashedId}": {
+      "get": {
+        "operationId": "GetTransferDetailsForReceiver",
+        "summary": "Retrieve transfer details for receiver",
+        "parameters": [
+          {
+            "name": "accountHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transferRequestHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Transfer details for the receiver successfully retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferRequestForReceiverViewModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "TransferConfirmationRequest": {
+        "type": "object",
+        "properties": {
+          "AccountHashedId": {
+            "type": "string"
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "TransferRequestHashedId": {
+            "type": "string"
+          },
+          "TransferRequestId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "AccountHashedId",
+          "AccountId",
+          "TransferRequestHashedId",
+          "TransferRequestId"
+        ]
+      },
+      "TransferConfirmationViewModel": {
+        "type": "object",
+        "properties": {
+          "AccountHashedId": {
+            "type": "string"
+          },
+          "TransferApprovalStatus": {
+            "type": "string"
+          },
+          "TransferReceiverName": {
+            "type": "string"
+          },
+          "SelectedOption": {
+            "type": "string",
+            "enum": [
+              "Homepage",
+              "TransfersDashboard"
+            ]
+          }
+        }
+      },
+      "TransferRequestForSenderViewModel": {
+        "type": "object",
+        "properties": {
+          "TransferSenderHashedAccountId": {
+            "type": "string"
+          },
+          "TransferReceiverPublicHashedAccountId": {
+            "type": "string"
+          },
+          "TransferReceiverName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "TransferSenderHashedAccountId",
+          "TransferReceiverPublicHashedAccountId",
+          "TransferReceiverName"
+        ]
+      },
+      "TransferRequestRequest": {
+        "type": "object",
+        "properties": {
+          "AccountHashedId": {
+            "type": "string"
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "TransferRequestHashedId": {
+            "type": "string"
+          },
+          "TransferRequestId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "AccountHashedId",
+          "TransferRequestHashedId",
+          "AccountId",
+          "TransferRequestId"
+        ]
+      },
+      "TransferRequestViewModel": {
+        "type": "object",
+        "properties": {
+          "AccountHashedId": {
+            "type": "string"
+          },
+          "TransferRequestHashedId": {
+            "type": "string"
+          },
+          "HashedCohortReference": {
+            "type": "string"
+          },
+          "TotalCost": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "FundingCap": {
+            "type": "integer"
+          },
+          "TrainingList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrainingCourseSummaryViewModel"
+            }
+          },
+          "TransferApprovalStatusDesc": {
+            "type": "string"
+          },
+          "TransferApprovalStatus": {
+            "type": "string"
+          },
+          "TransferApprovalSetBy": {
+            "type": "string"
+          },
+          "TransferApprovalSetOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ShowFundingCapWarning": {
+            "type": "boolean"
+          },
+          "ApprovalConfirmed": {
+            "type": "boolean"
+          },
+          "AutoApprovalEnabled": {
+            "type": "boolean"
+          },
+          "HashedPledgeId": {
+            "type": "string"
+          },
+          "HashedPledgeApplicationId": {
+            "type": "string"
+          }
+        }
+      },
+      "TrainingCourseSummaryViewModel": {
+        "type": "object",
+        "properties": {
+          "CourseTitle": {
+            "type": "string"
+          },
+          "ApprenticeshipCount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "CourseTitle",
+          "ApprenticeshipCount"
+        ]
+      }
+    }
+  }
+}

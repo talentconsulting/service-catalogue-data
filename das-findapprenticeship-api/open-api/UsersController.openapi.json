@@ -1,0 +1,375 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Find Apprenticeship API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/Users/{userReference}/SavedSearches": {
+      "get": {
+        "operationId": "GetSavedSearchesByUserReference",
+        "parameters": [
+          {
+            "name": "userReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSavedSearchesResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteSavedSearches",
+        "parameters": [
+          {
+            "name": "userReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/Users/{userReference}/SavedSearches/count": {
+      "get": {
+        "operationId": "GetSavedSearchCount",
+        "parameters": [
+          {
+            "name": "userReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSavedSearchCountResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/Users/{userReference}/SavedSearches/{id}": {
+      "get": {
+        "operationId": "GetUserSavedSearch",
+        "parameters": [
+          {
+            "name": "userReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSavedSearchResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "put": {
+        "operationId": "UpsertSavedSearch",
+        "parameters": [
+          {
+            "name": "userReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveSearchRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutSaveSearchResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "operationId": "DeleteUserSavedSearch",
+        "parameters": [
+          {
+            "name": "userReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No content"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SavedSearchDto": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "UserReference": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "DateCreated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "LastRunDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "EmailLastSendDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "UnsubscribeToken": {
+            "type": "string"
+          },
+          "SearchParameters": {
+            "$ref": "#/components/schemas/SearchParametersDto"
+          }
+        }
+      },
+      "SearchParametersDto": {
+        "type": "object",
+        "properties": {
+          "SearchTerm": {
+            "type": "string",
+            "nullable": true
+          },
+          "SelectedRouteIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "nullable": true
+          },
+          "Distance": {
+            "type": "integer",
+            "nullable": true
+          },
+          "DisabilityConfident": {
+            "type": "boolean"
+          },
+          "ExcludeNational": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "SelectedLevelIds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            },
+            "nullable": true
+          },
+          "Location": {
+            "type": "string",
+            "nullable": true
+          },
+          "Latitude": {
+            "type": "string",
+            "nullable": true
+          },
+          "Longitude": {
+            "type": "string",
+            "nullable": true
+          },
+          "SelectedApprenticeshipTypes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "Standard",
+                "Foundation"
+              ]
+            },
+            "nullable": true
+          }
+        }
+      },
+      "GetSavedSearchResponse": {
+        "type": "object",
+        "properties": {
+          "SavedSearch": {
+            "$ref": "#/components/schemas/SavedSearchDto"
+          }
+        }
+      },
+      "GetSavedSearchesResponse": {
+        "type": "object",
+        "properties": {
+          "SavedSearches": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SavedSearchDto"
+            }
+          },
+          "TotalCount": {
+            "type": "integer"
+          },
+          "PageIndex": {
+            "type": "integer"
+          },
+          "PageSize": {
+            "type": "integer"
+          },
+          "TotalPages": {
+            "type": "integer"
+          }
+        }
+      },
+      "SaveSearchRequest": {
+        "type": "object",
+        "properties": {
+          "UnsubscribeToken": {
+            "type": "string"
+          },
+          "SearchParameters": {
+            "$ref": "#/components/schemas/SearchParametersDto"
+          }
+        }
+      },
+      "PutSaveSearchResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "GetSavedSearchCountResponse": {
+        "type": "object",
+        "properties": {
+          "UserReference": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "SavedSearchesCount": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

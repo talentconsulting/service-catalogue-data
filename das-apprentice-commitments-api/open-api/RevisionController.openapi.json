@@ -1,0 +1,353 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Commitments API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/apprentices/{apprenticeId}/apprenticeships/{apprenticeshipId}/revisions/{revisionId}": {
+      "patch": {
+        "summary": "Update revision details",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "revisionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JsonPatchDocumentOfRevision"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Revision updated successfully"
+          }
+        }
+      },
+      "get": {
+        "summary": "Get apprenticeship revision details",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "revisionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Apprenticeship revision details retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Revision"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Revision not found"
+          }
+        }
+      }
+    },
+    "/apprentices/{apprenticeId}/apprenticeships/{apprenticeshipId}/revisions/{revisionId}/confirmations": {
+      "patch": {
+        "summary": "Confirm apprenticeship revision details",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "revisionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Confirmations"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Apprenticeship revision confirmed successfully"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Confirmations": {
+        "type": "object",
+        "properties": {
+          "EmployerCorrect": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "TrainingProviderCorrect": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "ApprenticeshipDetailsCorrect": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "RolesAndResponsibilitiesConfirmations": {
+            "$ref": "#/components/schemas/RolesAndResponsibilitiesConfirmations"
+          },
+          "HowApprenticeshipDeliveredCorrect": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "ApprenticeshipCorrect": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "RolesAndResponsibilitiesConfirmations": {
+        "type": "integer",
+        "format": "int32",
+        "description": "Bit flag representing roles and responsibilities confirmations."
+      },
+      "JsonPatchDocumentOfRevision": {
+        "type": "object",
+        "description": "JSON Patch Document for Revision. This contains patch operations for updating resources dynamically."
+      },
+      "Revision": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ApprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Details": {
+            "$ref": "#/components/schemas/ApprenticeshipDetails"
+          },
+          "CommitmentsApprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "CommitmentsApprovedOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EmployerCorrect": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "TrainingProviderCorrect": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "ApprenticeshipDetailsCorrect": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "RolesAndResponsibilitiesConfirmations": {
+            "$ref": "#/components/schemas/RolesAndResponsibilitiesConfirmations"
+          },
+          "HowApprenticeshipDeliveredCorrect": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "ApprenticeshipConfirmed": {
+            "type": "boolean"
+          },
+          "ConfirmBefore": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ConfirmedOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "LastViewed": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "StoppedReceivedOn": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "ApprenticeshipDetails": {
+        "type": "object",
+        "properties": {
+          "EmployerAccountLegalEntityId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "EmployerName": {
+            "type": "string"
+          },
+          "TrainingProviderId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "TrainingProviderName": {
+            "type": "string"
+          },
+          "DeliveryModel": {
+            "$ref": "#/components/schemas/DeliveryModel"
+          },
+          "Course": {
+            "$ref": "#/components/schemas/CourseDetails"
+          },
+          "Rpl": {
+            "$ref": "#/components/schemas/RplDetails"
+          },
+          "ApprenticeshipType": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          }
+        }
+      },
+      "DeliveryModel": {
+        "type": "string",
+        "enum": [
+          "Regular",
+          "PortableFlexiJob",
+          "FlexiJobAgency"
+        ]
+      },
+      "CourseDetails": {
+        "type": "object",
+        "properties": {
+          "Name": {
+            "type": "string"
+          },
+          "Level": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Option": {
+            "type": "string",
+            "nullable": true
+          },
+          "PlannedStartDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "PlannedEndDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "EmploymentEndDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "CourseDuration": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RplDetails": {
+        "type": "object",
+        "properties": {
+          "RecognisePriorLearning": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "DurationReducedByHours": {
+            "type": "integer",
+            "format": "int16",
+            "nullable": true
+          },
+          "DurationReducedBy": {
+            "type": "integer",
+            "format": "int16",
+            "nullable": true
+          }
+        }
+      }
+    }
+  }
+}

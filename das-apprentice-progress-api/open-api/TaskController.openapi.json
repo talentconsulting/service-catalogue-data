@@ -1,0 +1,341 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Progress API",
+    "version": "1.0"
+  },
+  "paths": {
+    "/apprenticeships/{apprenticeshipIdentifier}/taskCategories": {
+      "get": {
+        "summary": "Retrieve task categories for an apprenticeship",
+        "parameters": [
+          {
+            "name": "apprenticeshipIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of task categories",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Task categories not found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Add a new task category",
+        "parameters": [
+          {
+            "name": "apprenticeshipIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "categoryId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task category added successfully"
+          }
+        }
+      }
+    },
+    "/apprenticeships/{apprenticeshipIdentifier}/taskCategories/{taskCategoryId}": {
+      "get": {
+        "summary": "Retrieve a specific task category",
+        "parameters": [
+          {
+            "name": "apprenticeshipIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "taskId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of task category",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Task category not found"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a specific task category",
+        "parameters": [
+          {
+            "name": "apprenticeshipIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "taskCategoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task category deleted successfully"
+          }
+        }
+      }
+    },
+    "/apprenticeships/{apprenticeshipIdentifier}/fromDate/{fromDate}/toDate/{toDate}/status/{status}": {
+      "get": {
+        "summary": "Retrieve tasks based on apprenticeship ID and filters",
+        "parameters": [
+          {
+            "name": "apprenticeshipIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "status",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of filtered tasks",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "404": {
+            "description": "Tasks not found"
+          }
+        }
+      }
+    },
+    "/apprenticeships/{apprenticeshipIdentifier}/tasks": {
+      "post": {
+        "summary": "Add a new task",
+        "parameters": [
+          {
+            "name": "apprenticeshipIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprenticeTaskDataRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Task added successfully"
+          }
+        }
+      }
+    },
+    "/apprenticeships/{apprenticeshipIdentifier}/tasks/{taskId}/changestatus/{status}": {
+      "post": {
+        "summary": "Change the status of a task",
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "status",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Task status updated successfully"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApprenticeTaskDataRequest": {
+        "type": "object",
+        "properties": {
+          "ApprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "TaskId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "DueDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ApprenticeAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "ApprenticeshipCategoryId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "Note": {
+            "type": "string"
+          },
+          "CompletionDateTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "CreatedDateTime": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "Status": {
+            "type": "integer",
+            "nullable": true
+          },
+          "Files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TaskFile"
+            }
+          },
+          "ReminderUnit": {
+            "type": "integer",
+            "nullable": true
+          },
+          "ReminderValue": {
+            "type": "integer",
+            "nullable": true
+          },
+          "ReminderStatus": {
+            "type": "integer",
+            "nullable": true
+          },
+          "KsbsLinked": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "TaskFile": {
+        "type": "object",
+        "properties": {
+          "TaskId": {
+            "type": "integer"
+          },
+          "TaskFileId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "FileType": {
+            "type": "string"
+          },
+          "FileName": {
+            "type": "string"
+          },
+          "FileContents": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      }
+    }
+  }
+}

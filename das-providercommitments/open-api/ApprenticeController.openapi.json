@@ -1,0 +1,281 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Provider Commitments - Apprentice API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/{providerId}/apprentices": {
+      "get": {
+        "operationId": "getApprenticesIndex",
+        "summary": "Gets the list of apprentices for the provider",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/{providerId}/apprentices/{apprenticeshipHashedId}": {
+      "get": {
+        "operationId": "getApprenticeDetails",
+        "summary": "Gets the details of an apprentice",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "apprenticeshipHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/{providerId}/apprentices/{apprenticeshipHashedId}/changes/view": {
+      "get": {
+        "operationId": "viewApprenticeshipUpdates",
+        "summary": "Views apprenticeship updates for the apprentice",
+        "security": [
+          {
+            "AccessApprenticeship": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "apprenticeshipHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postViewApprenticeshipUpdates",
+        "summary": "Handles submission for viewing apprenticeship updates",
+        "security": [
+          {
+            "AccessApprenticeship": []
+          },
+          {
+            "HasAccountOwnerPermission": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "apprenticeshipHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "View model for apprenticeship updates",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ViewApprenticeshipUpdatesViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
+    "/{providerId}/apprentices/download": {
+      "get": {
+        "operationId": "downloadApprentices",
+        "summary": "Downloads apprentice data",
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "File downloaded",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{providerId}/apprentices/{apprenticeshipHashedId}/change-employer/confirm-employer": {
+      "get": {
+        "operationId": "getConfirmEmployer",
+        "summary": "Gets employer confirmation information for apprenticeship change",
+        "security": [
+          {
+            "AccessApprenticeship": []
+          },
+          {
+            "HasAccountOwnerPermission": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "apprenticeshipHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      },
+      "post": {
+        "operationId": "postConfirmEmployer",
+        "summary": "Handles employer confirmation for apprenticeship change",
+        "security": [
+          {
+            "AccessApprenticeship": []
+          },
+          {
+            "HasAccountOwnerPermission": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "apprenticeshipHashedId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "View model for employer confirmation",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmEmployerViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ViewApprenticeshipUpdatesViewModel": {
+        "type": "object",
+        "properties": {
+          "UndoChanges": {
+            "type": "boolean"
+          },
+          "ApprenticeshipId": {
+            "type": "integer"
+          },
+          "ProviderId": {
+            "type": "integer"
+          }
+        }
+      },
+      "ConfirmEmployerViewModel": {
+        "type": "object",
+        "properties": {
+          "ProviderId": {
+            "type": "integer"
+          },
+          "EmployerAccountLegalEntityPublicHashedId": {
+            "type": "string"
+          },
+          "Confirm": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

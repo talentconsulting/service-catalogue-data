@@ -1,0 +1,110 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Course Restrictions API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/restricted-courses/{larsCode}/providers/add": {
+      "get": {
+        "summary": "Get the view for adding a provider to a restricted course.",
+        "operationId": "GetProviderAddViewForRestrictedCourse",
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The LARS code of the restricted course."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the view.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Course not found or not restricted."
+          }
+        },
+        "security": [
+          {
+            "roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Add a provider to a restricted course.",
+        "operationId": "AddProviderToRestrictedCourse",
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The LARS code of the restricted course."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/AddProviderToRestrictedCourseSubmitModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to confirmation view."
+          },
+          "404": {
+            "description": "Course or provider not found."
+          }
+        },
+        "security": [
+          {
+            "roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddProviderToRestrictedCourseSubmitModel": {
+        "type": "object",
+        "properties": {
+          "SelectedUkprn": {
+            "type": "string",
+            "nullable": true,
+            "description": "The UKPRN of the provider to be added."
+          }
+        },
+        "required": []
+      }
+    },
+    "securitySchemes": {
+      "roles": {
+        "type": "apiKey",
+        "name": "Roles",
+        "in": "header"
+      }
+    }
+  }
+}

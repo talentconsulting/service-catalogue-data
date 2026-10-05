@@ -7,11 +7,12 @@
   "paths": {
     "/api/transfers/staging": {
       "post": {
-        "description": "Stage employer finance transfers.",
-        "operationId": "stageTransfers",
+        "summary": "Stage Transfers",
+        "description": "Stages employer account transfers.",
+        "operationId": "StageTransfers",
         "security": [
           {
-            "Authorization": []
+            "ApiRoles.ReadAllEmployerAccountBalances": []
           }
         ],
         "requestBody": {
@@ -26,50 +27,42 @@
         },
         "responses": {
           "400": {
-            "description": "Bad Request - Invalid payload.",
+            "description": "Bad Request",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "additionalProperties": true
+                "examples": {
+                  "Payload Missing": {
+                    "summary": "Transfers payload is required.",
+                    "value": "Transfers payload is required."
+                  },
+                  "Validation Errors": {
+                    "value": {
+                      "validationErrors": "List of validation errors."
+                    }
+                  }
                 }
               }
             }
           },
           "409": {
-            "description": "Conflict - Conflicting transfer IDs.",
+            "description": "Conflict",
             "content": {
               "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "transferIds": {
-                      "type": "array",
-                      "items": {
-                        "type": "integer",
-                        "format": "int64"
-                      }
+                "examples": {
+                  "Conflicting Transfers": {
+                    "value": {
+                      "transferIds": [
+                        "ConflictingTransferId1",
+                        "ConflictingTransferId2"
+                      ]
                     }
-                  },
-                  "required": [
-                    "transferIds"
-                  ]
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error - Unexpected error occurred during transfer staging.",
-            "content": {
-              "text/plain": {
-                "schema": {
-                  "type": "string"
+                  }
                 }
               }
             }
           },
           "201": {
-            "description": "Created - Transfers staged successfully.",
+            "description": "Created",
             "content": {
               "application/json": {
                 "schema": {
@@ -77,20 +70,28 @@
                   "properties": {
                     "insertedCount": {
                       "type": "integer",
-                      "format": "int32"
+                      "description": "Number of transfers staged."
                     },
                     "transferIds": {
                       "type": "array",
                       "items": {
-                        "type": "integer",
-                        "format": "int64"
-                      }
+                        "type": "integer"
+                      },
+                      "description": "IDs of staged transfers."
                     }
-                  },
-                  "required": [
-                    "insertedCount",
-                    "transferIds"
-                  ]
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "examples": {
+                  "Unexpected Error": {
+                    "value": "An unexpected error occurred while staging transfers."
+                  }
                 }
               }
             }
@@ -104,7 +105,7 @@
       "StageTransfersRequest": {
         "type": "object",
         "properties": {
-          "transfers": {
+          "Transfers": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/TransferStaging"
@@ -112,7 +113,7 @@
           }
         },
         "required": [
-          "transfers"
+          "Transfers"
         ]
       },
       "TransferStaging": {
@@ -120,72 +121,82 @@
         "properties": {
           "TransferId": {
             "type": "integer",
-            "format": "int64"
+            "description": "Unique identifier for the transfer."
           },
           "SenderAccountId": {
             "type": "integer",
-            "format": "int64"
+            "description": "ID of the sender account."
           },
           "SenderAccountName": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the sender account."
           },
           "ReceiverAccountId": {
             "type": "integer",
-            "format": "int64"
+            "description": "ID of the receiver account."
           },
           "ReceiverAccountName": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the receiver account."
           },
           "Amount": {
             "type": "number",
-            "format": "decimal"
+            "description": "Transfer amount."
           },
           "TransferDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "Date of transfer."
           },
           "PeriodEnd": {
-            "type": "string"
+            "type": "string",
+            "description": "Period end identifier."
           },
           "CollectionPeriodMonth": {
             "type": "integer",
-            "format": "int32"
+            "description": "Collection period month."
           },
           "CollectionPeriodYear": {
             "type": "integer",
-            "format": "int32"
+            "description": "Collection period year."
           },
           "Ukprn": {
             "type": "integer",
-            "format": "int64"
+            "description": "UK provider reference number."
           },
           "CourseName": {
-            "type": "string"
+            "type": "string",
+            "description": "Name of the course."
           },
           "CourseLevel": {
             "type": "integer",
-            "format": "int32",
-            "nullable": true
+            "nullable": true,
+            "description": "Level of the course, if applicable."
           },
           "LearningType": {
-            "type": "string"
+            "type": "string",
+            "description": "Type of learning."
           },
           "ApprenticeshipId": {
             "type": "integer",
-            "format": "int64"
+            "description": "ID of the apprenticeship."
           },
           "Type": {
-            "type": "string"
+            "type": "string",
+            "description": "Type of transfer."
           },
           "RequiredPaymentId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "ID of the required payment."
           },
           "CreatedBy": {
-            "type": "string"
+            "type": "string",
+            "description": "User who created the transfer."
           },
           "CorrelationId": {
-            "type": "string"
+            "type": "string",
+            "description": "Correlation ID for tracking."
           }
         },
         "required": [
@@ -201,19 +212,12 @@
           "CollectionPeriodYear",
           "Ukprn",
           "CourseName",
-          "LearningType",
           "ApprenticeshipId",
           "Type",
           "RequiredPaymentId",
           "CreatedBy",
           "CorrelationId"
         ]
-      }
-    },
-    "securitySchemes": {
-      "Authorization": {
-        "type": "http",
-        "scheme": "bearer"
       }
     }
   }

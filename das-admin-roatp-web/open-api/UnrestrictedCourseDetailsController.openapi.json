@@ -1,0 +1,109 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Unrestricted Course Details API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/unrestricted-courses/{larsCode}": {
+      "get": {
+        "summary": "Get unrestricted course details",
+        "operationId": "getUnrestrictedCourseDetails",
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The LARS code of the course"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Course not found"
+          }
+        },
+        "security": [
+          {
+            "rolesAuth": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Submit data to restrict course",
+        "operationId": "restrictCourse",
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The LARS code of the course"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RestrictCourseSubmitModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirected to restrict course confirmation"
+          }
+        },
+        "security": [
+          {
+            "rolesAuth": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RestrictCourseSubmitModel": {
+        "type": "object",
+        "properties": {
+          "LarsCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "DisplayName": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "rolesAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Roles-based authorization requiring RoatpAdminTeam."
+      }
+    }
+  }
+}

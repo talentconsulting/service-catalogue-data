@@ -1,0 +1,254 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Saved Vacancies API",
+    "version": "1.0.0",
+    "description": "API for managing saved apprenticeship vacancies."
+  },
+  "paths": {
+    "/saved-vacancies": {
+      "get": {
+        "operationId": "getSavedVacancies",
+        "summary": "Get saved vacancies.",
+        "parameters": [
+          {
+            "name": "vacancyReference",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Reference of the vacancy to delete."
+          },
+          {
+            "name": "sortOrder",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DateSaved",
+                "ClosingSoon"
+              ]
+            },
+            "description": "The sort order to apply to the list of saved vacancies."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Saved vacancies retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IndexViewModel"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized. Requires an authenticated user."
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "tags": [
+          "Saved Vacancies"
+        ]
+      }
+    },
+    "/saved-vacancies/{vacancyReference}/delete": {
+      "post": {
+        "operationId": "deleteSavedVacancy",
+        "summary": "Delete a saved vacancy.",
+        "parameters": [
+          {
+            "name": "vacancyReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The reference of the vacancy to delete."
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to the saved vacancies page after deletion."
+          },
+          "401": {
+            "description": "Unauthorized. Requires an authenticated user."
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "tags": [
+          "Saved Vacancies"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "IndexViewModel": {
+        "type": "object",
+        "properties": {
+          "applications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Application"
+            }
+          },
+          "expiredApplications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Application"
+            }
+          },
+          "withdrawnApplications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Application"
+            }
+          },
+          "selectedTab": {
+            "type": "string",
+            "description": "The selected tab."
+          },
+          "pageTitle": {
+            "type": "string",
+            "description": "The page title."
+          },
+          "tabTitle": {
+            "type": "string",
+            "description": "Title of the selected tab."
+          },
+          "tabText": {
+            "type": "string",
+            "description": "Text displayed in the selected tab."
+          },
+          "isTabTextInset": {
+            "type": "boolean",
+            "description": "Whether the tab text is inset."
+          },
+          "applicationSubmittedBannerMessage": {
+            "type": "string",
+            "description": "Banner message after submitting an application."
+          },
+          "withdrawnBannerMessage": {
+            "type": "string",
+            "description": "Banner message after withdrawing an application."
+          },
+          "deletedBannerMessage": {
+            "type": "string",
+            "description": "Banner message after deleting an application."
+          },
+          "newSuccessfulApplicationsCount": {
+            "type": "string",
+            "description": "Count of new successful applications."
+          },
+          "newUnsuccessfulApplicationsCount": {
+            "type": "string",
+            "description": "Count of new unsuccessful applications."
+          }
+        }
+      },
+      "Application": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The application ID."
+          },
+          "vacancyReference": {
+            "type": "string",
+            "description": "Reference code for the vacancy."
+          },
+          "title": {
+            "type": "string",
+            "description": "The title of the application."
+          },
+          "employerName": {
+            "type": "string",
+            "description": "Name of the employer offering the vacancy."
+          },
+          "startedOn": {
+            "type": "string",
+            "description": "Date the application was started."
+          },
+          "closingDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Closing date of the application."
+          },
+          "withdrawnDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date the application was withdrawn."
+          },
+          "submittedDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date the application was submitted."
+          },
+          "responseDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date the application received a response."
+          },
+          "isClosingSoon": {
+            "type": "boolean",
+            "description": "Whether the vacancy is closing soon."
+          },
+          "isClosed": {
+            "type": "boolean",
+            "description": "Whether the vacancy is already closed."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Draft",
+              "Submitted",
+              "Withdrawn",
+              "Successful",
+              "Unsuccessful",
+              "Expired"
+            ],
+            "description": "The current status of the application."
+          },
+          "responseNotes": {
+            "type": "string",
+            "description": "Notes on the application response."
+          },
+          "closeDateTime": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of the application's closing time."
+          },
+          "employmentWorkLocation": {
+            "type": "string",
+            "description": "Name of the location where the work is located."
+          },
+          "apprenticeshipType": {
+            "type": "string",
+            "enum": [
+              "Standard",
+              "Foundation"
+            ],
+            "description": "The type of apprenticeship."
+          },
+          "showFoundationTag": {
+            "type": "boolean",
+            "description": "Indicates whether the apprenticeship is of type Foundation."
+          }
+        }
+      }
+    }
+  }
+}

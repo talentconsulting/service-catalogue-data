@@ -8,15 +8,15 @@
     "/api/period-ends": {
       "get": {
         "summary": "Get all period ends",
-        "operationId": "GetAllPeriodEnds",
+        "operationId": "getAllPeriodEnds",
         "security": [
           {
-            "ApiRoles_ReadAllEmployerAccountBalances": []
+            "ReadAllEmployerAccountBalances": []
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with list of period ends",
+            "description": "A list of all period ends",
             "content": {
               "application/json": {
                 "schema": {
@@ -35,13 +35,14 @@
       },
       "post": {
         "summary": "Create a new period end",
-        "operationId": "CreatePeriodEnd",
+        "operationId": "createPeriodEnd",
         "security": [
           {
-            "ApiRoles_ReadAllEmployerAccountBalances": []
+            "ReadAllEmployerAccountBalances": []
           }
         ],
         "requestBody": {
+          "description": "The period end to create",
           "required": true,
           "content": {
             "application/json": {
@@ -53,7 +54,7 @@
         },
         "responses": {
           "200": {
-            "description": "Successfully created period end",
+            "description": "The created period end",
             "content": {
               "application/json": {
                 "schema": {
@@ -63,21 +64,21 @@
             }
           },
           "400": {
-            "description": "Bad request, invalid input data"
+            "description": "Invalid request"
           },
           "500": {
-            "description": "Internal server error, could not create period end"
+            "description": "Internal server error"
           }
         }
       }
     },
     "/api/period-ends/{periodEndId}": {
       "get": {
-        "summary": "Get details of a specific period end",
-        "operationId": "GetPeriodEndById",
+        "summary": "Get a specific period end by ID",
+        "operationId": "getPeriodEndById",
         "security": [
           {
-            "ApiRoles_ReadAllEmployerAccountBalances": []
+            "ReadAllEmployerAccountBalances": []
           }
         ],
         "parameters": [
@@ -87,12 +88,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "The ID of the period end"
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with period end details",
+            "description": "The requested period end",
             "content": {
               "application/json": {
                 "schema": {
@@ -113,42 +115,50 @@
       "PeriodEnd": {
         "type": "object",
         "properties": {
-          "PeriodEndId": {
+          "periodEndId": {
             "type": "string"
           },
-          "CalendarPeriodMonth": {
+          "calendarPeriodMonth": {
             "type": "integer",
             "format": "int32"
           },
-          "CalendarPeriodYear": {
+          "calendarPeriodYear": {
             "type": "integer",
             "format": "int32"
           },
-          "AccountDataValidAt": {
+          "accountDataValidAt": {
             "type": "string",
             "format": "date-time",
             "nullable": true
           },
-          "CommitmentDataValidAt": {
+          "commitmentDataValidAt": {
             "type": "string",
             "format": "date-time",
             "nullable": true
           },
-          "CompletionDateTime": {
+          "completionDateTime": {
             "type": "string",
             "format": "date-time"
           },
-          "PaymentsForPeriod": {
+          "paymentsForPeriod": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "periodEndId",
+          "calendarPeriodMonth",
+          "calendarPeriodYear",
+          "completionDateTime",
+          "paymentsForPeriod"
+        ]
       }
     },
     "securitySchemes": {
-      "ApiRoles_ReadAllEmployerAccountBalances": {
+      "ReadAllEmployerAccountBalances": {
         "type": "http",
         "scheme": "bearer",
-        "description": "Authorization using the ReadAllEmployerAccountBalances policy"
+        "bearerFormat": "JWT",
+        "description": "Requires the 'ReadAllEmployerAccountBalances' policy for access"
       }
     }
   }

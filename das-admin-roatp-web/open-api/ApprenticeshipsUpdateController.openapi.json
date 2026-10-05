@@ -1,0 +1,127 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprenticeships Update API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers/{ukprn}/apprenticeships": {
+      "get": {
+        "operationId": "GetApprenticeshipsUpdate",
+        "summary": "Retrieve the apprenticeships update view model.",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The UKPRN of the provider."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response displaying the apprenticeships update view model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferApprenticeshipsViewModel"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to the home route when certain conditions are not met."
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostApprenticeshipsUpdate",
+        "summary": "Submit the apprenticeships update form.",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The UKPRN of the provider."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferApprenticeshipsSubmitModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to either the home route or the apprenticeship units update route based on the submission."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "OfferApprenticeshipsViewModel": {
+        "type": "object",
+        "properties": {
+          "IsApprenticeshipsOffered": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Indicates whether apprenticeships are being offered."
+          },
+          "ApprenticeshipsSelection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprenticeshipsSelectionModel"
+            },
+            "description": "List of apprenticeship offering choices."
+          }
+        }
+      },
+      "OfferApprenticeshipsSubmitModel": {
+        "type": "object",
+        "properties": {
+          "IsApprenticeshipsOffered": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "Indicates whether apprenticeships are being offered."
+          }
+        },
+        "required": [
+          "IsApprenticeshipsOffered"
+        ]
+      },
+      "ApprenticeshipsSelectionModel": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "boolean",
+            "description": "Identifier indicating the selected choice."
+          },
+          "Description": {
+            "type": "string",
+            "description": "Text describing the choice."
+          },
+          "IsSelected": {
+            "type": "boolean",
+            "description": "Indicates if the choice is selected."
+          }
+        },
+        "required": [
+          "Id",
+          "Description",
+          "IsSelected"
+        ]
+      }
+    }
+  }
+}

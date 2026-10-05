@@ -1,0 +1,187 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SetLastDateStarts API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/restricted-courses/{larsCode}/providers/{ukprn}/set-last-start-date": {
+      "get": {
+        "summary": "Get the last start date view for a restricted course provider",
+        "operationId": "getLastStartDateView",
+        "tags": [
+          "RestrictedCourses"
+        ],
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The LARS code of the course"
+          },
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The UKPRN of the provider"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with view data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetLastDateStartsViewModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      },
+      "post": {
+        "summary": "Set the last start date for a restricted course provider",
+        "operationId": "setLastStartDate",
+        "tags": [
+          "RestrictedCourses"
+        ],
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The LARS code of the course"
+          },
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The UKPRN of the provider"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetLastDateStartsSubmitModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to the restricted course details page"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SetLastDateStartsSubmitModel": {
+        "type": "object",
+        "properties": {
+          "Day": {
+            "type": "string",
+            "nullable": true
+          },
+          "Month": {
+            "type": "string",
+            "nullable": true
+          },
+          "Year": {
+            "type": "string",
+            "nullable": true
+          },
+          "LarsCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "CourseLastDateStarts": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "description": "Model containing the data for submitting a last start date for a course provider."
+      },
+      "SetLastDateStartsViewModel": {
+        "type": "object",
+        "properties": {
+          "LarsCode": {
+            "type": "string"
+          },
+          "Ukprn": {
+            "type": "integer"
+          },
+          "ProviderName": {
+            "type": "string"
+          },
+          "CourseDisplayTitle": {
+            "type": "string"
+          },
+          "Day": {
+            "type": "string",
+            "nullable": true
+          },
+          "Month": {
+            "type": "string",
+            "nullable": true
+          },
+          "Year": {
+            "type": "string",
+            "nullable": true
+          },
+          "CourseLastDateStarts": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "IsChangingExistingDate": {
+            "type": "boolean"
+          },
+          "CancelUrl": {
+            "type": "string"
+          }
+        },
+        "description": "View model containing course provider details and current last start date."
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "JWT bearer authentication"
+      }
+    }
+  }
+}

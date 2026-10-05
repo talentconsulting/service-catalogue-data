@@ -1,0 +1,284 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Vacancies API",
+    "version": "1.0.0",
+    "description": "API for Find an Apprenticeship application vacancies."
+  },
+  "paths": {
+    "/apprenticeship/{vacancyReference}": {
+      "get": {
+        "tags": [
+          "Vacancies"
+        ],
+        "summary": "Get apprenticeship vacancy details.",
+        "parameters": [
+          {
+            "name": "vacancyReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "signedIn",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "true",
+                "false"
+              ]
+            }
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Applications",
+                "None"
+              ]
+            }
+          },
+          {
+            "name": "tab",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "None",
+                "Started",
+                "Submitted",
+                "Successful",
+                "Unsuccessful"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vacancy retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetVacancyDetailsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Vacancy not found."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Applications"
+        ],
+        "summary": "Apply for an apprenticeship vacancy.",
+        "security": [
+          {
+            "policyNames": [
+              "IsFaaUser"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "vacancyReference",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostApplyRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to apply page."
+          }
+        }
+      }
+    },
+    "/vacancy/save/{vacancyId}": {
+      "post": {
+        "tags": [
+          "Vacancies"
+        ],
+        "summary": "Save a vacancy from the details page.",
+        "security": [
+          {
+            "policyNames": [
+              "IsFaaUser"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "vacancyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "redirect",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to vacancy details page."
+          },
+          "200": {
+            "description": "Vacancy saved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/vacancy/delete/{vacancyId}": {
+      "post": {
+        "tags": [
+          "Vacancies"
+        ],
+        "summary": "Delete a saved vacancy from the details page.",
+        "security": [
+          {
+            "policyNames": [
+              "IsFaaUser"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "name": "vacancyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "redirect",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to vacancy details page."
+          },
+          "200": {
+            "description": "Vacancy deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetVacancyDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "employer": {
+            "type": "string"
+          },
+          "location": {
+            "$ref": "#/components/schemas/Location"
+          },
+          "wage": {
+            "type": "string"
+          }
+        }
+      },
+      "PostApplyRequest": {
+        "type": "object",
+        "properties": {
+          "vacancyReference": {
+            "type": "string"
+          }
+        }
+      },
+      "Location": {
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number"
+          },
+          "lon": {
+            "type": "number"
+          },
+          "locationName": {
+            "type": "string"
+          }
+        }
+      },
+      "PolicyNames": {
+        "type": "object",
+        "properties": {
+          "IsFaaUser": {
+            "type": "string",
+            "enum": [
+              "IsFaaUser"
+            ]
+          },
+          "IsAuthenticated": {
+            "type": "string",
+            "enum": [
+              "IsAuthenticated"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

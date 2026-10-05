@@ -1,0 +1,137 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Portal Services API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/account-details": {
+      "get": {
+        "summary": "Get account details",
+        "operationId": "getAccountDetails",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the account details page",
+            "content": {
+              "text/html": {}
+            }
+          },
+          "404": {
+            "description": "Environment is production (PRD); not found."
+          }
+        }
+      },
+      "post": {
+        "summary": "Authenticate and post account details",
+        "operationId": "postAccountDetails",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StubAuthenticationViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirects to stub signed-in route with returnUrl",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The URI to redirect to."
+              }
+            }
+          },
+          "404": {
+            "description": "Environment is production (PRD); not found."
+          }
+        }
+      }
+    },
+    "/Stub-Auth": {
+      "get": {
+        "summary": "Get stub signed-in page",
+        "operationId": "getStubSignedIn",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns the stub signed-in view",
+            "content": {
+              "text/html": {}
+            }
+          },
+          "404": {
+            "description": "Environment is production (PRD); not found."
+          }
+        }
+      }
+    },
+    "/apprentice-signed-out": {
+      "get": {
+        "summary": "Get post-logout view",
+        "operationId": "getSignedOut",
+        "responses": {
+          "200": {
+            "description": "Returns the signed-out page",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "StubAuthenticationViewModel": {
+        "type": "object",
+        "properties": {
+          "ReturnUrl": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "Id": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": ".AspNetCore.Cookies"
+      }
+    }
+  }
+}

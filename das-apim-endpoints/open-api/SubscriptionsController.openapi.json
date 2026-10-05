@@ -1,0 +1,234 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Subscriptions API",
+    "version": "1.0.0",
+    "description": "API for managing subscriptions and access keys for API products."
+  },
+  "paths": {
+    "/subscriptions/{accountIdentifier}/products": {
+      "get": {
+        "summary": "Get available products",
+        "operationId": "GetAvailableProducts",
+        "parameters": [
+          {
+            "name": "accountIdentifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identifier of the account."
+          },
+          {
+            "name": "accountType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Type of the account."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with available products.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSubscriptionsApiResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/subscriptions/{id}/products/{productId}": {
+      "get": {
+        "summary": "Get product subscription details",
+        "operationId": "GetProductSubscription",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identifier of the account."
+          },
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identifier of the product."
+          },
+          {
+            "name": "accountType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Type of the account."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with product subscription details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSubscriptionApiResponseItem"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Product subscription not found."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      },
+      "post": {
+        "summary": "Create product subscription",
+        "operationId": "CreateProductSubscription",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identifier of the account."
+          },
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identifier of the product."
+          },
+          {
+            "name": "accountType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Type of the account."
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Product subscription created successfully."
+          },
+          "400": {
+            "description": "Bad request error."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/subscriptions/{id}/renew/{productId}": {
+      "post": {
+        "summary": "Renew subscription key",
+        "operationId": "RenewSubscriptionKey",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identifier of the account."
+          },
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identifier of the product."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Subscription key renewed successfully."
+          },
+          "400": {
+            "description": "Bad request error."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    },
+    "/subscriptions/{id}/delete/{productId}": {
+      "delete": {
+        "summary": "Delete product subscription",
+        "operationId": "DeleteSubscription",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identifier of the account."
+          },
+          {
+            "name": "productId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Identifier of the product."
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Product subscription deleted successfully."
+          },
+          "400": {
+            "description": "Validation error."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProductSubscriptionsApiResponse": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "ProductSubscriptionApiResponseItem": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  }
+}

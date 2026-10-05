@@ -2,13 +2,14 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Employer Finance API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing employer finance transactions."
   },
   "paths": {
     "/api/accounts/{hashedAccountId}/transactions": {
       "get": {
         "operationId": "GetTransactionSummary",
-        "summary": "Retrieve account transaction summary",
+        "summary": "Fetch transaction summary for an account.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -16,16 +17,17 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Hashed account identifier."
           },
           {
             "name": "transactionType",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
+              "type": "integer"
+            },
+            "description": "Transaction type filter."
           },
           {
             "name": "periodEnd",
@@ -33,17 +35,13 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
-          }
-        ],
-        "security": [
-          {
-            "ReadAllEmployerAccountBalances": []
+            },
+            "description": "Period end to filter transactions."
           }
         ],
         "responses": {
           "200": {
-            "description": "Transaction summary retrieved successfully",
+            "description": "Transaction summary retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -53,18 +51,23 @@
             }
           },
           "400": {
-            "description": "Bad request"
+            "description": "Invalid request parameters."
           },
           "404": {
-            "description": "Summary not found"
+            "description": "Transaction summary not found."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiRolesReadAllEmployerAccountBalances": []
+          }
+        ]
       }
     },
     "/api/accounts/{hashedAccountId}/transactions/{year}/{month}": {
       "get": {
         "operationId": "GetTransactions",
-        "summary": "Retrieve transactions for a specific year and month",
+        "summary": "Retrieve account transactions for a specific year and month.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -72,35 +75,31 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Hashed account identifier."
           },
           {
             "name": "year",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
+              "type": "integer"
+            },
+            "description": "Year to filter transactions."
           },
           {
             "name": "month",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "security": [
-          {
-            "ReadAllEmployerAccountBalances": []
+              "type": "integer"
+            },
+            "description": "Month to filter transactions."
           }
         ],
         "responses": {
           "200": {
-            "description": "Transactions retrieved successfully",
+            "description": "Transactions retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -110,15 +109,20 @@
             }
           },
           "404": {
-            "description": "Transactions not found"
+            "description": "Transactions not found."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiRolesReadAllEmployerAccountBalances": []
+          }
+        ]
       }
     },
     "/api/accounts/{hashedAccountId}/transactions/query": {
       "get": {
         "operationId": "QueryAccountTransactions",
-        "summary": "Query account transactions within a date range",
+        "summary": "Query transactions within a specific date range.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -126,7 +130,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Hashed account identifier."
           },
           {
             "name": "fromDate",
@@ -135,7 +140,8 @@
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
+            },
+            "description": "Start date for transaction query."
           },
           {
             "name": "toDate",
@@ -144,77 +150,101 @@
             "schema": {
               "type": "string",
               "format": "date-time"
-            }
-          }
-        ],
-        "security": [
-          {
-            "ReadAllEmployerAccountBalances": []
+            },
+            "description": "End date for transaction query."
           }
         ],
         "responses": {
           "200": {
-            "description": "Transactions retrieved successfully",
+            "description": "Query results retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Transactions"
+                  "$ref": "#/components/schemas/QueryResults"
                 }
               }
             }
           },
           "400": {
-            "description": "Bad request"
+            "description": "Invalid request parameters."
           },
           "404": {
-            "description": "Transactions not found"
+            "description": "Query results not found."
           }
-        }
+        },
+        "security": [
+          {
+            "ApiRolesReadAllEmployerAccountBalances": []
+          }
+        ]
       }
     }
   },
   "components": {
+    "securitySchemes": {
+      "ApiRolesReadAllEmployerAccountBalances": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization required with the ReadAllEmployerAccountBalances policy."
+      }
+    },
     "schemas": {
       "TransactionSummary": {
         "type": "object",
         "properties": {
           "year": {
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           "month": {
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           "href": {
-            "type": "string"
+            "type": "string",
+            "format": "uri"
           }
-        }
+        },
+        "required": [
+          "year",
+          "month",
+          "href"
+        ]
       },
       "Transactions": {
         "type": "object",
         "properties": {
           "year": {
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           "month": {
-            "type": "integer",
-            "format": "int32"
+            "type": "integer"
           },
           "hasPreviousTransactions": {
             "type": "boolean"
           },
           "previousMonthUri": {
-            "type": "string"
+            "type": "string",
+            "format": "uri"
           }
-        }
-      }
-    },
-    "securitySchemes": {
-      "ReadAllEmployerAccountBalances": {
-        "type": "http",
-        "scheme": "bearer"
+        },
+        "required": [
+          "year",
+          "month",
+          "hasPreviousTransactions"
+        ]
+      },
+      "QueryResults": {
+        "type": "object",
+        "properties": {
+          "transactions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TransactionSummary"
+            }
+          }
+        },
+        "required": [
+          "transactions"
+        ]
       }
     }
   }

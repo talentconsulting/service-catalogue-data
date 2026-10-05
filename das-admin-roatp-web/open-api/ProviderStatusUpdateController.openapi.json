@@ -1,0 +1,200 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Provider Status Update API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers/{ukprn}/status": {
+      "get": {
+        "operationId": "getProviderStatus",
+        "summary": "Fetch the current status of a provider",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Provider status fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganisationStatusUpdateViewModel"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirects to the home route if provider is not found."
+          }
+        },
+        "security": [
+          {
+            "roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "operationId": "updateProviderStatus",
+        "summary": "Update the status of a provider",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrganisationStatusUpdateViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirects to different routes based on update status."
+          }
+        }
+      }
+    },
+    "/providers/{ukprn}/status/confirmed": {
+      "get": {
+        "operationId": "getProviderStatusConfirmed",
+        "summary": "View confirmed provider status",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmed provider status fetched successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderStatusConfirmationViewModel"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirects to the home route if provider is not found."
+          }
+        },
+        "security": [
+          {
+            "roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "OrganisationStatusUpdateViewModel": {
+        "type": "object",
+        "properties": {
+          "OrganisationStatuses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganisationStatusSelectionModel"
+            }
+          },
+          "OrganisationStatus": {
+            "$ref": "#/components/schemas/OrganisationStatus"
+          }
+        },
+        "required": [
+          "OrganisationStatuses",
+          "OrganisationStatus"
+        ]
+      },
+      "OrganisationStatusSelectionModel": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "IsSelected": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Id",
+          "Description",
+          "IsSelected"
+        ]
+      },
+      "OrganisationStatus": {
+        "type": "integer",
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "description": "Enumeration for organisation status (Removed = 0, Active = 1, ActiveNoStarts = 2, OnBoarding = 3)"
+      },
+      "ProviderStatusConfirmationViewModel": {
+        "type": "object",
+        "properties": {
+          "LegalName": {
+            "type": "string"
+          },
+          "OrganisationStatus": {
+            "$ref": "#/components/schemas/OrganisationStatus"
+          },
+          "Ukprn": {
+            "type": "integer"
+          },
+          "StatusText": {
+            "type": "string"
+          },
+          "ProviderSummaryLink": {
+            "type": "string"
+          },
+          "SelectTrainingProviderLink": {
+            "type": "string"
+          },
+          "AddNewTrainingProviderLink": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "LegalName",
+          "OrganisationStatus",
+          "Ukprn",
+          "StatusText",
+          "ProviderSummaryLink",
+          "SelectTrainingProviderLink",
+          "AddNewTrainingProviderLink"
+        ]
+      }
+    }
+  }
+}

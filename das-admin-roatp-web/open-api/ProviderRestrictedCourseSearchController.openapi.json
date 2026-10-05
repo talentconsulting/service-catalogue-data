@@ -1,0 +1,127 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Provider Restricted Course Search API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers/{ukprn}/restricted-courses/add": {
+      "get": {
+        "summary": "Get unrestricted courses for a provider.",
+        "operationId": "getProviderUnrestrictedCourses",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "The UKPRN of the provider."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with unrestricted courses.",
+            "content": {
+              "text/html": {
+                "example": "Rendered HTML view of courses."
+              }
+            }
+          },
+          "404": {
+            "description": "Provider or courses not found."
+          }
+        },
+        "security": [
+          {
+            "roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Search and select unrestricted courses for a provider.",
+        "operationId": "postProviderUnrestrictedCourses",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "The UKPRN of the provider."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderRestrictedCourseSearchSubmitModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirects to the next step based on the course selection.",
+            "headers": {
+              "Location": {
+                "description": "The URL for the redirect.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Course or provider not found."
+          },
+          "400": {
+            "description": "Validation errors in the submitted data.",
+            "content": {
+              "text/html": {
+                "example": "Rendered HTML view with validation errors."
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProviderRestrictedCourseSearchSubmitModel": {
+        "type": "object",
+        "properties": {
+          "SelectedLarsCode": {
+            "type": "string",
+            "nullable": true,
+            "description": "The LARS code of the selected course."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "securitySchemes": {
+      "roles": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Role-based authorization for RoatpAdminTeam."
+      }
+    }
+  }
+}

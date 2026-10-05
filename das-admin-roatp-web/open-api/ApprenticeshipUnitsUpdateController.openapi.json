@@ -1,0 +1,129 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprenticeship Units Update API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers/{ukprn}/apprenticeship-units": {
+      "get": {
+        "summary": "Retrieve apprenticeship units update view",
+        "operationId": "getApprenticeshipUnitsUpdateView",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Unique Provider Reference Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "View for updating apprenticeship units retrieved successfully",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to home if the organisation cannot be retrieved",
+            "content": {}
+          }
+        }
+      },
+      "post": {
+        "summary": "Update apprenticeship units for a provider",
+        "operationId": "updateApprenticeshipUnits",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Unique Provider Reference Number"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprenticeshipUnitsUpdateViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to the provider summary after successful update",
+            "content": {}
+          },
+          "400": {
+            "description": "Validation errors occurred",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApprenticeshipUnitsUpdateViewModel": {
+        "type": "object",
+        "properties": {
+          "ApprenticeshipUnitsSelection": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprenticeshipUnitsSelectionModel"
+            }
+          },
+          "OffersApprenticeships": {
+            "type": "boolean"
+          },
+          "ApprenticeshipUnitsSelectionId": {
+            "type": "boolean",
+            "nullable": true
+          }
+        },
+        "required": [
+          "ApprenticeshipUnitsSelection",
+          "OffersApprenticeships"
+        ]
+      },
+      "ApprenticeshipUnitsSelectionModel": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "boolean"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "IsSelected": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "Id",
+          "Description"
+        ]
+      }
+    }
+  }
+}

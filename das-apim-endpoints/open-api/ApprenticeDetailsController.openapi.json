@@ -1,0 +1,181 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Details API",
+    "version": "1.0.0",
+    "description": "API for managing apprentice details in the Apprentice App."
+  },
+  "paths": {
+    "/apprentices/{id}/details": {
+      "get": {
+        "summary": "Get details of an apprentice by ID",
+        "operationId": "GetApprenticeDetails",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the apprentice details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Apprentice details not found."
+          }
+        }
+      }
+    },
+    "/apprentice/{uln}": {
+      "get": {
+        "summary": "Get apprenticeship details by ULN",
+        "operationId": "GetApprenticeshipByUln",
+        "parameters": [
+          {
+            "name": "uln",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the apprenticeship details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Apprenticeship details not found."
+          }
+        }
+      }
+    },
+    "/apprentices/{apprenticeId}/apprenticeships/{apprenticeshipId}/revisions/{revisionId}/confirmations": {
+      "patch": {
+        "summary": "Confirm apprenticeship details",
+        "operationId": "ConfirmApprenticeship",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "revisionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Confirmations"
+              }
+            },
+            "application/json-patch+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Confirmations"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Confirmations"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Confirmations"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully confirmed the apprenticeship details."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Confirmations": {
+        "type": "object",
+        "properties": {
+          "EmployerCorrect": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "TrainingProviderCorrect": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "ApprenticeshipDetailsCorrect": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "RolesAndResponsibilitiesConfirmations": {
+            "$ref": "#/components/schemas/RolesAndResponsibilitiesConfirmations"
+          },
+          "HowApprenticeshipDeliveredCorrect": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "ApprenticeshipCorrect": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "RolesAndResponsibilitiesConfirmations": {
+        "type": "integer",
+        "enum": [
+          0,
+          1,
+          2,
+          4
+        ],
+        "description": "Flags for confirming roles and responsibilities."
+      }
+    }
+  }
+}

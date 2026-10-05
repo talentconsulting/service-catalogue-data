@@ -1,0 +1,126 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Finance API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/healthcheck": {
+      "get": {
+        "summary": "Get health check information",
+        "operationId": "getHealthCheck",
+        "security": [
+          {
+            "HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Successful response with health check information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetHealthCheckQueryResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Run health check",
+        "operationId": "runHealthCheck",
+        "security": [
+          {
+            "HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunHealthCheckCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Health check initiated successfully"
+          }
+        }
+      }
+    },
+    "/Content/lib/govuk-frontend/dist/assets/images/favicon.ico": {
+      "get": {
+        "summary": "Check if favicon.ico is accessible",
+        "operationId": "checkFaviconFile",
+        "responses": {
+          "200": {
+            "description": "Favicon is accessible"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetHealthCheckQueryResponse": {
+        "type": "object",
+        "properties": {
+          "healthCheck": {
+            "$ref": "#/components/schemas/HealthCheckDto"
+          }
+        }
+      },
+      "RunHealthCheckCommand": {
+        "type": "object",
+        "required": [
+          "userRef"
+        ],
+        "properties": {
+          "userRef": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": false
+          }
+        }
+      },
+      "HealthCheckDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sentRequest": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "receivedResponse": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "publishedEvent": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "receivedEvent": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "HasEmployerViewerTransactorOwnerAccount": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

@@ -1,0 +1,314 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Applications API",
+    "version": "1.0.0",
+    "description": "API for handling apprenticeship applications."
+  },
+  "paths": {
+    "/applications": {
+      "get": {
+        "summary": "Retrieve all applications.",
+        "operationId": "getApplications",
+        "parameters": [
+          {
+            "name": "tab",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "None",
+                "Started",
+                "Submitted",
+                "Successful",
+                "Unsuccessful"
+              ]
+            }
+          },
+          {
+            "name": "showEqualityQuestionsBanner",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applications retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetIndexQueryResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/withdraw": {
+      "get": {
+        "summary": "Prepare withdrawal of an application.",
+        "operationId": "getWithdrawApplication",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Withdrawal view model created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WithdrawApplicationViewModel"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Withdraw an application.",
+        "operationId": "postWithdrawApplication",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostWithdrawApplicationViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Redirect to application list after withdrawal.",
+            "headers": {
+              "Location": {
+                "description": "Redirect URL.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/view": {
+      "get": {
+        "summary": "View application details.",
+        "operationId": "getApplicationView",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application view model retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplicationViewModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications/{applicationId}/delete": {
+      "get": {
+        "summary": "Confirm deletion of an application.",
+        "operationId": "getConfirmDeleteApplication",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Deletion confirmation view model retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmDeleteApplicationViewModel"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Delete an application.",
+        "operationId": "postDeleteApplication",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "303": {
+            "description": "Redirect to application list after deletion.",
+            "headers": {
+              "Location": {
+                "description": "Redirect URL.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetIndexQueryResult": {
+        "type": "object",
+        "properties": {
+          "applications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Application"
+            }
+          }
+        }
+      },
+      "Application": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "vacancyReference": {
+            "type": "string"
+          },
+          "employerName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "Draft",
+              "Submitted",
+              "Withdrawn",
+              "Successful",
+              "Unsuccessful",
+              "Expired"
+            ]
+          }
+        }
+      },
+      "WithdrawApplicationViewModel": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "advertTitle": {
+            "type": "string"
+          },
+          "employerName": {
+            "type": "string"
+          }
+        }
+      },
+      "PostWithdrawApplicationViewModel": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "withdrawApplication": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "advertTitle": {
+            "type": "string",
+            "nullable": true
+          },
+          "employerName": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ApplicationViewModel": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "candidate": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "email": {
+                "type": "string",
+                "format": "email"
+              }
+            }
+          }
+        }
+      },
+      "ConfirmDeleteApplicationViewModel": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vacancyTitle": {
+            "type": "string"
+          },
+          "employerName": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

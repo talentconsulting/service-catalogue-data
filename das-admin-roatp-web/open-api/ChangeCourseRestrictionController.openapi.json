@@ -1,0 +1,155 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Change Course Restriction API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/restricted-courses/{larsCode}/providers/{ukprn}/change-restriction": {
+      "get": {
+        "summary": "View change course restriction details",
+        "operationId": "viewChangeCourseRestrictionDetails",
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "LARS code of the course"
+          },
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "UKPRN of the provider"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Course restriction view loaded successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeCourseRestrictionViewModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Course restriction details not found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Submit changes to course restriction",
+        "operationId": "submitChangeCourseRestriction",
+        "parameters": [
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "LARS code of the course"
+          },
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "UKPRN of the provider"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeCourseRestrictionSubmitModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Redirected to another route after successful submission"
+          },
+          "404": {
+            "description": "Course restriction details not found"
+          },
+          "400": {
+            "description": "Validation errors occurred",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChangeCourseRestrictionSubmitModel": {
+        "type": "object",
+        "properties": {
+          "SelectedOption": {
+            "type": "string",
+            "nullable": true,
+            "description": "Selected option for course restriction change"
+          }
+        }
+      },
+      "ChangeCourseRestrictionViewModel": {
+        "type": "object",
+        "properties": {
+          "LarsCode": {
+            "type": "string",
+            "description": "LARS code of the course"
+          },
+          "Ukprn": {
+            "type": "integer",
+            "format": "int32",
+            "description": "UKPRN of the provider"
+          },
+          "ProviderName": {
+            "type": "string",
+            "description": "Name of the provider"
+          },
+          "CourseDisplayTitle": {
+            "type": "string",
+            "description": "Display title of the course"
+          },
+          "LastDateStarts": {
+            "type": "string",
+            "format": "date",
+            "description": "Last start date of the course"
+          },
+          "SelectedOption": {
+            "type": "string",
+            "nullable": true,
+            "description": "Previously selected option for course restriction change"
+          },
+          "CancelUrl": {
+            "type": "string",
+            "description": "URL to cancel operation"
+          }
+        }
+      }
+    }
+  }
+}
