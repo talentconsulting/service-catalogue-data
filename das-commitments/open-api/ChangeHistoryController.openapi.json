@@ -5,24 +5,24 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/api/change-history/{apprenticeshipId}": {
+    "/api/change-history/{ApprenticeshipId}": {
       "get": {
-        "summary": "Get change history for a specific apprenticeship",
+        "summary": "Get change history for an apprenticeship",
+        "description": "Retrieves change history for a specific apprenticeship by ID.",
         "parameters": [
           {
-            "name": "apprenticeshipId",
+            "name": "ApprenticeshipId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "The ID of the apprenticeship to retrieve change history for"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved change history",
+            "description": "Successful retrieval of change history.",
             "content": {
               "application/json": {
                 "schema": {
@@ -32,19 +32,20 @@
             }
           },
           "400": {
-            "description": "Invalid request"
+            "description": "Invalid request."
           }
         },
         "security": [
           {
-            "oauth2": []
+            "OAuth2": []
           }
         ]
       }
     },
     "/api/change-history/{providerId}/Get-all-change-history": {
       "get": {
-        "summary": "Get change history for all learners of a specific provider",
+        "summary": "Get all change history for provider learners",
+        "description": "Retrieves change history for all learners associated with a specific provider by ID.",
         "parameters": [
           {
             "name": "providerId",
@@ -53,13 +54,12 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "The ID of the provider to retrieve change history for all learners"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved change history for all learners of the provider",
+            "description": "Successful retrieval of all change history for provider learners.",
             "content": {
               "application/json": {
                 "schema": {
@@ -69,19 +69,20 @@
             }
           },
           "400": {
-            "description": "Invalid request"
+            "description": "Invalid request."
           }
         },
         "security": [
           {
-            "oauth2": []
+            "OAuth2": []
           }
         ]
       }
     },
     "/api/change-history/employer/{accountId}/change-history": {
       "get": {
-        "summary": "Get change history for all learners of a specific employer",
+        "summary": "Get change history for employer learners",
+        "description": "Retrieves change history for all learners associated with a specific employer account by ID.",
         "parameters": [
           {
             "name": "accountId",
@@ -90,13 +91,12 @@
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "The account ID of the employer to retrieve change history for all learners"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved change history for all learners of the employer",
+            "description": "Successful retrieval of change history for employer learners.",
             "content": {
               "application/json": {
                 "schema": {
@@ -106,12 +106,12 @@
             }
           },
           "400": {
-            "description": "Invalid request"
+            "description": "Invalid request."
           }
         },
         "security": [
           {
-            "oauth2": []
+            "OAuth2": []
           }
         ]
       }
@@ -119,6 +119,42 @@
   },
   "components": {
     "schemas": {
+      "ChangeHistory": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ChangeType": {
+            "type": "integer"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "ApprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "LearnerName": {
+            "type": "string"
+          },
+          "AppliedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EmployerName": {
+            "type": "string"
+          },
+          "ProviderName": {
+            "type": "string"
+          }
+        }
+      },
       "GetChangeHistoryResponse": {
         "type": "object",
         "properties": {
@@ -151,54 +187,18 @@
             }
           }
         }
-      },
-      "ChangeHistory": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "ChangeType": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "Description": {
-            "type": "string"
-          },
-          "ApprenticeshipId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "LearnerName": {
-            "type": "string"
-          },
-          "AppliedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "Created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "EmployerName": {
-            "type": "string"
-          },
-          "ProviderName": {
-            "type": "string"
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "tokenUrl": "https://example.com/oauth/token",
+            "scopes": {}
           }
-        },
-        "required": [
-          "Id",
-          "ChangeType",
-          "Description",
-          "ApprenticeshipId",
-          "LearnerName",
-          "AppliedDate",
-          "Created",
-          "EmployerName",
-          "ProviderName"
-        ]
+        }
       }
     }
   }

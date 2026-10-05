@@ -7,6 +7,9 @@
   "paths": {
     "/{ukPrn}/reservations": {
       "get": {
+        "tags": [
+          "ProviderReservations"
+        ],
         "summary": "Provider Reservations Index",
         "parameters": [
           {
@@ -17,25 +20,27 @@
               "type": "integer",
               "format": "uint32"
             }
-          },
-          {
-            "name": "IsFromManage",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
           }
         ],
         "responses": {
-          "200": {
-            "description": "Successful operation"
+          "302": {
+            "description": "Redirect to start route or view result."
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderAccount": [],
+            "HasProviderContributorOrHigherOrIsEmployer": []
+          }
+        ]
       }
     },
     "/{ukPrn}/reservations/start": {
       "get": {
-        "summary": "Start Provider Reservation Process",
+        "tags": [
+          "ProviderReservations"
+        ],
+        "summary": "Start Provider Reservations Workflow",
         "parameters": [
           {
             "name": "ukPrn",
@@ -49,6 +54,7 @@
           {
             "name": "isFromManage",
             "in": "query",
+            "required": true,
             "schema": {
               "type": "boolean"
             }
@@ -56,14 +62,26 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful operation"
+            "description": "Provider reservations start view.",
+            "content": {
+              "text/html": {}
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderAccount": [],
+            "HasProviderContributorOrHigherOrIsEmployer": []
+          }
+        ]
       }
     },
     "/{ukPrn}/reservations/choose-employer": {
       "get": {
-        "summary": "Choose Employer",
+        "tags": [
+          "ProviderReservations"
+        ],
+        "summary": "Choose Employer for Reservation",
         "parameters": [
           {
             "name": "ukPrn",
@@ -75,37 +93,52 @@
             }
           },
           {
-            "name": "SearchTerm",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "SortField",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "ReverseSort",
+            "name": "reverseSort",
             "in": "query",
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "name": "sortField",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "searchTerm",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation"
+            "description": "Choose employer view.",
+            "content": {
+              "text/html": {}
+            }
+          },
+          "400": {
+            "description": "Bad request if ukPrn is invalid."
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderAccount": [],
+            "HasProviderContributorOrHigherOrIsEmployer": []
+          }
+        ]
       }
     },
     "/{ukPrn}/reservations/choose-employer-search": {
       "get": {
-        "summary": "Search Employers",
+        "tags": [
+          "ProviderReservations"
+        ],
+        "summary": "Search Employers for Reservation",
         "parameters": [
           {
             "name": "ukPrn",
@@ -126,7 +159,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "List of matching employer names.",
             "content": {
               "application/json": {
                 "schema": {
@@ -137,13 +170,25 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Bad request if ukPrn is invalid."
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderAccount": [],
+            "HasProviderContributorOrHigherOrIsEmployer": []
+          }
+        ]
       }
     },
     "/{ukPrn}/reservations/confirm-employer/{id}": {
       "get": {
-        "summary": "Confirm Employer",
+        "tags": [
+          "ProviderReservations"
+        ],
+        "summary": "Confirm Employer for Reservation",
         "parameters": [
           {
             "name": "ukPrn",
@@ -166,12 +211,44 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful operation"
+            "description": "Confirmation view.",
+            "content": {
+              "text/html": {}
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderAccount": [],
+            "HasProviderContributorOrHigherOrIsEmployer": []
+          }
+        ]
       },
       "post": {
-        "summary": "Process Confirm Employer",
+        "tags": [
+          "ProviderReservations"
+        ],
+        "summary": "Process Confirmation of Employer",
+        "parameters": [
+          {
+            "name": "ukPrn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "uint32"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -182,39 +259,28 @@
             }
           }
         },
-        "parameters": [
-          {
-            "name": "ukPrn",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "uint32"
-            }
-          },
-          {
-            "name": "id",
-            "in": "path",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
         "responses": {
-          "200": {
-            "description": "Successful operation"
+          "302": {
+            "description": "Redirect to next steps or return to employer selection."
           },
           "400": {
-            "description": "Validation failure"
+            "description": "Invalid data provided in the confirmation form."
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderAccount": [],
+            "HasProviderContributorOrHigherOrIsEmployer": []
+          }
+        ]
       }
     },
     "/{ukPrn}/reservations/employer-agreement-not-signed/{id}": {
       "get": {
-        "summary": "Employer Agreement Not Signed",
+        "tags": [
+          "ProviderReservations"
+        ],
+        "summary": "View Unsigned Employer Agreement",
         "parameters": [
           {
             "name": "ukPrn",
@@ -239,27 +305,22 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "IsFromSelect",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "PreviousPage",
-            "in": "query",
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation"
+            "description": "View showing details of unsigned agreements.",
+            "content": {
+              "text/html": {}
+            }
           }
-        }
+        },
+        "security": [
+          {
+            "HasProviderAccount": [],
+            "HasProviderContributorOrHigherOrIsEmployer": []
+          }
+        ]
       }
     }
   },
@@ -285,23 +346,23 @@
             "type": "string"
           },
           "Confirm": {
-            "type": "boolean"
+            "type": "boolean",
+            "nullable": true
           },
           "Id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "nullable": true
           }
-        },
-        "required": [
-          "UkPrn"
-        ]
+        }
       },
       "ReservationsRouteModel": {
         "type": "object",
         "properties": {
           "UkPrn": {
             "type": "integer",
-            "format": "uint32"
+            "format": "uint32",
+            "nullable": true
           },
           "EmployerAccountId": {
             "type": "string"
@@ -311,19 +372,23 @@
           },
           "Id": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "nullable": true
           },
           "AccountLegalEntityPublicHashedId": {
             "type": "string"
           },
           "FromReview": {
-            "type": "boolean"
+            "type": "boolean",
+            "nullable": true
           },
           "IsFromManage": {
-            "type": "boolean"
+            "type": "boolean",
+            "nullable": true
           },
           "IsFromSelect": {
-            "type": "boolean"
+            "type": "boolean",
+            "nullable": true
           },
           "PreviousPage": {
             "type": "string"
@@ -333,7 +398,8 @@
           },
           "ProviderId": {
             "type": "integer",
-            "format": "uint32"
+            "format": "uint32",
+            "nullable": true
           },
           "JourneyData": {
             "type": "string"
@@ -348,9 +414,20 @@
             "type": "boolean"
           },
           "UseLearnerData": {
-            "type": "boolean"
+            "type": "boolean",
+            "nullable": true
           }
         }
+      }
+    },
+    "securitySchemes": {
+      "HasProviderAccount": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "HasProviderContributorOrHigherOrIsEmployer": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

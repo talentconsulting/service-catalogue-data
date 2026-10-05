@@ -1,15 +1,15 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "DAS Courses API",
+    "title": "Courses API Standards",
     "version": "1.0.0",
-    "description": "API for managing apprenticeship standards and frameworks"
+    "description": "API for interacting with courses standards."
   },
   "paths": {
     "/api/courses/standards": {
       "get": {
-        "deprecated": true,
-        "summary": "Retrieve a list of standards",
+        "description": "Retrieve a list of standards based on filters and keyword search.",
+        "operationId": "GetStandardsList",
         "parameters": [
           {
             "name": "keyword",
@@ -17,7 +17,7 @@
             "schema": {
               "type": "string"
             },
-            "required": false
+            "description": "Search keyword for filtering standards."
           },
           {
             "name": "routeIds",
@@ -28,7 +28,7 @@
                 "type": "integer"
               }
             },
-            "required": false
+            "description": "Filter by specific route IDs."
           },
           {
             "name": "levels",
@@ -39,7 +39,7 @@
                 "type": "integer"
               }
             },
-            "required": false
+            "description": "Filter by specific levels."
           },
           {
             "name": "apprenticeshipType",
@@ -47,7 +47,7 @@
             "schema": {
               "$ref": "#/components/schemas/ApprenticeshipType"
             },
-            "required": false
+            "description": "Filter by type of apprenticeship."
           },
           {
             "name": "orderBy",
@@ -55,7 +55,7 @@
             "schema": {
               "$ref": "#/components/schemas/OrderBy"
             },
-            "required": false
+            "description": "Ordering preference for the standards list."
           },
           {
             "name": "filter",
@@ -63,12 +63,12 @@
             "schema": {
               "$ref": "#/components/schemas/StandardFilter"
             },
-            "required": false
+            "description": "Filter applied to standards, e.g., active or available."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Successful retrieval of standards list.",
             "content": {
               "application/json": {
                 "schema": {
@@ -76,14 +76,21 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Invalid query parameter format."
+          },
+          "500": {
+            "description": "Internal server error."
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/courses/standards/{id}": {
       "get": {
-        "deprecated": true,
-        "summary": "Retrieve standard detail by ID",
+        "description": "Retrieve detailed information about a specific standard by ID.",
+        "operationId": "GetStandardById",
         "parameters": [
           {
             "name": "id",
@@ -91,12 +98,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Unique identifier for the standard."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Detailed information of the standard.",
             "content": {
               "application/json": {
                 "schema": {
@@ -106,15 +114,19 @@
             }
           },
           "404": {
-            "description": "Standard not found"
+            "description": "Standard not found."
+          },
+          "500": {
+            "description": "Internal server error."
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/courses/standards/{id}/options/{option}/ksbs": {
       "get": {
-        "deprecated": true,
-        "summary": "Retrieve knowledge, skills, and behaviors for a specific option",
+        "description": "Retrieve knowledge, skills, and behaviors (KSBs) for a specific option of a standard.",
+        "operationId": "GetStandardOptionKsbs",
         "parameters": [
           {
             "name": "id",
@@ -122,7 +134,8 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Unique identifier for the standard."
           },
           {
             "name": "option",
@@ -130,12 +143,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Specific option identifier."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Knowledge, skills, and behaviors (KSBs) for the option.",
             "content": {
               "application/json": {
                 "schema": {
@@ -143,14 +157,21 @@
                 }
               }
             }
+          },
+          "404": {
+            "description": "Option not found for the given standard."
+          },
+          "500": {
+            "description": "Internal server error."
           }
-        }
+        },
+        "deprecated": true
       }
     },
     "/api/courses/standards/versions/{iFateReferenceNumber}": {
       "get": {
-        "deprecated": true,
-        "summary": "Retrieve all versions of a standard by IFate reference number",
+        "description": "Retrieve versions for a standard based on its iFate reference number.",
+        "operationId": "GetStandardVersions",
         "parameters": [
           {
             "name": "iFateReferenceNumber",
@@ -158,12 +179,13 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "iFate reference number for the standard."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Standard versions retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -173,9 +195,13 @@
             }
           },
           "404": {
-            "description": "No versions found for the given IFate reference number"
+            "description": "No versions found for the standard."
+          },
+          "500": {
+            "description": "Internal server error."
           }
-        }
+        },
+        "deprecated": true
       }
     }
   },
@@ -221,12 +247,7 @@
               "$ref": "#/components/schemas/GetCourseResponse"
             }
           }
-        },
-        "required": [
-          "total",
-          "totalFiltered",
-          "courses"
-        ]
+        }
       },
       "GetCourseResponse": {
         "type": "object",
@@ -240,126 +261,19 @@
           "status": {
             "type": "string"
           },
-          "searchScore": {
-            "type": "number"
-          },
           "title": {
             "type": "string"
           },
           "level": {
             "type": "integer"
           },
-          "coronationEmblem": {
-            "type": "boolean"
-          },
-          "version": {
-            "type": "string"
-          },
-          "overviewOfRole": {
-            "type": "string"
-          },
-          "keywords": {
-            "type": "string"
-          },
           "route": {
             "type": "string"
           },
           "routeCode": {
             "type": "integer"
-          },
-          "typicalJobTitles": {
-            "type": "string"
-          },
-          "standardPageUrl": {
-            "type": "string"
-          },
-          "integratedDegree": {
-            "type": "string"
-          },
-          "sectorSubjectAreaTier2": {
-            "type": "number"
-          },
-          "sectorSubjectAreaTier2Description": {
-            "type": "string"
-          },
-          "sectorSubjectAreaTier1": {
-            "type": "integer"
-          },
-          "sectorSubjectAreaTier1Description": {
-            "type": "string"
-          },
-          "otherBodyApprovalRequired": {
-            "type": "boolean"
-          },
-          "approvalBody": {
-            "type": "string"
-          },
-          "duties": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "coreAndOptions": {
-            "type": "boolean"
-          },
-          "coreDuties": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "integratedApprenticeship": {
-            "type": "boolean"
-          },
-          "sectorCode": {
-            "type": "integer"
-          },
-          "epaoMustBeApprovedByRegulatorBody": {
-            "type": "boolean"
-          },
-          "apprenticeshipStandardTypeCode": {
-            "type": "string"
-          },
-          "isLatestVersion": {
-            "type": "boolean"
-          },
-          "isRegulatedForProvider": {
-            "type": "boolean"
-          },
-          "isRegulatedForEPAO": {
-            "type": "boolean"
-          },
-          "apprenticeshipFunding": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CourseApprenticeshipFundingResponse"
-            }
-          },
-          "learningType": {
-            "$ref": "#/components/schemas/ApprenticeshipType"
-          },
-          "courseType": {
-            "type": "string",
-            "enum": [
-              "Apprenticeship",
-              "ShortCourse"
-            ]
-          },
-          "larsCode": {
-            "type": "string"
-          },
-          "courseDates": {
-            "$ref": "#/components/schemas/CourseDatesResponse"
           }
-        },
-        "required": [
-          "standardUId",
-          "title",
-          "level",
-          "route",
-          "status"
-        ]
+        }
       },
       "GetCourseDetailResponse": {
         "type": "object",
@@ -373,13 +287,10 @@
           "status": {
             "type": "string"
           },
-          "title": {
-            "type": "string"
-          },
           "level": {
             "type": "integer"
           },
-          "integratedDegree": {
+          "title": {
             "type": "string"
           },
           "overviewOfRole": {
@@ -391,26 +302,13 @@
           "routeCode": {
             "type": "integer"
           },
-          "assessmentPlanUrl": {
+          "keywords": {
             "type": "string"
           },
-          "sectorCode": {
-            "type": "integer"
-          },
-          "options": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "typicalJobTitles": {
+            "type": "string"
           }
-        },
-        "required": [
-          "standardUId",
-          "title",
-          "level",
-          "route",
-          "status"
-        ]
+        }
       },
       "GetCourseOptionKsbsResult": {
         "type": "object",
@@ -418,17 +316,24 @@
           "ksbs": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Ksb"
+              "$ref": "#/components/schemas/KSB"
             }
           }
-        },
-        "required": [
-          "ksbs"
-        ]
+        }
       },
-      "Ksb": {
+      "KSB": {
         "type": "object",
         "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "key": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
           "type": {
             "type": "string",
             "enum": [
@@ -439,23 +344,8 @@
               "TechnicalSkill",
               "EmployabilitySkillsAndBehaviour"
             ]
-          },
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "key": {
-            "type": "string"
-          },
-          "detail": {
-            "type": "string"
           }
-        },
-        "required": [
-          "type",
-          "id",
-          "detail"
-        ]
+        }
       },
       "GetCourseVersionsListResponse": {
         "type": "object",
@@ -466,62 +356,7 @@
               "$ref": "#/components/schemas/GetCourseDetailResponse"
             }
           }
-        },
-        "required": [
-          "courses"
-        ]
-      },
-      "CourseApprenticeshipFundingResponse": {
-        "type": "object",
-        "properties": {
-          "maxEmployerLevyCap": {
-            "type": "integer"
-          },
-          "effectiveTo": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "duration": {
-            "type": "integer"
-          },
-          "durationUnits": {
-            "type": "string",
-            "enum": [
-              "Months",
-              "Hours"
-            ]
-          }
-        },
-        "required": [
-          "maxEmployerLevyCap",
-          "effectiveFrom",
-          "duration",
-          "durationUnits"
-        ]
-      },
-      "CourseDatesResponse": {
-        "type": "object",
-        "properties": {
-          "lastDateStarts": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "effectiveTo": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "effectiveFrom": {
-            "type": "string",
-            "format": "date-time"
-          }
-        },
-        "required": [
-          "effectiveFrom"
-        ]
+        }
       }
     }
   }

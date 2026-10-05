@@ -1,0 +1,347 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Application Messages API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/applications/{applicationId}/messages": {
+      "get": {
+        "summary": "Get application messages by application ID",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The application ID"
+          },
+          {
+            "name": "userType",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The user type"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved application messages",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationMessagesByApplicationIdQueryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Application not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create application message",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The application ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApplicationMessageCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Message created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateApplicationMessageCommandResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/applications/messages/{messageId}": {
+      "get": {
+        "summary": "Get application message by message ID",
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The message ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationMessageByIdQueryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Message not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/applications/{applicationId}/messages/read": {
+      "put": {
+        "summary": "Mark all messages as read",
+        "parameters": [
+          {
+            "name": "applicationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The application ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MarkAllMessagesAsReadCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "All messages marked as read",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateApplicationMessageCommand": {
+        "type": "object",
+        "properties": {
+          "ApplicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "MessageText": {
+            "type": "string"
+          },
+          "MessageType": {
+            "type": "string"
+          },
+          "UserType": {
+            "type": "string"
+          },
+          "SentByName": {
+            "type": "string"
+          },
+          "SentByEmail": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateApplicationMessageCommandResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "Notifications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NotificationDefinition"
+            }
+          },
+          "EmailSent": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GetApplicationMessageByIdQueryResponse": {
+        "type": "object",
+        "properties": {
+          "MessageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ApplicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "MessageText": {
+            "type": "string"
+          },
+          "MessageType": {
+            "type": "string"
+          },
+          "MessageHeader": {
+            "type": "string"
+          },
+          "SharedWithDfe": {
+            "type": "boolean"
+          },
+          "SharedWithOfqual": {
+            "type": "boolean"
+          },
+          "SharedWithSkillsEngland": {
+            "type": "boolean"
+          },
+          "SharedWithAwardingOrganisation": {
+            "type": "boolean"
+          },
+          "SentByName": {
+            "type": "string"
+          },
+          "SentByEmail": {
+            "type": "string"
+          },
+          "SentAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "GetApplicationMessagesByApplicationIdQueryResponse": {
+        "type": "object",
+        "properties": {
+          "Messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "MessageId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "ApplicationId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "MessageText": {
+                  "type": "string"
+                },
+                "MessageType": {
+                  "type": "string"
+                },
+                "MessageHeader": {
+                  "type": "string"
+                },
+                "SharedWithDfe": {
+                  "type": "boolean"
+                },
+                "SharedWithOfqual": {
+                  "type": "boolean"
+                },
+                "SharedWithSkillsEngland": {
+                  "type": "boolean"
+                },
+                "SharedWithAwardingOrganisation": {
+                  "type": "boolean"
+                },
+                "SentByName": {
+                  "type": "string"
+                },
+                "SentByEmail": {
+                  "type": "string"
+                },
+                "SentAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      },
+      "MarkAllMessagesAsReadCommand": {
+        "type": "object",
+        "properties": {
+          "ApplicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "UserType": {
+            "type": "string"
+          }
+        }
+      },
+      "EmptyResponse": {
+        "type": "object"
+      },
+      "NotificationDefinition": {
+        "type": "object",
+        "properties": {
+          "TemplateName": {
+            "type": "string"
+          },
+          "RecipientKind": {
+            "type": "string",
+            "enum": [
+              "QfauMailbox",
+              "OfqualMailbox",
+              "SkillsEnglandMailbox",
+              "DirectEmail"
+            ]
+          },
+          "EmailAddress": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

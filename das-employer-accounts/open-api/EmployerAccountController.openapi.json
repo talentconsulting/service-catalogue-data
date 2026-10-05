@@ -7,15 +7,8 @@
   "paths": {
     "/accounts/create/tasklist": {
       "get": {
-        "summary": "Create Account Task List",
-        "tags": [
-          "EmployerAccount"
-        ],
-        "security": [
-          {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ],
+        "operationId": "CreateAccountTaskList",
+        "summary": "Get the task list for creating an employer account.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -28,50 +21,32 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "The task list for creating an employer account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateAccountProgressSavedViewModel"
+                }
+              }
+            }
+          },
+          "303": {
+            "description": "Redirect to the employer team index if the task list is complete."
           }
-        }
-      }
-    },
-    "/accounts/{hashedAccountId}/tasklist": {
-      "get": {
-        "summary": "Continue New Employer Account Task List",
-        "tags": [
-          "EmployerAccount"
-        ],
+        },
         "security": [
           {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
+            "oauth2": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
           }
-        ],
-        "parameters": [
-          {
-            "name": "hashedAccountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success"
-          }
-        }
+        ]
       }
     },
     "/accounts/create/progress-saved": {
       "get": {
-        "summary": "Create Account Progress Saved",
-        "tags": [
-          "EmployerAccount"
-        ],
-        "security": [
-          {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ],
+        "operationId": "CreateAccountProgressSaved",
+        "summary": "Progress saved view when creating an employer account.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -84,64 +59,22 @@
         ],
         "responses": {
           "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateAccountProgressSavedViewModel"
-                }
-              }
-            }
+            "description": "The progress saved view."
           }
-        }
-      }
-    },
-    "/accounts/{hashedAccountId}/progress-saved": {
-      "get": {
-        "summary": "Partial Account Progress Saved",
-        "tags": [
-          "EmployerAccount"
-        ],
+        },
         "security": [
           {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
+            "oauth2": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
           }
-        ],
-        "parameters": [
-          {
-            "name": "hashedAccountId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateAccountProgressSavedViewModel"
-                }
-              }
-            }
-          }
-        }
+        ]
       }
     },
     "/accounts/{hashedAccountId}/cannotAddPaye": {
       "get": {
-        "summary": "Add PAYE Shutter",
-        "tags": [
-          "EmployerAccount"
-        ],
-        "security": [
-          {
-            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
-          }
-        ],
+        "operationId": "AddPayeShutter",
+        "summary": "View for users who cannot add PAYE.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -154,9 +87,169 @@
         ],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "The cannot add PAYE view."
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
+          }
+        ]
+      }
+    },
+    "/accounts/payBill": {
+      "get": {
+        "operationId": "PayBillTriage",
+        "summary": "View for paying the bill triage.",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The pay bill triage view."
+          },
+          "303": {
+            "description": "Redirect to the Add PAYE Shutter view."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "operationId": "PayBillTriagePost",
+        "summary": "Post triage selection when paying the bill.",
+        "requestBody": {
+          "description": "User's choice for paying the bill.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Redirect to appropriate action based on user's choice."
+          },
+          "400": {
+            "description": "Error in the user's selection data.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "InError": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
+          }
+        ]
+      }
+    },
+    "/accounts/{hashedAccountId}/getApprenticeshipFunding": {
+      "get": {
+        "operationId": "GetApprenticeshipFunding",
+        "summary": "View for getting apprenticeship funding.",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The apprenticeship funding view."
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "operationId": "PostGetApprenticeshipFunding",
+        "summary": "Post user's funding choice.",
+        "parameters": [
+          {
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "User's funding choice.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "responses": {
+          "303": {
+            "description": "Redirect to appropriate action based on the user's funding choice."
+          },
+          "400": {
+            "description": "Error in the user's funding choice.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "InError": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "HasEmployerViewerTransactorOwnerAccount"
+            ]
+          }
+        ]
       }
     }
   },
@@ -183,12 +276,7 @@
             "type": "string"
           },
           "ChangeAccountName": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "NewNameError": {
-            "type": "string",
-            "nullable": true
+            "type": "boolean"
           },
           "LegalEntityName": {
             "type": "string"
@@ -202,13 +290,10 @@
         "type": "object",
         "properties": {
           "OrganisationType": {
-            "type": "integer",
-            "format": "int16"
+            "$ref": "#/components/schemas/OrganisationType"
           },
           "PublicSectorDataSource": {
-            "type": "integer",
-            "format": "int16",
-            "nullable": true
+            "type": "integer"
           },
           "OrganisationName": {
             "type": "string"
@@ -218,8 +303,7 @@
           },
           "OrganisationDateOfInception": {
             "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "format": "date"
           },
           "RegisteredAddress": {
             "type": "array",
@@ -249,22 +333,19 @@
             "type": "string"
           },
           "IsOrganisationWithCorrectAddress": {
-            "type": "boolean",
-            "nullable": true
+            "type": "boolean"
           }
         }
-      }
-    },
-    "securitySchemes": {
-      "PolicyNames.HasEmployerViewerTransactorOwnerAccount": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "Policy-based authorization for users with employer viewer, transactor, or owner account access."
       },
-      "PolicyNames.HasUserAccount": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "Policy-based authorization for users with general account access."
+      "OrganisationType": {
+        "type": "integer",
+        "enum": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
       }
     }
   }

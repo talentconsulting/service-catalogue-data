@@ -1,32 +1,31 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts API",
-    "version": "1.0.0",
-    "description": "API for managing registered user accounts."
+    "title": "User Management API",
+    "version": "1.0.0"
   },
   "paths": {
     "/api/user": {
       "get": {
-        "summary": "Get user by email",
-        "operationId": "GetUserByEmail",
+        "summary": "Get User by Email",
         "parameters": [
           {
             "name": "email",
             "in": "query",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "email"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "User retrieved successfully",
+            "description": "User found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/UserResponse"
                 }
               }
             }
@@ -34,18 +33,12 @@
           "404": {
             "description": "User not found"
           }
-        },
-        "security": [
-          {
-            "ApiRoles_ReadUserAccounts": []
-          }
-        ]
+        }
       }
     },
     "/api/user/by-ref/{userRef}": {
       "get": {
-        "summary": "Get user by reference",
-        "operationId": "GetUserByRef",
+        "summary": "Get User by Reference",
         "parameters": [
           {
             "name": "userRef",
@@ -58,11 +51,11 @@
         ],
         "responses": {
           "200": {
-            "description": "User retrieved successfully",
+            "description": "User found",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/User"
+                  "$ref": "#/components/schemas/UserResponse"
                 }
               }
             }
@@ -70,18 +63,12 @@
           "404": {
             "description": "User not found"
           }
-        },
-        "security": [
-          {
-            "ApiRoles_ReadUserAccounts": []
-          }
-        ]
+        }
       }
     },
     "/api/user/upsert": {
       "put": {
-        "summary": "Upsert a registered user",
-        "operationId": "UpsertRegisteredUser",
+        "summary": "Upsert Registered User",
         "requestBody": {
           "required": true,
           "content": {
@@ -99,63 +86,63 @@
           "500": {
             "description": "Internal server error"
           }
-        },
-        "security": [
-          {
-            "ApiRoles_ReadUserAccounts": []
-          }
-        ]
+        }
       }
     }
   },
   "components": {
     "schemas": {
+      "UserResponse": {
+        "type": "object",
+        "properties": {
+          "userRef": {
+            "type": "string"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "userRef",
+          "firstName",
+          "lastName",
+          "email"
+        ]
+      },
       "UpsertRegisteredUserCommand": {
         "type": "object",
         "properties": {
-          "UserRef": {
+          "userRef": {
             "type": "string"
           },
-          "FirstName": {
+          "firstName": {
             "type": "string"
           },
-          "LastName": {
+          "lastName": {
             "type": "string"
           },
-          "EmailAddress": {
-            "type": "string"
+          "emailAddress": {
+            "type": "string",
+            "format": "email"
           },
-          "CorrelationId": {
+          "correlationId": {
             "type": "string"
           }
         },
         "required": [
-          "UserRef",
-          "EmailAddress"
+          "userRef",
+          "firstName",
+          "lastName",
+          "emailAddress",
+          "correlationId"
         ]
-      },
-      "User": {
-        "type": "object",
-        "properties": {
-          "UserRef": {
-            "type": "string"
-          },
-          "FirstName": {
-            "type": "string"
-          },
-          "LastName": {
-            "type": "string"
-          },
-          "EmailAddress": {
-            "type": "string"
-          }
-        }
-      }
-    },
-    "securitySchemes": {
-      "ApiRoles_ReadUserAccounts": {
-        "type": "http",
-        "scheme": "bearer"
       }
     }
   }

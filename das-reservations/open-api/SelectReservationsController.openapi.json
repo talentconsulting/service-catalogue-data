@@ -2,7 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Reservations API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing reservations in the DAS system."
   },
   "paths": {
     "/{ukPrn}/reservations/{accountLegalEntityPublicHashedId}/select": {
@@ -10,14 +11,13 @@
         "tags": [
           "Reservations"
         ],
-        "summary": "Select a reservation",
-        "description": "Endpoint to select a reservation for providers.",
+        "summary": "Get reservation selection page.",
+        "operationId": "getSelectReservation",
         "parameters": [
           {
             "name": "ukPrn",
             "in": "path",
             "required": true,
-            "description": "The unique identifier for the provider.",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -27,7 +27,28 @@
             "name": "accountLegalEntityPublicHashedId",
             "in": "path",
             "required": true,
-            "description": "The hashed ID of the account legal entity.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cohortReference",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "providerId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "journeyData",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -35,13 +56,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Reservation selection page content"
+            "description": "Reservation selection page rendered.",
+            "content": {
+              "text/html": {}
+            }
           },
           "403": {
-            "description": "Forbidden due to lack of permissions."
+            "description": "Access forbidden."
           },
           "404": {
-            "description": "Not found."
+            "description": "Resource not found."
           },
           "500": {
             "description": "Internal server error."
@@ -52,14 +76,13 @@
         "tags": [
           "Reservations"
         ],
-        "summary": "Submit a selected reservation",
-        "description": "Endpoint to submit the selected reservation for providers.",
+        "summary": "Submit reservation selection.",
+        "operationId": "postSelectReservation",
         "parameters": [
           {
             "name": "ukPrn",
             "in": "path",
             "required": true,
-            "description": "The unique identifier for the provider.",
             "schema": {
               "type": "integer",
               "format": "int32"
@@ -69,31 +92,39 @@
             "name": "accountLegalEntityPublicHashedId",
             "in": "path",
             "required": true,
-            "description": "The hashed ID of the account legal entity.",
             "schema": {
               "type": "string"
             }
           }
         ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SelectReservationViewModel"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
-          "200": {
-            "description": "Successfully submitted reservation selection."
-          },
-          "400": {
-            "description": "Invalid request."
+          "302": {
+            "description": "Redirect to next step.",
+            "headers": {
+              "Location": {
+                "description": "The URL of the next resource.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
           },
           "403": {
-            "description": "Forbidden due to lack of permissions."
+            "description": "Access forbidden."
+          },
+          "404": {
+            "description": "Resource not found."
           },
           "500": {
             "description": "Internal server error."
@@ -106,14 +137,13 @@
         "tags": [
           "Reservations"
         ],
-        "summary": "Select a reservation",
-        "description": "Endpoint to select a reservation for employers.",
+        "summary": "Get reservation selection for employer.",
+        "operationId": "getEmployerSelectReservation",
         "parameters": [
           {
             "name": "employerAccountId",
             "in": "path",
             "required": true,
-            "description": "The unique identifier for the employer account.",
             "schema": {
               "type": "string"
             }
@@ -122,7 +152,28 @@
             "name": "accountLegalEntityPublicHashedId",
             "in": "path",
             "required": true,
-            "description": "The hashed ID of the account legal entity.",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cohortReference",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "providerId",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "journeyData",
+            "in": "query",
             "schema": {
               "type": "string"
             }
@@ -130,13 +181,16 @@
         ],
         "responses": {
           "200": {
-            "description": "Reservation selection page content"
+            "description": "Reservation selection page for employer rendered.",
+            "content": {
+              "text/html": {}
+            }
           },
           "403": {
-            "description": "Forbidden due to lack of permissions."
+            "description": "Access forbidden."
           },
           "404": {
-            "description": "Not found."
+            "description": "Resource not found."
           },
           "500": {
             "description": "Internal server error."
@@ -147,14 +201,13 @@
         "tags": [
           "Reservations"
         ],
-        "summary": "Submit a selected reservation",
-        "description": "Endpoint to submit the selected reservation for employers.",
+        "summary": "Submit reservation selection for employer.",
+        "operationId": "postEmployerSelectReservation",
         "parameters": [
           {
             "name": "employerAccountId",
             "in": "path",
             "required": true,
-            "description": "The unique identifier for the employer account.",
             "schema": {
               "type": "string"
             }
@@ -163,31 +216,39 @@
             "name": "accountLegalEntityPublicHashedId",
             "in": "path",
             "required": true,
-            "description": "The hashed ID of the account legal entity.",
             "schema": {
               "type": "string"
             }
           }
         ],
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/SelectReservationViewModel"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
-          "200": {
-            "description": "Successfully submitted reservation selection."
-          },
-          "400": {
-            "description": "Invalid request."
+          "302": {
+            "description": "Redirect to next step.",
+            "headers": {
+              "Location": {
+                "description": "The URL of the next resource.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              }
+            }
           },
           "403": {
-            "description": "Forbidden due to lack of permissions."
+            "description": "Access forbidden."
+          },
+          "404": {
+            "description": "Resource not found."
           },
           "500": {
             "description": "Internal server error."
@@ -202,20 +263,16 @@
         "type": "object",
         "properties": {
           "CohortReference": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "TransferSenderId": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "EncodedPledgeApplicationId": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "JourneyData": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "SelectedReservationId": {
             "type": "string",
@@ -226,8 +283,7 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AvailableReservationViewModel"
-            },
-            "nullable": true
+            }
           },
           "AccountId": {
             "type": "integer",
@@ -235,7 +291,7 @@
           },
           "BackLink": {
             "type": "string",
-            "nullable": true
+            "format": "uri"
           },
           "ProviderId": {
             "type": "integer",
@@ -264,16 +320,13 @@
             "format": "uuid"
           },
           "CourseDescription": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "TrainingDateDescription": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "CreatedDateDescription": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           }
         }
       }

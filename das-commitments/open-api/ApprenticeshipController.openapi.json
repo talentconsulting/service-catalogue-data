@@ -1,13 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Commitments V2 API",
-    "version": "2.0.0"
+    "title": "Apprenticeship API",
+    "version": "1.0.0"
   },
   "paths": {
     "/api/apprenticeships/{apprenticeshipId}": {
       "get": {
-        "summary": "Get Apprenticeship by ID",
+        "summary": "Get Apprenticeship Details",
+        "operationId": "getApprenticeship",
         "parameters": [
           {
             "name": "apprenticeshipId",
@@ -21,7 +22,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The apprenticeship.",
+            "description": "Apprenticeship details",
             "content": {
               "application/json": {
                 "schema": {
@@ -31,24 +32,19 @@
             }
           },
           "404": {
-            "description": "Not Found"
+            "description": "Apprenticeship not found"
           }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        }
       }
     },
     "/api/apprenticeships": {
       "get": {
         "summary": "Get Apprenticeships",
+        "operationId": "getApprenticeships",
         "parameters": [
           {
             "name": "AccountId",
             "in": "query",
-            "required": false,
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -57,7 +53,6 @@
           {
             "name": "ProviderId",
             "in": "query",
-            "required": false,
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -66,7 +61,6 @@
           {
             "name": "PageNumber",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "integer"
             }
@@ -74,15 +68,28 @@
           {
             "name": "PageItemCount",
             "in": "query",
-            "required": true,
             "schema": {
               "type": "integer"
+            }
+          },
+          {
+            "name": "SortField",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "ReverseSort",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Apprenticeships found.",
+            "description": "List of apprenticeships",
             "content": {
               "application/json": {
                 "schema": {
@@ -92,62 +99,15 @@
             }
           },
           "404": {
-            "description": "Not Found"
+            "description": "Apprenticeships not found"
           }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
-      }
-    },
-    "/api/apprenticeships/filters": {
-      "get": {
-        "summary": "Get Apprenticeship Filters",
-        "parameters": [
-          {
-            "name": "EmployerAccountId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "ProviderId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Filters found.",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        }
       }
     },
     "/api/apprenticeships/details/editenddate": {
       "post": {
         "summary": "Edit Apprenticeship End Date",
+        "operationId": "editEndDate",
         "requestBody": {
           "required": true,
           "content": {
@@ -160,19 +120,15 @@
         },
         "responses": {
           "200": {
-            "description": "End date updated successfully."
+            "description": "End date edited successfully"
           }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        }
       }
     },
     "/api/apprenticeships/{apprenticeshipId}/stop": {
       "post": {
         "summary": "Stop Apprenticeship",
+        "operationId": "stopApprenticeship",
         "parameters": [
           {
             "name": "apprenticeshipId",
@@ -196,19 +152,15 @@
         },
         "responses": {
           "200": {
-            "description": "Apprenticeship stopped successfully."
+            "description": "Apprenticeship stopped successfully"
           }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ]
+        }
       }
     },
     "/api/apprenticeships/{apprenticeshipId}/payments": {
       "patch": {
         "summary": "Patch Apprenticeship Payments",
+        "operationId": "patchPayments",
         "parameters": [
           {
             "name": "apprenticeshipId",
@@ -232,14 +184,122 @@
         },
         "responses": {
           "200": {
-            "description": "Payments patched successfully."
+            "description": "Payments patched successfully"
+          }
+        }
+      }
+    },
+    "/api/apprenticeships/details/pause": {
+      "post": {
+        "summary": "Pause Apprenticeship",
+        "operationId": "pauseApprenticeship",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PauseApprenticeshipRequest"
+              }
+            }
           }
         },
-        "security": [
-          {
-            "bearerAuth": []
+        "responses": {
+          "200": {
+            "description": "Apprenticeship paused successfully"
           }
-        ]
+        }
+      }
+    },
+    "/api/apprenticeships/details/resume": {
+      "post": {
+        "summary": "Resume Apprenticeship",
+        "operationId": "resumeApprenticeship",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResumeApprenticeshipRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Apprenticeship resumed successfully"
+          }
+        }
+      }
+    },
+    "/api/apprenticeships/{apprenticeshipId}/declined-changes": {
+      "get": {
+        "summary": "Get Declined Changes",
+        "operationId": "getDeclinedChanges",
+        "parameters": [
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "providerId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Declined changes retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeclinedChangesResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Declined changes not found"
+          }
+        }
+      },
+      "post": {
+        "summary": "Acknowledge Declined Changes",
+        "operationId": "acknowledgeDeclinedChanges",
+        "parameters": [
+          {
+            "name": "apprenticeshipId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AcknowledgeInvalidIlrChangesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Declined changes acknowledged successfully"
+          }
+        }
       }
     }
   },
@@ -247,24 +307,42 @@
     "schemas": {
       "GetApprenticeshipResponse": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "apprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
       },
       "GetApprenticeshipsResponse": {
         "type": "object",
-        "properties": {}
+        "properties": {
+          "apprenticeships": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "apprenticeshipId": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          }
+        }
       },
       "EditEndDateRequest": {
         "type": "object",
         "properties": {
-          "ApprenticeshipId": {
+          "apprenticeshipId": {
             "type": "integer",
             "format": "int64"
           },
-          "EndDate": {
+          "endDate": {
             "type": "string",
             "format": "date-time"
           },
-          "UserInfo": {
+          "userInfo": {
             "$ref": "#/components/schemas/UserInfo"
           }
         }
@@ -272,18 +350,18 @@
       "StopApprenticeshipRequest": {
         "type": "object",
         "properties": {
-          "AccountId": {
+          "accountId": {
             "type": "integer",
             "format": "int64"
           },
-          "StopDate": {
+          "stopDate": {
             "type": "string",
             "format": "date-time"
           },
-          "MadeRedundant": {
+          "madeRedundant": {
             "type": "boolean"
           },
-          "UserInfo": {
+          "userInfo": {
             "$ref": "#/components/schemas/UserInfo"
           }
         }
@@ -291,17 +369,72 @@
       "PatchApprenticeshipPaymentsRequest": {
         "type": "object",
         "properties": {
-          "PaymentFreezeDate": {
+          "paymentFreezeDate": {
             "type": "string",
             "format": "date-time"
           },
-          "FreezePaymentsReason": {
-            "$ref": "#/components/schemas/FreezePaymentsReason"
+          "freezePaymentsReason": {
+            "type": "string"
           },
-          "Party": {
+          "party": {
             "type": "integer"
           },
-          "UserInfo": {
+          "userInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        }
+      },
+      "PauseApprenticeshipRequest": {
+        "type": "object",
+        "properties": {
+          "apprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        }
+      },
+      "ResumeApprenticeshipRequest": {
+        "type": "object",
+        "properties": {
+          "apprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userInfo": {
+            "$ref": "#/components/schemas/UserInfo"
+          }
+        }
+      },
+      "DeclinedChangesResponse": {
+        "type": "object",
+        "properties": {}
+      },
+      "AcknowledgeInvalidIlrChangesRequest": {
+        "type": "object",
+        "properties": {
+          "providerId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "acknowledgements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "approvalRequestId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "deleteAlert": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "userInfo": {
             "$ref": "#/components/schemas/UserInfo"
           }
         }
@@ -309,26 +442,17 @@
       "UserInfo": {
         "type": "object",
         "properties": {
-          "UserId": {
+          "userId": {
             "type": "string"
           },
-          "UserDisplayName": {
+          "userDisplayName": {
             "type": "string"
           },
-          "UserEmail": {
+          "userEmail": {
             "type": "string",
             "format": "email"
           }
         }
-      },
-      "FreezePaymentsReason": {
-        "type": "string",
-        "enum": [
-          "LearnerOnBreak",
-          "LearnerWithdrawn",
-          "ChangeToTrainingDetails",
-          "DisagreeWithAutoApprovedChange"
-        ]
       }
     }
   }
