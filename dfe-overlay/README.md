@@ -23,7 +23,7 @@ das-commitments ──► Courses API, Reservations API, …   (resolved, "via A
 ```bash
 node dfe-overlay/extract-apim-routes.mjs ../path/to/das-apim-endpoints   # when APIM has changed
 node dfe-overlay/resolve-dependencies.mjs                                # after editing the overlay or a rescan
-node --test dfe-overlay/test
+node --test dfe-overlay/test/*.test.mjs
 ```
 
 The `Resolve APIM routing (DfE overlay)` workflow does the same in CI and opens a PR. It runs when a scan or the overlay changes, and every Monday. It needs **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests** turned on.
