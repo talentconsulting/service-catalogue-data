@@ -1,0 +1,970 @@
+{
+  "repository": "SkillsFundingAgency/das-employer-accounts",
+  "ref": "main",
+  "path": "src",
+  "systemName": "Employer Accounts",
+  "containers": [
+    {
+      "id": "employer-accounts",
+      "name": "Employer Accounts",
+      "type": "api",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/Program.cs",
+          "reason": "ASP.NET Core application's main entry point detected."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/SFA.DAS.EmployerAccounts.Api.csproj",
+          "reason": "ASP.NET Core project SDK detected."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/SFA.DAS.EmployerAccounts.csproj",
+          "reason": "Project file indicates a .NET API project."
+        }
+      ]
+    },
+    {
+      "id": "employer-accounts-jobs",
+      "name": "Employer Accounts Jobs",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Jobs/Program.cs",
+          "reason": "Background job entry point detected."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Jobs/SFA.DAS.EmployerAccounts.Jobs.csproj",
+          "reason": "WebJob project type detected."
+        }
+      ]
+    },
+    {
+      "id": "employer-accounts-messagehandlers",
+      "name": "Employer Accounts MessageHandlers",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.MessageHandlers/Program.cs",
+          "reason": "Background message handler entry point detected."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.MessageHandlers/SFA.DAS.EmployerAccounts.MessageHandlers.csproj",
+          "reason": "Message handler project type detected."
+        }
+      ]
+    },
+    {
+      "id": "employer-accounts-web",
+      "name": "Employer Accounts",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/Program.cs",
+          "reason": "ASP.NET application with web entry point (CreateHostBuilder and UseStartup)."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "employer-accounts",
+      "name": "Data Protection Redis",
+      "kind": "cache",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Redis (StackExchange)",
+      "configurationKeys": [
+        "DataProtectionKeysDatabase",
+        "RedisConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "cache",
+          "name": "DataProtection-Keys",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/DataProtectionServiceRegistrations.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/DataProtectionServiceRegistrations.cs",
+          "reason": "Redis client setup for data protection keys."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-data-protection-redis",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Redis",
+      "kind": "cache",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "StackExchange.Redis",
+      "configurationKeys": [
+        "RedisConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/ServiceRegistrations/CachingServiceRegistrations.cs",
+          "reason": "Redis cache client registration detected."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "employer-accounts-web",
+      "name": "Employer Accounts Database",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "EmployerAccountsDbContext",
+      "technology": "SQL Server",
+      "configurationKeys": [],
+      "authentication": {
+        "type": "Azure AD",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "connectionString (inferred from DatabaseExtensions)",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Extensions/DatabaseExtensions.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Data/EmployerAccountsDbContext.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Data/EmployerAccountsDbContext.cs",
+          "reason": "Constructor and DbSet registrations showcasing the database dependency."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Extensions/DatabaseExtensions.cs",
+          "reason": "SQLConnection object created using connection string and Azure service token provider."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-employer-accounts-database",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Employer Accounts Database",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "DbContext",
+      "technology": "SQL Server",
+      "configurationKeys": [
+        "DatabaseConnectionString"
+      ],
+      "authentication": {
+        "type": "managed-identity",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "SQL Database",
+          "name": "Employer Accounts DB",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/ServiceRegistrations/HealthChecksServiceRegistrations.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/Startup/EntityFrameworkStartup.cs",
+          "reason": "DbContext constructed with SQL Server from DatabaseConnectionString."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/DatabaseServiceRegistrations.cs",
+          "reason": "DbContext registration for SQL Server using EmployerAccountsDbContext."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/Startup.cs",
+          "reason": "EntityFramework database context registration detected."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/ServiceRegistrations/HealthChecksServiceRegistrations.cs",
+          "reason": "SQL Server health check configuration detected."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-employer-accounts-database",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "employer-accounts-web",
+      "name": "Apprenticeship Levy",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": null,
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/Startup.cs",
+          "reason": "Method call to addApprenticeshipLevyApi suggests an HTTP API client dependency."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-apprenticeship-levy",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Apprenticeship Levy",
+      "kind": "http-api",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "IApprenticeshipLevyApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "Hmrc.BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/ApprenticeshipLevyApiServiceRegistrations.cs",
+          "reason": "HttpClient registration for IApprenticeshipLevyApiClient."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-apprenticeship-levy",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "employer-accounts-web",
+      "name": "Commitments V2",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": null,
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/Startup.cs",
+          "reason": "Method call to addCommittmentsV2Client suggests an HTTP API client dependency."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-commitments-v2",
+      "description": "Calls the API of",
+      "targetRepo": "das-commitments"
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Commitments V2",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICommitmentsV2ApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/CommitmentsV2ApiClientServiceRegistrations.cs",
+          "reason": "HttpClient registration for ICommitmentsV2ApiClient."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-commitments-v2",
+      "description": "Calls the API of",
+      "targetRepo": "das-commitments"
+    },
+    {
+      "sourceId": "employer-accounts-web",
+      "name": "Content",
+      "kind": "http-api",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": null,
+      "technology": null,
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/Startup.cs",
+          "reason": "Method call to addContentApiClient suggests an HTTP API client dependency."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-content",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Content API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IContentApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ContentApi"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/ContentApiClientServiceRegistrations.cs",
+          "reason": "HttpClient registration for IContentApiClient."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-content-api",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Educational Organisation API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IEducationalOrganisationApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "OuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/EmployerAccountsOuterApiServiceRegistrations.cs",
+          "reason": "HttpClient registration for IOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Application/Queries/GetIdentifiableOrganisationTypes/GetIdentifiableOrganisationTypesQueryHandler.cs",
+          "reason": "EmployerAccounts APIM area calls Educational Organisation API through IEducationalOrganisationApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Application/Queries/SearchOrganisations/SearchOrganisationsQueryHandler.cs",
+          "reason": "EmployerAccounts APIM area calls Educational Organisation API through IEducationalOrganisationApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Strategies/EducationOrganisationApiStrategy.cs",
+          "reason": "EmployerAccounts APIM area calls Educational Organisation API through IEducationalOrganisationApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-educational-organisation-api",
+      "description": "Calls via APIM (EmployerAccounts)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "EmployerAccounts",
+        "dependencyName": "Employer Accounts Outer API",
+        "operations": [],
+        "areas": [
+          "EmployerAccounts"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Employer Finance API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IFinanceApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "OuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/EmployerAccountsOuterApiServiceRegistrations.cs",
+          "reason": "HttpClient registration for IOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Application/Queries/GetEnglishFractionCurrent/GetEnglishFractionCurrentQueryHandler.cs",
+          "reason": "EmployerAccounts APIM area calls Employer Finance API through IFinanceApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Application/Queries/GetEnglishFractionHistory/GetEnglishFractionHistoryQueryHandler.cs",
+          "reason": "EmployerAccounts APIM area calls Employer Finance API through IFinanceApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Application/Queries/GetTasks/GetTasksQueryHandler.cs",
+          "reason": "EmployerAccounts APIM area calls Employer Finance API through IFinanceApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-employer-finance-api",
+      "targetRepo": "das-employer-finance",
+      "description": "Calls via APIM (EmployerAccounts)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "EmployerAccounts",
+        "dependencyName": "Employer Accounts Outer API",
+        "operations": [],
+        "areas": [
+          "EmployerAccounts"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Companies House API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "CompaniesHouseApiClient, ICompaniesHouseApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "OuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/EmployerAccountsOuterApiServiceRegistrations.cs",
+          "reason": "HttpClient registration for IOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Application/Queries/SearchOrganisations/SearchOrganisationsQueryHandler.cs",
+          "reason": "EmployerAccounts APIM area calls Companies House API through CompaniesHouseApiClient, ICompaniesHouseApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Strategies/CompaniesHouseApiStrategy.cs",
+          "reason": "EmployerAccounts APIM area calls Companies House API through CompaniesHouseApiClient, ICompaniesHouseApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Strategies/OrganisationApiStrategyFactory.cs",
+          "reason": "EmployerAccounts APIM area calls Companies House API through CompaniesHouseApiClient, ICompaniesHouseApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-companies-house-api",
+      "description": "Calls via APIM (EmployerAccounts)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "EmployerAccounts",
+        "dependencyName": "Employer Accounts Outer API",
+        "operations": [],
+        "areas": [
+          "EmployerAccounts"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Charities API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICharitiesApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "OuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/EmployerAccountsOuterApiServiceRegistrations.cs",
+          "reason": "HttpClient registration for IOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Application/Queries/SearchOrganisations/SearchOrganisationsQueryHandler.cs",
+          "reason": "EmployerAccounts APIM area calls Charities API through ICharitiesApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Strategies/CharitiesApiStrategy.cs",
+          "reason": "EmployerAccounts APIM area calls Charities API through ICharitiesApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Strategies/OrganisationApiStrategyFactory.cs",
+          "reason": "EmployerAccounts APIM area calls Charities API through ICharitiesApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-charities-api",
+      "description": "Calls via APIM (EmployerAccounts)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "EmployerAccounts",
+        "dependencyName": "Employer Accounts Outer API",
+        "operations": [],
+        "areas": [
+          "EmployerAccounts"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Public Sector Organisation API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IPublicSectorOrganisationApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "OuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/EmployerAccountsOuterApiServiceRegistrations.cs",
+          "reason": "HttpClient registration for IOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Application/Queries/SearchOrganisations/SearchOrganisationsQueryHandler.cs",
+          "reason": "EmployerAccounts APIM area calls Public Sector Organisation API through IPublicSectorOrganisationApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Strategies/OrganisationApiStrategyFactory.cs",
+          "reason": "EmployerAccounts APIM area calls Public Sector Organisation API through IPublicSectorOrganisationApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Strategies/PublicSectorOrganisationApiStrategy.cs",
+          "reason": "EmployerAccounts APIM area calls Public Sector Organisation API through IPublicSectorOrganisationApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-public-sector-organisation-api",
+      "description": "Calls via APIM (EmployerAccounts)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "EmployerAccounts",
+        "dependencyName": "Employer Accounts Outer API",
+        "operations": [],
+        "areas": [
+          "EmployerAccounts"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Reservations API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IReservationApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "OuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/EmployerAccountsOuterApiServiceRegistrations.cs",
+          "reason": "HttpClient registration for IOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Application/Queries/GetReservations/GetReservationsQueryHandler.cs",
+          "reason": "EmployerAccounts APIM area calls Reservations API through IReservationApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "EmployerAccounts APIM area calls Reservations API through IReservationApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-reservations-api",
+      "targetRepo": "das-reservations-api",
+      "description": "Calls via APIM (EmployerAccounts)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "EmployerAccounts",
+        "dependencyName": "Employer Accounts Outer API",
+        "operations": [],
+        "areas": [
+          "EmployerAccounts"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Commitments API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICommitmentsV2ApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "OuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/EmployerAccountsOuterApiServiceRegistrations.cs",
+          "reason": "HttpClient registration for IOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Application/Queries/GetTasks/GetTasksQueryHandler.cs",
+          "reason": "EmployerAccounts APIM area calls Commitments API through ICommitmentsV2ApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "EmployerAccounts APIM area calls Commitments API through ICommitmentsV2ApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-commitments-api",
+      "targetRepo": "das-commitments",
+      "description": "Calls via APIM (EmployerAccounts)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "EmployerAccounts",
+        "dependencyName": "Employer Accounts Outer API",
+        "operations": [],
+        "areas": [
+          "EmployerAccounts"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Levy Transfer Matching API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ILevyTransferMatchingApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "OuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/EmployerAccountsOuterApiServiceRegistrations.cs",
+          "reason": "HttpClient registration for IOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Application/Queries/GetTasks/GetTasksQueryHandler.cs",
+          "reason": "EmployerAccounts APIM area calls Levy Transfer Matching API through ILevyTransferMatchingApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "EmployerAccounts APIM area calls Levy Transfer Matching API through ILevyTransferMatchingApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-levy-transfer-matching-api",
+      "description": "Calls via APIM (EmployerAccounts)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "EmployerAccounts",
+        "dependencyName": "Employer Accounts Outer API",
+        "operations": [],
+        "areas": [
+          "EmployerAccounts"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Provider Relationships API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IProviderRelationshipsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "OuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/EmployerAccountsOuterApiServiceRegistrations.cs",
+          "reason": "HttpClient registration for IOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Application/Queries/GetCreateAccountTaskList/GetCreateAccountTaskListQueryHandler.cs",
+          "reason": "EmployerAccounts APIM area calls Provider Relationships API through IProviderRelationshipsApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "EmployerAccounts APIM area calls Provider Relationships API through IProviderRelationshipsApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-provider-relationships-api",
+      "description": "Calls via APIM (EmployerAccounts)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "EmployerAccounts",
+        "dependencyName": "Employer Accounts Outer API",
+        "operations": [],
+        "areas": [
+          "EmployerAccounts"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Recruit Api V2 API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IRecruitApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "OuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/EmployerAccountsOuterApiServiceRegistrations.cs",
+          "reason": "HttpClient registration for IOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts/Application/Queries/GetEmployerVacancies/GetEmployerVacanciesQueryHandler.cs",
+          "reason": "EmployerAccounts APIM area calls Recruit Api V2 API through IRecruitApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "EmployerAccounts APIM area calls Recruit Api V2 API through IRecruitApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-recruit-api-v2-api",
+      "description": "Calls via APIM (EmployerAccounts)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "EmployerAccounts",
+        "dependencyName": "Employer Accounts Outer API",
+        "operations": [],
+        "areas": [
+          "EmployerAccounts"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Employer Profiles API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IEmployerProfilesApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "OuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/EmployerAccountsOuterApiServiceRegistrations.cs",
+          "reason": "HttpClient registration for IOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/EmployerAccounts/SFA.DAS.EmployerAccounts.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "EmployerAccounts APIM area calls Employer Profiles API through IEmployerProfilesApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-employer-profiles-api",
+      "description": "Calls via APIM (EmployerAccounts)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "EmployerAccounts",
+        "dependencyName": "Employer Accounts Outer API",
+        "operations": [],
+        "areas": [
+          "EmployerAccounts"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-accounts",
+      "name": "Azure Service Bus",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Azure.ServiceBus",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/SFA.DAS.EmployerAccounts.Api.csproj",
+          "reason": "Azure Service Bus package reference detected."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-azure-service-bus",
+      "description": "Publishes messages to and consumes messages from"
+    },
+    {
+      "sourceId": "employer-accounts-jobs",
+      "name": "NServiceBus SQL Server",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "NServiceBus.SQLServer",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Jobs/SFA.DAS.EmployerAccounts.Jobs.csproj",
+          "reason": "NServiceBus SQLServer package reference detected."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-nservicebus-sql-server",
+      "description": "Publishes messages to and consumes messages from"
+    },
+    {
+      "sourceId": "employer-accounts-messagehandlers",
+      "name": "NServiceBus SQL Server",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "NServiceBus.SQLServer",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.MessageHandlers/SFA.DAS.EmployerAccounts.MessageHandlers.csproj",
+          "reason": "NServiceBus SQLServer package reference detected."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-nservicebus-sql-server",
+      "description": "Publishes messages to and consumes messages from"
+    }
+  ],
+  "resolution": {
+    "overlay": "dfe-overlay/apim-routing.json",
+    "apimCommit": "ceec7d82806fda7806cdccc7275b03cd95725300",
+    "precision": "area"
+  }
+}

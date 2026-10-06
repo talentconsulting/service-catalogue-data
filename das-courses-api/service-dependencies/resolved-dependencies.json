@@ -1,0 +1,195 @@
+{
+  "repository": "SkillsFundingAgency/das-courses-api",
+  "ref": "master",
+  "path": "src",
+  "systemName": "Courses",
+  "containers": [
+    {
+      "id": "courses",
+      "name": "Courses",
+      "type": "api",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Courses.Api/Program.cs",
+          "reason": "ASP.NET entry point detected using CreateHostBuilder."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Courses.Api/SFA.DAS.Courses.Api.csproj",
+          "reason": "Project SDK is Web, indicating an API or web application."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "courses",
+      "name": "Redis Cache",
+      "kind": "cache",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Redis",
+      "configurationKeys": [
+        "Courses:RedisConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Courses.Api/Startup.cs",
+          "reason": "AddStackExchangeRedisOutputCache call with configuration from Courses:RedisConnectionString."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis-cache",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "courses",
+      "name": "Courses Database",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "CoursesDataContext",
+      "technology": "Entity Framework Core",
+      "configurationKeys": [
+        "Courses:ConnectionString"
+      ],
+      "authentication": {
+        "type": "Azure Default Credential",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "sql-server",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Courses.Api/AppStart/AddDatabaseExtension.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Courses.Api/AppStart/AddDatabaseExtension.cs",
+          "reason": "AddDbContext call for CoursesDataContext with optional SQL Server and in-memory database configurations."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Courses.Data/CoursesDataContext.cs",
+          "reason": "Entity Framework Core DbContext subclass CoursesDataContext detected."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-courses-database",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "courses",
+      "name": "Data Download",
+      "kind": "http-api",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "DataDownloadService",
+      "technology": "HttpClient",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Courses.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "HttpClient registration for IDataDownloadService detected."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-data-download",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "courses",
+      "name": "Qualification Sector Subject Area",
+      "kind": "http-api",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "QualificationSectorSubjectAreaService",
+      "technology": "HttpClient",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Courses.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "HttpClient registration for IQualificationSectorSubjectAreaService detected."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-qualification-sector-subject-area",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "courses",
+      "name": "Skills England",
+      "kind": "http-api",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "SkillsEnglandService",
+      "technology": "HttpClient",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Courses.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "HttpClient registration for ISkillsEnglandService detected."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-skills-england",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "courses",
+      "name": "Slack Notification",
+      "kind": "http-api",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "SlackNotificationService",
+      "technology": "HttpClient",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Courses.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "HttpClient registration for ISlackNotificationService detected."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-slack-notification",
+      "description": "Calls the API of"
+    }
+  ],
+  "resolution": {
+    "overlay": "dfe-overlay/apim-routing.json",
+    "apimCommit": "ceec7d82806fda7806cdccc7275b03cd95725300",
+    "precision": "area"
+  }
+}

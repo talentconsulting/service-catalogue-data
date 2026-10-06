@@ -1,0 +1,159 @@
+{
+  "repository": "SkillsFundingAgency/das-reservations-api",
+  "ref": "master",
+  "path": "src",
+  "systemName": "Reservations",
+  "containers": [
+    {
+      "id": "reservations",
+      "name": "Reservations",
+      "type": "api",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Api/Startup.cs",
+          "reason": "API application configuration"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Api/Program.cs",
+          "reason": "ASP.NET Core API application entry point"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Api/SFA.DAS.Reservations.Api.csproj",
+          "reason": "ASP.NET Core Web SDK"
+        }
+      ]
+    },
+    {
+      "id": "reservations-jobs",
+      "name": "Reservations Jobs",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.NServiceBusListener/SFA.DAS.Reservations.NServiceBusListener.csproj",
+          "reason": "Project is an executable targeting a .NET framework, typically indicative of a background process or a job."
+        }
+      ]
+    },
+    {
+      "id": "reservations-nservicebuslistener",
+      "name": "Reservations NServiceBusListener",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.NServiceBusListener/Program.cs",
+          "reason": "Hosted service/message listener entry point"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "reservations-jobs",
+      "name": "SQL Server",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "NServiceBus.SqlServer",
+      "technology": "SQL Server",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Reservations.NServiceBusListener/SFA.DAS.Reservations.NServiceBusListener.csproj"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.NServiceBusListener/SFA.DAS.Reservations.NServiceBusListener.csproj",
+          "reason": "Package reference to NServiceBus.SqlServer indicates interaction with a SQL Server database."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-sql-server",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "reservations",
+      "name": "SQL Server",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Microsoft.EntityFrameworkCore.SqlServer",
+      "configurationKeys": [
+        "Reservations:ConnectionString"
+      ],
+      "authentication": {
+        "type": "Managed Identity",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "Reservations.ConnectionString",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Reservations.Api/AppStart/AddDatabaseExtension.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Api/StartupExtensions/EntityFrameworkStartup.cs",
+          "reason": "DbContext SQL Server setup with connection handling"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Api/Startup.cs",
+          "reason": "DbContext registration for ReservationsDataContext"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Data/ReservationsDataContext.cs",
+          "reason": "EF Core context for interacting with database"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Api/AppStart/AddDatabaseExtension.cs",
+          "reason": "SQL Server connection creation and use of managed identity"
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-sql-server",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "reservations-jobs",
+      "name": "Azure Service Bus",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "NServiceBus.Transport.AzureServiceBus",
+      "technology": "Azure Service Bus",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.NServiceBusListener/SFA.DAS.Reservations.NServiceBusListener.csproj",
+          "reason": "Package reference to NServiceBus.Transport.AzureServiceBus indicates usage of Azure Service Bus."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-azure-service-bus",
+      "description": "Publishes messages to and consumes messages from"
+    }
+  ],
+  "resolution": {
+    "overlay": "dfe-overlay/apim-routing.json",
+    "apimCommit": "ceec7d82806fda7806cdccc7275b03cd95725300",
+    "precision": "area"
+  }
+}

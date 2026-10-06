@@ -166,9 +166,20 @@ const DATA_FILES = {
   topics: ['repo-topics', 'repo-topics.json']
 };
 
+// Written by dfe-overlay/resolve-dependencies.mjs; served instead of the scanned dependencies when present.
+const RESOLVED_DEPENDENCIES_FILE = ['service-dependencies', 'resolved-dependencies.json'];
+
+async function dataFileFor(sourceDir, kind) {
+  if (kind === 'dependencies') {
+    const resolved = join(sourceDir, ...RESOLVED_DEPENDENCIES_FILE);
+    if (await exists(resolved)) return resolved;
+  }
+  return join(sourceDir, ...DATA_FILES[kind]);
+}
+
 // One source's data file, or null when it is missing or unreadable.
 async function readSourceFile(source, kind) {
-  const file = join(safeChild(dataDir, source.name), ...DATA_FILES[kind]);
+  const file = await dataFileFor(safeChild(dataDir, source.name), kind);
   if (!await exists(file)) return null;
   try {
     return await readJson(file);
@@ -262,7 +273,7 @@ async function handleApi(request, response, url) {
   const [, id, kind] = match;
   const source = await sourceById(decodeURIComponent(id));
   const sourceDir = safeChild(dataDir, source.name);
-  let file = DATA_FILES[kind] ? join(sourceDir, ...DATA_FILES[kind]) : null;
+  let file = DATA_FILES[kind] ? await dataFileFor(sourceDir, kind) : null;
   if (kind === 'openapi') {
     const requested = url.searchParams.get('file');
     if (!requested || !source.apiFiles.includes(requested)) {

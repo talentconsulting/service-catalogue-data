@@ -1,0 +1,211 @@
+{
+  "repository": "SkillsFundingAgency/das-admin-roatp-web",
+  "ref": "main",
+  "path": "src",
+  "systemName": "Admin Roatp",
+  "containers": [
+    {
+      "id": "admin-roatp",
+      "name": "Admin Roatp",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/Program.cs",
+          "reason": "Detected ASP.NET Core WebApplication builder instantiation and configuration."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/SFA.DAS.Admin.Roatp.Web.csproj",
+          "reason": "Detected use of ASP.NET Web SDK in project file."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "admin-roatp",
+      "name": "Redis",
+      "kind": "cache",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "StackExchange.Redis",
+      "configurationKeys": [
+        "ApplicationConfiguration.RedisConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "cache.endpoint",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/AppStart/AddSessionExtension.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/AppStart/AddDataProtectionExtension.cs",
+          "reason": "Detected ConnectionMultiplexer construction for Redis connection using ApplicationConfiguration.RedisConnectionString."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/AppStart/AddSessionExtension.cs",
+          "reason": "Detected StackExchange.Redis cache client registration with a connection string read from ApplicationConfiguration.RedisConnectionString."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "admin-roatp",
+      "name": "Roatp API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IRoatpServiceApiClient",
+      "technology": "Refit",
+      "configurationKeys": [
+        "AdminRoatpOuterApiConfiguration.ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/AppStart/AddApplicationRegistrationsExtension.cs",
+          "reason": "Detected Refit client registration for IOuterApiClient with a base address using AdminRoatpOuterApiConfiguration.ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/AdminRoatp/SFA.DAS.AdminRoatp/Application/Commands/PatchOrganisation/PatchOrganisationCommandHandler.cs",
+          "reason": "AdminRoatp APIM area calls Roatp API through IRoatpServiceApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/AdminRoatp/SFA.DAS.AdminRoatp/Application/Commands/UpdateOrganisationCourseTypes/UpdateOrganisationCourseTypesCommandHandler.cs",
+          "reason": "AdminRoatp APIM area calls Roatp API through IRoatpServiceApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/AdminRoatp/SFA.DAS.AdminRoatp/Application/Queries/GetOrganisation/GetOrganisationQueryHandler.cs",
+          "reason": "AdminRoatp APIM area calls Roatp API through IRoatpServiceApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-roatp-api",
+      "description": "Calls via APIM (AdminRoatp)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "AdminRoatp",
+        "dependencyName": "Outer API",
+        "operations": [],
+        "areas": [
+          "AdminRoatp"
+        ]
+      }
+    },
+    {
+      "sourceId": "admin-roatp",
+      "name": "Roatp V2 API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IRoatpCourseManagementApiClient",
+      "technology": "Refit",
+      "configurationKeys": [
+        "AdminRoatpOuterApiConfiguration.ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/AppStart/AddApplicationRegistrationsExtension.cs",
+          "reason": "Detected Refit client registration for IOuterApiClient with a base address using AdminRoatpOuterApiConfiguration.ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/AdminRoatp/SFA.DAS.AdminRoatp/Application/Commands/AddRestrictedCourse/AddRestrictedCourseCommandHandler.cs",
+          "reason": "AdminRoatp APIM area calls Roatp V2 API through IRoatpCourseManagementApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/AdminRoatp/SFA.DAS.AdminRoatp/Application/Commands/PatchOrganisation/PatchOrganisationCommandHandler.cs",
+          "reason": "AdminRoatp APIM area calls Roatp V2 API through IRoatpCourseManagementApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/AdminRoatp/SFA.DAS.AdminRoatp/Application/Commands/PostOrganisation/PostOrganisatonCommandHandler.cs",
+          "reason": "AdminRoatp APIM area calls Roatp V2 API through IRoatpCourseManagementApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-roatp-v2-api",
+      "description": "Calls via APIM (AdminRoatp)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "AdminRoatp",
+        "dependencyName": "Outer API",
+        "operations": [],
+        "areas": [
+          "AdminRoatp"
+        ]
+      }
+    },
+    {
+      "sourceId": "admin-roatp",
+      "name": "Apply API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IApplyApiClient",
+      "technology": "Refit",
+      "configurationKeys": [
+        "AdminRoatpOuterApiConfiguration.ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Admin.Roatp.Web/AppStart/AddApplicationRegistrationsExtension.cs",
+          "reason": "Detected Refit client registration for IOuterApiClient with a base address using AdminRoatpOuterApiConfiguration.ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/AdminRoatp/SFA.DAS.AdminRoatp/Application/Queries/GetProvidersAllowedList/GetProvidersAllowedListQueryHandler.cs",
+          "reason": "AdminRoatp APIM area calls Apply API through IApplyApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/AdminRoatp/SFA.DAS.AdminRoatp.Api/AppStart/AddServiceRegistrationsExtension.cs",
+          "reason": "AdminRoatp APIM area calls Apply API through IApplyApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-apply-api",
+      "description": "Calls via APIM (AdminRoatp)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "AdminRoatp",
+        "dependencyName": "Outer API",
+        "operations": [],
+        "areas": [
+          "AdminRoatp"
+        ]
+      }
+    }
+  ],
+  "resolution": {
+    "overlay": "dfe-overlay/apim-routing.json",
+    "apimCommit": "ceec7d82806fda7806cdccc7275b03cd95725300",
+    "precision": "area"
+  }
+}

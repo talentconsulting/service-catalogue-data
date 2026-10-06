@@ -1,0 +1,112 @@
+{
+  "repository": "SkillsFundingAgency/das-apprentice-progress-api",
+  "ref": "main",
+  "path": "src",
+  "systemName": "Apprentice Progress",
+  "containers": [
+    {
+      "id": "apprentice-progress",
+      "name": "Apprentice Progress",
+      "type": "api",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeProgress.Api/SFA.DAS.ApprenticeProgress.Api.csproj",
+          "reason": "ASP.NET Core SDK detected in the project file."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeProgress.Api/Program.cs",
+          "reason": "ASP.NET Core web application entry point detected."
+        }
+      ]
+    },
+    {
+      "id": "apprentice-progress-functions",
+      "name": "Apprentice Progress Functions",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeProgress.Functions/Program.cs",
+          "reason": "Azure Functions entry point detected."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeProgress.Functions/SFA.DAS.ApprenticeProgress.Functions.csproj",
+          "reason": "Azure Functions project file detected with specific SDK for worker functions."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "apprentice-progress",
+      "name": "Apprentice Progress Database",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ApprenticeProgressDataContext",
+      "technology": "SQL Server",
+      "configurationKeys": [
+        "ApplicationSettings:SqlConnectionString"
+      ],
+      "authentication": {
+        "type": "Azure Service Token",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "SFA.DAS.ApprenticeProgress",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.ApprenticeProgress.Api/AppStart/AddDatabaseExtension.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeProgress.Api/AppStart/AddDatabaseExtension.cs",
+          "reason": "Database client registered with UseSqlServer."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeProgress.Data/ApprenticeProgressDataContext.cs",
+          "reason": "Entity Framework DbContext subclass found."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-apprentice-progress-database",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "apprentice-progress-functions",
+      "name": "Apprentice Progress API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IApprenticeProgressApiClient",
+      "technology": "HTTP",
+      "configurationKeys": [
+        "ApplicationConfiguration:ApprenticeProgressApiConfiguration:Url"
+      ],
+      "authentication": {
+        "type": "Azure AD",
+        "configurationKeys": [
+          "ApplicationConfiguration:ApprenticeProgressApiConfiguration:Identifier"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeProgress.Functions/HttpClientConfiguration/HttpClientConfigurationExtension.cs",
+          "reason": "HTTP client registration for IApprenticeProgressApiClient with URL and authentication handler."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-apprentice-progress-api",
+      "description": "Calls the API of"
+    }
+  ],
+  "resolution": {
+    "overlay": "dfe-overlay/apim-routing.json",
+    "apimCommit": "ceec7d82806fda7806cdccc7275b03cd95725300",
+    "precision": "area"
+  }
+}

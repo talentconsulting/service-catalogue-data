@@ -675,7 +675,8 @@ function edgeVerb(edge, isOutboundFromNode) {
 function edgeLabel(edge, isOutboundFromNode = true) {
   const technology = edge.technologies.join('/');
   const verb = edgeVerb(edge, isOutboundFromNode);
-  return `${verb}${technology ? ` [${technology}]` : ''}${edge.count > 1 ? ` ×${edge.count}` : ''}`;
+  const via = edge.via?.length ? ` via ${edge.via.join(', ')}` : '';
+  return `${verb}${technology ? ` [${technology}]` : ''}${via}${edge.count > 1 ? ` ×${edge.count}` : ''}`;
 }
 
 function buildLandscape(sources, dependencySets) {
@@ -684,7 +685,7 @@ function buildLandscape(sources, dependencySets) {
 
   function addEdge(from, to, dependency, reference) {
     const key = `${from}|${to}`;
-    if (!edgeMap.has(key)) edgeMap.set(key, { from, to, count: 0, operations: 0, technologies: new Set(), names: new Set(), kinds: new Set(), references: [] });
+    if (!edgeMap.has(key)) edgeMap.set(key, { from, to, count: 0, operations: 0, technologies: new Set(), names: new Set(), kinds: new Set(), via: new Set(), references: [] });
     const edge = edgeMap.get(key);
     edge.count += 1;
     edge.operations += dependency.operations?.length || 0;
@@ -692,6 +693,7 @@ function buildLandscape(sources, dependencySets) {
     [kindLabel, dependency.technology].filter(Boolean).forEach((value) => edge.technologies.add(value));
     edge.names.add(dependency.name);
     if (dependency.kind) edge.kinds.add(dependency.kind);
+    if (dependency.via) edge.via.add(`${dependency.via.label} (${dependency.via.area})`);
     if (reference) edge.references.push(reference);
   }
 
@@ -729,12 +731,14 @@ function buildLandscape(sources, dependencySets) {
     for (const [dependencyIndex, dependency] of dependencies.entries()) {
       const matchedFlag = INFRA_FLAGS.find((flag) => flag.test(dependency) || infraTargetIds.get(flag.key).get(source.id)?.has(dependency.targetId));
       if (matchedFlag) { infraSourceIds.get(matchedFlag.key).add(source.id); continue; }
-      const outerApiSystem = source.id !== OUTER_API_SOURCE_ID && isOuterApiDependency(dependency)
+      // Pinned by the DfE overlay (dfe-overlay/resolve-dependencies.mjs); beats name matching.
+      const pinnedSystem = dependency.targetRepo ? sources.find((candidate) => candidate.id === dependency.targetRepo) : null;
+      const outerApiSystem = !pinnedSystem && source.id !== OUTER_API_SOURCE_ID && isOuterApiDependency(dependency)
         ? sources.find((candidate) => candidate.id === OUTER_API_SOURCE_ID)
         : null;
       const depTokens = new Set(tokenize(dependency.name));
-      if (!outerApiSystem && canRelate(depTokens, ownTokens)) continue;
-      const matchedSystem = outerApiSystem
+      if (!pinnedSystem && !outerApiSystem && canRelate(depTokens, ownTokens)) continue;
+      const matchedSystem = pinnedSystem || outerApiSystem
         || bestMatchingSystem(depTokens, sources.filter((candidate) => candidate.id !== source.id), (candidate) => systemTokenMap.get(candidate.id));
       if (matchedSystem) {
         const [from, to] = dependency.direction === 'inbound' ? [`sys:${matchedSystem.id}`, `sys:${source.id}`] : [`sys:${source.id}`, `sys:${matchedSystem.id}`];
@@ -779,7 +783,7 @@ function buildLandscape(sources, dependencySets) {
     isSqlServer: infraSourceIds.get('sqlServer').has(s.id),
     isServiceBus: infraSourceIds.get('serviceBus').has(s.id)
   }));
-  const edges = [...edgeMap.values()].map((edge) => ({ ...edge, technologies: [...edge.technologies], names: [...edge.names], kinds: [...edge.kinds] }));
+  const edges = [...edgeMap.values()].map((edge) => ({ ...edge, technologies: [...edge.technologies], names: [...edge.names], kinds: [...edge.kinds], via: [...edge.via] }));
   return { systems, externals, edges };
 }
 
@@ -1801,12 +1805,14 @@ async function fetchLandscapeGraph() {
   const { sources } = await getJson('/api/landscape');
   const byId = new Map(sources.map((entry) => [entry.id, entry]));
   state.landscapeTopicsBySource = new Map(sources.filter((entry) => entry.topics).map((entry) => [entry.id, entry.topics]));
-  state.landscapeSources = state.catalog.map((source) => {
+  // A gateway the DfE overlay routes through (APIM) is drawn as edge labels, not as a system.
+  const landscapeCatalog = state.catalog.filter((source) => !byId.get(source.id)?.dependencies?.hideInLandscape);
+  state.landscapeSources = landscapeCatalog.map((source) => {
     const entry = byId.get(source.id);
     const data = combineDependencies(source, entry?.dependencies, entry?.messages);
     return data.dependencies?.length ? { source, ref: data.ref, dependencies: data.dependencies } : null;
   }).filter(Boolean);
-  return buildLandscape(state.catalog, state.landscapeSources);
+  return buildLandscape(landscapeCatalog, state.landscapeSources);
 }
 
 async function loadLandscape() {

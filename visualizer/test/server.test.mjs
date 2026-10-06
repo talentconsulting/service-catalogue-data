@@ -111,3 +111,11 @@ test('JSON responses are gzipped when the client accepts it', async () => {
   });
   assert.equal(headers['content-encoding'], 'gzip');
 });
+
+test('dependencies endpoint serves the DfE overlay resolution when present', async () => {
+  const response = await fetch(`${baseUrl}/api/sources/das-commitments/dependencies`);
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.ok(body.resolution);
+  assert.ok(body.dependencies.some((dependency) => dependency.targetRepo === 'das-courses-api' && dependency.via?.area === 'Approvals'));
+});

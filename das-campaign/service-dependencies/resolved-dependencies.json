@@ -1,0 +1,454 @@
+{
+  "repository": "SkillsFundingAgency/das-campaign",
+  "ref": "master",
+  "path": "src",
+  "systemName": "Campaign",
+  "containers": [
+    {
+      "id": "campaign-web",
+      "name": "Campaign",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/Program.cs",
+          "reason": "ASP.NET Core web entry point (IWebHostBuilder)."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/SFA.DAS.Campaign.Web.csproj",
+          "reason": "Project targeting `Microsoft.NET.Sdk.Web`."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "campaign-web",
+      "name": "Redis",
+      "kind": "cache",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "IConnectionMultiplexer",
+      "technology": "StackExchange.Redis",
+      "configurationKeys": [
+        "CampaignConfiguration:ConnectionStrings:SharedRedis"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/Helpers/StartupExtensions.cs",
+          "reason": "ConnectionMultiplexer configuration for StackExchange.Redis, with a named connection string."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Domain/SFA.DAS.Campaign.Domain.csproj",
+          "reason": "Redis client package `StackExchange.Redis` referenced."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/SFA.DAS.Campaign.Web.csproj",
+          "reason": "Redis client package `StackExchange.Redis` referenced."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "campaign-web",
+      "name": "Azure Key Vault",
+      "kind": "cloud-service",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "TokenCredential",
+      "technology": "Azure.Identity",
+      "configurationKeys": [
+        "TenantId"
+      ],
+      "authentication": {
+        "type": "oidc",
+        "configurationKeys": [
+          "TenantId"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/Helpers/StartupExtensions.cs",
+          "reason": "Azure Key Vault client configured with TenantId using Azure.Identity library."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cloud-service-azure-key-vault",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "campaign-web",
+      "name": "Contentful Preview API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IContentfulApiClient, IContentfulPreviewApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "CampaignConfiguration:OuterApi:BaseUrl",
+        "CampaignConfiguration:OuterApi:Key"
+      ],
+      "authentication": {
+        "type": "key",
+        "configurationKeys": [
+          "CampaignConfiguration:OuterApi:Key"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs",
+          "reason": "HttpClient configured with BaseAddress from CampaignConfiguration and subscription key is set in headers."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Campaign/SFA.DAS.Campaign/Application/Queries/PreviewArticles/GetPreviewArticleByHubAndSlugQueryHandler.cs",
+          "reason": "Campaign APIM area calls Contentful Preview API through IContentfulApiClient, IContentfulPreviewApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Campaign/SFA.DAS.Campaign/Application/Queries/PreviewHub/GetPreviewHubQueryHandler.cs",
+          "reason": "Campaign APIM area calls Contentful Preview API through IContentfulApiClient, IContentfulPreviewApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Campaign/SFA.DAS.Campaign/Application/Queries/PreviewLandingPage/GetPreviewLandingPageQueryHandler.cs",
+          "reason": "Campaign APIM area calls Contentful Preview API through IContentfulApiClient, IContentfulPreviewApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-contentful-preview-api",
+      "description": "Calls via APIM (Campaign)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Campaign",
+        "dependencyName": "Outer API",
+        "operations": [
+          {
+            "method": "GET",
+            "methodName": "Get",
+            "path": "{request.GetUrl}",
+            "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs"
+          }
+        ],
+        "areas": [
+          "Campaign"
+        ]
+      }
+    },
+    {
+      "sourceId": "campaign-web",
+      "name": "Contentful API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IContentfulApiClient, IContentfulMasterApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "CampaignConfiguration:OuterApi:BaseUrl",
+        "CampaignConfiguration:OuterApi:Key"
+      ],
+      "authentication": {
+        "type": "key",
+        "configurationKeys": [
+          "CampaignConfiguration:OuterApi:Key"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs",
+          "reason": "HttpClient configured with BaseAddress from CampaignConfiguration and subscription key is set in headers."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Campaign/SFA.DAS.Campaign/ExternalApi/ContentfulMasterApiClient.cs",
+          "reason": "Campaign APIM area calls Contentful API through IContentfulApiClient, IContentfulMasterApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Campaign/SFA.DAS.Campaign.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Campaign APIM area calls Contentful API through IContentfulApiClient, IContentfulMasterApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-contentful-api",
+      "description": "Calls via APIM (Campaign)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Campaign",
+        "dependencyName": "Outer API",
+        "operations": [
+          {
+            "method": "GET",
+            "methodName": "Get",
+            "path": "{request.GetUrl}",
+            "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs"
+          }
+        ],
+        "areas": [
+          "Campaign"
+        ]
+      }
+    },
+    {
+      "sourceId": "campaign-web",
+      "name": "Courses API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICoursesApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "CampaignConfiguration:OuterApi:BaseUrl",
+        "CampaignConfiguration:OuterApi:Key"
+      ],
+      "authentication": {
+        "type": "key",
+        "configurationKeys": [
+          "CampaignConfiguration:OuterApi:Key"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs",
+          "reason": "HttpClient configured with BaseAddress from CampaignConfiguration and subscription key is set in headers."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Campaign/SFA.DAS.Campaign/Application/Queries/Standard/GetStandardQueryHandler.cs",
+          "reason": "Campaign APIM area calls Courses API through ICoursesApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Campaign/SFA.DAS.Campaign/Application/Queries/Standards/GetStandardsQueryHandler.cs",
+          "reason": "Campaign APIM area calls Courses API through ICoursesApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Campaign/SFA.DAS.Campaign.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Campaign APIM area calls Courses API through ICoursesApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-courses-api",
+      "targetRepo": "das-courses-api",
+      "description": "Calls via APIM (Campaign)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Campaign",
+        "dependencyName": "Outer API",
+        "operations": [
+          {
+            "method": "GET",
+            "methodName": "Get",
+            "path": "{request.GetUrl}",
+            "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs"
+          }
+        ],
+        "areas": [
+          "Campaign"
+        ]
+      }
+    },
+    {
+      "sourceId": "campaign-web",
+      "name": "Find Apprenticeship API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IFindApprenticeshipApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "CampaignConfiguration:OuterApi:BaseUrl",
+        "CampaignConfiguration:OuterApi:Key"
+      ],
+      "authentication": {
+        "type": "key",
+        "configurationKeys": [
+          "CampaignConfiguration:OuterApi:Key"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs",
+          "reason": "HttpClient configured with BaseAddress from CampaignConfiguration and subscription key is set in headers."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Campaign/SFA.DAS.Campaign/Application/Queries/Adverts/GetAdvertsQueryHandler.cs",
+          "reason": "Campaign APIM area calls Find Apprenticeship API through IFindApprenticeshipApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Campaign/SFA.DAS.Campaign.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Campaign APIM area calls Find Apprenticeship API through IFindApprenticeshipApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-find-apprenticeship-api",
+      "targetRepo": "das-findapprenticeship-api",
+      "description": "Calls via APIM (Campaign)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Campaign",
+        "dependencyName": "Outer API",
+        "operations": [
+          {
+            "method": "GET",
+            "methodName": "Get",
+            "path": "{request.GetUrl}",
+            "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs"
+          }
+        ],
+        "areas": [
+          "Campaign"
+        ]
+      }
+    },
+    {
+      "sourceId": "campaign-web",
+      "name": "Campaign API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IInternalApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "CampaignConfiguration:OuterApi:BaseUrl",
+        "CampaignConfiguration:OuterApi:Key"
+      ],
+      "authentication": {
+        "type": "key",
+        "configurationKeys": [
+          "CampaignConfiguration:OuterApi:Key"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs",
+          "reason": "HttpClient configured with BaseAddress from CampaignConfiguration and subscription key is set in headers."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Campaign/SFA.DAS.Campaign/InnerApi/CampaignApiClient.cs",
+          "reason": "Campaign APIM area calls Campaign API through IInternalApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-campaign-api",
+      "targetRepo": "das-campaign-api",
+      "description": "Calls via APIM (Campaign)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Campaign",
+        "dependencyName": "Outer API",
+        "operations": [
+          {
+            "method": "GET",
+            "methodName": "Get",
+            "path": "{request.GetUrl}",
+            "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs"
+          }
+        ],
+        "areas": [
+          "Campaign"
+        ]
+      }
+    },
+    {
+      "sourceId": "campaign-web",
+      "name": "Location API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ILocationApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "CampaignConfiguration:OuterApi:BaseUrl",
+        "CampaignConfiguration:OuterApi:Key"
+      ],
+      "authentication": {
+        "type": "key",
+        "configurationKeys": [
+          "CampaignConfiguration:OuterApi:Key"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs",
+          "reason": "HttpClient configured with BaseAddress from CampaignConfiguration and subscription key is set in headers."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Campaign/SFA.DAS.Campaign.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Campaign APIM area calls Location API through ILocationApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-location-api",
+      "description": "Calls via APIM (Campaign)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Campaign",
+        "dependencyName": "Outer API",
+        "operations": [
+          {
+            "method": "GET",
+            "methodName": "Get",
+            "path": "{request.GetUrl}",
+            "sourceFile": "src/SFA.DAS.Campaign.Infrastructure/Api/ApiClient.cs"
+          }
+        ],
+        "areas": [
+          "Campaign"
+        ]
+      }
+    },
+    {
+      "sourceId": "campaign-web",
+      "name": "Azure Queue Storage",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Azure Storage Queue",
+      "configurationKeys": [
+        "CampaignConfiguration:QueueConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Campaign.Web/Helpers/StartupExtensions.cs",
+          "reason": "Azure Queue Storage health check configured with campaign QueueConnectionString."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-azure-queue-storage",
+      "description": "Publishes messages to and consumes messages from"
+    }
+  ],
+  "resolution": {
+    "overlay": "dfe-overlay/apim-routing.json",
+    "apimCommit": "ceec7d82806fda7806cdccc7275b03cd95725300",
+    "precision": "area"
+  }
+}
