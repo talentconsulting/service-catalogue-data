@@ -1,0 +1,610 @@
+{
+  "repository": "SkillsFundingAgency/das-learning",
+  "ref": "main",
+  "path": "src",
+  "systemName": "Learning",
+  "containers": [
+    {
+      "id": "learning",
+      "name": "Learning",
+      "type": "api",
+      "evidence": [
+        {
+          "sourceFile": "src/Queries/GetShortCoursesForEarnings/GetShortCoursesForEarningsQueryHandler.cs",
+          "reason": "Evidenced by database interaction in a query handler method."
+        },
+        {
+          "sourceFile": "src/Queries/SFA.DAS.Learning.Queries.csproj",
+          "reason": "Project file for the API layer."
+        },
+        {
+          "sourceFile": "src/InnerApi/Program.cs",
+          "reason": "Web application entry point with controllers and endpoint mappings evidenced."
+        }
+      ]
+    },
+    {
+      "id": "learning-command",
+      "name": "Learning Command",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/Command/SFA.DAS.Learning.Command.csproj",
+          "reason": "Project file indicates a .NET application without a web server (likely a job or worker)."
+        }
+      ]
+    },
+    {
+      "id": "learning-jobs",
+      "name": "Learning Jobs",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/Functions/Program.cs",
+          "reason": "Azure Functions entry point evidenced in Program.cs."
+        }
+      ]
+    },
+    {
+      "id": "learning-testmessagepublisher",
+      "name": "Learning TestMessagePublisher",
+      "type": "other",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Learning.TestMessagePublisher/Program.cs",
+          "reason": "Test message publisher program creating NServiceBus configuration and publishing events."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Learning.TestMessagePublisher/SFA.DAS.Learning.TestMessagePublisher.csproj",
+          "reason": "Test message publisher project file."
+        }
+      ]
+    },
+    {
+      "id": "testhelpers",
+      "name": "TestHelpers",
+      "type": "other",
+      "evidence": [
+        {
+          "sourceFile": "src/TestHelpers/SqlDatabase.cs",
+          "reason": "Test helper class constructing a database instance for testing."
+        },
+        {
+          "sourceFile": "src/TestHelpers/SFA.DAS.Learning.TestHelpers.csproj",
+          "reason": "Test helpers project file."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "learning",
+      "name": "Azure Table Storage",
+      "kind": "cloud-service",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Azure Table Storage",
+      "configurationKeys": [
+        "ConfigurationStorageConnectionString",
+        "EnvironmentName"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/InnerApi/Program.cs",
+          "reason": "Configuration with AddAzureTableStorage."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cloud-service-azure-table-storage",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "learning-jobs",
+      "name": "Azure Table Storage",
+      "kind": "cloud-service",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Azure Table Storage",
+      "configurationKeys": [
+        "ConfigurationStorageConnectionString",
+        "EnvironmentName"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/Functions/Startup.cs",
+          "reason": "Configuration for Azure Table Storage added with options for keys."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cloud-service-azure-table-storage",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "learning-command",
+      "name": "Learning Database",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Microsoft.EntityFrameworkCore.SqlServer",
+      "configurationKeys": [
+        "ApplicationSettings:DbConnectionString"
+      ],
+      "authentication": {
+        "type": "Azure AD token",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "db",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/DataAccess/ServiceCollectionExtensions.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/DataAccess/ServiceCollectionExtensions.cs",
+          "reason": "AddDbContext for LearningDataContext with `UseSqlServer`, referencing a database connection string."
+        },
+        {
+          "sourceFile": "src/DataAccess/LearningDataContext.cs",
+          "reason": "LearningDataContext indicates a database client with Entity Framework core models."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-learning-database",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "learning",
+      "name": "Learning Database",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Entity Framework Core",
+      "configurationKeys": [
+        "ApplicationSettings.DatabaseConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "ApplicationSettings.DatabaseConnectionString",
+          "direction": "outbound",
+          "sourceFile": "src/InnerApi/Program.cs"
+        },
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/Queries/GetShortCoursesForEarnings/GetShortCoursesForEarningsQueryHandler.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/InnerApi/Program.cs",
+          "reason": "Entity Framework configured for SQL Server access."
+        },
+        {
+          "sourceFile": "src/Queries/GetShortCoursesForEarnings/GetShortCoursesForEarningsQueryHandler.cs",
+          "reason": "Usage of 'LearningDataContext', 'DbSet', and LINQ queries suggests interaction with a database."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-learning-database",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "testhelpers",
+      "name": "Learning Database",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": null,
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "(localdb)\\MSSQLLocalDB",
+          "direction": "outbound",
+          "sourceFile": "src/TestHelpers/SqlDatabase.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/TestHelpers/SqlDatabase.cs",
+          "reason": "Explicit use of 'SqlConnection' with a LocalDB connection string."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-learning-database",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "learning-jobs",
+      "name": "Learning Database",
+      "kind": "database",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Entity Framework",
+      "configurationKeys": [
+        "ApplicationSettings.DatabaseConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "ApplicationSettings.DatabaseConnectionString",
+          "direction": "outbound",
+          "sourceFile": "src/Functions/Startup.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Functions/Startup.cs",
+          "reason": "Entity Framework configured for SQL Server access."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-learning-database",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "learning-command",
+      "name": "Collection Calendar API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICollectionCalendarClient",
+      "technology": "HttpClient",
+      "configurationKeys": [],
+      "authentication": {
+        "type": "headers",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/Command/ServiceCollectionExtensions.cs",
+          "reason": "Evidence of an outbound HTTP API client configured using the LearningOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Learning/SFA.DAS.Learning.Api/Controllers/CollectionCalendarController.cs",
+          "reason": "Learning APIM area calls Collection Calendar API through ICollectionCalendarClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-collection-calendar-api",
+      "description": "Calls via APIM (Learning)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Learning",
+        "dependencyName": "Learning Outer",
+        "operations": [],
+        "areas": [
+          "Learning"
+        ]
+      }
+    },
+    {
+      "sourceId": "learning-command",
+      "name": "Employer Accounts API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IAccountsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [],
+      "authentication": {
+        "type": "headers",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/Command/ServiceCollectionExtensions.cs",
+          "reason": "Evidence of an outbound HTTP API client configured using the LearningOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Learning/SFA.DAS.Learning.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Learning APIM area calls Employer Accounts API through IAccountsApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-employer-accounts-api",
+      "targetRepo": "das-employer-accounts",
+      "description": "Calls via APIM (Learning)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Learning",
+        "dependencyName": "Learning Outer",
+        "operations": [],
+        "areas": [
+          "Learning"
+        ]
+      }
+    },
+    {
+      "sourceId": "learning-command",
+      "name": "Commitments API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICommitmentsV2ApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [],
+      "authentication": {
+        "type": "headers",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/Command/ServiceCollectionExtensions.cs",
+          "reason": "Evidence of an outbound HTTP API client configured using the LearningOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Learning/SFA.DAS.Learning.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Learning APIM area calls Commitments API through ICommitmentsV2ApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-commitments-api",
+      "targetRepo": "das-commitments",
+      "description": "Calls via APIM (Learning)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Learning",
+        "dependencyName": "Learning Outer",
+        "operations": [],
+        "areas": [
+          "Learning"
+        ]
+      }
+    },
+    {
+      "sourceId": "learning-command",
+      "name": "Courses API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICoursesApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [],
+      "authentication": {
+        "type": "headers",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/Command/ServiceCollectionExtensions.cs",
+          "reason": "Evidence of an outbound HTTP API client configured using the LearningOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Learning/SFA.DAS.Learning.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Learning APIM area calls Courses API through ICoursesApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-courses-api",
+      "targetRepo": "das-courses-api",
+      "description": "Calls via APIM (Learning)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Learning",
+        "dependencyName": "Learning Outer",
+        "operations": [],
+        "areas": [
+          "Learning"
+        ]
+      }
+    },
+    {
+      "sourceId": "learning-command",
+      "name": "Provider Account API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IProviderAccountApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [],
+      "authentication": {
+        "type": "headers",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/Command/ServiceCollectionExtensions.cs",
+          "reason": "Evidence of an outbound HTTP API client configured using the LearningOuterApiClient."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Learning/SFA.DAS.Learning.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Learning APIM area calls Provider Account API through IProviderAccountApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-provider-account-api",
+      "description": "Calls via APIM (Learning)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Learning",
+        "dependencyName": "Learning Outer",
+        "operations": [],
+        "areas": [
+          "Learning"
+        ]
+      }
+    },
+    {
+      "sourceId": "learning-jobs",
+      "name": "Azure Storage Queues",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "bidirectional",
+      "client": null,
+      "technology": "Azure Storage Queues",
+      "configurationKeys": [
+        "ConnectionStrings:AzureWebJobsStorage"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/Functions/SFA.DAS.Learning.Functions.csproj",
+          "reason": "Azure Storage Queues package referenced for message broker functionality."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-azure-storage-queues",
+      "description": "Publishes messages to and consumes messages from"
+    },
+    {
+      "sourceId": "learning-testmessagepublisher",
+      "name": "NServiceBus",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "NServiceBus",
+      "configurationKeys": [
+        "fullyQualifiedNamespace"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Learning.TestMessagePublisher/Program.cs",
+          "reason": "Configuration of NServiceBus with fully qualified namespace and usage of IMessageSession for event publishing."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-nservicebus",
+      "description": "Publishes messages to and consumes messages from"
+    },
+    {
+      "sourceId": "learning",
+      "name": "NServiceBus",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "NServiceBus",
+      "configurationKeys": [
+        "ApplicationSettings.NServiceBusConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "NServiceBus",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/InnerApi/Program.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/InnerApi/Program.cs",
+          "reason": "NServiceBus configured for sending messages using a connection string."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-nservicebus",
+      "description": "Publishes messages to and consumes messages from"
+    },
+    {
+      "sourceId": "learning-jobs",
+      "name": "NServiceBus",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "bidirectional",
+      "client": null,
+      "technology": "NServiceBus",
+      "configurationKeys": [
+        "ApplicationSettings.NServiceBusConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "NServiceBus",
+          "name": null,
+          "direction": "bidirectional",
+          "sourceFile": "src/Functions/Startup.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Functions/Startup.cs",
+          "reason": "NServiceBus configured for subscription."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-nservicebus",
+      "description": "Publishes messages to and consumes messages from"
+    }
+  ],
+  "resolution": {
+    "overlay": "dfe-overlay/apim-routing.json",
+    "apimCommit": "ceec7d82806fda7806cdccc7275b03cd95725300",
+    "precision": "area"
+  }
+}

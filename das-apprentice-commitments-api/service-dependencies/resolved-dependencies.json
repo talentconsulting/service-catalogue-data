@@ -1,0 +1,133 @@
+{
+  "repository": "SkillsFundingAgency/das-apprentice-commitments-api",
+  "ref": "main",
+  "path": "src",
+  "systemName": "Apprentice Commitments",
+  "containers": [
+    {
+      "id": "apprentice-commitments",
+      "name": "Apprentice Commitments",
+      "type": "api",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeCommitments.Api/Startup.cs",
+          "reason": "ASP.NET Startup class with application configuration."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeCommitments.Api/Program.cs",
+          "reason": "ASP.NET entry point with web host configuration."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeCommitments.Api/SFA.DAS.ApprenticeCommitments.Api.csproj",
+          "reason": "Project file indicates a web application."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "apprentice-commitments",
+      "name": "Azure Table Storage",
+      "kind": "cloud-service",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "Table Storage SDK",
+      "technology": "Azure Table Storage",
+      "configurationKeys": [
+        "ConfigNames",
+        "ConfigurationStorageConnectionString",
+        "EnvironmentName"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeCommitments.Api/Startup.cs",
+          "reason": "Azure Table Storage registered for configuration management."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cloud-service-azure-table-storage",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "apprentice-commitments",
+      "name": "SQL Server",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Microsoft SQL Server",
+      "configurationKeys": [
+        "ApplicationSettings:DbConnectionString"
+      ],
+      "authentication": {
+        "type": "Managed Identity",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "ApplicationSettings:DbConnectionString",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.ApprenticeCommitments/Infrastructure/SqlServerConnectionFactory.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeCommitments/Infrastructure/ServiceCollectionExtensions.cs",
+          "reason": "DbContextOptions configured for SQL Server."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeCommitments/Data/Models/ApprenticeCommitmentsDbContext.cs",
+          "reason": "Entity Framework DbContext providing access to SQL Server."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeCommitments.Api/Startup.cs",
+          "reason": "Entity Framework context registered with SQL Server connection string."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-sql-server",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "apprentice-commitments",
+      "name": "Azure Service Bus",
+      "kind": "message-broker",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "NServiceBus",
+      "technology": "Azure Service Bus",
+      "configurationKeys": [
+        "ApplicationSettings:NServiceBusConnectionString",
+        "ApplicationSettings:NServiceBusLicense"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeCommitments/Infrastructure/ServiceCollectionExtensions.cs",
+          "reason": "NServiceBus endpoint configured with Azure Service Bus transport."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-azure-service-bus",
+      "description": "Publishes messages to and consumes messages from"
+    }
+  ],
+  "resolution": {
+    "overlay": "dfe-overlay/apim-routing.json",
+    "apimCommit": "ceec7d82806fda7806cdccc7275b03cd95725300",
+    "precision": "area"
+  }
+}

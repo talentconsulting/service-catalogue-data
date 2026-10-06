@@ -1,0 +1,232 @@
+{
+  "repository": "SkillsFundingAgency/das-providerapprenticeshipsservice",
+  "ref": "master",
+  "path": "src",
+  "systemName": "Provider Apprenticeships Service",
+  "containers": [
+    {
+      "id": "provider-apprenticeships-service-api",
+      "name": "Provider Apprenticeships Service",
+      "type": "api",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.PAS.Account.Api/Program.cs",
+          "reason": "Program.cs contains a web API entry point using Web Host."
+        }
+      ]
+    },
+    {
+      "id": "provider-apprenticeships-service-jobs",
+      "name": "Provider Apprenticeships Service Jobs",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.PAS.Jobs/Program.cs",
+          "reason": "Program.cs sets up an Azure Functions application indicating a job/hosted service."
+        }
+      ]
+    },
+    {
+      "id": "provider-apprenticeships-service-web",
+      "name": "Provider Apprenticeships Service",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ProviderApprenticeshipsService.Web/Program.cs",
+          "reason": "ASP.NET Core Web application entry point detected."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ProviderApprenticeshipsService.Web/Startup.cs",
+          "reason": "ASP.NET Core services and middleware configured."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "provider-apprenticeships-service-jobs",
+      "name": "Azure Table Storage",
+      "kind": "cloud-service",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Azure Table Storage",
+      "configurationKeys": [
+        "ConnectionStrings:AzureStorage"
+      ],
+      "authentication": {
+        "type": "shared-key",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.PAS.Jobs/Extensions/AddApplicationRegistrationsExtension.cs",
+          "reason": "Dependency on Azure Table Storage using configuration and shared key."
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "cloud-service-azure-table-storage",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "provider-apprenticeships-service-web",
+      "name": "OpenTelemetry Application Insights",
+      "kind": "cloud-service",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Azure Application Insights",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ProviderApprenticeshipsService.Web/Startup.cs",
+          "reason": "OpenTelemetry Application Insights configured in logging setup."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cloud-service-opentelemetry-application-insights",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "provider-apprenticeships-service-web",
+      "name": "Azure SQL Database",
+      "kind": "database",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": "SqlConnection",
+      "technology": "Microsoft.Data.SqlClient",
+      "configurationKeys": [],
+      "authentication": {
+        "type": "managed-identity",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.ProviderApprenticeshipsService.Infrastructure/Data/SqlConnectionFactory.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ProviderApprenticeshipsService.Infrastructure/Data/SqlConnectionFactory.cs",
+          "reason": "Azure SQL Database configured and initialized through SqlConnectionFactory."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ProviderApprenticeshipsService.Infrastructure/Data/BaseRepository.cs",
+          "reason": "Database connection and query logic using SqlConnection found."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-azure-sql-database",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "provider-apprenticeships-service-api",
+      "name": "Azure SQL Database",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": null,
+      "technology": "SQL Server",
+      "configurationKeys": [
+        "DefaultConnection"
+      ],
+      "authentication": {
+        "type": "managed-identity",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "DefaultConnection",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.ProviderApprenticeshipsService.Application/Extensions/DatabaseExtensions.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ProviderApprenticeshipsService.Application/Extensions/DatabaseExtensions.cs",
+          "reason": "SQL connection creation using managed identity."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-azure-sql-database",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "provider-apprenticeships-service-jobs",
+      "name": "RoATP API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IRoatpApiClient",
+      "technology": "Refit",
+      "configurationKeys": [
+        "PasJobsConfiguration:RoatpApiClient:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "custom-header",
+        "configurationKeys": [
+          "PasJobsConfiguration:RoatpApiClient:ApiKey"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.PAS.Jobs/Extensions/AddApplicationRegistrationsExtension.cs",
+          "reason": "Refit client for RoATP API configured with base address and authorization handler."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-roatp-api",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "provider-apprenticeships-service-web",
+      "name": "NServiceBus",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "IClientOutboxStorageV2",
+      "technology": "NServiceBus",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ProviderApprenticeshipsService.Web/Startup.cs",
+          "reason": "Custom NServiceBus configuration for client outbox storage."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ProviderApprenticeshipsService.Web/Startup.cs",
+          "reason": "NServiceBus client setup detected in service configuration."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-nservicebus",
+      "description": "Publishes messages to and consumes messages from"
+    }
+  ],
+  "resolution": {
+    "overlay": "dfe-overlay/apim-routing.json",
+    "apimCommit": "ceec7d82806fda7806cdccc7275b03cd95725300",
+    "precision": "area"
+  }
+}

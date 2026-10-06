@@ -1,0 +1,819 @@
+{
+  "repository": "SkillsFundingAgency/das-findapprenticeship-web",
+  "ref": "main",
+  "path": "src",
+  "systemName": "Find An Apprenticeship",
+  "containers": [
+    {
+      "id": "find-an-apprenticeship",
+      "name": "Find An Apprenticeship",
+      "type": "other",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Infrastructure/SFA.DAS.FAA.Infrastructure.csproj",
+          "reason": "Primary logic is implemented in the Infrastructure project without an API or web entry point. Assumed to be a component without clear deployment context."
+        }
+      ]
+    },
+    {
+      "id": "findanapprenticeship-mockserver",
+      "name": "FindAnApprenticeship MockServer",
+      "type": "other",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.MockServer/Program.cs",
+          "reason": "Mock server entry point detected."
+        }
+      ]
+    },
+    {
+      "id": "findanapprenticeship-web",
+      "name": "FindAnApprenticeship",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/Program.cs",
+          "reason": "ASP.NET Core web application entry point found."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/SFA.DAS.FAA.Web.csproj",
+          "reason": "Project file indicates a Web SDK target framework."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "findanapprenticeship-web",
+      "name": "Redis",
+      "kind": "cache",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": null,
+      "technology": "StackExchange.Redis",
+      "configurationKeys": [
+        "FindAnApprenticeship:RedisConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/SFA.DAS.FAA.Web.csproj",
+          "reason": "Project file includes StackExchange.Redis package reference."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Redis cache service registration using AddStackExchangeRedisCache."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "find-an-apprenticeship",
+      "name": "Azure Key Vault",
+      "kind": "cloud-service",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "Azure.Security.KeyVault.Secrets.SecretClient",
+      "technology": "Azure SDK",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Infrastructure/SFA.DAS.FAA.Infrastructure.csproj",
+          "reason": "PackageReference for Azure.Security.KeyVault.Secrets indicating use of Azure Key Vault."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cloud-service-azure-key-vault",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "findanapprenticeship-web",
+      "name": "Azure Key Vault",
+      "kind": "cloud-service",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Azure SDK",
+      "configurationKeys": [
+        "FindAnApprenticeshipOuterApi:SecretClientUrl",
+        "FindAnApprenticeshipOuterApi:SecretName"
+      ],
+      "authentication": {
+        "type": "azure-active-directory",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Azure SecretClient constructed for accessing Key Vault secrets."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AzureKeyVaultSecretHealthCheck.cs",
+          "reason": "Health check configured for Azure Key Vault."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cloud-service-azure-key-vault",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "findanapprenticeship-web",
+      "name": "Candidate API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICandidateApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "FindAnApprenticeshipOuterApi:BaseUrl",
+        "FindAnApprenticeshipOuterApi:BaseUrlSecure",
+        "FindAnApprenticeshipOuterApi:SecretClientUrl",
+        "FindAnApprenticeshipOuterApi:SecretName",
+        "FindAnApprenticeshipOuterApi:UseSecureGateway"
+      ],
+      "authentication": {
+        "type": "certificate",
+        "configurationKeys": [
+          "FindAnApprenticeshipOuterApi:SecretClientUrl",
+          "FindAnApprenticeshipOuterApi:SecretName"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AzureKeyVaultSecretHealthCheck.cs",
+          "reason": "Health check for Azure Key Vault secret client using configurations."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Service registration for IApiClient using HttpClient with specific configuration and certificate-based authentication."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Apply/ApplyCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Candidate API through ICandidateApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Apply/CreateEqualityQuestionsCommand/UpsertAboutYouEqualityQuestionsCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Candidate API through ICandidateApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Apply/CreateInterviewAdjustments/UpsertInterviewAdjustmentsCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Candidate API through ICandidateApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-candidate-api",
+      "description": "Calls via APIM (FindAnApprenticeship)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "FindAnApprenticeship",
+        "dependencyName": "Find An Apprenticeship Outer",
+        "operations": [],
+        "areas": [
+          "FindAnApprenticeship"
+        ]
+      }
+    },
+    {
+      "sourceId": "findanapprenticeship-web",
+      "name": "Find Apprenticeship API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IFindApprenticeshipApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "FindAnApprenticeshipOuterApi:BaseUrl",
+        "FindAnApprenticeshipOuterApi:BaseUrlSecure",
+        "FindAnApprenticeshipOuterApi:SecretClientUrl",
+        "FindAnApprenticeshipOuterApi:SecretName",
+        "FindAnApprenticeshipOuterApi:UseSecureGateway"
+      ],
+      "authentication": {
+        "type": "certificate",
+        "configurationKeys": [
+          "FindAnApprenticeshipOuterApi:SecretClientUrl",
+          "FindAnApprenticeshipOuterApi:SecretName"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AzureKeyVaultSecretHealthCheck.cs",
+          "reason": "Health check for Azure Key Vault secret client using configurations."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Service registration for IApiClient using HttpClient with specific configuration and certificate-based authentication."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Apply/ApplyCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Find Apprenticeship API through IFindApprenticeshipApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/SaveSearch/CreateSaveSearch/SaveSearchCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Find Apprenticeship API through IFindApprenticeshipApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/SaveSearch/UnsubscribeSavedSearchCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Find Apprenticeship API through IFindApprenticeshipApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-find-apprenticeship-api",
+      "targetRepo": "das-findapprenticeship-api",
+      "description": "Calls via APIM (FindAnApprenticeship)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "FindAnApprenticeship",
+        "dependencyName": "Find An Apprenticeship Outer",
+        "operations": [],
+        "areas": [
+          "FindAnApprenticeship"
+        ]
+      }
+    },
+    {
+      "sourceId": "findanapprenticeship-web",
+      "name": "Location API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ILocationApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "FindAnApprenticeshipOuterApi:BaseUrl",
+        "FindAnApprenticeshipOuterApi:BaseUrlSecure",
+        "FindAnApprenticeshipOuterApi:SecretClientUrl",
+        "FindAnApprenticeshipOuterApi:SecretName",
+        "FindAnApprenticeshipOuterApi:UseSecureGateway"
+      ],
+      "authentication": {
+        "type": "certificate",
+        "configurationKeys": [
+          "FindAnApprenticeshipOuterApi:SecretClientUrl",
+          "FindAnApprenticeshipOuterApi:SecretName"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AzureKeyVaultSecretHealthCheck.cs",
+          "reason": "Health check for Azure Key Vault secret client using configurations."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Service registration for IApiClient using HttpClient with specific configuration and certificate-based authentication."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Queries/GetAddresses/GetAddressesQueryHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Location API through ILocationApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Queries/GetCandidateAddressesByPostcode/GetCandidateAddressesByPostcodeQueryHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Location API through ILocationApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Queries/GetLocationsBySearch/GetLocationsBySearchQueryHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Location API through ILocationApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-location-api",
+      "description": "Calls via APIM (FindAnApprenticeship)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "FindAnApprenticeship",
+        "dependencyName": "Find An Apprenticeship Outer",
+        "operations": [],
+        "areas": [
+          "FindAnApprenticeship"
+        ]
+      }
+    },
+    {
+      "sourceId": "findanapprenticeship-web",
+      "name": "Recruit Api V2 API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IRecruitApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "FindAnApprenticeshipOuterApi:BaseUrl",
+        "FindAnApprenticeshipOuterApi:BaseUrlSecure",
+        "FindAnApprenticeshipOuterApi:SecretClientUrl",
+        "FindAnApprenticeshipOuterApi:SecretName",
+        "FindAnApprenticeshipOuterApi:UseSecureGateway"
+      ],
+      "authentication": {
+        "type": "certificate",
+        "configurationKeys": [
+          "FindAnApprenticeshipOuterApi:SecretClientUrl",
+          "FindAnApprenticeshipOuterApi:SecretName"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AzureKeyVaultSecretHealthCheck.cs",
+          "reason": "Health check for Azure Key Vault secret client using configurations."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Service registration for IApiClient using HttpClient with specific configuration and certificate-based authentication."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Apply/SubmitApplication/SubmitApplicationCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Recruit Api V2 API through IRecruitApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Apply/WithdrawApplication/WithdrawApplicationCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Recruit Api V2 API through IRecruitApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Users/DeleteCandidate/DeleteCandidateCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Recruit Api V2 API through IRecruitApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-recruit-api-v2-api",
+      "description": "Calls via APIM (FindAnApprenticeship)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "FindAnApprenticeship",
+        "dependencyName": "Find An Apprenticeship Outer",
+        "operations": [],
+        "areas": [
+          "FindAnApprenticeship"
+        ]
+      }
+    },
+    {
+      "sourceId": "findanapprenticeship-web",
+      "name": "Courses API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICoursesApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "FindAnApprenticeshipOuterApi:BaseUrl",
+        "FindAnApprenticeshipOuterApi:BaseUrlSecure",
+        "FindAnApprenticeshipOuterApi:SecretClientUrl",
+        "FindAnApprenticeshipOuterApi:SecretName",
+        "FindAnApprenticeshipOuterApi:UseSecureGateway"
+      ],
+      "authentication": {
+        "type": "certificate",
+        "configurationKeys": [
+          "FindAnApprenticeshipOuterApi:SecretClientUrl",
+          "FindAnApprenticeshipOuterApi:SecretName"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AzureKeyVaultSecretHealthCheck.cs",
+          "reason": "Health check for Azure Key Vault secret client using configurations."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Service registration for IApiClient using HttpClient with specific configuration and certificate-based authentication."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Queries/Apply/GetAddQualification/GetAddQualificationQueryHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Courses API through ICoursesApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Queries/SearchByVacancyReference/GetApprenticeshipVacancyQueryHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Courses API through ICoursesApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "FindAnApprenticeship APIM area calls Courses API through ICoursesApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-courses-api",
+      "targetRepo": "das-courses-api",
+      "description": "Calls via APIM (FindAnApprenticeship)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "FindAnApprenticeship",
+        "dependencyName": "Find An Apprenticeship Outer",
+        "operations": [],
+        "areas": [
+          "FindAnApprenticeship"
+        ]
+      }
+    },
+    {
+      "sourceId": "find-an-apprenticeship",
+      "name": "Candidate API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICandidateApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "FindAnApprenticeshipOuterApi:BaseUrl",
+        "FindAnApprenticeshipOuterApi:Key"
+      ],
+      "authentication": {
+        "type": "api-key",
+        "configurationKeys": [
+          "FindAnApprenticeshipOuterApi:Key"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingGetOnTheApiClient.cs",
+          "reason": "HttpClient configured with base URL and API key for FindAnApprenticeshipOuterApi"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPostOnTheApiClient.cs",
+          "reason": "POST operation targeting FindAnApprenticeshipOuterApi"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Apply/ApplyCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Candidate API through ICandidateApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Apply/CreateEqualityQuestionsCommand/UpsertAboutYouEqualityQuestionsCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Candidate API through ICandidateApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Apply/CreateInterviewAdjustments/UpsertInterviewAdjustmentsCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Candidate API through ICandidateApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-candidate-api",
+      "description": "Calls via APIM (FindAnApprenticeship)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "FindAnApprenticeship",
+        "dependencyName": "Find An Apprenticeship Outer API",
+        "operations": [
+          {
+            "method": "GET",
+            "methodName": "Get",
+            "path": "/test-url/get",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingGetOnTheApiClient.cs"
+          },
+          {
+            "method": "POST",
+            "methodName": "Post",
+            "path": "/test-url/post",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPostOnTheApiClient.cs"
+          },
+          {
+            "method": "PUT",
+            "methodName": "Put",
+            "path": "/test-url/put",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPutOnTheApiClient.cs"
+          }
+        ],
+        "areas": [
+          "FindAnApprenticeship"
+        ]
+      }
+    },
+    {
+      "sourceId": "find-an-apprenticeship",
+      "name": "Find Apprenticeship API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IFindApprenticeshipApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "FindAnApprenticeshipOuterApi:BaseUrl",
+        "FindAnApprenticeshipOuterApi:Key"
+      ],
+      "authentication": {
+        "type": "api-key",
+        "configurationKeys": [
+          "FindAnApprenticeshipOuterApi:Key"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingGetOnTheApiClient.cs",
+          "reason": "HttpClient configured with base URL and API key for FindAnApprenticeshipOuterApi"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPostOnTheApiClient.cs",
+          "reason": "POST operation targeting FindAnApprenticeshipOuterApi"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Apply/ApplyCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Find Apprenticeship API through IFindApprenticeshipApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/SaveSearch/CreateSaveSearch/SaveSearchCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Find Apprenticeship API through IFindApprenticeshipApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/SaveSearch/UnsubscribeSavedSearchCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Find Apprenticeship API through IFindApprenticeshipApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-find-apprenticeship-api",
+      "targetRepo": "das-findapprenticeship-api",
+      "description": "Calls via APIM (FindAnApprenticeship)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "FindAnApprenticeship",
+        "dependencyName": "Find An Apprenticeship Outer API",
+        "operations": [
+          {
+            "method": "GET",
+            "methodName": "Get",
+            "path": "/test-url/get",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingGetOnTheApiClient.cs"
+          },
+          {
+            "method": "POST",
+            "methodName": "Post",
+            "path": "/test-url/post",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPostOnTheApiClient.cs"
+          },
+          {
+            "method": "PUT",
+            "methodName": "Put",
+            "path": "/test-url/put",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPutOnTheApiClient.cs"
+          }
+        ],
+        "areas": [
+          "FindAnApprenticeship"
+        ]
+      }
+    },
+    {
+      "sourceId": "find-an-apprenticeship",
+      "name": "Location API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ILocationApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "FindAnApprenticeshipOuterApi:BaseUrl",
+        "FindAnApprenticeshipOuterApi:Key"
+      ],
+      "authentication": {
+        "type": "api-key",
+        "configurationKeys": [
+          "FindAnApprenticeshipOuterApi:Key"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingGetOnTheApiClient.cs",
+          "reason": "HttpClient configured with base URL and API key for FindAnApprenticeshipOuterApi"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPostOnTheApiClient.cs",
+          "reason": "POST operation targeting FindAnApprenticeshipOuterApi"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Queries/GetAddresses/GetAddressesQueryHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Location API through ILocationApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Queries/GetCandidateAddressesByPostcode/GetCandidateAddressesByPostcodeQueryHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Location API through ILocationApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Queries/GetLocationsBySearch/GetLocationsBySearchQueryHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Location API through ILocationApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-location-api",
+      "description": "Calls via APIM (FindAnApprenticeship)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "FindAnApprenticeship",
+        "dependencyName": "Find An Apprenticeship Outer API",
+        "operations": [
+          {
+            "method": "GET",
+            "methodName": "Get",
+            "path": "/test-url/get",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingGetOnTheApiClient.cs"
+          },
+          {
+            "method": "POST",
+            "methodName": "Post",
+            "path": "/test-url/post",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPostOnTheApiClient.cs"
+          },
+          {
+            "method": "PUT",
+            "methodName": "Put",
+            "path": "/test-url/put",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPutOnTheApiClient.cs"
+          }
+        ],
+        "areas": [
+          "FindAnApprenticeship"
+        ]
+      }
+    },
+    {
+      "sourceId": "find-an-apprenticeship",
+      "name": "Recruit Api V2 API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IRecruitApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "FindAnApprenticeshipOuterApi:BaseUrl",
+        "FindAnApprenticeshipOuterApi:Key"
+      ],
+      "authentication": {
+        "type": "api-key",
+        "configurationKeys": [
+          "FindAnApprenticeshipOuterApi:Key"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingGetOnTheApiClient.cs",
+          "reason": "HttpClient configured with base URL and API key for FindAnApprenticeshipOuterApi"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPostOnTheApiClient.cs",
+          "reason": "POST operation targeting FindAnApprenticeshipOuterApi"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Apply/SubmitApplication/SubmitApplicationCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Recruit Api V2 API through IRecruitApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Apply/WithdrawApplication/WithdrawApplicationCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Recruit Api V2 API through IRecruitApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Commands/Users/DeleteCandidate/DeleteCandidateCommandHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Recruit Api V2 API through IRecruitApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-recruit-api-v2-api",
+      "description": "Calls via APIM (FindAnApprenticeship)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "FindAnApprenticeship",
+        "dependencyName": "Find An Apprenticeship Outer API",
+        "operations": [
+          {
+            "method": "GET",
+            "methodName": "Get",
+            "path": "/test-url/get",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingGetOnTheApiClient.cs"
+          },
+          {
+            "method": "POST",
+            "methodName": "Post",
+            "path": "/test-url/post",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPostOnTheApiClient.cs"
+          },
+          {
+            "method": "PUT",
+            "methodName": "Put",
+            "path": "/test-url/put",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPutOnTheApiClient.cs"
+          }
+        ],
+        "areas": [
+          "FindAnApprenticeship"
+        ]
+      }
+    },
+    {
+      "sourceId": "find-an-apprenticeship",
+      "name": "Courses API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICoursesApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "FindAnApprenticeshipOuterApi:BaseUrl",
+        "FindAnApprenticeshipOuterApi:Key"
+      ],
+      "authentication": {
+        "type": "api-key",
+        "configurationKeys": [
+          "FindAnApprenticeshipOuterApi:Key"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingGetOnTheApiClient.cs",
+          "reason": "HttpClient configured with base URL and API key for FindAnApprenticeshipOuterApi"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPostOnTheApiClient.cs",
+          "reason": "POST operation targeting FindAnApprenticeshipOuterApi"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Queries/Apply/GetAddQualification/GetAddQualificationQueryHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Courses API through ICoursesApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship/Application/Queries/SearchByVacancyReference/GetApprenticeshipVacancyQueryHandler.cs",
+          "reason": "FindAnApprenticeship APIM area calls Courses API through ICoursesApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/FindAnApprenticeship/SFA.DAS.FindAnApprenticeship.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "FindAnApprenticeship APIM area calls Courses API through ICoursesApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-courses-api",
+      "targetRepo": "das-courses-api",
+      "description": "Calls via APIM (FindAnApprenticeship)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "FindAnApprenticeship",
+        "dependencyName": "Find An Apprenticeship Outer API",
+        "operations": [
+          {
+            "method": "GET",
+            "methodName": "Get",
+            "path": "/test-url/get",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingGetOnTheApiClient.cs"
+          },
+          {
+            "method": "POST",
+            "methodName": "Post",
+            "path": "/test-url/post",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPostOnTheApiClient.cs"
+          },
+          {
+            "method": "PUT",
+            "methodName": "Put",
+            "path": "/test-url/put",
+            "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPutOnTheApiClient.cs"
+          }
+        ],
+        "areas": [
+          "FindAnApprenticeship"
+        ]
+      }
+    }
+  ],
+  "resolution": {
+    "overlay": "dfe-overlay/apim-routing.json",
+    "apimCommit": "ceec7d82806fda7806cdccc7275b03cd95725300",
+    "precision": "area"
+  }
+}

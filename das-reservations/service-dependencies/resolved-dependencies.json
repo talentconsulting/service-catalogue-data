@@ -1,0 +1,631 @@
+{
+  "repository": "SkillsFundingAgency/das-reservations",
+  "ref": "master",
+  "path": "src",
+  "systemName": "Reservations",
+  "containers": [
+    {
+      "id": "reservations-web",
+      "name": "Reservations",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/Program.cs",
+          "reason": "ASP.NET web application entry point"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/SFA.DAS.Reservations.Web.csproj",
+          "reason": "Project uses Microsoft.NET.Sdk.Web SDK"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "reservations-web",
+      "name": "Redis Cache",
+      "kind": "cache",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "StackExchangeRedisCache",
+      "technology": "Redis",
+      "configurationKeys": [
+        "ReservationsWeb:RedisCacheConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/Startup.cs",
+          "reason": "AddStackExchangeRedisCache registration"
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis-cache",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "reservations-web",
+      "name": "Commitments API",
+      "kind": "http-api",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": null,
+      "configurationKeys": [
+        "CommitmentsApi"
+      ],
+      "authentication": {
+        "type": "unknown",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/Startup.cs",
+          "reason": "AddCommitmentsApi registration"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Domain/SFA.DAS.Reservations.Domain.csproj",
+          "reason": "Uses SFA.DAS.CommitmentsV2.Types package"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/SFA.DAS.Reservations.Infrastructure.csproj",
+          "reason": "Uses SFA.DAS.CommitmentsV2.Types package"
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-commitments-api",
+      "description": "Calls the API of",
+      "targetRepo": "das-commitments"
+    },
+    {
+      "sourceId": "reservations-web",
+      "name": "Reservations API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ReservationsApiConfiguration"
+      ],
+      "authentication": {
+        "type": "client credentials",
+        "configurationKeys": [
+          "ReservationsApiConfiguration.Id",
+          "ReservationsApiConfiguration.Secret",
+          "ReservationsApiConfiguration.Tenant"
+        ]
+      },
+      "operations": [
+        {
+          "method": "GET",
+          "methodName": "Ping",
+          "path": "/ping",
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs"
+        }
+      ],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/Startup.cs",
+          "reason": "Configured health check for Reservations API"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ApiClient.cs",
+          "reason": "HttpClient instance for Reservations API calls"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
+          "reason": "Registered IApiClient with dependency injection"
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-reservations-api",
+      "description": "Calls the API of",
+      "targetRepo": "das-reservations-api"
+    },
+    {
+      "sourceId": "reservations-web",
+      "name": "Commitments API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICommitmentsV2ApiClient",
+      "technology": null,
+      "configurationKeys": [
+        "ReservationsOuterApiConfiguration"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ReservationsOuterApiClient.cs",
+          "reason": "Reservations outer API client (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
+          "reason": "Registers IReservationsOuterApiClient (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations/Application/Cohorts/Queries/GetCohort/GetCohortQueryHandler.cs",
+          "reason": "Reservations APIM area calls Commitments API through ICommitmentsV2ApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations/Application/Cohorts/Queries/GetCohortAccess/GetCohortAccessQueryHandler.cs",
+          "reason": "Reservations APIM area calls Commitments API through ICommitmentsV2ApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "Reservations APIM area calls Commitments API through ICommitmentsV2ApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-commitments-api",
+      "targetRepo": "das-commitments",
+      "description": "Calls via APIM (Reservations)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Reservations",
+        "dependencyName": "Reservations Outer API",
+        "operations": [],
+        "areas": [
+          "Reservations"
+        ]
+      }
+    },
+    {
+      "sourceId": "reservations-web",
+      "name": "Provider Relationships API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IProviderRelationshipsApiClient",
+      "technology": null,
+      "configurationKeys": [
+        "ReservationsOuterApiConfiguration"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ReservationsOuterApiClient.cs",
+          "reason": "Reservations outer API client (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
+          "reason": "Registers IReservationsOuterApiClient (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations/Application/AccountProviderLegalEntities/Queries/GetAccountProviderLegalEntitiesQueryHandler.cs",
+          "reason": "Reservations APIM area calls Provider Relationships API through IProviderRelationshipsApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations/Application/ProviderAccounts/Queries/GetProviderAccountLegalEntitiesWithCreatCohortQueryHandler.cs",
+          "reason": "Reservations APIM area calls Provider Relationships API through IProviderRelationshipsApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "Reservations APIM area calls Provider Relationships API through IProviderRelationshipsApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-provider-relationships-api",
+      "description": "Calls via APIM (Reservations)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Reservations",
+        "dependencyName": "Reservations Outer API",
+        "operations": [],
+        "areas": [
+          "Reservations"
+        ]
+      }
+    },
+    {
+      "sourceId": "reservations-web",
+      "name": "Courses API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICoursesApiClient",
+      "technology": null,
+      "configurationKeys": [
+        "ReservationsOuterApiConfiguration"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ReservationsOuterApiClient.cs",
+          "reason": "Reservations outer API client (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
+          "reason": "Registers IReservationsOuterApiClient (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations/Application/TrainingCourses/Queries/GetTrainingCourseList/GetTrainingCoursesQueryHandler.cs",
+          "reason": "Reservations APIM area calls Courses API through ICoursesApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "Reservations APIM area calls Courses API through ICoursesApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-courses-api",
+      "targetRepo": "das-courses-api",
+      "description": "Calls via APIM (Reservations)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Reservations",
+        "dependencyName": "Reservations Outer API",
+        "operations": [],
+        "areas": [
+          "Reservations"
+        ]
+      }
+    },
+    {
+      "sourceId": "reservations-web",
+      "name": "Employer Finance API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IFinanceApiClient",
+      "technology": null,
+      "configurationKeys": [
+        "ReservationsOuterApiConfiguration"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ReservationsOuterApiClient.cs",
+          "reason": "Reservations outer API client (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
+          "reason": "Registers IReservationsOuterApiClient (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations/Application/Transfers/Queries/GetTransferValidity/GetTransferValidityQueryHandler.cs",
+          "reason": "Reservations APIM area calls Employer Finance API through IFinanceApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "Reservations APIM area calls Employer Finance API through IFinanceApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-employer-finance-api",
+      "targetRepo": "das-employer-finance",
+      "description": "Calls via APIM (Reservations)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Reservations",
+        "dependencyName": "Reservations Outer API",
+        "operations": [],
+        "areas": [
+          "Reservations"
+        ]
+      }
+    },
+    {
+      "sourceId": "reservations-web",
+      "name": "Levy Transfer Matching API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ILevyTransferMatchingApiClient",
+      "technology": null,
+      "configurationKeys": [
+        "ReservationsOuterApiConfiguration"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ReservationsOuterApiClient.cs",
+          "reason": "Reservations outer API client (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
+          "reason": "Registers IReservationsOuterApiClient (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations/Application/Transfers/Queries/GetTransferValidity/GetTransferValidityQueryHandler.cs",
+          "reason": "Reservations APIM area calls Levy Transfer Matching API through ILevyTransferMatchingApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "Reservations APIM area calls Levy Transfer Matching API through ILevyTransferMatchingApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-levy-transfer-matching-api",
+      "description": "Calls via APIM (Reservations)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Reservations",
+        "dependencyName": "Reservations Outer API",
+        "operations": [],
+        "areas": [
+          "Reservations"
+        ]
+      }
+    },
+    {
+      "sourceId": "reservations-web",
+      "name": "Reservations API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IReservationApiClient",
+      "technology": null,
+      "configurationKeys": [
+        "ReservationsOuterApiConfiguration"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ReservationsOuterApiClient.cs",
+          "reason": "Reservations outer API client (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
+          "reason": "Registers IReservationsOuterApiClient (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations/Application/Rules/Queries/GetAvailableDates/GetAvailableDatesQueryHandler.cs",
+          "reason": "Reservations APIM area calls Reservations API through IReservationApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "Reservations APIM area calls Reservations API through IReservationApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-reservations-api",
+      "targetRepo": "das-reservations-api",
+      "description": "Calls via APIM (Reservations)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Reservations",
+        "dependencyName": "Reservations Outer API",
+        "operations": [],
+        "areas": [
+          "Reservations"
+        ]
+      }
+    },
+    {
+      "sourceId": "reservations-web",
+      "name": "Roatp API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IRoatpServiceApiClient",
+      "technology": null,
+      "configurationKeys": [
+        "ReservationsOuterApiConfiguration"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ReservationsOuterApiClient.cs",
+          "reason": "Reservations outer API client (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
+          "reason": "Registers IReservationsOuterApiClient (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations/Application/Providers/Queries/GetProvider/GetProviderQueryHandler.cs",
+          "reason": "Reservations APIM area calls Roatp API through IRoatpServiceApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "Reservations APIM area calls Roatp API through IRoatpServiceApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-roatp-api",
+      "description": "Calls via APIM (Reservations)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Reservations",
+        "dependencyName": "Reservations Outer API",
+        "operations": [],
+        "areas": [
+          "Reservations"
+        ]
+      }
+    },
+    {
+      "sourceId": "reservations-web",
+      "name": "Employer Accounts API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IAccountsApiClient",
+      "technology": null,
+      "configurationKeys": [
+        "ReservationsOuterApiConfiguration"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ReservationsOuterApiClient.cs",
+          "reason": "Reservations outer API client (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
+          "reason": "Registers IReservationsOuterApiClient (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "Reservations APIM area calls Employer Accounts API through IAccountsApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-employer-accounts-api",
+      "targetRepo": "das-employer-accounts",
+      "description": "Calls via APIM (Reservations)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Reservations",
+        "dependencyName": "Reservations Outer API",
+        "operations": [],
+        "areas": [
+          "Reservations"
+        ]
+      }
+    },
+    {
+      "sourceId": "reservations-web",
+      "name": "Employer Profiles API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IEmployerProfilesApiClient",
+      "technology": null,
+      "configurationKeys": [
+        "ReservationsOuterApiConfiguration"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ReservationsOuterApiClient.cs",
+          "reason": "Reservations outer API client (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
+          "reason": "Registers IReservationsOuterApiClient (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "Reservations APIM area calls Employer Profiles API through IEmployerProfilesApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-employer-profiles-api",
+      "description": "Calls via APIM (Reservations)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Reservations",
+        "dependencyName": "Reservations Outer API",
+        "operations": [],
+        "areas": [
+          "Reservations"
+        ]
+      }
+    },
+    {
+      "sourceId": "reservations-web",
+      "name": "Roatp V2 API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IRoatpCourseManagementApiClient",
+      "technology": null,
+      "configurationKeys": [
+        "ReservationsOuterApiConfiguration"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ReservationsOuterApiClient.cs",
+          "reason": "Reservations outer API client (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs",
+          "reason": "Registers IReservationsOuterApiClient (added by the DfE overlay)"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Reservations/SFA.DAS.Reservations.Api/AppStart/AddServiceRegistrationExtension.cs",
+          "reason": "Reservations APIM area calls Roatp V2 API through IRoatpCourseManagementApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-roatp-v2-api",
+      "description": "Calls via APIM (Reservations)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Reservations",
+        "dependencyName": "Reservations Outer API",
+        "operations": [],
+        "areas": [
+          "Reservations"
+        ]
+      }
+    }
+  ],
+  "resolution": {
+    "overlay": "dfe-overlay/apim-routing.json",
+    "apimCommit": "ceec7d82806fda7806cdccc7275b03cd95725300",
+    "precision": "area"
+  }
+}

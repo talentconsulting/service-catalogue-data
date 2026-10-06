@@ -1,0 +1,70 @@
+{
+  "_about": "DfE-only mapping layer. das-apim-endpoints is a route to other APIs, not a dependency: a call into an APIM area is rewritten as calls to the inner APIs that area uses. See dfe-overlay/README.md.",
+  "gateway": {
+    "repo": "das-apim-endpoints",
+    "label": "APIM",
+    "hideInLandscape": true,
+    "areas": {
+      "AdminRoatp": { "match": [{ "configurationKey": "AdminRoatpOuterApiConfiguration" }] },
+      "Approvals": {
+        "match": [
+          { "configurationKey": "ApprovalsOuterApiConfiguration" },
+          { "configurationKey": "ApprovalsApiClientConfiguration" },
+          { "name": "Approvals Outer" }
+        ]
+      },
+      "Campaign": { "match": [{ "repo": "das-campaign", "configurationKey": "OuterApi" }] },
+      "DigitalCertificates": { "match": [{ "configurationKey": "DigitalCertificatesOuterApiConfiguration" }] },
+      "Earnings": { "match": [{ "configurationKey": "EarningOuterApiConfiguration" }, { "name": "Earnings Outer" }] },
+      "EmployerAccounts": { "match": [{ "repo": "das-employer-accounts", "configurationKey": "OuterApiConfiguration" }] },
+      "EmployerFinance": { "match": [{ "configurationKey": "EmployerFinanceOuterApiConfiguration" }] },
+      "FindAnApprenticeship": { "match": [{ "configurationKey": "FindAnApprenticeshipOuterApi" }] },
+      "Learning": { "match": [{ "name": "Learning Outer" }] },
+      "Reservations": { "match": [{ "configurationKey": "ReservationsOuterApiConfiguration" }, { "name": "Reservations Outer" }] }
+    }
+  },
+  "additionalCalls": [
+    {
+      "_why": "The service-dependency scan misses this; das-reservations calls APIM through IReservationsOuterApiClient.",
+      "repo": "das-reservations",
+      "sourceId": "reservations-web",
+      "name": "Reservations Outer API",
+      "configurationKeys": ["ReservationsOuterApiConfiguration"],
+      "evidence": [
+        { "sourceFile": "src/SFA.DAS.Reservations.Infrastructure/Api/ReservationsOuterApiClient.cs", "reason": "Reservations outer API client (added by the DfE overlay)" },
+        { "sourceFile": "src/SFA.DAS.Reservations.Web/AppStart/ServiceRegistrationExtension.cs", "reason": "Registers IReservationsOuterApiClient (added by the DfE overlay)" }
+      ]
+    }
+  ],
+  "innerApis": {
+    "AccountsConfiguration": { "name": "Employer Accounts API", "repo": "das-employer-accounts", "names": ["Account", "Accounts", "Employer Accounts"] },
+    "EmployerAccountsConfiguration": { "name": "Employer Accounts API", "repo": "das-employer-accounts" },
+    "ApprenticeCommitmentsApiConfiguration": { "name": "Apprentice Commitments API", "repo": "das-apprentice-commitments-api" },
+    "ApprenticeCommitmentsConfiguration": { "name": "Apprentice Commitments API", "repo": "das-apprentice-commitments-api" },
+    "ApprenticeProgressApiConfiguration": { "name": "Apprentice Progress API", "repo": "das-apprentice-progress-api" },
+    "CampaignApiConfiguration": { "name": "Campaign API", "repo": "das-campaign-api" },
+    "CommitmentsConfiguration": { "name": "Commitments API", "repo": "das-commitments" },
+    "CommitmentsV2ApiConfiguration": {
+      "name": "Commitments API",
+      "repo": "das-commitments",
+      "names": ["Commitments", "Commitments API", "Commitments V2"],
+      "configurationKeys": ["CommitmentsClientApiConfiguration", "CommitmentsV2ApiClient", "CommitmentsApi"]
+    },
+    "CoursesApiConfiguration": { "name": "Courses API", "repo": "das-courses-api", "names": ["Courses", "Courses API"] },
+    "DigitalCertificatesApiConfiguration": { "name": "Digital Certificates API", "repo": "das-digital-certification-api" },
+    "EarningsApiConfiguration": { "name": "Earnings API", "repo": "das-funding-apprenticeship-earnings" },
+    "FinanceApiConfiguration": { "name": "Employer Finance API", "repo": "das-employer-finance" },
+    "FindApprenticeshipApiConfiguration": { "name": "Find Apprenticeship API", "repo": "das-findapprenticeship-api" },
+    "LearnerDataInnerApiConfiguration": { "name": "Learner Data API", "repo": "das-learner-data-api" },
+    "LearnerDataApiConfiguration": { "name": "Learner Data API", "repo": "das-learner-data-api" },
+    "LearningApiConfiguration": { "name": "Learning API", "repo": "das-learning" },
+    "LevyTransferMatchingApiConfiguration": { "name": "Levy Transfer Matching API", "repo": "das-levy-transfer-matching-api", "names": ["Levy Transfer Matching"] },
+    "ProviderRelationshipsApiConfiguration": { "name": "Provider Relationships API", "repo": "das-provider-relationships", "names": ["Provider Relationships"] },
+    "ReservationApiConfiguration": {
+      "name": "Reservations API",
+      "repo": "das-reservations-api",
+      "names": ["Reservations", "Reservations API"],
+      "configurationKeys": ["ReservationsApiConfiguration"]
+    }
+  }
+}

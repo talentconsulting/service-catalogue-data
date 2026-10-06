@@ -1,0 +1,1247 @@
+{
+  "repository": "SkillsFundingAgency/das-employercommitments-v2",
+  "ref": "master",
+  "path": "src",
+  "systemName": "Employer Commitments",
+  "containers": [
+    {
+      "id": "employer-commitments",
+      "name": "Employer Commitments",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Program.cs",
+          "reason": "Entry point for web application detected via WebHost creation."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/SFA.DAS.EmployerCommitmentsV2.Web.csproj",
+          "reason": "Project file indicating an ASP.NET Core web application."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "employer-commitments",
+      "name": "Redis Cache",
+      "kind": "cache",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "StackExchangeRedis",
+      "technology": "Redis",
+      "configurationKeys": [
+        "ConnectionStrings:RedisConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "Cache setup included in Startup class."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Extensions/CacheStartupExtensions.cs",
+          "reason": "Redis cache configured with an AddStackExchangeRedisCache call using ConnectionStrings:RedisConnectionString."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis-cache",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Commitments API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICommitmentsV2ApiClient, IInternalApiClient, InternalApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/AccountLegalEntity/Queries/GetAccountLegalEntityQueryHandler.cs",
+          "reason": "Approvals APIM area calls Commitments API through ICommitmentsV2ApiClient, IInternalApiClient, InternalApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/Apprentices/Commands/ChangeEmployer/Confirm/CreateChangeOfEmployerCommandHandler.cs",
+          "reason": "Approvals APIM area calls Commitments API through ICommitmentsV2ApiClient, IInternalApiClient, InternalApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/Apprentices/Commands/ChangePayments/ChangePaymentsCommandHandler.cs",
+          "reason": "Approvals APIM area calls Commitments API through ICommitmentsV2ApiClient, IInternalApiClient, InternalApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-commitments-api",
+      "targetRepo": "das-commitments",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Employer Accounts API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IAccountsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/Accounts/Queries/GetAccountQuery/GetAccountQueryHandler.cs",
+          "reason": "Approvals APIM area calls Employer Accounts API through IAccountsApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/Accounts/Queries/GetAccountUsersQuery/GetAccountUsersQueryHandler.cs",
+          "reason": "Approvals APIM area calls Employer Accounts API through IAccountsApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/AgreementNotSigned/Queries/GetAgreementNotSignedQueryHandler.cs",
+          "reason": "Approvals APIM area calls Employer Accounts API through IAccountsApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-employer-accounts-api",
+      "targetRepo": "das-employer-accounts",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Courses API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICoursesApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/Cohorts/Queries/GetCohortDetails/GetCohortDetailsQuery.cs",
+          "reason": "Approvals APIM area calls Courses API through ICoursesApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/TrainingCourses/Queries/GetCoursesQueryHandler.cs",
+          "reason": "Approvals APIM area calls Courses API through ICoursesApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/TrainingCourses/Queries/GetFrameworksQueryHandler.cs",
+          "reason": "Approvals APIM area calls Courses API through ICoursesApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-courses-api",
+      "targetRepo": "das-courses-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Reservations API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IReservationApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/BulkUpload/Commands/BulkUploadAddAndApproveDraftApprenticeshipsCommandHandler.cs",
+          "reason": "Approvals APIM area calls Reservations API through IReservationApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/BulkUpload/Commands/BulkUploadAddDraftApprenticeshipsCommandHandler.cs",
+          "reason": "Approvals APIM area calls Reservations API through IReservationApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/BulkUpload/Commands/ValidateBulkUploadRecordsCommandHandler.cs",
+          "reason": "Approvals APIM area calls Reservations API through IReservationApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-reservations-api",
+      "targetRepo": "das-reservations-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Levy Transfer Matching API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ILevyTransferMatchingApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/LevyTransferMatching/Queries/GetApprovedAccountApplication/GetAcceptedEmployerAccountApplicationsQueryHandler.cs",
+          "reason": "Approvals APIM area calls Levy Transfer Matching API through ILevyTransferMatchingApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/LevyTransferMatching/Queries/GetPledgeApplicationQueryHandler.cs",
+          "reason": "Approvals APIM area calls Levy Transfer Matching API through ILevyTransferMatchingApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/SelectFunding/Queries/GetSelectFundingOptionsQueryHandler.cs",
+          "reason": "Approvals APIM area calls Levy Transfer Matching API through ILevyTransferMatchingApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-levy-transfer-matching-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Provider Courses API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IProviderCoursesApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/Providers/Queries/GetProvidersQueryHandler.cs",
+          "reason": "Approvals APIM area calls Provider Courses API through IProviderCoursesApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Services/DeliveryModelService.cs",
+          "reason": "Approvals APIM area calls Provider Courses API through IProviderCoursesApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Services/ProviderCoursesOrStandardsService.cs",
+          "reason": "Approvals APIM area calls Provider Courses API through IProviderCoursesApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-provider-courses-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Provider Relationships API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IProviderRelationshipsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/Apprentices/Queries/Apprenticeship/GetSelectNewEmployer/GetSelectNewEmployerQueryHandler.cs",
+          "reason": "Approvals APIM area calls Provider Relationships API through IProviderRelationshipsApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/Cohorts/Queries/GetSelectEmployer/GetSelectEmployerQueryHandler.cs",
+          "reason": "Approvals APIM area calls Provider Relationships API through IProviderRelationshipsApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/ProviderPermissions/Queries/GetAccountProviderLegalEntitiesQueryHandler.cs",
+          "reason": "Approvals APIM area calls Provider Relationships API through IProviderRelationshipsApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-provider-relationships-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Provider Account API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IProviderAccountApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/ProviderUsers/Commands/ProviderEmailCommandHandler.cs",
+          "reason": "Approvals APIM area calls Provider Account API through IProviderAccountApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/ProviderUsers/Queries/GetProviderUsersQueryHandler.cs",
+          "reason": "Approvals APIM area calls Provider Account API through IProviderAccountApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Approvals APIM area calls Provider Account API through IProviderAccountApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-provider-account-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Provider Events API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IProviderPaymentEventsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/CommitmentPayment/Queries/GetDataLockEvents/GetDataLockStatusesQueryHandler.cs",
+          "reason": "Approvals APIM area calls Provider Events API through IProviderPaymentEventsApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/PaymentEvents/Queries/GetPaymentSubmissionEventsQueryHandler.cs",
+          "reason": "Approvals APIM area calls Provider Events API through IProviderPaymentEventsApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Approvals APIM area calls Provider Events API through IProviderPaymentEventsApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-provider-events-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Employer Finance API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IFinanceApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/SelectDirectTransferConnection/Queries/GetSelectDirectTransferConnectionQueryHandler.cs",
+          "reason": "Approvals APIM area calls Employer Finance API through IFinanceApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/SelectFunding/Queries/GetSelectFundingOptionsQueryHandler.cs",
+          "reason": "Approvals APIM area calls Employer Finance API through IFinanceApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Approvals APIM area calls Employer Finance API through IFinanceApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-employer-finance-api",
+      "targetRepo": "das-employer-finance",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Apprentice Accounts API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IApprenticeAccountsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/Apprentices/Queries/GetApprenticeQueryHandler.cs",
+          "reason": "Approvals APIM area calls Apprentice Accounts API through IApprenticeAccountsApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Approvals APIM area calls Apprentice Accounts API through IApprenticeAccountsApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-apprentice-accounts-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Assessors API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IAssessorsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/Epaos/Queries/GetEpaosQueryHandler.cs",
+          "reason": "Approvals APIM area calls Assessors API through IAssessorsApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Approvals APIM area calls Assessors API through IAssessorsApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-assessors-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Fjaa API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IFjaaApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Services/FjaaService.cs",
+          "reason": "Approvals APIM area calls Fjaa API through IFjaaApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Approvals APIM area calls Fjaa API through IFjaaApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-fjaa-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Learner Data API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IInternalApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/DraftApprenticeships/Commands/SyncLearnerData/SyncLearnerDataCommandHandler.cs",
+          "reason": "Approvals APIM area calls Learner Data API through IInternalApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/Learners/Queries/GetLearnerForProviderQueryHandler.cs",
+          "reason": "Approvals APIM area calls Learner Data API through IInternalApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/Learners/Queries/GetLearnersForProviderQueryHandler.cs",
+          "reason": "Approvals APIM area calls Learner Data API through IInternalApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-learner-data-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Collection Calendar API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ICollectionCalendarApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/Apprentices/Queries/Apprenticeship/GetManageApprenticeshipDetails/GetManageApprenticeshipDetailsQueryHandler.cs",
+          "reason": "Approvals APIM area calls Collection Calendar API through ICollectionCalendarApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Approvals APIM area calls Collection Calendar API through ICollectionCalendarApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-collection-calendar-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Course Types API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IInternalApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Services/ICourseTypesApiClient.cs",
+          "reason": "Approvals APIM area calls Course Types API through IInternalApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/Clients/CourseTypesApiClient.cs",
+          "reason": "Approvals APIM area calls Course Types API through IInternalApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-course-types-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Employment Check API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IEmploymentCheckApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals/Application/EmploymentChecks/Queries/GetEmploymentChecksQuery/GetEmploymentChecksQueryHandler.cs",
+          "reason": "Approvals APIM area calls Employment Check API through IEmploymentCheckApiClient"
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Approvals APIM area calls Employment Check API through IEmploymentCheckApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-employment-check-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Apprentice Commitments API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IApprenticeCommitmentsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Approvals APIM area calls Apprentice Commitments API through IApprenticeCommitmentsApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-apprentice-commitments-api",
+      "targetRepo": "das-apprentice-commitments-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Employer Profiles API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IEmployerProfilesApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Approvals APIM area calls Employer Profiles API through IEmployerProfilesApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-employer-profiles-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Learning API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ILearningApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Approvals APIM area calls Learning API through ILearningApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-learning-api",
+      "targetRepo": "das-learning",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Roatp API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IRoatpServiceApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Approvals APIM area calls Roatp API through IRoatpServiceApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-roatp-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Roatp V2 API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IRoatpCourseManagementApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ApprovalsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "ApimAuthorisationHeader",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "ApprovalsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/ApprovalsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from ApprovalsApiClientConfiguration:ApiBaseUrl."
+        },
+        {
+          "sourceFile": "das-apim-endpoints/src/Approvals/SFA.DAS.Approvals.Api/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Approvals APIM area calls Roatp V2 API through IRoatpCourseManagementApiClient"
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "http-api-roatp-v2-api",
+      "description": "Calls via APIM (Approvals)",
+      "via": {
+        "repo": "das-apim-endpoints",
+        "label": "APIM",
+        "area": "Approvals",
+        "dependencyName": "Approvals API",
+        "operations": [],
+        "areas": [
+          "Approvals"
+        ]
+      }
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Commitment Permissions API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "CommitmentPermissionsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "CommitmentPermissionsApiClientConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "unknown",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "endpoint",
+          "name": "CommitmentPermissionsApiClientConfiguration:ApiBaseUrl",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/CommitmentPermissionsApiClientFactory.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "CommitmentPermissionsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/CommitmentPermissionsApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from CommitmentPermissionsApiClientConfiguration:ApiBaseUrl."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-commitment-permissions-api",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "employer-commitments",
+      "name": "Commitments API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "CommitmentsApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "CommitmentsClientApiConfiguration:ApiBaseUrl"
+      ],
+      "authentication": {
+        "type": "Basic",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "endpoint",
+          "name": "CommitmentsClientApiConfiguration:ApiBaseUrl",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/CommitmentApiClientFactory.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2.Web/Startup.cs",
+          "reason": "CommitmentsApiClient registered in ConfigureServices."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerCommitmentsV2/Client/CommitmentApiClientFactory.cs",
+          "reason": "HttpClient configured with a base address from CommitmentsClientApiConfiguration:ApiBaseUrl and Basic Authentication."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-commitments-api",
+      "description": "Calls the API of",
+      "targetRepo": "das-commitments"
+    }
+  ],
+  "resolution": {
+    "overlay": "dfe-overlay/apim-routing.json",
+    "apimCommit": "ceec7d82806fda7806cdccc7275b03cd95725300",
+    "precision": "area"
+  }
+}
