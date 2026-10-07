@@ -1,0 +1,110 @@
+{
+  "repository": "SkillsFundingAgency/das-payments-v2-providerpayments",
+  "ref": "main",
+  "path": "src",
+  "localServices": [
+    {
+      "name": "SQL Server",
+      "kind": "database",
+      "technology": "sqlserver",
+      "configurationKeys": [
+        "ConnectionStrings:PaymentsConnectionString",
+        "DasPeriodEndConnectionString",
+        "PaymentsConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Specs/appSettings.json",
+          "reason": "Connection string key suggests a database dependency for Payments."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Application/Data/ProviderPaymentsDataContext.cs",
+          "reason": "ConnectionString property and UseSqlServer method configure SQL Server usage."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Specs/Data/TestSessionDataContext.cs",
+          "reason": "ConnectionString property and UseSqlServer method configure SQL Server usage."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Application/Repositories/LegacyPaymentsRepository.cs",
+          "reason": "IConfigurationHelper retrieves the DasPeriodEndConnectionString for SQL Server."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Application/Infrastructure/ioc/ProviderPaymentsModule.cs",
+          "reason": "IConfigurationHelper retrieves the PaymentsConnectionString for SQL Server."
+        }
+      ]
+    },
+    {
+      "name": "Azure Service Bus",
+      "kind": "message-broker",
+      "technology": "servicebus",
+      "configurationKeys": [
+        "ConnectionStrings:DASServiceBusConnectionString",
+        "ConnectionStrings:ServiceBusConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Specs/appSettings.json",
+          "reason": "ServiceBus-related connection string keys indicate the application depends on an Azure Service Bus (emulated locally)."
+        }
+      ]
+    },
+    {
+      "name": "Azurite",
+      "kind": "object-storage",
+      "technology": "azurite",
+      "configurationKeys": [
+        "ConnectionStrings:StorageConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Specs/appSettings.json",
+          "reason": "Connection string key indicates usage of Azure Storage, which can be emulated locally by Azurite."
+        }
+      ]
+    }
+  ],
+  "configurationKeys": [
+    {
+      "key": "ConnectionStrings:DASServiceBusConnectionString",
+      "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Specs/appSettings.json",
+      "reason": "Secondary Azure Service Bus connection string (local backing: emulator)."
+    },
+    {
+      "key": "ConnectionStrings:PaymentsConnectionString",
+      "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Specs/appSettings.json",
+      "reason": "Configuration for database backend (SQL Server)."
+    },
+    {
+      "key": "ConnectionStrings:ServiceBusConnectionString",
+      "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Specs/appSettings.json",
+      "reason": "Configuration for Azure Service Bus (local backing: emulator)."
+    },
+    {
+      "key": "ConnectionStrings:StorageConnectionString",
+      "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Specs/appSettings.json",
+      "reason": "Key configuration for Azure Storage usage (local backing: Azurite)."
+    },
+    {
+      "key": "DasPeriodEndConnectionString",
+      "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Application/Repositories/LegacyPaymentsRepository.cs",
+      "reason": "Used by IConfigurationHelper to initialize the LegacyPaymentsRepository."
+    },
+    {
+      "key": "PaymentsConnectionString",
+      "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Application/Infrastructure/ioc/ProviderPaymentsModule.cs",
+      "reason": "Used by IConfigurationHelper to configure the ProviderPaymentsDataContext instance."
+    },
+    {
+      "key": "ProviderPaymentsEndpoint",
+      "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Specs/appSettings.json",
+      "reason": "Defines the endpoint used for provider payments API."
+    },
+    {
+      "key": "UseWebSockets",
+      "sourceFile": "src/SFA.DAS.Payments.ProviderPayments.Specs/appSettings.json",
+      "reason": "Toggle for WebSocket usage, indicates features dependent on transport settings."
+    }
+  ]
+}
