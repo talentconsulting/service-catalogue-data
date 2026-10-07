@@ -1754,18 +1754,18 @@ function databaseRows({ source, schema }) {
     <td>${databasePiiCell(schema)}</td>
     <td>${links}</td>
   </tr>`;
-  const detailRow = `<tr class="repo-alert-detail-row" data-detail-for="${escapeHtml(rowId)}" ${expanded ? '' : 'hidden'}><td colspan="5"><div class="repo-alert-detail">${databaseTablesDetail(schema, rowId)}</div></td></tr>`;
+  const detailRow = `<tr class="repo-alert-detail-row" data-detail-for="${escapeHtml(rowId)}" ${expanded ? '' : 'hidden'}><td colspan="5"><div class="repo-alert-detail">${databaseTablesDetail(source, schema, rowId)}</div></td></tr>`;
   return summaryRow + detailRow;
 }
 
-function databaseTablesDetail(schema, rowId) {
+function databaseTablesDetail(source, schema, rowId) {
   const tables = schema.tables;
   // PII tables first so the answer to "what holds personal data?" is at the top of the list.
   const ordered = [...tables].sort((a, b) => Number(b.hasPii === true) - Number(a.hasPii === true) || compareText(tableLabel(a), tableLabel(b)));
   const pageKey = `databases-detail-${rowId}`;
   const { pageItems, page, totalPages } = paginate(ordered, pageKey);
   return `<table class="data-table"><thead><tr><th>Table</th><th>Columns</th><th>Relationships</th><th>Indexes</th><th>Contains PII</th></tr></thead><tbody>${pageItems.map((table) => `<tr>
-    <td><code>${escapeHtml(tableLabel(table))}</code></td>
+    <td><button class="as-link" type="button" data-open-table="${escapeHtml(source.id)}" data-table-schema="${escapeHtml(table.schema || '')}" data-table-name="${escapeHtml(table.name)}" title="Open in ${escapeHtml(titleCase(source.name))}'s database schema"><code>${escapeHtml(tableLabel(table))}</code></button></td>
     <td>${(table.columns || []).length}</td>
     <td>${(table.relationships || []).length}</td>
     <td>${(table.indexes || []).length}</td>
@@ -1786,6 +1786,17 @@ function wireDatabaseLinks() {
     button.onclick = (event) => {
       event.stopPropagation();
       openSourceView(button.dataset.openSchema, 'database');
+    };
+  });
+  document.querySelectorAll('[data-open-table]').forEach((button) => {
+    button.onclick = async (event) => {
+      event.stopPropagation();
+      const { openTable: sourceId, tableSchema, tableName } = button.dataset;
+      await openSourceView(sourceId, 'database');
+      // The standalone detail covers tables the diagram leaves out (those with no foreign keys).
+      if (state.source?.id !== sourceId || state.view !== 'database') return;
+      const table = (state.data?.tables || []).find((candidate) => candidate.name === tableName && (candidate.schema || '') === tableSchema);
+      if (table) renderTableDetail(table);
     };
   });
 }
