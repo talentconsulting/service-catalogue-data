@@ -2,6 +2,171 @@
   "repository": "SkillsFundingAgency/das-learning",
   "ref": "main",
   "path": "src",
-  "localServices": [],
-  "configurationKeys": []
+  "localServices": [
+    {
+      "name": "SQL Server",
+      "kind": "database",
+      "technology": "sqlserver",
+      "configurationKeys": [
+        "ConnectionStrings:LearningDataContext",
+        "DbConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/DataAccess/ServiceCollectionExtensions.cs",
+          "reason": "The code uses UseSqlServer with DbConnectionString in AddDbContext for LearningDataContext."
+        },
+        {
+          "sourceFile": "src/Domain/Repositories/ApprenticeshipLearningHistoryRepository.cs",
+          "reason": "DbContext indicates dependency on a SQL Server database for data persistence."
+        },
+        {
+          "sourceFile": "src/Domain/Repositories/LearningHistoryRepository.cs",
+          "reason": "DbContext usage shows reliance on an Entity Framework SQL Server database for operations."
+        },
+        {
+          "sourceFile": "src/Domain/Repositories/ApprenticeshipLearningRepository.cs",
+          "reason": "LearningDataContext and DbSet usage are indicative of Entity Framework with SQL Server."
+        },
+        {
+          "sourceFile": "src/Domain/Repositories/LearnerRepository.cs",
+          "reason": "LearningDataContext and DbSet usage show dependency on an underlying SQL Server database."
+        },
+        {
+          "sourceFile": "src/DataAccess/SqlAzureIdentityAuthenticationDbConnectionInterceptor.cs",
+          "reason": "Uses Microsoft.Data.SqlClient to connect to a SQL Server database."
+        },
+        {
+          "sourceFile": "src/Queries/CheckApprovedApprenticeshipExists/CheckApprovedApprenticeshipExistsQueryHandler.cs",
+          "reason": "The query handler interacts with the LearningDataContext, which indicates it connects to a SQL Server database."
+        },
+        {
+          "sourceFile": "src/Queries/GetApprenticeshipsByAcademicYear/GetLearningsByAcademicYearQueryHandler.cs",
+          "reason": "The query handler interacts with the LearningDataContext, which indicates it connects to a SQL Server database."
+        },
+        {
+          "sourceFile": "src/Queries/GetLearnings/GetLearningsQueryHandler.cs",
+          "reason": "The query handler interacts with the LearningDataContext, which indicates it connects to a SQL Server database."
+        },
+        {
+          "sourceFile": "src/Domain/Repositories/ShortCourseLearningHistoryRepository.cs",
+          "reason": "The repository uses the LearningDataContext, which indicates it connects to a SQL Server database."
+        },
+        {
+          "sourceFile": "src/Domain/Repositories/ShortCourseLearningRepository.cs",
+          "reason": "The repository uses the LearningDataContext, which indicates it connects to a SQL Server database."
+        },
+        {
+          "sourceFile": "src/TestHelpers/SqlDatabase.cs",
+          "reason": "The code in this file explicitly uses a SQL Server connection string format and creates a local database using SQL Server LocalDB."
+        },
+        {
+          "sourceFile": "src/Queries/GetShortCoursesByAcademicYear/GetShortCoursesByAcademicYearQueryHandler.cs",
+          "reason": "The code uses an Entity Framework `DbContext` to query short course learnings data."
+        },
+        {
+          "sourceFile": "src/Queries/GetShortCoursesForEarnings/GetShortCoursesForEarningsQueryHandler.cs",
+          "reason": "The code uses an Entity Framework `DbContext` to query short course learnings for earnings-related calculations."
+        },
+        {
+          "sourceFile": "src/Queries/GetLearningsWithEpisodes/GetLearningsWithEpisodesRequestQueryHandler.cs",
+          "reason": "The code uses an Entity Framework `DbContext`, which accesses a database for apprentice learning data."
+        }
+      ]
+    },
+    {
+      "name": "Azure Service Bus",
+      "kind": "message-broker",
+      "technology": null,
+      "configurationKeys": [
+        "NServiceBusConnectionString",
+        "NServiceBusLicense"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+          "reason": "The ApplicationSettings class defines NServiceBusConnectionString and NServiceBusLicense for NServiceBus configuration."
+        },
+        {
+          "sourceFile": "src/Functions/AppStart/NServiceBusConfiguration.cs",
+          "reason": "The code accesses ApplicationSettings:NServiceBusLicense and sets NServiceBus configuration for Azure Service Bus."
+        }
+      ]
+    },
+    {
+      "name": "Azurite",
+      "kind": "object-storage",
+      "technology": "azurite",
+      "configurationKeys": [
+        "AzureWebJobsStorage"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/InnerApi/appsettings.json",
+          "reason": "ConfigurationStorageConnectionString specifies UseDevelopmentStorage=true, indicating Azurite for local development."
+        },
+        {
+          "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+          "reason": "The ApplicationSettings class defines AzureWebJobsStorage, which is required for local Azure storage emulation."
+        }
+      ]
+    }
+  ],
+  "configurationKeys": [
+    {
+      "key": "AzureWebJobsStorage",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "Defined in ApplicationSettings for configuring Azure storage emulator."
+    },
+    {
+      "key": "ConfigurationStorageConnectionString",
+      "sourceFile": "src/InnerApi/appsettings.json",
+      "reason": "Present in appsettings.json and indicates the use of Azurite for object storage in local development."
+    },
+    {
+      "key": "ConnectionStrings:LearningDataContext",
+      "sourceFile": "src/Domain/Repositories/ShortCourseLearningHistoryRepository.cs",
+      "reason": "The repository uses the LearningDataContext, which requires a connection string key to point the application at a SQL Server database."
+    },
+    {
+      "key": "ConnectionStrings:LearningDataContext",
+      "sourceFile": "src/Domain/Repositories/ShortCourseLearningRepository.cs",
+      "reason": "The repository uses the LearningDataContext, which requires a connection string key to point the application at a SQL Server database."
+    },
+    {
+      "key": "ConnectionStrings:LearningDataContext",
+      "sourceFile": "src/Queries/CheckApprovedApprenticeshipExists/CheckApprovedApprenticeshipExistsQueryHandler.cs",
+      "reason": "The query handler interacts with the LearningDataContext, which requires a connection string key to point the application at a SQL Server database."
+    },
+    {
+      "key": "ConnectionStrings:LearningDataContext",
+      "sourceFile": "src/Queries/GetApprenticeshipsByAcademicYear/GetLearningsByAcademicYearQueryHandler.cs",
+      "reason": "The query handler interacts with the LearningDataContext, which requires a connection string key to point the application at a SQL Server database."
+    },
+    {
+      "key": "ConnectionStrings:LearningDataContext",
+      "sourceFile": "src/Queries/GetLearnings/GetLearningsQueryHandler.cs",
+      "reason": "The query handler interacts with the LearningDataContext, which requires a connection string key to point the application at a SQL Server database."
+    },
+    {
+      "key": "DatabaseInfo:ConnectionString",
+      "sourceFile": "src/TestHelpers/SqlDatabase.cs",
+      "reason": "The `SqlDatabase` class constructs and sets a connection string for SQL Server LocalDB through `DatabaseInfo.SetConnectionString`. This likely needs to be configurable for local setup."
+    },
+    {
+      "key": "DbConnectionString",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "Defined in ApplicationSettings as a required configuration for database connectivity."
+    },
+    {
+      "key": "NServiceBusConnectionString",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "Defined in ApplicationSettings for configuring NServiceBus message broker."
+    },
+    {
+      "key": "NServiceBusLicense",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "Defined in ApplicationSettings for configuring NServiceBus license."
+    }
+  ]
 }
