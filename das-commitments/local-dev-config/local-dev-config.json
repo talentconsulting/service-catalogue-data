@@ -2,6 +2,654 @@
   "repository": "SkillsFundingAgency/das-commitments",
   "ref": "master",
   "path": "src",
-  "localServices": [],
-  "configurationKeys": []
+  "localServices": [
+    {
+      "name": "Redis",
+      "kind": "cache",
+      "technology": "redis",
+      "configurationKeys": [
+        "CommitmentsV2Configuration:RedisConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/CommitmentsV2Configuration.cs",
+          "reason": "A Redis connection string is defined in the configuration class."
+        }
+      ]
+    },
+    {
+      "name": "ProviderCommitmentsDbContext",
+      "kind": "database",
+      "technology": null,
+      "configurationKeys": [],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipPausedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dbContext indicates use of a database context."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipResumedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dbContext indicates use of a database context."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipWithChangeOfPartyCreatedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dbContext indicates use of a database context."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ChangeOfPartyRequestCreatedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dbContext indicates use of a database context."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/CohortWithChangeOfPartyCreatedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dbContext indicates use of a database context."
+        }
+      ]
+    },
+    {
+      "name": "SQL Server",
+      "kind": "database",
+      "technology": "sqlserver",
+      "configurationKeys": [
+        "Commitments:DatabaseConnectionString",
+        "CommitmentsV2Configuration:DatabaseConnectionString",
+        "CommitmentsV2Configuration:ReadOnlyDatabaseConnectionString",
+        "ConnectionStrings:ProviderCommitments",
+        "ConnectionStrings:ProviderCommitmentsDbContext"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/CommitmentsV2Configuration.cs",
+          "reason": "Database connection strings are defined in the configuration class properties."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/HealthChecks/ServiceCollectionExtensions.cs",
+          "reason": "SQL Server connection string `Commitments:DatabaseConnectionString` is retrieved from configuration and used for health checks in `AddSqlServer`."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/Services/WithDrawalNotificationToEmployerService.cs",
+          "reason": "Access to `Apprenticeships` using `ProviderCommitmentsDbContext`."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/ProviderApproveCohortCommandHandler.cs",
+          "reason": "Database access using `ProviderCommitmentsDbContext` to manage `Cohort` aggregate."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/EmployerSendCohortCommandHandler.cs",
+          "reason": "Database operation using `ProviderCommitmentsDbContext` for `Cohort` aggregate."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/EventHandlers/RecordedAct1CompletionPaymentEventHandler.cs",
+          "reason": "Usage of `ProviderCommitmentsDbContext` and `DbContext` API for database access."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/EventHandlers/LearningWithdrawnEventHandler.cs",
+          "reason": "Usage of `ProviderCommitmentsDbContext`, indicating a SQL Server dependency."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/ProviderSendCohortCommandHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> injected and used"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/StoreLearningHistoryCommandHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> injected and used"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/SyncLearningDataBatchCommandHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> injected and used"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipCreatedEmployerVerificationEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> injected and used"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipEmployerTypeChangeEventHandlerToAutoRejectTransfers.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> injected and used"
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/CohortWithChangeOfPartyCreatedEventHandlerForEmail.cs",
+          "reason": "The usage of ProviderCommitmentsDbContext implies a SQL Server database."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/CohortWithChangeOfPartyDeletedEventHandler.cs",
+          "reason": "The usage of ProviderCommitmentsDbContext implies a SQL Server database."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/CohortWithChangeOfPartyFullyApprovedEventHandler.cs",
+          "reason": "The usage of ProviderCommitmentsDbContext implies a SQL Server database."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/CohortWithChangeOfPartyUpdatedEventHandler.cs",
+          "reason": "The usage of ProviderCommitmentsDbContext implies a SQL Server database."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/CohortDeletedWithPendingOverlappingTrainingDateEventHandler.cs",
+          "reason": "The usage of ProviderCommitmentsDbContext implies a SQL Server database."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateForActiveApprenticeshipEventHandler.cs",
+          "reason": "The code references `ProviderCommitmentsDbContext` which is likely configured to use SQL Server."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateForCompletedApprenticeshipEventHandler.cs",
+          "reason": "The code references `ProviderCommitmentsDbContext` which is likely configured to use SQL Server."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateForStoppedApprenticeshipEventHandler.cs",
+          "reason": "The code references `ProviderCommitmentsDbContext` which is likely configured to use SQL Server."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateRequestRejectedEventHandler.cs",
+          "reason": "The code references `ProviderCommitmentsDbContext` which is likely configured to use SQL Server."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/OverlappingTrainingDateRequest/OverlappingTrainingDateResolvedEventHandler.cs",
+          "reason": "The code references `ProviderCommitmentsDbContext` which is likely configured to use SQL Server."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ProviderRejectedChangeOfPartyRequestEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> is used to interact with the database."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/TransferRequestWithAutoApprovalCreatedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> is used to load TransferRequest and Cohort data from the database."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/TransferRequestRejectedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> is used to retrieve and update Cohort data in the database."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/TransferRequestApprovedEventHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> is used to retrieve entities from the database."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AcceptApprenticeshipUpdates/AcceptApprenticeshipUpdatesCommandHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> is utilized to fetch Apprenticeship and Course data from the database."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddDraftApprenticeship/AddDraftApprenticeshipCommandHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dbContext is injected as a dependency and used for database operations."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AcknowledgeInvalidIlrChanges/AcknowledgeInvalidIlrChangesCommandHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dbContext is injected as a dependency and used to access the database."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddCohort/AddCohortCommandHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dbContext is injected as a dependency and used to access the database."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddCohort/AddCohortWithOtherPartyHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dbContext is injected as a dependency and used to access the database."
+        },
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddCohort/AddEmptyCohortHandler.cs",
+          "reason": "Lazy<ProviderCommitmentsDbContext> dbContext is injected as a dependency and used to access the database."
+        }
+      ]
+    },
+    {
+      "name": "Azure Service Bus",
+      "kind": "message-broker",
+      "technology": "azure-service-bus",
+      "configurationKeys": [
+        "NServiceBusConfiguration:LearningTransportFolderPath",
+        "NServiceBusConfiguration:NServiceBusLicense",
+        "NServiceBusConfiguration:ServiceBusConnectionString",
+        "NServiceBusConfiguration:SharedServiceBusEndpointUrl",
+        "NServiceBusConfiguration:UseServiceBusInDev"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/NServiceBusConfiguration.cs",
+          "reason": "Defines configuration properties for Azure Service Bus, including connection string and other details."
+        }
+      ]
+    },
+    {
+      "name": "Azure Storage",
+      "kind": "object-storage",
+      "technology": "azurite",
+      "configurationKeys": [
+        "CommitmentsV2Configuration:StorageConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/CommitmentsV2Configuration.cs",
+          "reason": "A storage connection string is defined in the configuration class."
+        }
+      ]
+    }
+  ],
+  "configurationKeys": [
+    {
+      "key": "AllowedHosts",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.json",
+      "reason": "Configuration to define allowed hosts for the application."
+    },
+    {
+      "key": "ApplicationInsights:InstrumentationKey",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.json",
+      "reason": "Application Insights instrumentation key for monitoring."
+    },
+    {
+      "key": "ApprenticeshipInfoServiceConfiguration:BaseUrl",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/ApprenticeshipInfoServiceConfiguration.cs",
+      "reason": "Property name in a strongly-typed configuration class indicating a required API base URL."
+    },
+    {
+      "key": "ApprovalsOuterApiConfiguration:BaseUrl",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/ApprovalsOuterApiConfiguration.cs",
+      "reason": "Property name in a strongly-typed configuration class indicating a required API base URL."
+    },
+    {
+      "key": "ApprovalsOuterApiConfiguration:Key",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/ApprovalsOuterApiConfiguration.cs",
+      "reason": "Property name in a strongly-typed configuration class indicating an API key for Approvals Outer API."
+    },
+    {
+      "key": "AzureActiveDirectoryApiConfiguration:Identifier",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/AzureActiveDirectoryApiConfiguration.cs",
+      "reason": "Property name in a strongly-typed configuration class indicating Azure AD identifier."
+    },
+    {
+      "key": "AzureActiveDirectoryApiConfiguration:Tenant",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/AzureActiveDirectoryApiConfiguration.cs",
+      "reason": "Property name in a strongly-typed configuration class indicating Azure AD tenant information."
+    },
+    {
+      "key": "AzureADClientAuthentication:ApiBaseUrl",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api.Client.TestHarness/appsettings.json",
+      "reason": "Azure AD authentication configuration evidenced in client test harness appsettings."
+    },
+    {
+      "key": "AzureADClientAuthentication:ClientId",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api.Client.TestHarness/appsettings.json",
+      "reason": "Azure AD authentication configuration evidenced in client test harness appsettings."
+    },
+    {
+      "key": "AzureADClientAuthentication:ClientSecret",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api.Client.TestHarness/appsettings.json",
+      "reason": "Azure AD authentication configuration evidenced in client test harness appsettings."
+    },
+    {
+      "key": "AzureADClientAuthentication:IdentifierUri",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api.Client.TestHarness/appsettings.json",
+      "reason": "Azure AD authentication configuration evidenced in client test harness appsettings."
+    },
+    {
+      "key": "AzureADClientAuthentication:Tenant",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api.Client.TestHarness/appsettings.json",
+      "reason": "Azure AD authentication configuration evidenced in client test harness appsettings."
+    },
+    {
+      "key": "Commitments:DatabaseConnectionString",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/HealthChecks/ServiceCollectionExtensions.cs",
+      "reason": "SQL Server connection string `Commitments:DatabaseConnectionString` is retrieved from configuration and used for health checks in `AddSqlServer`."
+    },
+    {
+      "key": "CommitmentsV2Configuration:CurrentDateTime",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/CommitmentsV2Configuration.cs",
+      "reason": "ISO-formatted string for overriding current datetime, likely for test purposes."
+    },
+    {
+      "key": "CommitmentsV2Configuration:DatabaseConnectionString",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/CommitmentsV2Configuration.cs",
+      "reason": "Database connection string required for SQL Server connection."
+    },
+    {
+      "key": "CommitmentsV2Configuration:EmployerCommitmentsBaseUrl",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/CommitmentsV2Configuration.cs",
+      "reason": "Base URL for employer commitments."
+    },
+    {
+      "key": "CommitmentsV2Configuration:EventsApi:BaseUrl",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/EventsApiClientConfiguration.cs",
+      "reason": "Base URL for accessing the Events API."
+    },
+    {
+      "key": "CommitmentsV2Configuration:EventsApi:ClientToken",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/EventsApiClientConfiguration.cs",
+      "reason": "Authorization token for accessing the Events API."
+    },
+    {
+      "key": "CommitmentsV2Configuration:LevyTransferMatchingInnerApiConfiguration:BaseUrl",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/LevyTransferMatchingApiConfiguration.cs",
+      "reason": "Base URL for accessing the Levy Transfer Matching API."
+    },
+    {
+      "key": "CommitmentsV2Configuration:LevyTransferMatchingInnerApiConfiguration:Identifier",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/LevyTransferMatchingApiConfiguration.cs",
+      "reason": "Service-specific identifier for accessing the Levy Transfer Matching API."
+    },
+    {
+      "key": "CommitmentsV2Configuration:ProviderCommitmentsBaseUrl",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/CohortWithChangeOfPartyCreatedEventHandlerForEmail.cs",
+      "reason": "Configuration key used to retrieve base URL for provider commitments."
+    },
+    {
+      "key": "CommitmentsV2Configuration:ProviderCommitmentsBaseUrl",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/CommitmentsV2Configuration.cs",
+      "reason": "Base URL for provider commitments."
+    },
+    {
+      "key": "CommitmentsV2Configuration:ReadOnlyDatabaseConnectionString",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/CommitmentsV2Configuration.cs",
+      "reason": "Read-only database connection string for SQL Server."
+    },
+    {
+      "key": "CommitmentsV2Configuration:RedisConnectionString",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/CommitmentsV2Configuration.cs",
+      "reason": "Redis connection string for the cache service."
+    },
+    {
+      "key": "CommitmentsV2Configuration:StorageConnectionString",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/CommitmentsV2Configuration.cs",
+      "reason": "Storage connection string required for local Azure Storage emulator."
+    },
+    {
+      "key": "CommitmentsV2Configuration:ZenDeskEmailAddress",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/CommitmentsV2Configuration.cs",
+      "reason": "Likely required for email configuration purposes."
+    },
+    {
+      "key": "ConfigNames",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.json",
+      "reason": "Configuration names required for the application."
+    },
+    {
+      "key": "ConfigurationStorageConnectionString",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.json",
+      "reason": "Configuration storage connection string for local development."
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitments",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/ProviderSendCohortCommandHandler.cs",
+      "reason": "Lazy<ProviderCommitmentsDbContext> requires connection string"
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitments",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/StoreLearningHistoryCommandHandler.cs",
+      "reason": "Lazy<ProviderCommitmentsDbContext> requires connection string"
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitments",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/CommandHandlers/SyncLearningDataBatchCommandHandler.cs",
+      "reason": "Lazy<ProviderCommitmentsDbContext> requires connection string"
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitments",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipCreatedEmployerVerificationEventHandler.cs",
+      "reason": "Lazy<ProviderCommitmentsDbContext> requires connection string"
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitments",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ApprenticeshipEmployerTypeChangeEventHandlerToAutoRejectTransfers.cs",
+      "reason": "Lazy<ProviderCommitmentsDbContext> requires connection string"
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitmentsDbContext",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/ProviderRejectedChangeOfPartyRequestEventHandler.cs",
+      "reason": "ProviderCommitmentsDbContext is used to access database data."
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitmentsDbContext",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/TransferRequestApprovedEventHandler.cs",
+      "reason": "ProviderCommitmentsDbContext is used to access Cohort data."
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitmentsDbContext",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/TransferRequestRejectedEventHandler.cs",
+      "reason": "ProviderCommitmentsDbContext is used to manage database state."
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitmentsDbContext",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/EventHandlers/TransferRequestWithAutoApprovalCreatedEventHandler.cs",
+      "reason": "ProviderCommitmentsDbContext is used to query TransferRequest information."
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitmentsDbContext",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AcceptApprenticeshipUpdates/AcceptApprenticeshipUpdatesCommandHandler.cs",
+      "reason": "ProviderCommitmentsDbContext is used for database access."
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitmentsDbContext",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AcknowledgeInvalidIlrChanges/AcknowledgeInvalidIlrChangesCommandHandler.cs",
+      "reason": "Lazy<ProviderCommitmentsDbContext> dbContext requires a connection string to interact with the database."
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitmentsDbContext",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddCohort/AddCohortCommandHandler.cs",
+      "reason": "Lazy<ProviderCommitmentsDbContext> dbContext requires a connection string to interact with the database."
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitmentsDbContext",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddCohort/AddCohortWithOtherPartyHandler.cs",
+      "reason": "Lazy<ProviderCommitmentsDbContext> dbContext requires a connection string to interact with the database."
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitmentsDbContext",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddCohort/AddEmptyCohortHandler.cs",
+      "reason": "Lazy<ProviderCommitmentsDbContext> dbContext requires a connection string to interact with the database."
+    },
+    {
+      "key": "ConnectionStrings:ProviderCommitmentsDbContext",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Application/Commands/AddDraftApprenticeship/AddDraftApprenticeshipCommandHandler.cs",
+      "reason": "Lazy<ProviderCommitmentsDbContext> dbContext requires a connection string to interact with the database."
+    },
+    {
+      "key": "EnvironmentName",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.json",
+      "reason": "Configuration for the application environment name."
+    },
+    {
+      "key": "InstrumentationKey",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.json",
+      "reason": "Instrumentation key for monitoring."
+    },
+    {
+      "key": "Logging:LogLevel:Default",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api.Client.TestHarness/appsettings.json",
+      "reason": "Declared in client test harness appsettings."
+    },
+    {
+      "key": "Logging:LogLevel:Default",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.Development.json",
+      "reason": "Logging level configuration for development environment."
+    },
+    {
+      "key": "Logging:LogLevel:Default",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.json",
+      "reason": "Logging level default configuration."
+    },
+    {
+      "key": "Logging:LogLevel:Default",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/appsettings.Development.json",
+      "reason": "Key defined in the Development configuration file for logging level."
+    },
+    {
+      "key": "Logging:LogLevel:Default",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/appsettings.json",
+      "reason": "Key defined in the default configuration file for logging level."
+    },
+    {
+      "key": "Logging:LogLevel:Default",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Jobs/appsettings.Development.json",
+      "reason": "Key defined in the Development configuration file for logging level."
+    },
+    {
+      "key": "Logging:LogLevel:Default",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Jobs/appsettings.json",
+      "reason": "Key defined in the default configuration file for logging level."
+    },
+    {
+      "key": "Logging:LogLevel:Default",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/appsettings.Development.json",
+      "reason": "Key defined in the Development configuration file for logging level."
+    },
+    {
+      "key": "Logging:LogLevel:Microsoft",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api.Client.TestHarness/appsettings.json",
+      "reason": "Declared in client test harness appsettings."
+    },
+    {
+      "key": "Logging:LogLevel:Microsoft",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.Development.json",
+      "reason": "Logging level configuration for development environment."
+    },
+    {
+      "key": "Logging:LogLevel:Microsoft",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/appsettings.Development.json",
+      "reason": "Key defines the logging level for Microsoft category, evidenced in the Development configuration file."
+    },
+    {
+      "key": "Logging:LogLevel:System",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api.Client.TestHarness/appsettings.json",
+      "reason": "Declared in client test harness appsettings."
+    },
+    {
+      "key": "Logging:LogLevel:System",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.Development.json",
+      "reason": "Logging level configuration for development environment."
+    },
+    {
+      "key": "Logging:LogLevel:System",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/appsettings.Development.json",
+      "reason": "Key defines the logging level for System category, evidenced in the Development configuration file."
+    },
+    {
+      "key": "NServiceBusConfiguration:LearningTransportFolderPath",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/NServiceBusConfiguration.cs",
+      "reason": "Defines the folder path for the learning transport used in local development."
+    },
+    {
+      "key": "NServiceBusConfiguration:NServiceBusLicense",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/NServiceBusConfiguration.cs",
+      "reason": "Represents the license key required for NServiceBus."
+    },
+    {
+      "key": "NServiceBusConfiguration:ServiceBusConnectionString",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/NServiceBusConfiguration.cs",
+      "reason": "Required for connecting to Azure Service Bus."
+    },
+    {
+      "key": "NServiceBusConfiguration:SharedServiceBusEndpointUrl",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/NServiceBusConfiguration.cs",
+      "reason": "Defines the Azure Service Bus endpoint URL."
+    },
+    {
+      "key": "NServiceBusConfiguration:UseServiceBusInDev",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/NServiceBusConfiguration.cs",
+      "reason": "Indicates if Service Bus should be used in a development environment."
+    },
+    {
+      "key": "OLTDNotificationToServiceDeskJobSchdule",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Jobs/appsettings.json",
+      "reason": "Key defines the schedule for a specific job, evidenced in the default configuration file."
+    },
+    {
+      "key": "ProviderRelationshipsApiConfiguration:ApiBaseUrl",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Shared/ProviderRelationshipsApiClient/ProviderRelationshipsApiConfiguration.cs",
+      "reason": "Property name in a strongly-typed configuration class indicating a required API base URL."
+    },
+    {
+      "key": "ProviderRelationshipsApiConfiguration:IdentifierUri",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Shared/ProviderRelationshipsApiClient/ProviderRelationshipsApiConfiguration.cs",
+      "reason": "Property name in a strongly-typed configuration class indicating an identifier for managed identity configuration."
+    },
+    {
+      "key": "ProviderUrlConfiguration:CourseManagementBaseUrl",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/ProviderUrlConfiguration.cs",
+      "reason": "Specifies the base URL of the Course Management API."
+    },
+    {
+      "key": "ProviderUrlConfiguration:ProviderApprenticeshipServiceBaseUrl",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/ProviderUrlConfiguration.cs",
+      "reason": "Specifies the base URL of the Provider Apprenticeship Service API."
+    },
+    {
+      "key": "ReservationsClientApiConfiguration:ApiBaseUrl",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.ReservationsV2.Api.Types/Configuration/ReservationsClientApiConfiguration.cs",
+      "reason": "Evidenced by a property in the ReservationsClientApiConfiguration class."
+    },
+    {
+      "key": "ReservationsClientApiConfiguration:ClientId",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.ReservationsV2.Api.Types/Configuration/ReservationsClientApiConfiguration.cs",
+      "reason": "Evidenced by a property in the ReservationsClientApiConfiguration class."
+    },
+    {
+      "key": "ReservationsClientApiConfiguration:ClientSecret",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.ReservationsV2.Api.Types/Configuration/ReservationsClientApiConfiguration.cs",
+      "reason": "Evidenced by a property in the ReservationsClientApiConfiguration class."
+    },
+    {
+      "key": "ReservationsClientApiConfiguration:IdentifierUri",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.ReservationsV2.Api.Types/Configuration/ReservationsClientApiConfiguration.cs",
+      "reason": "Evidenced by a property in the ReservationsClientApiConfiguration class."
+    },
+    {
+      "key": "ReservationsClientApiConfiguration:Tenant",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.ReservationsV2.Api.Types/Configuration/ReservationsClientApiConfiguration.cs",
+      "reason": "Evidenced by a property in the ReservationsClientApiConfiguration class."
+    },
+    {
+      "key": "ReservationsClientApiConfiguration:UseStub",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.ReservationsV2.Api.Types/Configuration/ReservationsClientApiConfiguration.cs",
+      "reason": "Evidenced by a property in the ReservationsClientApiConfiguration class."
+    },
+    {
+      "key": "RplSettingsConfiguration:MaximumTrainingTimeReduction",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/RplSettingsConfiguration.cs",
+      "reason": "Indicates the maximum allowable training time reduction for RPL (Recognition of Prior Learning)."
+    },
+    {
+      "key": "RplSettingsConfiguration:MinimumPriceReduction",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2/Configuration/RplSettingsConfiguration.cs",
+      "reason": "Indicates the minimum allowable price reduction for RPL (Recognition of Prior Learning)."
+    },
+    {
+      "key": "UseStubAccountApiClient",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.Development.json",
+      "reason": "Stub account API client configuration."
+    },
+    {
+      "key": "UseStubAccountApiClient",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.json",
+      "reason": "Stub account API client configuration."
+    },
+    {
+      "key": "UseStubAccountApiClient",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/appsettings.Development.json",
+      "reason": "Key determines whether a stub Account API client is used, evidenced in the Development configuration."
+    },
+    {
+      "key": "UseStubAccountApiClient",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.ExternalHandlers/appsettings.json",
+      "reason": "Key determines whether a stub Account API client is used, evidenced in the default configuration."
+    },
+    {
+      "key": "UseStubAccountApiClient",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/appsettings.Development.json",
+      "reason": "Key determines whether a stub Account API client is used, evidenced in the Development configuration file."
+    },
+    {
+      "key": "UseStubAccountApiClient",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/appsettings.json",
+      "reason": "Key evidenced in appsettings.json for application-specific configuration."
+    },
+    {
+      "key": "UseStubProviderRelationships",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.Development.json",
+      "reason": "Stub provider relationships configuration."
+    },
+    {
+      "key": "UseStubProviderRelationships",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.Api/appsettings.json",
+      "reason": "Stub provider relationships configuration."
+    },
+    {
+      "key": "UseStubProviderRelationships",
+      "sourceFile": "src/CommitmentsV2/SFA.DAS.CommitmentsV2.MessageHandlers/appsettings.Development.json",
+      "reason": "Key determines whether a stub Provider Relationships client is used, evidenced in the Development configuration file."
+    }
+  ]
 }

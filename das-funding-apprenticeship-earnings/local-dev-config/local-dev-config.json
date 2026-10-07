@@ -2,6 +2,143 @@
   "repository": "SkillsFundingAgency/das-funding-apprenticeship-earnings",
   "ref": "main",
   "path": "src",
-  "localServices": [],
-  "configurationKeys": []
+  "localServices": [
+    {
+      "name": "SQL Server",
+      "kind": "database",
+      "technology": "sqlserver",
+      "configurationKeys": [
+        "ApplicationSettings:DbConnectionString",
+        "DbConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+          "reason": "DbConnectionString property in ApplicationSettings indicates database connection configuration."
+        },
+        {
+          "sourceFile": "src/DataAccess/ApprenticeshipEarningsDataContext.cs",
+          "reason": "DbContext provides evidence of a SQL Server connection for entity configuration."
+        },
+        {
+          "sourceFile": "src/Infrastructure/HealthChecks/DbHealthCheck.cs",
+          "reason": "SQL Server connection is created with a connection string."
+        },
+        {
+          "sourceFile": "src/Infrastructure/ServiceCollectionExtensions.cs",
+          "reason": "UseSqlServer method is called with a DbConnectionString."
+        },
+        {
+          "sourceFile": "src/TestHelpers/SqlDatabase.cs",
+          "reason": "Defines a test helper for SQL Server, including database creation and connection management."
+        },
+        {
+          "sourceFile": "src/Queries/GetFm36Data/GetFm36DataQueryHandler.cs",
+          "reason": "Uses Entity Framework with SQL Server-specific options via ApprenticeshipEarningsDataContext."
+        },
+        {
+          "sourceFile": "src/Queries/GetFm99ShortCourseEarnings/GetFm99ShortCourseEarningsQueryHandler.cs",
+          "reason": "Uses Entity Framework with SQL Server-specific options via ApprenticeshipEarningsDataContext."
+        },
+        {
+          "sourceFile": "src/Queries/GetShortCourse/GetShortCourseQueryHandler.cs",
+          "reason": "Uses Entity Framework with SQL Server-specific options via ApprenticeshipEarningsDataContext."
+        }
+      ]
+    },
+    {
+      "name": "Azure Service Bus",
+      "kind": "message-broker",
+      "technology": "servicebus",
+      "configurationKeys": [
+        "_connectionString",
+        "ApplicationSettings:ServiceBusConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+          "reason": "ServiceBusConnectionString property in ApplicationSettings indicates a connection to Azure Service Bus."
+        },
+        {
+          "sourceFile": "src/Infrastructure/HealthChecks/ServiceBusReceiveHealthCheck.cs",
+          "reason": "Service Bus client is created using a connection string for health checks."
+        }
+      ]
+    },
+    {
+      "name": "NServiceBus",
+      "kind": "message-broker",
+      "technology": "nservicebus",
+      "configurationKeys": [
+        "ApplicationSettings:NServiceBusConnectionString",
+        "ApplicationSettings:NServiceBusLicense"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/MessageHandlers/AppStart/NServiceBusConfiguration.cs",
+          "reason": "NServiceBus configuration methods indicate the application uses NServiceBus as a message broker."
+        },
+        {
+          "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+          "reason": "NServiceBusConnectionString and NServiceBusLicense properties in ApplicationSettings indicate NServiceBus usage."
+        }
+      ]
+    },
+    {
+      "name": "Azurite",
+      "kind": "object-storage",
+      "technology": "azurite",
+      "configurationKeys": [
+        "ApplicationSettings:AzureWebJobsStorage"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+          "reason": "AzureWebJobsStorage property in ApplicationSettings suggests dependency on Azure Storage, which can be emulated locally with Azurite."
+        }
+      ]
+    }
+  ],
+  "configurationKeys": [
+    {
+      "key": "_connectionString",
+      "sourceFile": "src/Infrastructure/HealthChecks/ServiceBusReceiveHealthCheck.cs",
+      "reason": "Azure Service Bus client connection is initiated with this key."
+    },
+    {
+      "key": "ApplicationSettings:AzureWebJobsStorage",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "Required for Azurite object storage emulation to mimic Azure Storage."
+    },
+    {
+      "key": "ApplicationSettings:DbConnectionString",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "Required for SQL Server connection in the data context."
+    },
+    {
+      "key": "ApplicationSettings:NServiceBusConnectionString",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "Required for NServiceBus message broker connection."
+    },
+    {
+      "key": "ApplicationSettings:NServiceBusLicense",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "Required for NServiceBus license configuration."
+    },
+    {
+      "key": "ApplicationSettings:ServiceBusConnectionString",
+      "sourceFile": "src/Infrastructure/Configuration/ApplicationSettings.cs",
+      "reason": "Required for Azure Service Bus connection."
+    },
+    {
+      "key": "DbConnectionString",
+      "sourceFile": "src/Infrastructure/HealthChecks/DbHealthCheck.cs",
+      "reason": "SQL Server connection initialized using this key in DbHealthCheck."
+    },
+    {
+      "key": "DbConnectionString",
+      "sourceFile": "src/Infrastructure/ServiceCollectionExtensions.cs",
+      "reason": "UseSqlServer method is configured with this key."
+    }
+  ]
 }
