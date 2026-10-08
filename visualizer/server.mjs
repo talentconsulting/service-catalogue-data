@@ -13,6 +13,8 @@ const dataDir = resolve(process.env.CATALOGUE_DATA_DIR || join(appDir, '..'));
 const port = Number(process.env.PORT || 8080);
 // The catalogue is rebuilt from disk at most this often; data only changes when the repo is pulled.
 const catalogCacheMs = Number(process.env.CATALOG_CACHE_MS ?? 15000);
+// GitHub URL of the catalogue repository itself, so generated files (e.g. OpenAPI specs) can link to GitHub.
+let catalogueRepositoryPromise = null;
 
 // Basic Auth is opt-in: set AUTH_PASSWORD (e.g. in a local, gitignored .env file — never commit
 // it) to require credentials for every request. With no password configured the server stays
@@ -233,9 +235,27 @@ function safeChild(base, ...parts) {
   return target;
 }
 
+// CATALOGUE_REPOSITORY_URL wins; otherwise the data checkout's origin remote, or null when neither is known.
+async function readCatalogueRepository() {
+  if (process.env.CATALOGUE_REPOSITORY_URL) return process.env.CATALOGUE_REPOSITORY_URL.replace(/\/$/, '');
+  try {
+    const config = await readFile(join(dataDir, '.git', 'config'), 'utf8');
+    const origin = config.match(/\[remote "origin"\][^[]*?url\s*=\s*(\S+)/)?.[1];
+    const match = origin?.match(/github\.com[:/]([^/\s]+\/[^/\s]+?)(?:\.git)?$/);
+    return match ? `https://github.com/${match[1]}` : null;
+  } catch {
+    return null;
+  }
+}
+
+function getCatalogueRepository() {
+  catalogueRepositoryPromise ??= readCatalogueRepository();
+  return catalogueRepositoryPromise;
+}
+
 async function handleApi(request, response, url) {
   if (url.pathname === '/api/catalog') {
-    return sendJson(response, 200, { sources: await getCatalog() });
+    return sendJson(response, 200, { sources: await getCatalog(), catalogueRepository: await getCatalogueRepository() });
   }
   if (url.pathname === '/api/dashboard') {
     return sendJson(response, 200, { sources: await buildDashboard(await getCatalog()) });

@@ -1624,6 +1624,14 @@ function groupApiFindings(findings, activeFilter) {
   return [...groups.values()].sort((a, b) => spectralSeverityRank(a.severity) - spectralSeverityRank(b.severity) || b.locations.length - a.locations.length);
 }
 
+// Links a generated file in the catalogue repository (e.g. an OpenAPI spec) to GitHub, at a line when known.
+function catalogueFileLink(path, line) {
+  const label = `<code>${escapeHtml(path)}${line ? `:${line}` : ''}</code>`;
+  if (!state.catalogueRepository) return label;
+  const href = `${state.catalogueRepository}/blob/HEAD/${path.split('/').map(encodeURIComponent).join('/')}${line ? `#L${line}` : ''}`;
+  return `<a class="source-link" href="${escapeHtml(href)}" target="_blank" rel="noreferrer">${label}<span aria-hidden="true"> ↗</span><span class="sr-only"> (opens on GitHub)</span></a>`;
+}
+
 function apiAuditDetailTable(report, activeFilter, rowId) {
   if (!report) return '<p class="no-alerts-note">No findings.</p>';
   const groups = groupApiFindings(report.findings || [], activeFilter);
@@ -1632,7 +1640,7 @@ function apiAuditDetailTable(report, activeFilter, rowId) {
   const { pageItems, page, totalPages } = paginate(groups, pageKey);
   return `<table class="data-table"><thead><tr><th>Severity</th><th>Rule</th><th>Message</th><th>Occurrences</th><th>Example location</th></tr></thead><tbody>${pageItems.map((group) => {
     const example = group.locations[0];
-    const exampleLink = example ? `<code>${escapeHtml(example.source)}${example.line ? `:${example.line}` : ''}</code>` : '—';
+    const exampleLink = example ? catalogueFileLink(example.source, example.line) : '—';
     const more = group.locations.length > 1 ? ` <span class="muted">+${group.locations.length - 1} more</span>` : '';
     return `<tr>
       <td><span class="severity-pill ${spectralSeverityClass(group.severity)}">${escapeHtml(group.severity)}</span></td>
@@ -2872,6 +2880,7 @@ async function init() {
   try {
     const catalog = await getJson('/api/catalog');
     state.catalog = catalog.sources;
+    state.catalogueRepository = catalog.catalogueRepository || null;
     if (!state.catalog.length) throw new Error('The manifest does not contain any sources.');
     sourceSelect.innerHTML = state.catalog.map((source) => `<option value="${source.id}">${escapeHtml(titleCase(source.name))}</option>`).join('');
     sourceSelect.value = state.catalog[0].id;
