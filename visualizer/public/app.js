@@ -2109,7 +2109,17 @@ function wireLandscapeChecklist(allNodes) {
   document.querySelectorAll('[data-landscape-toggle]').forEach((checkbox) => {
     checkbox.addEventListener('change', () => {
       const id = checkbox.dataset.landscapeToggle;
-      if (checkbox.checked) state.landscapeChecked.add(id); else state.landscapeChecked.delete(id);
+      if (checkbox.checked) {
+        // Checking a system brings in everything it has a relationship with, in either direction,
+        // so it can be seen in context; unchecking still removes only that one system.
+        state.landscapeChecked.add(id);
+        (state.landscape?.edges || []).forEach((edge) => {
+          if (edge.from === id) state.landscapeChecked.add(edge.to);
+          if (edge.to === id) state.landscapeChecked.add(edge.from);
+        });
+      } else {
+        state.landscapeChecked.delete(id);
+      }
       renderLandscape();
     });
   });
