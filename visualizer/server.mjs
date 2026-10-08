@@ -235,9 +235,12 @@ function safeChild(base, ...parts) {
   return target;
 }
 
-// CATALOGUE_REPOSITORY_URL wins; otherwise the data checkout's origin remote, or null when neither is known.
+// CATALOGUE_REPOSITORY_URL wins, then Render's repository slug, then the data checkout's origin remote;
+// null when none is known.
 async function readCatalogueRepository() {
   if (process.env.CATALOGUE_REPOSITORY_URL) return process.env.CATALOGUE_REPOSITORY_URL.replace(/\/$/, '');
+  // Render deploys without a .git directory but sets the source repository as owner/name.
+  if (process.env.RENDER_GIT_REPO_SLUG) return `https://github.com/${process.env.RENDER_GIT_REPO_SLUG}`;
   try {
     const config = await readFile(join(dataDir, '.git', 'config'), 'utf8');
     const origin = config.match(/\[remote "origin"\][^[]*?url\s*=\s*(\S+)/)?.[1];
