@@ -1362,7 +1362,7 @@ async function loadHomeDashboard() {
   state.selected = null;
   state.dashboardPages = new Map();
   state.dashboardExpanded = new Set();
-  state.dashboardFilters = { dependabot: new Set(SEVERITY_ORDER), apiSecurity: new Set(SPECTRAL_SEVERITY_ORDER) };
+  state.dashboardFilters = { dependabot: new Set(SEVERITY_ORDER), apiSecurity: new Set(SPECTRAL_SEVERITY_ORDER), metadataFramework: 'all' };
   try {
     // One request for every tab, rather than one per source per tab.
     const { sources } = await getJson('/api/dashboard');
@@ -1523,6 +1523,7 @@ function renderHomeDashboard() {
   wireDatabaseLinks();
   wireDashboardPagination();
   wireDashboardSeverityFilters();
+  wireMetadataFrameworkFilter();
   wireSortableHeaders();
 }
 
@@ -1647,11 +1648,61 @@ function metadataFrameworks(metadata) {
   return [...new Set((metadata?.projects || []).flatMap((project) => project.targetFrameworks || []))].sort();
 }
 
+// The generator's dotnetSupport carries an end-of-support date per modern .NET moniker; .NET Framework
+// and .NET Standard come back null by design, so they are never reported as out of support.
+function frameworkEndOfSupport(metadata, framework) {
+  return (metadata?.dotnetSupport || []).find((entry) => entry.targetFramework === framework)?.endOfSupport || null;
+}
+
+function isOutOfSupport(endOfSupport) {
+  return Boolean(endOfSupport) && new Date(endOfSupport) < new Date();
+}
+
+function outOfSupportFrameworks(metadata) {
+  return metadataFrameworks(metadata).filter((framework) => isOutOfSupport(frameworkEndOfSupport(metadata, framework)));
+}
+
+function frameworkBadge(metadata, framework) {
+  const endOfSupport = frameworkEndOfSupport(metadata, framework);
+  if (isOutOfSupport(endOfSupport)) {
+    return `<span class="badge danger" title="Out of support since ${escapeHtml(new Date(endOfSupport).toLocaleDateString())}">${escapeHtml(framework)}</span>`;
+  }
+  const title = endOfSupport ? ` title="Supported until ${escapeHtml(new Date(endOfSupport).toLocaleDateString())}"` : '';
+  return `<span class="badge"${title}>${escapeHtml(framework)}</span>`;
+}
+
+function matchesFrameworkFilter(metadata, filter) {
+  if (filter === 'all') return true;
+  if (filter === 'out-of-support') return outOfSupportFrameworks(metadata).length > 0;
+  return metadataFrameworks(metadata).includes(filter);
+}
+
+function frameworkFilterHtml(results, filter) {
+  const frameworks = [...new Set(results.flatMap((result) => metadataFrameworks(result.metadata)))].sort();
+  const option = (value, label) => `<option value="${escapeHtml(value)}" ${filter === value ? 'selected' : ''}>${escapeHtml(label)}</option>`;
+  return `<label class="source-picker dashboard-filter" for="metadata-framework-filter"><span>Framework</span><select id="metadata-framework-filter">
+    ${option('all', 'All frameworks')}${option('out-of-support', 'Out of support only')}${frameworks.map((framework) => option(framework, framework)).join('')}
+  </select></label>`;
+}
+
+function wireMetadataFrameworkFilter() {
+  const select = $('#metadata-framework-filter');
+  if (!select) return;
+  select.onchange = () => {
+    state.dashboardFilters.metadataFramework = select.value;
+    state.dashboardPages.clear();
+    renderHomeDashboard();
+  };
+}
+
 function renderMetadataSection() {
   const results = state.repoMetadata || [];
   const scanned = results.filter((result) => result.metadata);
+  const frameworkFilter = state.dashboardFilters.metadataFramework;
+  const filtered = results.filter((result) => matchesFrameworkFilter(result.metadata, frameworkFilter));
+  const outOfSupportCount = scanned.filter((result) => outOfSupportFrameworks(result.metadata).length).length;
   const sort = dashboardSortState('metadata-summary', 'lastCommit', 'asc');
-  const rowsAll = sortRows(results, sort, {
+  const rowsAll = sortRows(filtered, sort, {
     name: (a, b, dir) => compareText(a.source.name, b.source.name, dir),
     projects: (a, b, dir) => compareNumber(a.metadata?.projects?.length, b.metadata?.projects?.length, dir),
     branch: (a, b, dir) => compareText(a.metadata?.ref, b.metadata?.ref, dir),
@@ -1661,11 +1712,12 @@ function renderMetadataSection() {
 
   return `<section class="dashboard-section">
     <h2>Metadata</h2>
-    <p class="section-sub">Target framework(s), GitHub topics and last commit date read from each repository's generated metadata — ${scanned.length}/${results.length} repositories scanned.</p>
+    <p class="section-sub">Target framework(s), GitHub topics and last commit date read from each repository's generated metadata — ${scanned.length}/${results.length} repositories scanned${outOfSupportCount ? `; <span class="danger-text">${outOfSupportCount} on an out-of-support framework</span>` : ''}.</p>
+    ${frameworkFilterHtml(scanned, frameworkFilter)}
     <div class="table-wrap">
       <table class="data-table repo-alert-table">
         <thead><tr>${sortableHeaderCell('metadata-summary', 'name', 'Repository')}<th>Target framework(s)</th><th>Topics</th>${sortableHeaderCell('metadata-summary', 'projects', 'Projects')}${sortableHeaderCell('metadata-summary', 'branch', 'Branch')}${sortableHeaderCell('metadata-summary', 'lastCommit', 'Last commit')}</tr></thead>
-        <tbody>${page.pageItems.map(metadataRows).join('')}</tbody>
+        <tbody>${page.pageItems.map(metadataRows).join('') || '<tr><td colspan="6" class="muted">No repositories match this framework.</td></tr>'}</tbody>
       </table>
     </div>
     ${paginationHtml('metadata-summary', page.page, page.totalPages, rowsAll.length)}
@@ -1677,7 +1729,7 @@ function metadataRows({ source, metadata, topics }) {
   const lastCommit = metadata?.lastCommitDate ? new Date(metadata.lastCommitDate).toLocaleDateString() : '—';
   return `<tr>
     <td><span class="repo-name">${escapeHtml(titleCase(source.name))}</span><span class="repo-slug">${escapeHtml(orgRepoSlug(source.repository))}</span></td>
-    <td>${metadata ? (frameworks.map((framework) => `<span class="badge">${escapeHtml(framework)}</span>`).join(' ') || '<span class="muted">None found</span>') : '<span class="muted">Not scanned</span>'}</td>
+    <td>${metadata ? (frameworks.map((framework) => frameworkBadge(metadata, framework)).join(' ') || '<span class="muted">None found</span>') : '<span class="muted">Not scanned</span>'}</td>
     <td>${topics ? (topics.length ? `<span class="topic-list">${topics.map((topic) => `<span class="badge blue">${escapeHtml(topic)}</span>`).join('')}</span>` : '<span class="muted">None</span>') : '<span class="muted">—</span>'}</td>
     <td>${metadata ? metadata.projects.length : '—'}</td>
     <td>${metadata ? `<code>${escapeHtml(metadata.ref)}</code>` : '—'}</td>
