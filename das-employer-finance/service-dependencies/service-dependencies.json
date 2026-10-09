@@ -7,72 +7,75 @@
     {
       "id": "employer-finance",
       "name": "Employer Finance",
-      "type": "api",
+      "type": "other",
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.EmployerFinance/ServiceRegistration/DatabaseServiceRegistrations.cs",
-          "reason": "AddDbContext registration evidences the main container as the system's primary API."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Api/SFA.DAS.EmployerFinance.Api.csproj",
-          "reason": "Project file declares Sdk as Microsoft.NET.Sdk.Web, indicating a web application."
-        },
-        {
           "sourceFile": "src/SFA.DAS.EmployerFinance/SFA.DAS.EmployerFinance.csproj",
-          "reason": "Project file indicating an API with references to API-related packages like Microsoft.AspNetCore.Authorization and Microsoft.AspNetCore.Authentication.OpenIdConnect"
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Api/Program.cs",
-          "reason": "Web application entry point detected in Program.cs."
+          "reason": "Detected .NET project with no specific web/API/worker entry point, likely a background container or service."
         }
       ]
     },
     {
-      "id": "employer-finance-jobs",
-      "name": "Employer Finance Jobs",
+      "id": "employer-finance-2",
+      "name": "Employer Finance",
+      "type": "api",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance.Api/Program.cs",
+          "reason": "Contains Program.cs file for web application entry point."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance/ServiceRegistration/EmployerFinanceOuterApiServiceRegistrations.cs",
+          "reason": "HttpClient for IOuterApiClient registered, indicating an API container."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance.Api/SFA.DAS.EmployerFinance.Api.csproj",
+          "reason": "Project file uses Microsoft.NET.Sdk.Web, indicating a web application."
+        }
+      ]
+    },
+    {
+      "id": "employerfinance-jobs",
+      "name": "EmployerFinance Jobs",
       "type": "job",
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.Jobs/Program.cs",
-          "reason": "Background job entry point detected in WebJobs Program.cs."
+          "reason": "Contains Program.cs file for a web job entry point."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.Jobs/SFA.DAS.EmployerFinance.Jobs.csproj",
-          "reason": "Project file indicates a WebJob configuration with OutputType set to Exe and WebJobType as Continuous."
+          "reason": "Project file specifies WebJob type."
         }
       ]
     },
     {
-      "id": "employer-finance-messagehandlers",
-      "name": "Employer Finance MessageHandlers",
+      "id": "employerfinance-messagehandlers",
+      "name": "EmployerFinance MessageHandlers",
       "type": "job",
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/Program.cs",
-          "reason": "Background job entry point detected for message handlers in Program.cs."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/Extensions/ServiceCollectionExtensions.cs",
-          "reason": "Evidence of message handling setup with NServiceBus endpoint configuration."
+          "reason": "Contains Program.cs file for a message handler entry point."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/SFA.DAS.EmployerFinance.MessageHandlers.csproj",
-          "reason": "Message-handler entry point; marked as a WebJob project for Azure WebJobs."
+          "reason": "Project file indicates a WebJob project with continuous execution."
         }
       ]
     },
     {
-      "id": "employer-finance-web",
-      "name": "Employer Finance Web",
+      "id": "employerfinance-web",
+      "name": "EmployerFinance Web",
       "type": "web",
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Web/SFA.DAS.EmployerFinance.Web.csproj",
-          "reason": "Project file defines an ASP.NET Core web application."
+          "sourceFile": "src/SFA.DAS.EmployerFinance.Web/Program.cs",
+          "reason": "The project contains an ASP.NET Core application entry point."
         },
         {
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Web/Program.cs",
-          "reason": "Web entry point evidenced by WebHost setup with UseStartup."
+          "sourceFile": "src/SFA.DAS.EmployerFinance.Web/SFA.DAS.EmployerFinance.Web.csproj",
+          "reason": "The project file specifies Microsoft.NET.Sdk.Web."
         }
       ]
     }
@@ -82,41 +85,7 @@
       "sourceId": "employer-finance",
       "name": "Redis",
       "kind": "cache",
-      "classification": "internal",
-      "direction": "outbound",
-      "client": null,
-      "technology": "StackExchange.Redis",
-      "configurationKeys": [
-        "RedisConnectionString"
-      ],
-      "authentication": {
-        "type": null,
-        "configurationKeys": []
-      },
-      "operations": [],
-      "resources": [
-        {
-          "type": "cache",
-          "name": "RedisConnectionString",
-          "direction": "outbound",
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Api/ServiceRegistrations/CachingServiceRegistrations.cs"
-        }
-      ],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Api/ServiceRegistrations/CachingServiceRegistrations.cs",
-          "reason": "AddStackExchangeRedisCache configuration detected."
-        }
-      ],
-      "confidence": "high",
-      "targetId": "cache-redis",
-      "description": "Caches data in"
-    },
-    {
-      "sourceId": "employer-finance",
-      "name": "StackExchange Redis",
-      "kind": "cache",
-      "classification": "third-party",
+      "classification": "unknown",
       "direction": "outbound",
       "client": null,
       "technology": "Microsoft.AspNetCore.DataProtection.StackExchangeRedis",
@@ -130,23 +99,23 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance/SFA.DAS.EmployerFinance.csproj",
-          "reason": "Detected package reference to Microsoft.AspNetCore.DataProtection.StackExchangeRedis indicating usage of Redis as a cache"
+          "reason": "Usage of Microsoft.AspNetCore.DataProtection.StackExchangeRedis package indicates a Redis dependency."
         }
       ],
-      "confidence": "high",
-      "targetId": "cache-stackexchange-redis",
+      "confidence": "medium",
+      "targetId": "cache-redis",
       "description": "Caches data in"
     },
     {
-      "sourceId": "employer-finance-web",
-      "name": "Azure Application Insights",
-      "kind": "cloud-service",
+      "sourceId": "employer-finance-2",
+      "name": "Redis",
+      "kind": "cache",
       "classification": "third-party",
       "direction": "outbound",
-      "client": "ApplicationInsightsServiceOptions",
-      "technology": "Azure Application Insights",
+      "client": null,
+      "technology": "Redis",
       "configurationKeys": [
-        "APPINSIGHTS_INSTRUMENTATIONKEY"
+        "RedisConnectionString"
       ],
       "authentication": {
         "type": null,
@@ -156,19 +125,19 @@
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Web/Startup.cs",
-          "reason": "Azure Application Insights telemetry configuration."
+          "sourceFile": "src/SFA.DAS.EmployerFinance.Api/ServiceRegistrations/CachingServiceRegistrations.cs",
+          "reason": "AddStackExchangeRedisCache registration found."
         }
       ],
       "confidence": "high",
-      "targetId": "cloud-service-azure-application-insights",
-      "description": "Uses"
+      "targetId": "cache-redis",
+      "description": "Caches data in"
     },
     {
       "sourceId": "employer-finance",
-      "name": "Azure Identity",
+      "name": "Azure Key Vault",
       "kind": "cloud-service",
-      "classification": "third-party",
+      "classification": "unknown",
       "direction": "outbound",
       "client": null,
       "technology": "Azure.Identity",
@@ -182,50 +151,46 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance/SFA.DAS.EmployerFinance.csproj",
-          "reason": "Detected package reference to Azure.Identity"
+          "reason": "Usage of Azure.Identity package indicates a likely dependency on Azure Key Vault or other Azure cloud services."
         }
       ],
-      "confidence": "high",
-      "targetId": "cloud-service-azure-identity",
-      "description": "Uses"
-    },
-    {
-      "sourceId": "employer-finance",
-      "name": "Azure Managed Identity",
-      "kind": "cloud-service",
-      "classification": "internal",
-      "direction": "outbound",
-      "client": "ChainedTokenCredential",
-      "technology": "Azure SDK",
-      "configurationKeys": [
-        "IdentifierUri"
-      ],
-      "authentication": {
-        "type": "managed-identity",
-        "configurationKeys": [
-          "IdentifierUri"
-        ]
-      },
-      "operations": [],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Api.Client/SecureHttpClient.cs",
-          "reason": "ChainedTokenCredential used for Azure Managed Identity token acquisition."
-        }
-      ],
-      "confidence": "high",
-      "targetId": "cloud-service-azure-managed-identity",
+      "confidence": "medium",
+      "targetId": "cloud-service-azure-key-vault",
       "description": "Uses"
     },
     {
       "sourceId": "employer-finance",
       "name": "SQL Server",
       "kind": "database",
-      "classification": "third-party",
+      "classification": "unknown",
       "direction": "outbound",
       "client": null,
-      "technology": "Microsoft.EntityFrameworkCore.SqlServer",
+      "technology": "System.Data.SqlClient",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance/SFA.DAS.EmployerFinance.csproj",
+          "reason": "Usage of System.Data.SqlClient and Microsoft.EntityFrameworkCore.SqlServer packages suggests a SQL Server dependency."
+        }
+      ],
+      "confidence": "medium",
+      "targetId": "database-sql-server",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "employer-finance-2",
+      "name": "SQL Server",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "EmployerFinanceDbContext",
+      "technology": "SqlServer",
       "configurationKeys": [
         "EmployerFinanceConfiguration.SqlConnectionString",
         "EmployerFinanceDbContext"
@@ -238,12 +203,6 @@
       "resources": [
         {
           "type": "database",
-          "name": "EmployerFinanceDbContext",
-          "direction": "outbound",
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Api/Startup.cs"
-        },
-        {
-          "type": "database",
           "name": "employer_financial",
           "direction": "outbound",
           "sourceFile": "src/SFA.DAS.EmployerFinance/Data/EmployerFinanceDbContext.cs"
@@ -251,20 +210,16 @@
       ],
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.EmployerFinance/ServiceRegistration/DatabaseServiceRegistrations.cs",
-          "reason": "AddDbContext registration uses a SQL Server connection."
-        },
-        {
           "sourceFile": "src/SFA.DAS.EmployerFinance.Api/Startup.cs",
-          "reason": "Database registration with AddDbContextCheck for EmployerFinanceDbContext."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance/SFA.DAS.EmployerFinance.csproj",
-          "reason": "Detected package reference to Microsoft.EntityFrameworkCore.SqlServer indicating access to SQL Server databases"
+          "reason": "AddDbContextCheck for EmployerFinanceDbContext found."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance/Data/EmployerFinanceDbContext.cs",
-          "reason": "EmployerFinanceDbContext referencing schema 'employer_financial' for SQL Server."
+          "reason": "DbContext detected with OnConfiguring method using SQL Server connection."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance/ServiceRegistration/DatabaseServiceRegistrations.cs",
+          "reason": "DbContext registered with SQL Server connection string."
         }
       ],
       "confidence": "high",
@@ -272,82 +227,16 @@
       "description": "Reads from and writes to"
     },
     {
-      "sourceId": "employer-finance-web",
+      "sourceId": "employerfinance-messagehandlers",
       "name": "SQL Server",
       "kind": "database",
       "classification": "internal",
-      "direction": "outbound",
-      "client": "EmployerFinanceDbContext",
-      "technology": "Entity Framework Core",
-      "configurationKeys": [
-        "ConnectionStrings:AccountSubmissionsDatabase"
-      ],
-      "authentication": {
-        "type": null,
-        "configurationKeys": []
-      },
-      "operations": [],
-      "resources": [
-        {
-          "type": "sql-server",
-          "name": "AccountSubmissionsDatabase",
-          "direction": "outbound",
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Web/StartupExtensions/EntityFrameworkStartup.cs"
-        }
-      ],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Web/StartupExtensions/EntityFrameworkStartup.cs",
-          "reason": "Entity Framework DbContext configuration with a SQL connection string."
-        }
-      ],
-      "confidence": "high",
-      "targetId": "database-sql-server",
-      "description": "Reads from and writes to"
-    },
-    {
-      "sourceId": "employer-finance-messagehandlers",
-      "name": "SQL Server",
-      "kind": "database",
-      "classification": "internal",
-      "direction": "outbound",
-      "client": "EmployerFinanceDbContext",
-      "technology": "Entity Framework Core",
-      "configurationKeys": [
-        "ConnectionStrings:EmployerFinanceDb"
-      ],
-      "authentication": {
-        "type": null,
-        "configurationKeys": []
-      },
-      "operations": [],
-      "resources": [
-        {
-          "type": "sql-server",
-          "name": "EmployerFinanceDb",
-          "direction": "outbound",
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Web/StartupExtensions/EntityFrameworkStartup.cs"
-        }
-      ],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance/Data/AuditLogRepository.cs",
-          "reason": "Evidence of DbContext usage for interacting with the SQL database."
-        }
-      ],
-      "confidence": "high",
-      "targetId": "database-sql-server",
-      "description": "Reads from and writes to"
-    },
-    {
-      "sourceId": "employer-finance",
-      "name": "Apprenticeship Levy",
-      "kind": "http-api",
-      "classification": "third-party",
       "direction": "outbound",
       "client": null,
-      "technology": "HMRC.ESFA.Levy.Api.Client",
-      "configurationKeys": [],
+      "technology": "SQL Server",
+      "configurationKeys": [
+        "SqlConnectionString"
+      ],
       "authentication": {
         "type": null,
         "configurationKeys": []
@@ -356,24 +245,55 @@
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.EmployerFinance/SFA.DAS.EmployerFinance.csproj",
-          "reason": "Detected package reference to HMRC.ESFA.Levy.Api.Client indicating usage of the Apprenticeship Levy API"
+          "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/Extensions/ServiceCollectionExtensions.cs",
+          "reason": "UseSqlServerPersistence for SQL Server found."
         }
       ],
       "confidence": "high",
-      "targetId": "http-api-apprenticeship-levy",
-      "description": "Calls the API of"
+      "targetId": "database-sql-server",
+      "description": "Reads from and writes to"
     },
     {
-      "sourceId": "employer-finance-messagehandlers",
+      "sourceId": "employerfinance-web",
+      "name": "SQL Server",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "EmployerFinanceDbContext",
+      "technology": "SQL Server",
+      "configurationKeys": [
+        "EmployerFinanceConfiguration.SqlConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance.Web/StartupExtensions/EntityFrameworkStartup.cs",
+          "reason": "DbContextOptionsBuilder<EmployerFinanceDbContext>.UseSqlServer is invoked using a connection string."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance.Web/StartupExtensions/EntityFrameworkStartup.cs",
+          "reason": "EmployerFinanceDbContext is registered for dependency injection."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-sql-server",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "employerfinance-messagehandlers",
       "name": "Apprenticeship Levy",
       "kind": "http-api",
-      "classification": "unknown",
+      "classification": "third-party",
       "direction": "outbound",
-      "client": "IApprenticeshipLevyApiClient",
+      "client": "ApprenticeshipLevyApiClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "ApprenticeshipLevyApi"
+        "IHmrcConfiguration.BaseUrl"
       ],
       "authentication": {
         "type": null,
@@ -384,7 +304,7 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/ServiceRegistrations/ClientServiceRegistrations.cs",
-          "reason": "Custom HttpClient initialization for ApprenticeshipLevyApiClient."
+          "reason": "Custom HttpClient factory for IApprenticeshipLevyApiClient."
         }
       ],
       "confidence": "high",
@@ -392,16 +312,39 @@
       "description": "Calls the API of"
     },
     {
-      "sourceId": "employer-finance-web",
+      "sourceId": "employerfinance-messagehandlers",
       "name": "Commitments V2",
       "kind": "http-api",
-      "classification": "unknown",
+      "classification": "internal",
       "direction": "outbound",
-      "client": "ICommitmentsV2ApiClient",
+      "client": "CommitmentsV2ApiClient",
       "technology": "HttpClient",
-      "configurationKeys": [
-        "CommitmentsV2ApiClient"
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/ServiceRegistrations/ClientServiceRegistrations.cs",
+          "reason": "AddHttpClient registration for ICommitmentsV2ApiClient."
+        }
       ],
+      "confidence": "high",
+      "targetId": "http-api-commitments-v2",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "employerfinance-web",
+      "name": "Commitments V2",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "CommitmentsV2ApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [],
       "authentication": {
         "type": null,
         "configurationKeys": []
@@ -411,7 +354,7 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.Web/StartupExtensions/ApplicationServiceRegistrations.cs",
-          "reason": "HttpClient registration for ICommitmentsV2ApiClient."
+          "reason": "AddHttpClient registration for ICommitmentsV2ApiClient."
         }
       ],
       "confidence": "high",
@@ -419,10 +362,10 @@
       "description": "Calls the API of"
     },
     {
-      "sourceId": "employer-finance",
+      "sourceId": "employer-finance-2",
       "name": "Content API",
       "kind": "http-api",
-      "classification": "unknown",
+      "classification": "third-party",
       "direction": "outbound",
       "client": "ContentApiClient",
       "technology": "HttpClient",
@@ -438,7 +381,7 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance/ServiceRegistration/ContentApiClientServiceRegistrations.cs",
-          "reason": "ContentApiClient registered via AddHttpClient based on ContentClientApiConfiguration."
+          "reason": "HttpClient registered for content API with associated configuration."
         }
       ],
       "confidence": "high",
@@ -446,16 +389,102 @@
       "description": "Calls the API of"
     },
     {
-      "sourceId": "employer-finance-web",
-      "name": "Content API",
+      "sourceId": "employer-finance-2",
+      "name": "Employer Finance Authentication",
       "kind": "http-api",
       "classification": "unknown",
       "direction": "outbound",
-      "client": "IContentApiClient",
+      "client": "ISecureHttpClient",
       "technology": "HttpClient",
       "configurationKeys": [
-        "ContentApiClient"
+        "IdentifierUri"
       ],
+      "authentication": {
+        "type": "managed-identity",
+        "configurationKeys": [
+          "IdentifierUri"
+        ]
+      },
+      "operations": [
+        {
+          "method": "GET",
+          "methodName": "GetAsync",
+          "path": null,
+          "sourceFile": "src/SFA.DAS.EmployerFinance.Api.Client/SecureHttpClient.cs"
+        },
+        {
+          "method": "POST",
+          "methodName": "PostAsync",
+          "path": null,
+          "sourceFile": "src/SFA.DAS.EmployerFinance.Api.Client/SecureHttpClient.cs"
+        }
+      ],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance.Api.Client/SecureHttpClient.cs",
+          "reason": "SecureHttpClient using HttpClient with Bearer authentication based on managed identity token."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-employer-finance-authentication",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "employer-finance-2",
+      "name": "Outer API",
+      "kind": "http-api",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "OuterApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "EmployerFinanceOuterApiConfiguration.BaseUrl"
+      ],
+      "authentication": {
+        "type": "api-key",
+        "configurationKeys": [
+          "EmployerFinanceOuterApiConfiguration.Key"
+        ]
+      },
+      "operations": [
+        {
+          "method": "GET",
+          "methodName": "Get",
+          "path": "[request.GetUrl]",
+          "sourceFile": "src/SFA.DAS.EmployerFinance/Infrastructure/OuterApiClient.cs"
+        },
+        {
+          "method": "POST",
+          "methodName": "Post",
+          "path": "[url]",
+          "sourceFile": "src/SFA.DAS.EmployerFinance/Infrastructure/OuterApiClient.cs"
+        }
+      ],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance/Infrastructure/OuterApiClient.cs",
+          "reason": "Base URL configured for the Outer API client."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance/ServiceRegistration/EmployerFinanceOuterApiServiceRegistrations.cs",
+          "reason": "HttpClient registered for interactions with an external API."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-outer-api",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "employerfinance-web",
+      "name": "Outer API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "OuterApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [],
       "authentication": {
         "type": null,
         "configurationKeys": []
@@ -465,95 +494,7 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.Web/StartupExtensions/ApplicationServiceRegistrations.cs",
-          "reason": "HttpClient registration for IContentApiClient."
-        }
-      ],
-      "confidence": "high",
-      "targetId": "http-api-content-api",
-      "description": "Calls the API of"
-    },
-    {
-      "sourceId": "employer-finance",
-      "name": "HTTP Wrapper",
-      "kind": "http-api",
-      "classification": "unknown",
-      "direction": "outbound",
-      "client": "HttpClientWrapper",
-      "technology": "HttpClient",
-      "configurationKeys": [],
-      "authentication": {
-        "type": "Bearer",
-        "configurationKeys": []
-      },
-      "operations": [
-        {
-          "method": "GET",
-          "methodName": "Get",
-          "path": "{url}",
-          "sourceFile": "src/SFA.DAS.EmployerFinance/Http/HttpClientWrapper.cs"
-        },
-        {
-          "method": "GET",
-          "methodName": "GetString",
-          "path": "{url}",
-          "sourceFile": "src/SFA.DAS.EmployerFinance/Http/HttpClientWrapper.cs"
-        },
-        {
-          "method": "POST",
-          "methodName": "SendMessage",
-          "path": "{url}",
-          "sourceFile": "src/SFA.DAS.EmployerFinance/Http/HttpClientWrapper.cs"
-        }
-      ],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance/Http/HttpClientWrapper.cs",
-          "reason": "HttpClientWrapper uses HttpClient to interact with external HTTP services."
-        }
-      ],
-      "confidence": "medium",
-      "targetId": "http-api-http-wrapper",
-      "description": "Calls the API of"
-    },
-    {
-      "sourceId": "employer-finance",
-      "name": "Outer API",
-      "kind": "http-api",
-      "classification": "unknown",
-      "direction": "outbound",
-      "client": "OuterApiClient",
-      "technology": "HttpClient",
-      "configurationKeys": [
-        "EmployerFinanceOuterApiConfiguration.BaseUrl"
-      ],
-      "authentication": {
-        "type": "Ocp-Apim-Subscription-Key",
-        "configurationKeys": []
-      },
-      "operations": [
-        {
-          "method": "GET",
-          "methodName": "Get",
-          "path": "{request.GetUrl}",
-          "sourceFile": "src/SFA.DAS.EmployerFinance/Infrastructure/OuterApiClient.cs"
-        },
-        {
-          "method": "POST",
-          "methodName": "Post",
-          "path": "{url}",
-          "sourceFile": "src/SFA.DAS.EmployerFinance/Infrastructure/OuterApiClient.cs"
-        }
-      ],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance/ServiceRegistration/EmployerFinanceOuterApiServiceRegistrations.cs",
-          "reason": "HttpClient registered for IOuterApiClient via OuterApiClient."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance/Infrastructure/OuterApiClient.cs",
-          "reason": "OuterApiClient constructed and registered with base URL from EmployerFinanceOuterApiConfiguration."
+          "reason": "AddHttpClient registration for IOuterApiClient."
         }
       ],
       "confidence": "high",
@@ -561,35 +502,10 @@
       "description": "Calls the API of"
     },
     {
-      "sourceId": "employer-finance-messagehandlers",
-      "name": "Payments Events",
-      "kind": "http-api",
-      "classification": "unknown",
-      "direction": "outbound",
-      "client": "IPaymentsEventsApiClient",
-      "technology": "HttpClient",
-      "configurationKeys": [],
-      "authentication": {
-        "type": null,
-        "configurationKeys": []
-      },
-      "operations": [],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/ServiceRegistrations/ClientServiceRegistrations.cs",
-          "reason": "Factory-based client registration for PaymentsEventsApiClient."
-        }
-      ],
-      "confidence": "high",
-      "targetId": "http-api-payments-events",
-      "description": "Calls the API of"
-    },
-    {
       "sourceId": "employer-finance",
       "name": "Azure Service Bus",
       "kind": "message-broker",
-      "classification": "third-party",
+      "classification": "unknown",
       "direction": "outbound",
       "client": null,
       "technology": "Azure.Messaging.ServiceBus",
@@ -603,19 +519,19 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance/SFA.DAS.EmployerFinance.csproj",
-          "reason": "Detected package reference to Azure.Messaging.ServiceBus"
+          "reason": "Usage of Azure.Messaging.ServiceBus package indicates dependency on Azure Service Bus."
         }
       ],
-      "confidence": "high",
+      "confidence": "medium",
       "targetId": "message-broker-azure-service-bus",
       "description": "Publishes messages to and consumes messages from"
     },
     {
-      "sourceId": "employer-finance-messagehandlers",
+      "sourceId": "employerfinance-messagehandlers",
       "name": "Azure Service Bus",
       "kind": "message-broker",
       "classification": "internal",
-      "direction": "outbound",
+      "direction": "bidirectional",
       "client": "ServiceBusClient",
       "technology": "Azure Service Bus",
       "configurationKeys": [
@@ -626,18 +542,11 @@
         "configurationKeys": []
       },
       "operations": [],
-      "resources": [
-        {
-          "type": "queue",
-          "name": null,
-          "direction": "outbound",
-          "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/Extensions/ServiceCollectionExtensions.cs"
-        }
-      ],
+      "resources": [],
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/Extensions/ServiceCollectionExtensions.cs",
-          "reason": "ServiceBusClient construction with connection string detected."
+          "reason": "ServiceBusClient instance construction found."
         }
       ],
       "confidence": "high",

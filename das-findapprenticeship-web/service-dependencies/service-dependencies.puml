@@ -2,21 +2,22 @@
 !include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
 LAYOUT_WITH_LEGEND()
 
-System_Boundary(sys_SkillsFundingAgency_das_findapprenticeship_web, "Find An Apprenticeship") {
-  Container(c_find_an_apprenticeship, "Find An Apprenticeship", "Component")
-  Container(c_findanapprenticeship_mockserver, "FindAnApprenticeship MockServer", "Component")
-  Container(c_findanapprenticeship_web, "FindAnApprenticeship", "Web Application")
+System_Boundary(sys_SkillsFundingAgency_das_findapprenticeship_web, "FindAnApprenticeship") {
+  Container(c_findanapprenticeship, "FindAnApprenticeship", "Component")
+  Container(c_sfa_das_faa_mockserver, "FindAnApprenticeship MockServer", "Component")
+  Container(c_sfa_das_faa_web, "FindAnApprenticeship", "Web Application")
 }
 
-SystemDb_Ext(d_cache_redis, "Redis", "StackExchange.Redis")
-System_Ext(d_cloud_service_azure_key_vault, "Azure Key Vault", "Azure SDK")
+SystemDb_Ext(d_cache_redis_cache, "Redis Cache", "StackExchange.Redis")
+System_Ext(d_cloud_service_application_insights, "Application Insights", "Application Insights SDK")
+System_Ext(d_cloud_service_azure_key_vault, "Azure Key Vault", "Azure Key Vault")
 System_Ext(d_http_api_find_an_apprenticeship_outer, "Find An Apprenticeship Outer", "HttpClient")
-System_Ext(d_http_api_find_an_apprenticeship_outer_api, "Find An Apprenticeship Outer API", "HttpClient")
 
-Rel(c_findanapprenticeship_web, d_cache_redis, "Caches data in", "StackExchange.Redis")
-Rel(c_find_an_apprenticeship, d_cloud_service_azure_key_vault, "Uses", "Azure SDK")
-Rel(c_findanapprenticeship_web, d_cloud_service_azure_key_vault, "Uses", "Azure SDK")
-Rel(c_findanapprenticeship_web, d_http_api_find_an_apprenticeship_outer, "Calls the API of", "HttpClient")
-Rel(c_find_an_apprenticeship, d_http_api_find_an_apprenticeship_outer_api, "Calls the API of", "HttpClient")
+Rel(c_sfa_das_faa_web, d_cache_redis_cache, "Caches data in", "StackExchange.Redis")
+Rel(c_sfa_das_faa_web, d_cloud_service_application_insights, "Uses", "Application Insights SDK")
+Rel(c_findanapprenticeship, d_cloud_service_azure_key_vault, "Uses", "Azure Key Vault")
+Rel(c_sfa_das_faa_web, d_cloud_service_azure_key_vault, "Uses", "Azure.Security.KeyVault.Secrets")
+Rel(c_findanapprenticeship, d_http_api_find_an_apprenticeship_outer, "Calls the API of", "HttpClient")
+Rel(c_sfa_das_faa_web, d_http_api_find_an_apprenticeship_outer, "Calls the API of", "HttpClient")
 
 @enduml
