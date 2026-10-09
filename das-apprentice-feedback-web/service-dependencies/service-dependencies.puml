@@ -1,0 +1,16 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+System_Boundary(sys_SkillsFundingAgency_das_apprentice_feedback_web, "Apprentice Feedback") {
+  Container(c_apprentice_feedback_nservicebuslistener, "Apprentice Feedback NServiceBus Listener", "Background Job")
+  Container(c_apprentice_feedback_web, "Apprentice Feedback", "Web Application")
+}
+
+SystemDb_Ext(d_cache_redis, "Redis", "StackExchange.Redis")
+SystemQueue_Ext(d_message_broker_azure_service_bus, "Azure Service Bus", "Azure Service Bus")
+
+Rel(c_apprentice_feedback_web, d_cache_redis, "Caches data in", "StackExchange.Redis")
+Rel(c_apprentice_feedback_nservicebuslistener, d_message_broker_azure_service_bus, "Publishes messages to and consumes messages from", "Azure Service Bus")
+
+@enduml

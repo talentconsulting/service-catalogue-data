@@ -1,0 +1,119 @@
+{
+  "repository": "SkillsFundingAgency/das-apprentice-feedback-api",
+  "ref": "main",
+  "path": "src",
+  "systemName": "Apprentice Feedback",
+  "containers": [
+    {
+      "id": "apprentice-feedback",
+      "name": "Apprentice Feedback",
+      "type": "api",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Api/Program.cs",
+          "reason": "ASP.NET Core application entry point."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Api/SFA.DAS.ApprenticeFeedback.Api.csproj",
+          "reason": "Project SDK is for a web application."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "apprentice-feedback",
+      "name": "Azure Table Storage",
+      "kind": "cloud-service",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "Azure Table Storage",
+      "technology": "Azure Table Storage",
+      "configurationKeys": [
+        "ConfigNames",
+        "ConfigurationStorageConnectionString",
+        "EnvironmentName"
+      ],
+      "authentication": {
+        "type": "Azure AD",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Api/Startup.cs",
+          "reason": "Azure Table Storage configuration is added to the application."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cloud-service-azure-table-storage",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "apprentice-feedback",
+      "name": "Apprentice Feedback Database",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ApprenticeFeedbackDataContext",
+      "technology": "SQL Server",
+      "configurationKeys": [
+        "ApplicationSettings:DbConnectionString"
+      ],
+      "authentication": {
+        "type": "Azure AD",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "Apprentice Feedback Database",
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Data/ApprenticeFeedbackDataContext.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Api/AppStart/AddDatabaseRegistrations.cs",
+          "reason": "AddDbContext with SQL Server is registered for ApprenticeFeedbackDataContext."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Data/ApprenticeFeedbackDataContext.cs",
+          "reason": "ApprenticeFeedbackDataContext class configures SQL Server connection for the database."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-apprentice-feedback-database",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "apprentice-feedback",
+      "name": "Azure Service Bus",
+      "kind": "message-broker",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "NServiceBus",
+      "technology": "Azure Service Bus",
+      "configurationKeys": [
+        "ApplicationSettings:NServiceBusConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Api/AppStart/NServiceBusRegistration.cs",
+          "reason": "NServiceBus Azure Service Bus transport is configured."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-azure-service-bus",
+      "description": "Publishes messages to and consumes messages from"
+    }
+  ]
+}
