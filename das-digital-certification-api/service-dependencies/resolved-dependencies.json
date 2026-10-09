@@ -11,11 +11,11 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.DigitalCertificates.Api/Program.cs",
-          "reason": "ASP.NET entry point (web application hosting)."
+          "reason": "ASP.NET Web API entry point evidenced by `CreateHostBuilder` and `UseStartup` calls."
         },
         {
-          "sourceFile": "src/SFA.DAS.DigitalCertificates.Api/SFA.DAS.DigitalCertificates.Api.csproj",
-          "reason": "Web SDK project file."
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Api/Startup.cs",
+          "reason": "ASP.NET Web API setup in Startup class."
         }
       ]
     }
@@ -23,47 +23,75 @@
   "dependencies": [
     {
       "sourceId": "digital-certificates",
-      "name": "Digital Certificates Database",
+      "name": "Azure Token Credentials",
+      "kind": "cloud-service",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "ChainedTokenCredential",
+      "technology": "Azure.Identity",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Api/AppStart/AddDatabaseRegistrations.cs",
+          "reason": "Azure Credentials constructed for ChainedTokenCredential registration."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Data/DigitalCertificatesDataContext.cs",
+          "reason": "Azure Credentials used for database authentication."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cloud-service-azure-token-credentials",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "digital-certificates",
+      "name": "Application Database",
       "kind": "database",
       "classification": "internal",
       "direction": "outbound",
-      "client": "DigitalCertificatesDataContext",
-      "technology": "SqlServer",
+      "client": "SqlConnection",
+      "technology": "Microsoft.EntityFrameworkCore.SqlServer",
       "configurationKeys": [
-        "ApplicationSettings:DbConnectionString",
-        "ConfigurationStorageConnectionString"
+        "ApplicationSettings:DbConnectionString"
       ],
       "authentication": {
-        "type": "Azure AD Managed Identity",
+        "type": "managed",
         "configurationKeys": []
       },
       "operations": [],
       "resources": [
         {
           "type": "database",
-          "name": "DigitalCertificatesDataContext",
+          "name": "ApplicationSettings:DbConnectionString",
           "direction": "outbound",
           "sourceFile": "src/SFA.DAS.DigitalCertificates.Api/AppStart/AddDatabaseRegistrations.cs"
         }
       ],
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.DigitalCertificates.Data/DigitalCertificatesDataContext.cs",
-          "reason": "DbContext class implementation."
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Api/AppStart/AddDatabaseRegistrations.cs",
+          "reason": "Database connection registered using `AddDbContext` with SQL Server."
         },
         {
-          "sourceFile": "src/SFA.DAS.DigitalCertificates.Api/AppStart/AddDatabaseRegistrations.cs",
-          "reason": "DbContext for the SQL Server database is registered."
+          "sourceFile": "src/SFA.DAS.DigitalCertificates.Data/DigitalCertificatesDataContext.cs",
+          "reason": "Entity Framework DbContext subclass for SQL Server with connection configuration from application settings."
         }
       ],
       "confidence": "high",
-      "targetId": "database-digital-certificates-database",
+      "targetId": "database-application-database",
       "description": "Reads from and writes to"
     }
   ],
   "resolution": {
     "overlay": "dfe-overlay/apim-routing.json",
-    "apimCommit": "6f286b6a514dd2a65572b7c1fbd140cdbb58ab1a",
+    "apimCommit": "d1abc8e74ee8a1b8b58af7b7093268450310b87b",
     "precision": "area"
   }
 }
