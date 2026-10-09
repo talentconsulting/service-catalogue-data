@@ -8,26 +8,27 @@
       "kind": "cache",
       "technology": "redis",
       "configurationKeys": [
-        "EmployerAccountsConfiguration:DataProtectionKeysDatabase",
-        "EmployerAccountsConfiguration:RedisConnectionString",
-        "RedisConnection"
+        "EmployerAccounts:DataProtectionKeysDatabase",
+        "EmployerAccounts:RedisConnectionString",
+        "RedisConnection",
+        "RedisConnectionString"
       ],
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-          "reason": "Key 'RedisConnection' explicitly configures the Redis service connection."
+          "reason": "Redis connection is configured via the RedisConnection key."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
-          "reason": "Contains a property 'RedisConnectionString' evidencing a Redis caching service."
+          "reason": "Property 'RedisConnectionString' indicates a Redis cache configuration."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/ServiceRegistrations/CachingServiceRegistrations.cs",
-          "reason": "Detected Redis configuration in AddStackExchangeRedisCache method."
+          "reason": "AddStackExchangeRedisCache method is used with Redis connection string for caching."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/DataProtectionServiceRegistrations.cs",
-          "reason": "Redis connection and database keys are used for configuring data protection."
+          "reason": "Redis configured for data protection keys with a connection string and database."
         }
       ]
     },
@@ -36,75 +37,58 @@
       "kind": "database",
       "technology": "sqlserver",
       "configurationKeys": [
-        "EmployerAccountsConfiguration:DatabaseConnectionString",
-        "EmployerAccountsConfiguration:DataProtectionKeysDatabase",
-        "EmployerApprenticeshipsServiceConfiguration:DatabaseConnectionString"
+        "DatabaseConnectionString",
+        "DataProtectionKeysDatabase",
+        "EmployerAccounts:DatabaseConnectionString"
       ],
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
-          "reason": "Contains a property named 'DataProtectionKeysDatabase' likely for a database used to store data protection keys."
+          "reason": "Properties 'DatabaseConnectionString' and 'DataProtectionKeysDatabase' indicate an SQL Server database configuration."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerApprenticeshipsServiceConfiguration.cs",
-          "reason": "Contains a property named 'DatabaseConnectionString' for another local database connection."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
-          "reason": "Contains a property named 'DatabaseConnectionString' used for local database connectivity."
+          "reason": "Property 'DatabaseConnectionString' indicates an SQL Server database configuration."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/ServiceRegistrations/HealthChecksServiceRegistrations.cs",
-          "reason": "Detected SQL Server connection in AddSqlServer method for health check registration."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerAccounts/Extensions/DatabaseExtensions.cs",
-          "reason": "Detected SQL Server connection in GetSqlConnection method."
+          "reason": "AddSqlServer is used for health checks with database connection string."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Data/EmployerAccountsDbContext.cs",
-          "reason": "Detected SQL Server connection in OnConfiguring method of DbContext."
+          "reason": "EmployerAccountsDbContext is configured with a database connection."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/DatabaseServiceRegistrations.cs",
-          "reason": "The database connection string is used to configure Entity Framework with `UseSqlServer`."
+          "reason": "AddDbContext configured with SQL Server using a connection string."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Startup/EntityFrameworkStartup.cs",
-          "reason": "The database connection string is used to initialize `DbContext` with `UseSqlServer`."
+          "reason": "DbContext configured with SQL Server using a connection string."
         }
       ]
     },
     {
-      "name": "Azure Service Bus",
+      "name": "azure service bus",
       "kind": "message-broker",
       "technology": "servicebus",
       "configurationKeys": [
-        "Microsoft.ServiceBus.ConnectionString"
+        "Microsoft.ServiceBus.ConnectionString",
+        "ServiceBusConnectionString"
       ],
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts.TestCommon/appsettings.json",
-          "reason": "Contains 'Microsoft.ServiceBus.ConnectionString', indicating usage of Azure Service Bus for messaging"
-        }
-      ]
-    },
-    {
-      "name": "Service Bus",
-      "kind": "message-broker",
-      "technology": null,
-      "configurationKeys": [
-        "EmployerAccountsConfiguration:ServiceBusConnectionString"
-      ],
-      "evidence": [
+          "reason": "Microsoft.ServiceBus.ConnectionString references an Azure Service Bus instance."
+        },
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
-          "reason": "Contains a property 'ServiceBusConnectionString' evidencing a message broker service."
+          "reason": "Property 'ServiceBusConnectionString' indicates a message broker configuration for Azure Service Bus."
         }
       ]
     },
     {
-      "name": "Azurite",
+      "name": "azure development storage",
       "kind": "object-storage",
       "technology": "azurite",
       "configurationKeys": [
@@ -116,15 +100,30 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts.Jobs/appsettings.json",
-          "reason": "References 'UseDevelopmentStorage=true', which is commonly used with Azurite for local development"
+          "reason": "ConfigurationStorageConnectionString and related storage connection strings reference Azure Development Storage."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerAccounts.MessageHandlers/appsettings.json",
-          "reason": "References 'UseDevelopmentStorage=true', which is commonly used with Azurite for local development"
+          "reason": "ConfigurationStorageConnectionString and related storage connection strings reference Azure Development Storage."
         },
         {
+          "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/appsettings.json",
+          "reason": "ConfigurationStorageConnectionString indicates Azure Development Storage."
+        }
+      ]
+    },
+    {
+      "name": "Azurite",
+      "kind": "object-storage",
+      "technology": "azurite",
+      "configurationKeys": [
+        "ConfigurationStorageConnectionString",
+        "StorageConnectionString"
+      ],
+      "evidence": [
+        {
           "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-          "reason": "Keys 'ConfigurationStorageConnectionString' and 'StorageConnectionString' are set to 'UseDevelopmentStorage=true', indicating use of Azurite for local Azure Blob Storage emulation."
+          "reason": "Azurite is indicated as the object storage handler using UseDevelopmentStorage=true in connection strings."
         }
       ]
     }
@@ -133,512 +132,612 @@
     {
       "key": "AccountsApiIdentifierUri",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/appsettings.json",
-      "reason": "Evidenced as part of the appsettings.json file, likely indicating API configuration is required"
+      "reason": "Specifies the API identifier URI."
+    },
+    {
+      "key": "AllowedHashstringCharacters",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
+      "reason": "General configuration property required for hashing operations."
+    },
+    {
+      "key": "AllowedHosts",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/appsettings.json",
+      "reason": "Defines the allowed hosts for the application."
     },
     {
       "key": "AllowedHosts",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying allowed hostnames."
+      "reason": "Key configures allowed hosts for the application."
     },
     {
       "key": "APPINSIGHTS_INSTRUMENTATIONKEY",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Jobs/appsettings.json",
-      "reason": "Listed in appsettings.json, indicating it is part of required telemetry configuration"
+      "reason": "Placeholder for an Application Insights instrumentation key."
+    },
+    {
+      "key": "APPINSIGHTS_INSTRUMENTATIONKEY",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.MessageHandlers/appsettings.json",
+      "reason": "Placeholder for an Application Insights instrumentation key."
     },
     {
       "key": "ApprenticeshipInfoServiceConfiguration:BaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/ApprenticeshipInfoServiceConfiguration.cs",
-      "reason": "Property 'BaseUrl' of a strongly-typed configuration class indicates a key for configuring the Apprenticeship Info Service."
+      "reason": "Key configures the base URL for the Apprenticeship Info Service API."
     },
     {
       "key": "AzureActiveDirectoryApiConfiguration:Identifier",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/AzureActiveDirectoryApiConfiguration.cs",
-      "reason": "Property 'Identifier' of a strongly-typed configuration class indicates a key for configuring Azure Active Directory."
+      "reason": "Key configures the identifier URI for Azure Active Directory API."
     },
     {
       "key": "AzureActiveDirectoryApiConfiguration:Tenant",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/AzureActiveDirectoryApiConfiguration.cs",
-      "reason": "Property 'Tenant' of a strongly-typed configuration class indicates a key for configuring Azure Active Directory."
+      "reason": "Key configures the tenant identifier for Azure Active Directory."
     },
     {
       "key": "cdn:url",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying the CDN URL."
+      "reason": "Key sets the URL for delivering content via CDN."
+    },
+    {
+      "key": "CdnBaseUrl",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
+      "reason": "URL for the CDN base needs to be configured."
     },
     {
       "key": "ClientValidationEnabled",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for enabling or disabling client-side validation."
+      "reason": "Key toggles client-side validation."
     },
     {
       "key": "CommitmentsApiV2ClientConfiguration:ApiBaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/CommitmentsApiV2ClientConfiguration.cs",
-      "reason": "Property 'ApiBaseUrl' of a strongly-typed configuration class indicates a key for configuring the Commitments API V2 client."
+      "reason": "Key configures the base URL for the Commitments API V2."
     },
     {
       "key": "CommitmentsApiV2ClientConfiguration:IdentifierUri",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/CommitmentsApiV2ClientConfiguration.cs",
-      "reason": "Property 'IdentifierUri' of a strongly-typed configuration class indicates a key for configuring the Commitments API V2 client."
+      "reason": "Key configures the identifier URI for the Commitments API."
     },
     {
       "key": "ConfigNames",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/appsettings.json",
-      "reason": "Listed in the appsettings.json file, likely part of the application's custom configuration"
+      "reason": "Specifies configuration names to load."
     },
     {
       "key": "ConfigNames",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying configuration names."
+      "reason": "Key lists configuration names for reference in the application."
     },
     {
       "key": "ConfigurationStorageConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/appsettings.json",
-      "reason": "Referenced in the appsettings.json file, indicating it is required for local development"
+      "reason": "Indicates connection to Azure Development Storage."
+    },
+    {
+      "key": "ConfigurationStorageConnectionString",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.Jobs/appsettings.json",
+      "reason": "Indicates connection to Azure Development Storage."
+    },
+    {
+      "key": "ConfigurationStorageConnectionString",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.MessageHandlers.TestHarness/appsettings.json",
+      "reason": "Indicates connection to Azure Development Storage."
+    },
+    {
+      "key": "ConfigurationStorageConnectionString",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.MessageHandlers/appsettings.json",
+      "reason": "Indicates connection to Azure Development Storage."
     },
     {
       "key": "ConfigurationStorageConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for connecting to configuration storage."
+      "reason": "Controls connection string for configuration storage, indicating local Azurite use."
     },
     {
       "key": "ConnectionStrings:AzureWebJobsDashboard",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Jobs/appsettings.json",
-      "reason": "Evidenced for local Azure Web Jobs monitoring, configured using storage services"
+      "reason": "Azure Development Storage connection string for WebJobs Dashboard."
+    },
+    {
+      "key": "ConnectionStrings:AzureWebJobsDashboard",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.MessageHandlers/appsettings.json",
+      "reason": "Azure Development Storage connection string for WebJobs Dashboard."
     },
     {
       "key": "ConnectionStrings:AzureWebJobsStorage",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Jobs/appsettings.json",
-      "reason": "Evidenced for Azure Functions or Web Jobs storage configuration in local development"
+      "reason": "Azure Development Storage connection string for WebJobs Storage."
+    },
+    {
+      "key": "ConnectionStrings:AzureWebJobsStorage",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.MessageHandlers/appsettings.json",
+      "reason": "Azure Development Storage connection string for WebJobs Storage."
     },
     {
       "key": "ContentClientApi:ApiBaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/IManagedIdentityClientConfiguration.cs",
-      "reason": "Evidenced as a property in the IManagedIdentityClientConfiguration interface."
+      "reason": "Defined as a property on the IManagedIdentityClientConfiguration interface, inherited by IContentClientApiConfiguration."
     },
     {
       "key": "ContentClientApi:IdentifierUri",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/IManagedIdentityClientConfiguration.cs",
-      "reason": "Evidenced as a property in the IManagedIdentityClientConfiguration interface."
+      "reason": "Defined as a property on the IManagedIdentityClientConfiguration interface, inherited by IContentClientApiConfiguration."
     },
     {
       "key": "ContentClientApiConfiguration:ApiBaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/ContentClientApiConfiguration.cs",
-      "reason": "Property 'ApiBaseUrl' of a strongly-typed configuration class indicates a key for configuring the Content Client API."
+      "reason": "Key configures the base URL for the Content Client API."
     },
     {
       "key": "ContentClientApiConfiguration:IdentifierUri",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/ContentClientApiConfiguration.cs",
-      "reason": "Property 'IdentifierUri' of a strongly-typed configuration class indicates a key for configuring the Content Client API."
+      "reason": "Key configures the identifier URI for the Content Client API."
     },
     {
       "key": "CurrentTime",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying current time (value not provided in sample)."
+      "reason": "Key setting is expected to provide the current time for application workflows."
     },
     {
-      "key": "EmployerAccountsConfiguration:DatabaseConnectionString",
+      "key": "DashboardUrl",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
+      "reason": "URL for the dashboard application."
+    },
+    {
+      "key": "DatabaseConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/ServiceRegistrations/HealthChecksServiceRegistrations.cs",
-      "reason": "Detected as database connection string for SQL Server in health check registration."
+      "reason": "Database connection string is needed for health checks."
     },
     {
-      "key": "EmployerAccountsConfiguration:DatabaseConnectionString",
+      "key": "DatabaseConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
-      "reason": "Required for connecting to the primary database."
+      "reason": "SQL Server connection string for primary application data storage."
     },
     {
-      "key": "EmployerAccountsConfiguration:DatabaseConnectionString",
-      "sourceFile": "src/SFA.DAS.EmployerAccounts/Data/EmployerAccountsDbContext.cs",
-      "reason": "Referenced for SQL Server connection in OnConfiguring method."
-    },
-    {
-      "key": "EmployerAccountsConfiguration:DatabaseConnectionString",
-      "sourceFile": "src/SFA.DAS.EmployerAccounts/Extensions/DatabaseExtensions.cs",
-      "reason": "Referenced for SQL Server connection in GetSqlConnection method."
-    },
-    {
-      "key": "EmployerAccountsConfiguration:DatabaseConnectionString",
-      "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/DatabaseServiceRegistrations.cs",
-      "reason": "Required to connect to the SQL Server database through Entity Framework."
-    },
-    {
-      "key": "EmployerAccountsConfiguration:DatabaseConnectionString",
-      "sourceFile": "src/SFA.DAS.EmployerAccounts/Startup/EntityFrameworkStartup.cs",
-      "reason": "Required to configure the `DbContext` when initializing the application."
-    },
-    {
-      "key": "EmployerAccountsConfiguration:DataProtectionKeysDatabase",
-      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
-      "reason": "Required for specifying the database for data protection keys."
-    },
-    {
-      "key": "EmployerAccountsConfiguration:DataProtectionKeysDatabase",
-      "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/DataProtectionServiceRegistrations.cs",
-      "reason": "Required for specifying the Redis database for data protection."
-    },
-    {
-      "key": "EmployerAccountsConfiguration:RedisConnectionString",
-      "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/ServiceRegistrations/CachingServiceRegistrations.cs",
-      "reason": "Referenced as Redis connection string in AddStackExchangeRedisCache method."
-    },
-    {
-      "key": "EmployerAccountsConfiguration:RedisConnectionString",
-      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
-      "reason": "Required to configure Redis for local caching."
-    },
-    {
-      "key": "EmployerAccountsConfiguration:RedisConnectionString",
-      "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/DataProtectionServiceRegistrations.cs",
-      "reason": "Required to connect to the Redis instance for data protection."
-    },
-    {
-      "key": "EmployerAccountsConfiguration:ServiceBusConnectionString",
-      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
-      "reason": "Required to configure connection to a message broker service for handling messages."
-    },
-    {
-      "key": "EmployerApprenticeshipsServiceConfiguration:DatabaseConnectionString",
+      "key": "DatabaseConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerApprenticeshipsServiceConfiguration.cs",
-      "reason": "Required for connecting to the database for the apprenticeships service."
+      "reason": "SQL Server connection string for application data storage in a specific context."
+    },
+    {
+      "key": "DatabaseConnectionString",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Data/EmployerAccountsDbContext.cs",
+      "reason": "Database connection string is required for EmployerAccountsDbContext configuration."
+    },
+    {
+      "key": "DataProtectionKeysDatabase",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
+      "reason": "SQL Server database used for storing data protection keys."
+    },
+    {
+      "key": "EmployerAccounts:DatabaseConnectionString",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/DatabaseServiceRegistrations.cs",
+      "reason": "Required to configure SQL Server for Entity Framework."
+    },
+    {
+      "key": "EmployerAccounts:DatabaseConnectionString",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Startup/EntityFrameworkStartup.cs",
+      "reason": "Required to configure SQL Server for DbContext."
+    },
+    {
+      "key": "EmployerAccounts:DataProtectionKeysDatabase",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/DataProtectionServiceRegistrations.cs",
+      "reason": "Required to specify Redis database for data protection keys."
+    },
+    {
+      "key": "EmployerAccounts:RedisConnectionString",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/ServiceRegistration/DataProtectionServiceRegistrations.cs",
+      "reason": "Required to configure Redis for data protection keys."
+    },
+    {
+      "key": "EmployerAccountsOuterApiConfiguration:BaseUrl",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsOuterApiConfiguration.cs",
+      "reason": "Base URL for Employer Accounts Outer API."
+    },
+    {
+      "key": "EmployerAccountsOuterApiConfiguration:Key",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsOuterApiConfiguration.cs",
+      "reason": "API Key for accessing Employer Accounts Outer API."
     },
     {
       "key": "EmployerProjectionsBaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying the base URL of the Employer Projections feature."
+      "reason": "Key configures the base URL for Employer Projections functionality."
     },
     {
       "key": "EmployerRecruitBaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying the base URL of the Employer Recruit feature."
+      "reason": "Key configures the base URL for Employer Recruit functionality."
     },
     {
       "key": "EnvironmentName",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/appsettings.json",
-      "reason": "Referenced in the appsettings.json file, indicating it is required for environment configuration"
+      "reason": "Identifies the hosting environment."
+    },
+    {
+      "key": "EnvironmentName",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.Jobs/appsettings.json",
+      "reason": "Identifies the hosting environment."
+    },
+    {
+      "key": "EnvironmentName",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.MessageHandlers.TestHarness/appsettings.json",
+      "reason": "Identifies the hosting environment."
+    },
+    {
+      "key": "EnvironmentName",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.MessageHandlers/appsettings.json",
+      "reason": "Identifies the hosting environment."
     },
     {
       "key": "EnvironmentName",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying the runtime environment."
+      "reason": "Key specifies the current environment name."
     },
     {
       "key": "Hmrc:AzureAppKey",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Evidenced as a property in the IHmrcConfiguration interface."
+      "reason": "Defined as a property on the IHmrcConfiguration interface."
     },
     {
       "key": "Hmrc:AzureClientId",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Evidenced as a property in the IHmrcConfiguration interface."
+      "reason": "Defined as a property on the IHmrcConfiguration interface."
     },
     {
       "key": "Hmrc:AzureResourceId",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Evidenced as a property in the IHmrcConfiguration interface."
+      "reason": "Defined as a property on the IHmrcConfiguration interface."
     },
     {
       "key": "Hmrc:AzureTenant",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Evidenced as a property in the IHmrcConfiguration interface."
+      "reason": "Defined as a property on the IHmrcConfiguration interface."
+    },
+    {
+      "key": "Hmrc:BaseUrl",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/HmrcConfiguration.cs",
+      "reason": "Base URL configuration for HMRC API."
     },
     {
       "key": "Hmrc:BaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Evidenced as a property in the IHmrcConfiguration interface."
+      "reason": "Defined as a property on the IHmrcConfiguration interface."
+    },
+    {
+      "key": "Hmrc:ClientId",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/HmrcConfiguration.cs",
+      "reason": "Client ID for accessing HMRC API."
     },
     {
       "key": "Hmrc:ClientId",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Evidenced as a property in the IHmrcConfiguration interface."
+      "reason": "Defined as a property on the IHmrcConfiguration interface."
     },
     {
       "key": "Hmrc:ClientSecret",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Evidenced as a property in the IHmrcConfiguration interface."
+      "reason": "Defined as a property on the IHmrcConfiguration interface."
     },
     {
       "key": "Hmrc:OgdClientId",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Evidenced as a property in the IHmrcConfiguration interface."
+      "reason": "Defined as a property on the IHmrcConfiguration interface."
     },
     {
       "key": "Hmrc:OgdSecret",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Evidenced as a property in the IHmrcConfiguration interface."
+      "reason": "Defined as a property on the IHmrcConfiguration interface."
+    },
+    {
+      "key": "Hmrc:Scope",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/HmrcConfiguration.cs",
+      "reason": "Auth scope for HMRC API."
     },
     {
       "key": "Hmrc:Scope",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Evidenced as a property in the IHmrcConfiguration interface."
+      "reason": "Defined as a property on the IHmrcConfiguration interface."
     },
     {
       "key": "Hmrc:ServerToken",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Evidenced as a property in the IHmrcConfiguration interface."
+      "reason": "Defined as a property on the IHmrcConfiguration interface."
+    },
+    {
+      "key": "Hmrc:UseHiDataFeed",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/HmrcConfiguration.cs",
+      "reason": "Boolean option for configuring data feed from HMRC."
     },
     {
       "key": "Hmrc:UseHiDataFeed",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Evidenced as a property in the IHmrcConfiguration interface."
+      "reason": "Defined as a property on the IHmrcConfiguration interface."
     },
     {
       "key": "idaTenant",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/appsettings.json",
-      "reason": "Appears in the appsettings.json file, indicating a tenant configuration for authentication"
+      "reason": "Defines the Azure AD tenant."
     },
     {
       "key": "InstrumentationKey",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/appsettings.json",
-      "reason": "Referenced in the appsettings.json file, indicating it is required for local telemetry/configuration"
+      "reason": "Placeholder for an Application Insights instrumentation key."
+    },
+    {
+      "key": "InstrumentationKey",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.MessageHandlers/appsettings.json",
+      "reason": "Placeholder for an Application Insights instrumentation key."
     },
     {
       "key": "InstrumentationKey",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying an instrumentation key."
+      "reason": "Key configures instrumentation for logging/telemetry."
     },
     {
       "key": "LevyDormancyConfiguration:AssessmentEnabled",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/LevyDormancyConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "Boolean property in the LevyDormancyConfiguration class."
     },
     {
       "key": "LevyDormancyConfiguration:DormancyDetectionMonths",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/LevyDormancyConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "Integer property in the LevyDormancyConfiguration class."
     },
     {
       "key": "LevyDormancyConfiguration:IgnoredAccountIds",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/LevyDormancyConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the LevyDormancyConfiguration class, used to specify account IDs."
     },
     {
       "key": "LevyDormancyConfiguration:InitialWarningMonths",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/LevyDormancyConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "Integer property in the LevyDormancyConfiguration class."
     },
     {
       "key": "LevyDormancyConfiguration:LevyDormancyOrchestrationJobSchedule",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/LevyDormancyConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the LevyDormancyConfiguration class."
     },
     {
       "key": "LevyDormancyConfiguration:LevyStatusAssessmentJobSchedule",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/LevyDormancyConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the LevyDormancyConfiguration class."
     },
     {
       "key": "LevyDormancyConfiguration:MonthsBetweenInitialWarningAndSwitch",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/LevyDormancyConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "Integer property in the LevyDormancyConfiguration class."
     },
     {
       "key": "LevyDormancyConfiguration:OrchestrationEnabled",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/LevyDormancyConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "Boolean property in the LevyDormancyConfiguration class."
     },
     {
       "key": "LevyDormancyConfiguration:SkipInitialWarning",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/LevyDormancyConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "Boolean property in the LevyDormancyConfiguration class."
     },
     {
       "key": "LevyDormancyConfiguration:SwitchMonths",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/LevyDormancyConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "Integer property in the LevyDormancyConfiguration class."
     },
     {
       "key": "Logging:LogLevel:Default",
-      "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json under Logging configuration."
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/appsettings.json",
+      "reason": "Default logging level configuration."
     },
     {
       "key": "Logging:LogLevel:Microsoft",
-      "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json under Logging configuration."
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/appsettings.json",
+      "reason": "Microsoft-specific logging level configuration."
     },
     {
       "key": "Logging:LogLevel:Microsoft.Hosting.Lifetime",
-      "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json under Logging configuration."
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/appsettings.json",
+      "reason": "Logging level configuration for hosting lifecycle logs."
     },
     {
       "key": "LogLevel",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying log level."
+      "reason": "Key sets application-wide logging level."
     },
     {
       "key": "Microsoft.ServiceBus.ConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.TestCommon/appsettings.json",
-      "reason": "Lists connection details for Azure Service Bus, indicating it is required for message brokering"
+      "reason": "Message broker connection to Azure Service Bus."
     },
     {
       "key": "PensionRegulatorConfiguration:BaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/PensionRegulatorConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the PensionRegulatorConfiguration class."
     },
     {
       "key": "PensionRegulatorConfiguration:ClientId",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/PensionRegulatorConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the PensionRegulatorConfiguration class."
     },
     {
       "key": "PensionRegulatorConfiguration:ClientSecret",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/PensionRegulatorConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the PensionRegulatorConfiguration class."
     },
     {
       "key": "PensionRegulatorConfiguration:IdentifierUri",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/PensionRegulatorConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the PensionRegulatorConfiguration class."
     },
     {
       "key": "PensionRegulatorConfiguration:Tenant",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/PensionRegulatorConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the PensionRegulatorConfiguration class."
     },
     {
-      "key": "ProviderRegistrationApi:BaseUrl",
+      "key": "ProviderRegistrationClientApi:BaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/IProviderRegistrationClientApiConfiguration.cs",
-      "reason": "Evidenced as a property in the IProviderRegistrationClientApiConfiguration interface."
+      "reason": "Defined as a property on the IProviderRegistrationClientApiConfiguration interface."
     },
     {
-      "key": "ProviderRegistrationApi:IdentifierUri",
+      "key": "ProviderRegistrationClientApi:IdentifierUri",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/IProviderRegistrationClientApiConfiguration.cs",
-      "reason": "Evidenced as a property in the IProviderRegistrationClientApiConfiguration interface."
+      "reason": "Defined as a property on the IProviderRegistrationClientApiConfiguration interface."
     },
     {
       "key": "ProviderRegistrationClientApiConfiguration:BaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/ProviderRegistrationClientApiConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the ProviderRegistrationClientApiConfiguration class."
     },
     {
       "key": "ProviderRegistrationClientApiConfiguration:IdentifierUri",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/ProviderRegistrationClientApiConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the ProviderRegistrationClientApiConfiguration class."
     },
     {
       "key": "ProviderRegistrationsConfiguration:BaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/ProviderRegistrationsConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the ProviderRegistrationsConfiguration class."
     },
     {
       "key": "ProviderRegistrationsConfiguration:ClientId",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/ProviderRegistrationsConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the ProviderRegistrationsConfiguration class."
     },
     {
       "key": "ProviderRegistrationsConfiguration:ClientSecret",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/ProviderRegistrationsConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the ProviderRegistrationsConfiguration class."
     },
     {
       "key": "ProviderRegistrationsConfiguration:IdentifierUri",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/ProviderRegistrationsConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the ProviderRegistrationsConfiguration class."
     },
     {
       "key": "ProviderRegistrationsConfiguration:Tenant",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/ProviderRegistrationsConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the ProviderRegistrationsConfiguration class."
     },
     {
       "key": "RecruitClientApi:ApiBaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/IManagedIdentityClientConfiguration.cs",
-      "reason": "Evidenced as a property in the IManagedIdentityClientConfiguration interface."
+      "reason": "Defined as a property on the IManagedIdentityClientConfiguration interface, inherited by IRecruitClientApiConfiguration."
     },
     {
       "key": "RecruitClientApi:IdentifierUri",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Interfaces/IManagedIdentityClientConfiguration.cs",
-      "reason": "Evidenced as a property in the IManagedIdentityClientConfiguration interface."
+      "reason": "Defined as a property on the IManagedIdentityClientConfiguration interface, inherited by IRecruitClientApiConfiguration."
     },
     {
       "key": "RecruitClientApiConfiguration:ApiBaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/RecruitClientApiConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the RecruitClientApiConfiguration class."
     },
     {
       "key": "RecruitClientApiConfiguration:IdentifierUri",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/RecruitClientApiConfiguration.cs",
-      "reason": "Property on a strongly-typed configuration class."
+      "reason": "String property in the RecruitClientApiConfiguration class."
     },
     {
       "key": "RedirectUriConfiguration:Description",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/RedirectUriConfiguration.cs",
-      "reason": "Property defined in a strongly-typed configuration class."
+      "reason": "The class `RedirectUriConfiguration` defines this property, which indicates it must be set at runtime."
     },
     {
       "key": "RedirectUriConfiguration:Uri",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/RedirectUriConfiguration.cs",
-      "reason": "Property defined in a strongly-typed configuration class."
+      "reason": "The class `RedirectUriConfiguration` defines this property, which indicates it must be set at runtime."
     },
     {
       "key": "RedisConnection",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for the Redis connection string."
+      "reason": "Key sets the connection string for Redis."
+    },
+    {
+      "key": "RedisConnectionString",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.Api/ServiceRegistrations/CachingServiceRegistrations.cs",
+      "reason": "Redis connection string is needed for distributed cache configuration."
+    },
+    {
+      "key": "RedisConnectionString",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
+      "reason": "Redis connection string for caching purposes."
     },
     {
       "key": "ResourceEnvironmentName",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying the resource environment name."
+      "reason": "Key configures the environment name for resources."
+    },
+    {
+      "key": "ServiceBusConnectionString",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/EmployerAccountsConfiguration.cs",
+      "reason": "Azure Service Bus connection string required for application message handling."
     },
     {
       "key": "StorageConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Jobs/appsettings.json",
-      "reason": "Used for object storage connectivity, evidenced by 'UseDevelopmentStorage=true'"
+      "reason": "Defines the connection string for Azure Development Storage."
+    },
+    {
+      "key": "StorageConnectionString",
+      "sourceFile": "src/SFA.DAS.EmployerAccounts.MessageHandlers/appsettings.json",
+      "reason": "Defines the connection string for Azure Development Storage."
     },
     {
       "key": "StorageConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for connecting to storage."
+      "reason": "Controls connection string for storage service, indicating local Azurite use."
     },
     {
       "key": "StubAuth",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for toggling stub authentication."
+      "reason": "Key toggles stub authorization functionality for local development."
     },
     {
       "key": "StubEmail",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying a stub email address."
+      "reason": "Key configures an email address for stub purposes in local development."
     },
     {
       "key": "StubId",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying a stub user ID."
+      "reason": "Key configures a user ID for stub purposes in local development."
     },
     {
       "key": "TokenCertificateThumbprint",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying a token certificate thumbprint."
+      "reason": "Key configures a client certificate thumbprint."
     },
     {
       "key": "UnobtrusiveJavaScriptEnabled",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for configuring JavaScript unobtrusiveness."
+      "reason": "Key toggles unobtrusive JavaScript mode."
     },
     {
       "key": "UserAornPayeLockConfiguration:LockoutTimeSpanMinutes",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/UserAornPayeLockConfiguration.cs",
-      "reason": "Property defined in a strongly-typed configuration class."
+      "reason": "The class `UserAornPayeLockConfiguration` defines this property, which indicates it must be set at runtime."
     },
     {
       "key": "UserAornPayeLockConfiguration:NumberOfPermittedAttempts",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/UserAornPayeLockConfiguration.cs",
-      "reason": "Property defined in a strongly-typed configuration class."
+      "reason": "The class `UserAornPayeLockConfiguration` defines this property, which indicates it must be set at runtime."
     },
     {
       "key": "UserAornPayeLockConfiguration:PermittedAttemptsTimeSpanMinutes",
       "sourceFile": "src/SFA.DAS.EmployerAccounts/Configuration/UserAornPayeLockConfiguration.cs",
-      "reason": "Property defined in a strongly-typed configuration class."
+      "reason": "The class `UserAornPayeLockConfiguration` defines this property, which indicates it must be set at runtime."
     },
     {
       "key": "webpages:Enabled",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for enabling or disabling Web Pages."
+      "reason": "Key configures Web Pages functionality in the application."
     },
     {
       "key": "webpages:Version",
       "sourceFile": "src/SFA.DAS.EmployerAccounts.Web/appsettings.json",
-      "reason": "Set in appsettings.json for specifying the version of Web Pages."
+      "reason": "Key sets the version for Web Pages functionality."
     }
   ]
 }

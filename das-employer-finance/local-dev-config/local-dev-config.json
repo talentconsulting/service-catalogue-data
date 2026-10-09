@@ -13,11 +13,11 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-          "reason": "Redis connection string property defined for local service dependency."
+          "reason": "The 'RedisConnectionString' property indicates the use of a Redis cache."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.Api/ServiceRegistrations/CachingServiceRegistrations.cs",
-          "reason": "Redis is registered as a distributed cache using StackExchangeRedisCache when running in non-development environments."
+          "reason": "Redis is configured as a distributed cache in non-development environments using the `RedisConnectionString` configuration key."
         }
       ]
     },
@@ -33,94 +33,70 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-          "reason": "SQL Server connection string property defined for local database dependency."
+          "reason": "The 'SqlConnectionString' property suggests a connection to a local SQL Server database."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/LevyDeclarationProviderConfiguration.cs",
-          "reason": "A property named 'DatabaseConnectionString' indicates a SQL Server database connection."
+          "reason": "Presence of a property named 'DatabaseConnectionString' indicating a dependency on a SQL Server database."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance/Data/EmployerFinanceDbContext.cs",
-          "reason": "Configured for SQL Server database context."
+          "reason": "DbContext configured to use SQL Server."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.Web/StartupExtensions/EntityFrameworkStartup.cs",
-          "reason": "Used for initializing DbContextOptionsBuilder with SQL Server."
+          "reason": "DbContextOptionsBuilder configured with a SQL connection."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance/Data/PaymentStagingRepository.cs",
+          "reason": "Direct usage of SqlConnection for SQL operations."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/Extensions/ServiceCollectionExtensions.cs",
-          "reason": "Used in AddNServiceBus configuration for SQL Server persistence."
+          "reason": "UseSqlServerPersistence and direct usage of SqlConnectionString."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance/ServiceRegistration/DatabaseServiceRegistrations.cs",
-          "reason": "The database connection string is retrieved from EmployerFinanceConfiguration and used to configure DbContext."
-        }
-      ]
-    },
-    {
-      "name": "SQL Server (LocalDB)",
-      "kind": "database",
-      "technology": "sqlserver",
-      "configurationKeys": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers.TestHarness/App.config",
-          "reason": "Entity Framework default connection factory with LocalDb."
+          "reason": "DatabaseServiceRegistrations uses a connection string from EmployerFinanceConfiguration to register EmployerFinanceDbContext with SQL Server."
         }
       ]
     },
     {
       "name": "Azure Service Bus",
       "kind": "message-broker",
-      "technology": null,
+      "technology": "servicebus",
       "configurationKeys": [
         "EmployerFinanceConfiguration:ServiceBusConnectionString",
         "LevyDeclarationProviderConfiguration:MessageServiceBusConnectionString",
         "LevyDeclarationProviderConfiguration:ServiceBusConnectionString",
-        "Microsoft.ServiceBus.ConnectionString"
+        "Microsoft.ServiceBus.ConnectionString",
+        "ServiceBusConnectionString"
       ],
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers.TestHarness/appsettings.json",
-          "reason": "Key for Service Bus connection string in JSON configuration."
+          "reason": "Service Bus connection string explicitly defined."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers.TestHarness/App.config",
-          "reason": "Key for Service Bus connection string in appSettings."
+          "reason": "Specifies Service Bus connection string configuration."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
+          "reason": "The 'ServiceBusConnectionString' property suggests an Azure Service Bus message broker."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/LevyDeclarationProviderConfiguration.cs",
-          "reason": "Properties named 'ServiceBusConnectionString' and 'MessageServiceBusConnectionString' suggest Azure Service Bus usage."
+          "reason": "Presence of properties named 'ServiceBusConnectionString' and 'MessageServiceBusConnectionString' indicating a dependency on Azure Service Bus."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/Extensions/ServiceCollectionExtensions.cs",
-          "reason": "Used with UseAzureServiceBusTransport and as an injected ServiceBusClient."
+          "reason": "UseAzureServiceBusTransport configured with ServiceBusConnectionString."
         }
       ]
     },
     {
-      "name": "Azure Blob Storage",
-      "kind": "object-storage",
-      "technology": "azurite",
-      "configurationKeys": [
-        "ConfigurationStorageConnectionString",
-        "ConnectionStrings:AzureWebJobsDashboard",
-        "ConnectionStrings:AzureWebJobsStorage",
-        "StorageConnectionString"
-      ],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Api/appsettings.json",
-          "reason": "Key 'ConfigurationStorageConnectionString' references Azure Storage emulator."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.EmployerFinance.Jobs/appsettings.json",
-          "reason": "Keys relate to Azure Storage emulator for local development."
-        }
-      ]
-    },
-    {
-      "name": "Azure Storage Emulator",
+      "name": "Azure Development Storage",
       "kind": "object-storage",
       "technology": "azurite",
       "configurationKeys": [
@@ -132,430 +108,421 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.Web/appsettings.json",
-          "reason": "Key referencing UseDevelopmentStorage for Azure Storage Emulator."
+          "reason": "ConfigurationStorageConnectionString references local development storage."
         },
         {
           "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/appsettings.json",
-          "reason": "Keys referencing UseDevelopmentStorage for Azure Storage Emulator."
+          "reason": "Contains connection strings pointing to development storage."
+        }
+      ]
+    },
+    {
+      "name": "Azurite",
+      "kind": "object-storage",
+      "technology": "azurite",
+      "configurationKeys": [
+        "ConfigurationStorageConnectionString",
+        "ConnectionStrings:AzureWebJobsDashboard",
+        "ConnectionStrings:AzureWebJobsStorage",
+        "StorageConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance.Api/appsettings.json",
+          "reason": "Contains ConfigurationStorageConnectionString set to UseDevelopmentStorage=true, indicating local Azurite usage."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.EmployerFinance.Jobs/appsettings.json",
+          "reason": "Contains multiple Azure storage-related keys set to UseDevelopmentStorage=true, indicating local Azurite usage."
         }
       ]
     }
   ],
   "configurationKeys": [
     {
+      "key": "AllowedHosts",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.Web/appsettings.json",
+      "reason": "Hosts allowed to connect to the application."
+    },
+    {
+      "key": "ApiBaseUrl",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/CommitmentsApiV2ClientConfiguration.cs",
+      "reason": "Key found as a property in the CommitmentsApiV2ClientConfiguration class."
+    },
+    {
       "key": "APPINSIGHTS_INSTRUMENTATIONKEY",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Api/appsettings.json",
-      "reason": "Key for application insights instrumentation."
+      "reason": "Key required for Application Insights instrumentation."
     },
     {
       "key": "APPINSIGHTS_INSTRUMENTATIONKEY",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Jobs/appsettings.json",
-      "reason": "Key for application insights instrumentation."
+      "reason": "Key required for Application Insights instrumentation."
     },
     {
-      "key": "ApplicationId",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Application ID configuration for the web application."
+      "key": "APPINSIGHTS_INSTRUMENTATIONKEY",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/appsettings.json",
+      "reason": "Placeholder for Application Insights instrumentation."
     },
     {
-      "key": "AzureActiveDirectoryApiConfiguration:Identifier",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/AzureActiveDirectoryApiConfiguration.cs",
-      "reason": "Azure Active Directory configuration property 'Identifier' for local development."
+      "key": "APPINSIGHTS_INSTRUMENTATIONKEY",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.Web/appsettings.json",
+      "reason": "Instrumentation key for Application Insights monitoring."
     },
     {
-      "key": "AzureActiveDirectoryApiConfiguration:Tenant",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/AzureActiveDirectoryApiConfiguration.cs",
-      "reason": "Azure Active Directory configuration property 'Tenant' for local development."
+      "key": "BaseUrl",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceOuterApiConfiguration.cs",
+      "reason": "Key found as a property in the EmployerFinanceOuterApiConfiguration class."
     },
     {
-      "key": "CommitmentsApiV2ClientConfiguration:ApiBaseUrl",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/CommitmentsApiV2ClientConfiguration.cs",
-      "reason": "Base URL configuration for Commitments API V2 client."
-    },
-    {
-      "key": "CommitmentsApiV2ClientConfiguration:IdentifierUri",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/CommitmentsApiV2ClientConfiguration.cs",
-      "reason": "Identifier URI configuration for Commitments API V2 client."
+      "key": "cdn:url",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.Web/appsettings.json",
+      "reason": "Specifies the base URL for the content delivery network."
     },
     {
       "key": "ConfigNames",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Api/appsettings.json",
-      "reason": "Specifies configuration settings namespaces."
+      "reason": "Key required for configuration loading."
+    },
+    {
+      "key": "ConfigNames",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/appsettings.json",
+      "reason": "List of configuration names to load from storage."
+    },
+    {
+      "key": "ConfigNames",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.Web/appsettings.json",
+      "reason": "List of configurations to load from the storage."
     },
     {
       "key": "ConfigurationStorageConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Api/appsettings.json",
-      "reason": "Declared in 'appsettings.json' as a connection string for Azure Storage."
+      "reason": "Key required for storage connection, set to UseDevelopmentStorage=true."
     },
     {
       "key": "ConfigurationStorageConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Jobs/appsettings.json",
-      "reason": "Declared in 'appsettings.json' as a connection string for Azure Storage."
+      "reason": "Key required for storage connection, set to UseDevelopmentStorage=true."
     },
     {
       "key": "ConfigurationStorageConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/appsettings.json",
-      "reason": "Key referencing UseDevelopmentStorage for Azure Storage Emulator."
+      "reason": "Configuration for accessing local development object storage."
     },
     {
       "key": "ConfigurationStorageConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Web/appsettings.json",
-      "reason": "Key referencing UseDevelopmentStorage for Azure Storage Emulator."
+      "reason": "Storage connection string for configuration loading."
     },
     {
       "key": "ConnectionStrings:AzureWebJobsDashboard",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Jobs/appsettings.json",
-      "reason": "Key for Azure WebJobs dashboard connection string."
+      "reason": "Key required for Azure WebJobs dashboard storage connection."
     },
     {
       "key": "ConnectionStrings:AzureWebJobsDashboard",
       "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/appsettings.json",
-      "reason": "Key referencing UseDevelopmentStorage for Azure Storage Emulator."
+      "reason": "Monitoring dashboard connection string for Azure WebJobs."
     },
     {
       "key": "ConnectionStrings:AzureWebJobsStorage",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Jobs/appsettings.json",
-      "reason": "Key for Azure WebJobs storage connection string."
+      "reason": "Key required for Azure WebJobs storage connection."
     },
     {
       "key": "ConnectionStrings:AzureWebJobsStorage",
       "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/appsettings.json",
-      "reason": "Key referencing UseDevelopmentStorage for Azure Storage Emulator."
+      "reason": "Connection string for Azure WebJobs storage."
     },
     {
       "key": "ContentApi:ApiBaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/ContentClientApiConfiguration.cs",
-      "reason": "'ContentApi' section 'ApiBaseUrl' configuration for content API client."
+      "reason": "Key found as a property in the ContentClientApiConfiguration class under the 'ContentApi' section."
     },
     {
       "key": "ContentApi:IdentifierUri",
       "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/ContentClientApiConfiguration.cs",
-      "reason": "'ContentApi' section 'IdentifierUri' configuration for content API client."
+      "reason": "Key found as a property in the ContentClientApiConfiguration class under the 'ContentApi' section."
     },
     {
-      "key": "DataProtectionKeysDatabase",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Data protection keys database configuration."
+      "key": "ContentClientApiConfiguration:ApiBaseUrl",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/IManagedIdentityClientConfiguration.cs",
+      "reason": "Represents the base URL for the Content Client API."
     },
     {
-      "key": "DefaultCacheExpirationInMinutes",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Default cache expiration configuration for caching."
+      "key": "ContentClientApiConfiguration:IdentifierUri",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/IManagedIdentityClientConfiguration.cs",
+      "reason": "Represents the identifier URI required for the Content Client API."
     },
     {
-      "key": "EmployerAccountsBaseUrl",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Employer accounts base URL configuration."
-    },
-    {
-      "key": "EmployerCommitmentsV2BaseUrl",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Employer commitments V2 base URL configuration."
+      "key": "DeclarationsEnabled",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/appsettings.json",
+      "reason": "Indicates declaration options for the application."
     },
     {
       "key": "EmployerFinanceBaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Base URL configuration for Employer Finance."
+      "reason": "Key found as a property in the EmployerFinanceConfiguration class."
     },
     {
       "key": "EmployerFinanceConfiguration:ServiceBusConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/Extensions/ServiceCollectionExtensions.cs",
-      "reason": "retrieved for initializing Azure Service Bus transport and client."
+      "reason": "Used to configure Azure Service Bus transport for NServiceBus."
     },
     {
       "key": "EmployerFinanceConfiguration:SqlConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/Extensions/ServiceCollectionExtensions.cs",
-      "reason": "retrieved for database configuration in NServiceBus endpoint."
+      "reason": "Used to configure SQL Server persistence for NServiceBus."
     },
     {
       "key": "EmployerFinanceConfiguration:SqlConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Web/StartupExtensions/EntityFrameworkStartup.cs",
-      "reason": "required to configure an SQL connection for DbContext handling."
+      "reason": "Used to configure DbContext with SQL Server connection."
     },
     {
       "key": "EmployerFinanceConfiguration:SqlConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance/Data/EmployerFinanceDbContext.cs",
-      "reason": "used to configure SQL Server database connection in DbContext."
+      "reason": "Used to configure DbContext with SQL Server connection."
     },
     {
       "key": "EmployerFinanceConfiguration:SqlConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance/ServiceRegistration/DatabaseServiceRegistrations.cs",
-      "reason": "This configuration key is used to provide the SQL Server connection string to the application's database context."
-    },
-    {
-      "key": "EmployerFinanceOuterApiConfiguration:BaseUrl",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceOuterApiConfiguration.cs",
-      "reason": "Outer API base URL configuration for interacting with external systems."
-    },
-    {
-      "key": "EmployerFinanceOuterApiConfiguration:Key",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceOuterApiConfiguration.cs",
-      "reason": "Outer API key configuration for secure access."
-    },
-    {
-      "key": "EmployerPortalBaseUrl",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Employer portal base URL configuration."
-    },
-    {
-      "key": "EmployerProjectionsBaseUrl",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Employer projections base URL configuration."
-    },
-    {
-      "key": "EmployerRecruitBaseUrl",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Employer recruit base URL configuration."
+      "reason": "SQL connection string is retrieved from EmployerFinanceConfiguration for database context registration."
     },
     {
       "key": "EnvironmentName",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Api/appsettings.json",
-      "reason": "Specifies the running environment for local development."
+      "reason": "Key required for setting the runtime environment."
     },
     {
       "key": "EnvironmentName",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Jobs/appsettings.json",
-      "reason": "Specifies the running environment for local development."
+      "reason": "Key required for setting the runtime environment."
     },
     {
       "key": "EnvironmentName",
       "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/Extensions/ServiceCollectionExtensions.cs",
-      "reason": "checked to determine if the environment is local for message transportation configuration."
+      "reason": "Used to check if the environment is LOCAL."
+    },
+    {
+      "key": "EnvironmentName",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/appsettings.json",
+      "reason": "Specifies the environment in which the application runs."
+    },
+    {
+      "key": "EnvironmentName",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.Web/appsettings.json",
+      "reason": "Indicates the current environment."
     },
     {
       "key": "FinanceApiIdaAudience",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Api/appsettings.json",
-      "reason": "Related to authentication configuration for the API."
+      "reason": "Key required for API audience registration."
     },
     {
-      "key": "FundsExpiryPeriod",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Funds expiry period configuration for finance."
-    },
-    {
-      "key": "FundsExpiryPolicyChangeDate",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Funds expiry policy change date configuration for finance."
+      "key": "HmrcConfiguration:AzureAppKey",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
+      "reason": "Represents the Azure application key required for HMRC integration."
     },
     {
       "key": "HmrcConfiguration:AzureClientId",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/HmrcConfiguration.cs",
-      "reason": "A public property named 'AzureClientId' implies it must be configured for Azure integration."
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
+      "reason": "Represents the Azure client ID required for HMRC integration."
     },
     {
       "key": "HmrcConfiguration:AzureResourceId",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/HmrcConfiguration.cs",
-      "reason": "A public property named 'AzureResourceId' implies it must be configured for Azure integration."
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
+      "reason": "Represents the Azure resource ID required for HMRC integration."
     },
     {
       "key": "HmrcConfiguration:AzureTenant",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/HmrcConfiguration.cs",
-      "reason": "A public property named 'AzureTenant' implies it must be configured for Azure integration."
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
+      "reason": "Represents the Azure tenant required for HMRC integration."
     },
     {
       "key": "HmrcConfiguration:BaseUrl",
       "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/HmrcConfiguration.cs",
-      "reason": "A public property named 'BaseUrl' implies it must be configured for the HMRC API."
+      "reason": "Field named 'BaseUrl' in HmrcConfiguration class indicating a configuration key related to HMRC API base URL."
+    },
+    {
+      "key": "HmrcConfiguration:BaseUrl",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
+      "reason": "Represents the base URL for HMRC integration."
     },
     {
       "key": "HmrcConfiguration:ClientId",
       "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/HmrcConfiguration.cs",
-      "reason": "A public property named 'ClientId' implies it must be configured for the HMRC API."
+      "reason": "Field named 'ClientId' in HmrcConfiguration class indicating a configuration key for HMRC API Client ID."
+    },
+    {
+      "key": "HmrcConfiguration:ClientId",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
+      "reason": "Represents the client ID required for HMRC integration."
+    },
+    {
+      "key": "HmrcConfiguration:ClientSecret",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
+      "reason": "Represents the client secret required for HMRC integration."
+    },
+    {
+      "key": "HmrcConfiguration:OgdClientId",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
+      "reason": "Represents the OGD client ID required for HMRC integration."
+    },
+    {
+      "key": "HmrcConfiguration:OgdSecret",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
+      "reason": "Represents the OGD secret required for HMRC integration."
     },
     {
       "key": "HmrcConfiguration:Scope",
       "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/HmrcConfiguration.cs",
-      "reason": "A public property named 'Scope' implies it must be configured for the HMRC API."
+      "reason": "Field named 'Scope' in HmrcConfiguration class indicating a configuration key for HMRC API scope."
+    },
+    {
+      "key": "HmrcConfiguration:Scope",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
+      "reason": "Represents the scope of the HMRC integration."
+    },
+    {
+      "key": "HmrcConfiguration:ServerToken",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
+      "reason": "Represents the server token required for HMRC integration."
+    },
+    {
+      "key": "HmrcConfiguration:UseHiDataFeed",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
+      "reason": "Indicates whether to use the Hi Data Feed for HMRC integration."
     },
     {
       "key": "idaTenant",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Api/appsettings.json",
-      "reason": "Related to the authentication tenant configuration."
+      "reason": "Key required for tenant identifier."
     },
     {
-      "key": "IHmrcConfiguration:AzureAppKey",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Azure application key configuration required for HMRC integration when using Azure resources."
+      "key": "Identifier",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/AzureActiveDirectoryApiConfiguration.cs",
+      "reason": "Key found as a property in the AzureActiveDirectoryApiConfiguration class."
     },
     {
-      "key": "IHmrcConfiguration:AzureClientId",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Azure client ID configuration required for HMRC integration when using Azure resources."
-    },
-    {
-      "key": "IHmrcConfiguration:AzureResourceId",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Azure resource ID configuration required for HMRC integration when using Azure resources."
-    },
-    {
-      "key": "IHmrcConfiguration:AzureTenant",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Azure tenant configuration required for HMRC integration when using Azure resources."
-    },
-    {
-      "key": "IHmrcConfiguration:BaseUrl",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Base URL configuration required for the HMRC integration."
-    },
-    {
-      "key": "IHmrcConfiguration:ClientId",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Client ID configuration required for the HMRC integration."
-    },
-    {
-      "key": "IHmrcConfiguration:ClientSecret",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Client secret configuration required for the HMRC integration."
-    },
-    {
-      "key": "IHmrcConfiguration:OgdClientId",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "OGD client ID configuration required for the HMRC integration."
-    },
-    {
-      "key": "IHmrcConfiguration:OgdSecret",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "OGD secret configuration required for the HMRC integration."
-    },
-    {
-      "key": "IHmrcConfiguration:Scope",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Scope configuration required for the HMRC integration."
-    },
-    {
-      "key": "IHmrcConfiguration:ServerToken",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Server token configuration required for the HMRC integration."
-    },
-    {
-      "key": "IHmrcConfiguration:UseHiDataFeed",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/Hmrc/IHmrcConfiguration.cs",
-      "reason": "Flag indicating whether to use the Hi data feed for the HMRC integration."
-    },
-    {
-      "key": "IManagedIdentityClientConfiguration:ApiBaseUrl",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/IManagedIdentityClientConfiguration.cs",
-      "reason": "Base URL configuration required for services that integrate with Managed Identity clients."
-    },
-    {
-      "key": "IManagedIdentityClientConfiguration:IdentifierUri",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Interfaces/IManagedIdentityClientConfiguration.cs",
-      "reason": "Identifier URI configuration required for services that integrate with Managed Identity clients."
+      "key": "IdentifierUri",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/CommitmentsApiV2ClientConfiguration.cs",
+      "reason": "Key found as a property in the CommitmentsApiV2ClientConfiguration class."
     },
     {
       "key": "InstrumentationKey",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Api/appsettings.json",
-      "reason": "Key for application insights instrumentation."
+      "reason": "Key required for additional instrumentation."
+    },
+    {
+      "key": "Key",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceOuterApiConfiguration.cs",
+      "reason": "Key found as a property in the EmployerFinanceOuterApiConfiguration class."
     },
     {
       "key": "LevyDeclarationProviderConfiguration:DatabaseConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/LevyDeclarationProviderConfiguration.cs",
-      "reason": "A property named 'DatabaseConnectionString' suggests a SQL Server database connection."
+      "reason": "Field named 'DatabaseConnectionString' in LevyDeclarationProviderConfiguration class indicating a database connection string key."
     },
     {
       "key": "LevyDeclarationProviderConfiguration:MessageServiceBusConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/LevyDeclarationProviderConfiguration.cs",
-      "reason": "A property named 'MessageServiceBusConnectionString' suggests Azure Service Bus usage."
+      "reason": "Field named 'MessageServiceBusConnectionString' in LevyDeclarationProviderConfiguration class indicating another Message Service Bus connection string key."
     },
     {
       "key": "LevyDeclarationProviderConfiguration:ServiceBusConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/LevyDeclarationProviderConfiguration.cs",
-      "reason": "A property named 'ServiceBusConnectionString' suggests Azure Service Bus usage."
+      "reason": "Field named 'ServiceBusConnectionString' in LevyDeclarationProviderConfiguration class indicating a Service Bus connection string key."
     },
     {
-      "key": "LevyTransferMatchingBaseUrl",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Levy transfer matching base URL configuration."
+      "key": "Logging:ApplicationInsights:LogLevel:Default",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/appsettings.json",
+      "reason": "Application Insights logging level for the default category."
+    },
+    {
+      "key": "Logging:ApplicationInsights:LogLevel:Microsoft",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/appsettings.json",
+      "reason": "Application Insights logging level for Microsoft-related events."
+    },
+    {
+      "key": "Logging:ApplicationInsights:LogLevel:Microsoft.Hosting.Lifetime",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/appsettings.json",
+      "reason": "Defines the logging level for lifetime events in hosting."
     },
     {
       "key": "Microsoft.ServiceBus.ConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers.TestHarness/App.config",
-      "reason": "Key for Service Bus connection string in appSettings."
+      "reason": "Messaging service configuration defined in the application config."
     },
     {
       "key": "Microsoft.ServiceBus.ConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers.TestHarness/appsettings.json",
-      "reason": "Key for Service Bus connection string in JSON configuration."
-    },
-    {
-      "key": "NewFundsExpiryPeriod",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "New funds expiry period configuration for finance."
-    },
-    {
-      "key": "NServiceBusLicense",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "NServiceBus license configuration for messaging."
+      "reason": "Required for Service Bus integration."
     },
     {
       "key": "RedisConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Api/ServiceRegistrations/CachingServiceRegistrations.cs",
-      "reason": "Key used to configure StackExchangeRedisCache for distributed caching in non-development environments."
+      "reason": "Used to configure Redis as the distributed cache in production-like environments."
     },
     {
       "key": "RedisConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Redis connection string configuration for cache dependency."
-    },
-    {
-      "key": "ReservationsBaseUrl",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Reservations base URL configuration for services."
+      "reason": "Key found as a property in the EmployerFinanceConfiguration class indicating Redis usage."
     },
     {
       "key": "ResourceEnvironmentName",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Api/appsettings.json",
-      "reason": "Identifies the name of the resource environment."
+      "reason": "Key required for setting specific environment identification."
+    },
+    {
+      "key": "ResourceEnvironmentName",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.Web/appsettings.json",
+      "reason": "Specifies the resource environment."
     },
     {
       "key": "ServiceBusConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Service Bus connection string configuration for messaging."
-    },
-    {
-      "key": "ShowLevyTransparency",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Configuration for displaying levy transparency."
+      "reason": "Key found as a property in the EmployerFinanceConfiguration class suggesting a Service Bus configuration."
     },
     {
       "key": "SqlConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "SQL Server connection string configuration for database dependency."
+      "reason": "Key found as a property in the EmployerFinanceConfiguration class suggesting a SQL Server connection."
     },
     {
       "key": "StorageConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance.Jobs/appsettings.json",
-      "reason": "Local Azure Storage emulator connection string for storage."
+      "reason": "Key required for storage connection, set to UseDevelopmentStorage=true."
     },
     {
       "key": "StorageConnectionString",
       "sourceFile": "src/SFA.DAS.EmployerFinance.MessageHandlers/appsettings.json",
-      "reason": "Key referencing UseDevelopmentStorage for Azure Storage Emulator."
+      "reason": "Pointing to development object storage."
     },
     {
-      "key": "TransferAllowancePercentage",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "Transfer allowance percentage configuration for finance."
+      "key": "StubAuth",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.Web/appsettings.json",
+      "reason": "Indicates whether stub authentication is enabled."
     },
     {
-      "key": "ZenDeskCobrowsingSnippetKey",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "ZenDesk cobrowsing snippet key configuration for support service."
+      "key": "StubEmail",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.Web/appsettings.json",
+      "reason": "Stub email address for testing purposes."
     },
     {
-      "key": "ZenDeskHelpCentreUrl",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "ZenDesk help centre URL for support service integration."
+      "key": "StubId",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.Web/appsettings.json",
+      "reason": "Stub ID for testing purposes."
     },
     {
-      "key": "ZenDeskSectionId",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "ZenDesk section ID configuration for support service."
+      "key": "Tenant",
+      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/AzureActiveDirectoryApiConfiguration.cs",
+      "reason": "Key found as a property in the AzureActiveDirectoryApiConfiguration class."
     },
     {
-      "key": "ZenDeskSnippetKey",
-      "sourceFile": "src/SFA.DAS.EmployerFinance/Configuration/EmployerFinanceConfiguration.cs",
-      "reason": "ZenDesk snippet key configuration for support service."
+      "key": "Version",
+      "sourceFile": "src/SFA.DAS.EmployerFinance.Web/appsettings.json",
+      "reason": "Application version information."
     }
   ]
 }
