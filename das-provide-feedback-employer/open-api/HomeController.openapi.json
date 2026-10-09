@@ -1,0 +1,246 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Feedback API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/{encodedAccountId}": {
+      "get": {
+        "operationId": "GetFeedbackForAccount",
+        "summary": "Get feedback for an employer account.",
+        "parameters": [
+          {
+            "name": "encodedAccountId",
+            "in": "path",
+            "required": true,
+            "description": "The encoded account ID.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "HasEmployerAccountPolicy": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The feedback page was successfully retrieved."
+          },
+          "404": {
+            "description": "Feedback not found for the given account."
+          }
+        }
+      }
+    },
+    "/{uniqueCode}": {
+      "get": {
+        "operationId": "GetFeedbackByEmail",
+        "summary": "Get feedback based on the unique email code.",
+        "parameters": [
+          {
+            "name": "uniqueCode",
+            "in": "path",
+            "required": true,
+            "description": "Unique code associated with an email.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "security": [
+          {
+            "EmployerAuthenticatedPolicy": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback details retrieved successfully."
+          },
+          "302": {
+            "description": "Redirect to FeedbackAlreadySubmitted if feedback already submitted."
+          },
+          "404": {
+            "description": "Unique code not found."
+          }
+        }
+      }
+    },
+    "/signout": {
+      "post": {
+        "operationId": "SignOut",
+        "summary": "Sign out of the application.",
+        "responses": {
+          "200": {
+            "description": "Sign out successfully."
+          }
+        }
+      }
+    },
+    "/signoutcleanup": {
+      "post": {
+        "operationId": "SignOutCleanup",
+        "summary": "Clean up cookies after signout.",
+        "responses": {
+          "204": {
+            "description": "Cookies cleared."
+          }
+        }
+      }
+    },
+    "/ping": {
+      "get": {
+        "operationId": "Ping",
+        "summary": "Health check endpoint.",
+        "responses": {
+          "200": {
+            "description": "The application is running."
+          }
+        }
+      }
+    },
+    "/SignIn-Stub": {
+      "get": {
+        "operationId": "SignInStub",
+        "summary": "Display sign-in stub UI.",
+        "responses": {
+          "200": {
+            "description": "Sign-in stub UI rendered."
+          }
+        }
+      },
+      "post": {
+        "operationId": "SignInStubPost",
+        "summary": "Perform sign-in using stub authentication.",
+        "responses": {
+          "302": {
+            "description": "Redirect to 'signed-in-stub' after successful login."
+          }
+        }
+      }
+    },
+    "/signed-in-stub": {
+      "get": {
+        "operationId": "SignedInStub",
+        "summary": "Display signed-in stub page.",
+        "security": [
+          {
+            "defaultAuthorization": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "'Signed-in stub' page displayed."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "HasEmployerAccountPolicy": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "EmployerAuthenticatedPolicy": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      },
+      "defaultAuthorization": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "StartFeedbackRequest": {
+        "type": "object",
+        "properties": {
+          "encodedAccountId": {
+            "type": "string"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "uniqueCode": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "EmployerSurveyInvite": {
+        "type": "object",
+        "properties": {
+          "uniqueSurveyCode": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userRef": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "emailAddress": {
+            "type": "string",
+            "format": "email"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ukprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "inviteSentDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastReminderSentDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "codeBurntDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "EmployerFeedback": {
+        "type": "object",
+        "properties": {
+          "feedbackId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "userRef": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ukprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

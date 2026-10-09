@@ -1,0 +1,286 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Provider Feedback API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/{encodedAccountId}/providers": {
+      "get": {
+        "operationId": "getProviders",
+        "summary": "List providers with pagination and filters.",
+        "parameters": [
+          {
+            "name": "encodedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageIndex",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "filterProviders",
+        "summary": "Apply filters to provider search.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderSearchViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Filtered providers displayed.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{encodedAccountId}/providers/sort": {
+      "get": {
+        "operationId": "sortProviders",
+        "summary": "Sort providers by a given column and direction.",
+        "parameters": [
+          {
+            "name": "encodedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortColumn",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sortDirection",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Asc",
+                "Desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to provider list."
+          }
+        }
+      }
+    },
+    "/{encodedAccountId}/providers/unfilter": {
+      "get": {
+        "operationId": "clearFilters",
+        "summary": "Clear applied filters and reset provider list.",
+        "parameters": [
+          {
+            "name": "encodedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to provider list."
+          }
+        }
+      }
+    },
+    "/{encodedAccountId}/providers/{providerId}": {
+      "get": {
+        "operationId": "getProviderConfirmation",
+        "summary": "View confirmation details for a provider.",
+        "parameters": [
+          {
+            "name": "encodedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "providerId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Confirmation view for the provider.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "format": "html"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "confirmProvider",
+        "summary": "Submit confirmation or rejection for a provider.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/ProviderSearchConfirmationViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect after confirmation."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetProvidersForFeedbackRequest": {
+        "type": "object",
+        "properties": {
+          "EncodedAccountId": {
+            "type": "string"
+          },
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ProviderSearchViewModel": {
+        "type": "object",
+        "properties": {
+          "AccountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "EncodedAccountId": {
+            "type": "string"
+          },
+          "SelectedProviderName": {
+            "type": "string"
+          },
+          "ProviderNameFilter": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "SelectedFeedbackStatus": {
+            "type": "string"
+          },
+          "FeedbackStatusFilter": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "SortColumn": {
+            "type": "string"
+          },
+          "SortDirection": {
+            "type": "string"
+          }
+        }
+      },
+      "ProviderSearchConfirmationViewModel": {
+        "type": "object",
+        "properties": {
+          "EncodedAccountId": {
+            "type": "string"
+          },
+          "ProviderId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ProviderName": {
+            "type": "string"
+          },
+          "Confirmed": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "PagingState": {
+        "type": "object",
+        "properties": {
+          "PageIndex": {
+            "type": "integer"
+          },
+          "PageSize": {
+            "type": "integer"
+          },
+          "SortDirection": {
+            "type": "string"
+          },
+          "SortColumn": {
+            "type": "string"
+          },
+          "SelectedProviderName": {
+            "type": "string"
+          },
+          "SelectedFeedbackStatus": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,233 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Feedback API",
+    "version": "1.0.0",
+    "description": "API for managing and querying employer feedback transactions."
+  },
+  "paths": {
+    "/api/feedbacktransactions": {
+      "get": {
+        "summary": "Get feedback transactions batch",
+        "description": "Retrieve a batch of feedback transactions.",
+        "operationId": "getFeedbackTransactionsBatch",
+        "parameters": [
+          {
+            "name": "batchsize",
+            "in": "query",
+            "required": true,
+            "description": "The batch size of feedback transactions to retrieve.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batch of feedback transactions successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. Invalid batch size provided.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error. An unexpected error occurred.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feedbacktransactions/{id}": {
+      "get": {
+        "summary": "Get feedback transaction by ID",
+        "description": "Retrieve a specific feedback transaction by ID.",
+        "operationId": "getFeedbackTransaction",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the feedback transaction to retrieve.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feedback transaction successfully retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackTransaction"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request. Invalid ID provided or feedback transaction not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error. An unexpected error occurred.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update feedback transaction",
+        "description": "Update a specific feedback transaction by ID.",
+        "operationId": "updateFeedbackTransaction",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the feedback transaction to update.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFeedbackTransactionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Feedback transaction successfully updated. No content returned."
+          },
+          "400": {
+            "description": "Bad request. Validation failed or feedback transaction not found.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error. An unexpected error occurred.",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpdateFeedbackTransactionRequest": {
+        "type": "object",
+        "properties": {
+          "TemplateId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "SentCount": {
+            "type": "integer"
+          },
+          "SentDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "TemplateId",
+          "SentCount",
+          "SentDate"
+        ]
+      },
+      "FeedbackTransaction": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer"
+          },
+          "AccountId": {
+            "type": "integer"
+          },
+          "TemplateName": {
+            "type": "string"
+          },
+          "SendAfter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "TemplateId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "SentCount": {
+            "type": "integer",
+            "nullable": true
+          },
+          "SentDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "CreatedOn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "Id",
+          "AccountId",
+          "TemplateName",
+          "SendAfter",
+          "CreatedOn"
+        ]
+      }
+    }
+  }
+}

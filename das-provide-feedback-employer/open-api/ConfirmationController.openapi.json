@@ -1,0 +1,115 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Provide Feedback API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/{feedbackRoutePath}/feedback-confirmation": {
+      "get": {
+        "operationId": "GetFeedbackConfirmation",
+        "summary": "Get feedback submission confirmation details.",
+        "parameters": [
+          {
+            "name": "feedbackRoutePath",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Base route path for feedback actions."
+          },
+          {
+            "name": "encodedAccountId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The encoded account ID for the employer."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response with the confirmation details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConfirmationViewModel"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HasEmployerAccount": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ConfirmationViewModel": {
+        "type": "object",
+        "properties": {
+          "ProviderName": {
+            "type": "string",
+            "description": "The name of the provider."
+          },
+          "FeedbackRating": {
+            "type": "integer",
+            "description": "The feedback rating given by the user."
+          },
+          "FatUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the Find Apprenticeship Training site."
+          },
+          "ComplaintSiteUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the complaint site."
+          },
+          "ComplaintToProviderSiteUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the complaint-to-provider site."
+          },
+          "HasMultipleProviders": {
+            "type": "boolean",
+            "description": "Indicates if there are multiple providers involved."
+          },
+          "EncodedAccountId": {
+            "type": "string",
+            "description": "Encoded account ID for the employer."
+          },
+          "EmployerAccountsHomeUrl": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to the employer's accounts home page."
+          }
+        },
+        "required": [
+          "ProviderName",
+          "FeedbackRating",
+          "FatUrl",
+          "ComplaintSiteUrl",
+          "ComplaintToProviderSiteUrl",
+          "HasMultipleProviders",
+          "EncodedAccountId",
+          "EmployerAccountsHomeUrl"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "HasEmployerAccount": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header",
+        "description": "Authorization based on the HasEmployerAccount policy."
+      }
+    }
+  }
+}

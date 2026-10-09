@@ -2,64 +2,37 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Results and Certification API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing T Level results and certification."
   },
   "paths": {
-    "/api/Result/ProcessBulkResults": {
-      "post": {
-        "operationId": "ProcessBulkResults",
-        "summary": "Processes bulk results file.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkProcessRequest"
-              }
-            }
-          }
-        },
+    "/results": {
+      "get": {
+        "operationId": "GetResultsDashboard",
+        "summary": "Get results dashboard view.",
+        "tags": [
+          "Results"
+        ],
         "responses": {
           "200": {
-            "description": "Successful response.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/BulkResultResponse"
-                }
-              }
-            }
+            "description": "Dashboard view returned."
           }
         }
       }
     },
-    "/api/Result/GetResultDetails/{aoUkprn}/{profileId}/{status}": {
+    "/upload-results-file/{requestErrorTypeId}": {
       "get": {
-        "operationId": "GetResultDetails",
-        "summary": "Gets the result details of a learner profile.",
+        "operationId": "GetUploadResultsFile",
+        "summary": "Upload Results File",
+        "tags": [
+          "Results"
+        ],
         "parameters": [
           {
-            "name": "aoUkprn",
+            "name": "requestErrorTypeId",
             "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          {
-            "name": "profileId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          },
-          {
-            "name": "status",
-            "in": "path",
-            "required": true,
+            "description": "Optional request error type ID.",
+            "required": false,
             "schema": {
               "type": "integer",
               "nullable": true
@@ -68,70 +41,227 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ResultDetails"
-                }
-              }
-            }
+            "description": "File upload view returned."
           }
         }
-      }
-    },
-    "/api/Result/AddResult": {
+      },
       "post": {
-        "operationId": "AddResult",
-        "summary": "Adds a new result.",
+        "operationId": "PostUploadResultsFile",
+        "summary": "Submit a results file for upload.",
+        "tags": [
+          "Results"
+        ],
         "requestBody": {
           "required": true,
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/AddResultRequest"
+                "$ref": "#/components/schemas/UploadResultsRequestViewModel"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Successful response.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AddResultResponse"
-                }
-              }
-            }
+            "description": "File upload processed successfully."
+          },
+          "400": {
+            "description": "Validation errors encountered."
           }
         }
       }
     },
-    "/api/Result/ChangeResult": {
-      "put": {
-        "operationId": "ChangeResult",
-        "summary": "Changes an existing result.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ChangeResultRequest"
-              }
-            }
-          }
-        },
+    "/results-upload-confirmation": {
+      "get": {
+        "operationId": "GetResultsUploadConfirmation",
+        "summary": "Confirmation for successful results upload.",
+        "tags": [
+          "Results"
+        ],
         "responses": {
           "200": {
-            "description": "Successful response.",
+            "description": "Confirmation page returned."
+          },
+          "404": {
+            "description": "Upload confirmation not found."
+          }
+        }
+      }
+    },
+    "/results-upload-unsuccessful": {
+      "get": {
+        "operationId": "GetResultsUploadUnsuccessful",
+        "summary": "View for unsuccessful results upload.",
+        "tags": [
+          "Results"
+        ],
+        "responses": {
+          "200": {
+            "description": "Unsuccessful upload page returned."
+          },
+          "404": {
+            "description": "Unsuccessful upload data not found."
+          }
+        }
+      }
+    },
+    "/results-file-upload-service-problem": {
+      "get": {
+        "operationId": "GetResultsFileUploadServiceProblem",
+        "summary": "Error page for service-related problems during results file upload.",
+        "tags": [
+          "Results"
+        ],
+        "responses": {
+          "200": {
+            "description": "Service problem page returned."
+          }
+        }
+      }
+    },
+    "/download-result-errors": {
+      "get": {
+        "operationId": "DownloadResultErrors",
+        "summary": "Download error file for uploaded results.",
+        "tags": [
+          "Results"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "description": "Unique ID for the error file.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV file returned for errors.",
             "content": {
-              "application/json": {
+              "text/csv": {
                 "schema": {
-                  "$ref": "#/components/schemas/ChangeResultResponse"
+                  "type": "string",
+                  "format": "binary"
                 }
               }
             }
+          },
+          "404": {
+            "description": "Error file not found."
+          }
+        }
+      }
+    },
+    "/results-generating-download": {
+      "get": {
+        "operationId": "GetResultsGeneratingDownload",
+        "summary": "Indicates results data file is generating.",
+        "tags": [
+          "Results"
+        ],
+        "responses": {
+          "200": {
+            "description": "Generating download page returned."
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostResultsGeneratingDownload",
+        "summary": "Submit for results data file generation.",
+        "tags": [
+          "Results"
+        ],
+        "responses": {
+          "200": {
+            "description": "File generation initiated successfully."
+          },
+          "400": {
+            "description": "File generation failed."
+          }
+        }
+      }
+    },
+    "/results-download-data": {
+      "get": {
+        "operationId": "GetResultsDownloadData",
+        "summary": "Download results data file.",
+        "tags": [
+          "Results"
+        ],
+        "responses": {
+          "200": {
+            "description": "Results data file available for download."
+          },
+          "404": {
+            "description": "Results data file not found."
+          }
+        }
+      }
+    },
+    "/download-results-data/{id}/{componentType}": {
+      "get": {
+        "operationId": "DownloadResultsDataLink",
+        "summary": "Download specific results data file.",
+        "tags": [
+          "Results"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Unique ID for the results data file.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "componentType",
+            "in": "path",
+            "description": "Type of results data to download (e.g., Core, Specialism).",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "Core",
+                "Specialism"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "CSV file returned with requested data.",
+            "content": {
+              "text/csv": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Requested results data file not found."
+          }
+        }
+      }
+    },
+    "/results-no-records-found": {
+      "get": {
+        "operationId": "GetResultsNoRecordsFound",
+        "summary": "Page for no records found during results data download.",
+        "tags": [
+          "Results"
+        ],
+        "responses": {
+          "200": {
+            "description": "Page displayed for no records found."
           }
         }
       }
@@ -139,326 +269,26 @@
   },
   "components": {
     "schemas": {
-      "AddResultRequest": {
+      "UploadResultsRequestViewModel": {
         "type": "object",
         "properties": {
-          "aoUkprn": {
+          "AoUkprn": {
             "type": "integer",
-            "format": "int64"
+            "description": "Awarding organization UKPRN."
           },
-          "profileId": {
+          "File": {
+            "type": "string",
+            "format": "binary",
+            "description": "CSV file containing results."
+          },
+          "RequestErrorTypeId": {
             "type": "integer",
-            "format": "int32"
-          },
-          "assessmentId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lookupId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "componentType": {
-            "$ref": "#/components/schemas/ComponentType"
-          },
-          "performedBy": {
-            "type": "string"
+            "nullable": true,
+            "description": "Optional error type ID for request."
           }
         },
         "required": [
-          "aoUkprn",
-          "profileId",
-          "assessmentId",
-          "lookupId",
-          "componentType",
-          "performedBy"
-        ]
-      },
-      "AddResultResponse": {
-        "type": "object",
-        "properties": {
-          "uln": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "profileId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "isSuccess": {
-            "type": "boolean"
-          }
-        }
-      },
-      "BulkProcessRequest": {
-        "type": "object",
-        "properties": {
-          "aoUkprn": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "blobFileName": {
-            "type": "string"
-          },
-          "blobUniqueReference": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "fileType": {
-            "$ref": "#/components/schemas/FileType"
-          },
-          "documentType": {
-            "$ref": "#/components/schemas/DocumentType"
-          },
-          "loginUserType": {
-            "$ref": "#/components/schemas/LoginUserType"
-          },
-          "performedBy": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "aoUkprn",
-          "blobFileName",
-          "blobUniqueReference",
-          "fileType",
-          "documentType",
-          "loginUserType",
-          "performedBy"
-        ]
-      },
-      "BulkResultResponse": {
-        "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/BulkProcessResponse"
-          }
-        ]
-      },
-      "BulkProcessResponse": {
-        "type": "object",
-        "properties": {
-          "isSuccess": {
-            "type": "boolean"
-          },
-          "blobUniqueReference": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "errorFileSize": {
-            "type": "number",
-            "format": "double"
-          },
-          "stats": {
-            "$ref": "#/components/schemas/BulkUploadStats"
-          }
-        }
-      },
-      "BulkUploadStats": {
-        "type": "object",
-        "properties": {
-          "totalRecordsCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "newRecordsCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "amendedRecordsCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "unchangedRecordsCount": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "ChangeResultRequest": {
-        "type": "object",
-        "properties": {
-          "aoUkprn": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "uln": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "profileId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "resultId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "lookupId": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "componentType": {
-            "$ref": "#/components/schemas/ComponentType"
-          },
-          "performedBy": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "aoUkprn",
-          "uln",
-          "profileId",
-          "resultId",
-          "componentType",
-          "performedBy"
-        ]
-      },
-      "ChangeResultResponse": {
-        "type": "object",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AddResultResponse"
-          }
-        ]
-      },
-      "ResultDetails": {
-        "type": "object",
-        "properties": {
-          "profileId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "uln": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "firstname": {
-            "type": "string"
-          },
-          "lastname": {
-            "type": "string"
-          },
-          "dateofBirth": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "providerUkprn": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "providerName": {
-            "type": "string"
-          },
-          "tlevelTitle": {
-            "type": "string"
-          },
-          "pathwayLarId": {
-            "type": "string"
-          },
-          "pathwayName": {
-            "type": "string"
-          },
-          "pathwayAssessmentSeries": {
-            "type": "string"
-          },
-          "pathwayAssessmentId": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "appealEndDate": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "pathwayResultId": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true
-          },
-          "pathwayResultCode": {
-            "type": "string"
-          },
-          "pathwayResult": {
-            "type": "string"
-          },
-          "pathwayPrsStatus": {
-            "$ref": "#/components/schemas/PrsStatus"
-          },
-          "status": {
-            "$ref": "#/components/schemas/RegistrationPathwayStatus"
-          }
-        }
-      },
-      "ComponentType": {
-        "type": "string",
-        "enum": [
-          "NotSpecified",
-          "Core",
-          "Specialism"
-        ]
-      },
-      "DocumentType": {
-        "type": "string",
-        "enum": [
-          "Registrations",
-          "Assessments",
-          "Results",
-          "Documents",
-          "Ucas",
-          "DataExports",
-          "OverallResults",
-          "IndustryPlacements",
-          "AnalystOverallResults",
-          "AnalystCoreResults",
-          "CoreRomm",
-          "SpecialismRomm",
-          "ProviderAddressess",
-          "CertificateTracking",
-          "Withdrawals",
-          "ResultSlips",
-          "Romms",
-          "Aspose"
-        ]
-      },
-      "FileType": {
-        "type": "string",
-        "enum": [
-          "Csv",
-          "Xlsx",
-          "Pdf"
-        ]
-      },
-      "LoginUserType": {
-        "type": "string",
-        "enum": [
-          "NotSpecified",
-          "AwardingOrganisation",
-          "TrainingProvider",
-          "Admin"
-        ]
-      },
-      "PrsStatus": {
-        "type": "string",
-        "enum": [
-          "NotSpecified",
-          "UnderReview",
-          "Reviewed",
-          "BeingAppealed",
-          "Final",
-          "Withdraw"
-        ]
-      },
-      "RegistrationPathwayStatus": {
-        "type": "string",
-        "enum": [
-          "NotSpecified",
-          "Active",
-          "InActive",
-          "Transferred",
-          "Withdrawn"
+          "File"
         ]
       }
     }

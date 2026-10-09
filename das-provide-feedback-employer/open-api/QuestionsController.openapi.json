@@ -1,0 +1,251 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Provide Feedback API",
+    "version": "1.0.0",
+    "description": "An API to manage employer feedback surveys."
+  },
+  "paths": {
+    "/feedback/question-one": {
+      "get": {
+        "operationId": "getQuestionOne",
+        "parameters": [
+          {
+            "name": "encodedAccountId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "HasEmployerAccountPolicy": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "postQuestionOne",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SurveyModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "302": {
+            "description": "Redirected to question two."
+          }
+        },
+        "security": [
+          {
+            "HasEmployerAccountPolicy": []
+          }
+        ]
+      }
+    },
+    "/feedback/question-two": {
+      "get": {
+        "operationId": "getQuestionTwo",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "HasEmployerAccountPolicy": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "postQuestionTwo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SurveyModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "302": {
+            "description": "Redirected to question three."
+          }
+        },
+        "security": [
+          {
+            "HasEmployerAccountPolicy": []
+          }
+        ]
+      }
+    },
+    "/feedback/question-three": {
+      "get": {
+        "operationId": "getQuestionThree",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "security": [
+          {
+            "HasEmployerAccountPolicy": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "postQuestionThree",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SurveyModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "302": {
+            "description": "Redirected to review answers."
+          }
+        },
+        "security": [
+          {
+            "HasEmployerAccountPolicy": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SurveyModel": {
+        "type": "object",
+        "properties": {
+          "userRef": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ukprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderAttributeModel"
+            }
+          },
+          "rating": {
+            "$ref": "#/components/schemas/ProviderRating"
+          },
+          "submitted": {
+            "type": "boolean"
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "fatUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "uniqueCode": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "userRef",
+          "ukprn",
+          "accountId",
+          "rating"
+        ]
+      },
+      "ProviderAttributeModel": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "good": {
+            "type": "boolean"
+          },
+          "bad": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name",
+          "good",
+          "bad"
+        ]
+      },
+      "ProviderRating": {
+        "type": "string",
+        "enum": [
+          "VeryPoor",
+          "Poor",
+          "Good",
+          "Excellent"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "HasEmployerAccountPolicy": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
+  }
+}

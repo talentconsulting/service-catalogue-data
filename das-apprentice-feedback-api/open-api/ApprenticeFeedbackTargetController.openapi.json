@@ -1,0 +1,476 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Feedback API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/apprenticefeedbacktarget/{apprenticeId}": {
+      "get": {
+        "summary": "Get all feedback targets for an apprentice",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of apprentice feedback targets",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApprenticeFeedbackTarget"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/apprenticefeedbacktarget": {
+      "post": {
+        "summary": "Create a new apprentice feedback target",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApprenticeFeedbackTargetCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful creation of apprentice feedback target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateApprenticeFeedbackTargetCommandResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/apprenticefeedbacktarget/update": {
+      "post": {
+        "summary": "Update an apprentice feedback target",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateApprenticeFeedbackTargetCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful update of feedback target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateApprenticeFeedbackTargetCommandResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/apprenticefeedbacktarget/deferupdate": {
+      "post": {
+        "summary": "Defer update for apprentice feedback target",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateApprenticeFeedbackTargetDeferCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful defer update of feedback target",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateApprenticeFeedbackTargetDeferCommandResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/apprenticefeedbacktarget/requiresupdate": {
+      "get": {
+        "summary": "Get feedback targets requiring update",
+        "parameters": [
+          {
+            "name": "BatchSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of feedback targets for update",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApprenticeFeedbackTargetsForUpdateResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/apprenticefeedbacktarget/{apprenticeFeedbackTargetId}": {
+      "patch": {
+        "summary": "Update status of apprentice feedback target",
+        "parameters": [
+          {
+            "name": "apprenticeFeedbackTargetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateApprenticeFeedbackTargetStatusCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful update of status"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/api/apprenticefeedbacktarget/{apprenticeFeedbackTargetId}/exitsurvey": {
+      "get": {
+        "summary": "Get exit survey for a feedback target",
+        "parameters": [
+          {
+            "name": "apprenticeFeedbackTargetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of exit survey",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {}
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ApprenticeFeedbackTarget": {
+        "type": "object",
+        "properties": {
+          "apprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "apprenticeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "apprenticeshipId": {
+            "type": "integer"
+          },
+          "status": {
+            "$ref": "#/components/schemas/FeedbackTargetStatus"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "standardName": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateApprenticeFeedbackTargetCommand": {
+        "type": "object",
+        "properties": {
+          "apprenticeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "apprenticeshipId": {
+            "type": "integer"
+          },
+          "commitmentApprenticeshipId": {
+            "type": "integer"
+          }
+        }
+      },
+      "CreateApprenticeFeedbackTargetCommandResponse": {
+        "type": "object",
+        "properties": {
+          "apprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "UpdateApprenticeFeedbackTargetCommand": {
+        "type": "object",
+        "properties": {
+          "apprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "learner": {
+            "$ref": "#/components/schemas/Learner"
+          },
+          "myApprenticeship": {
+            "$ref": "#/components/schemas/MyApprenticeship"
+          }
+        }
+      },
+      "UpdateApprenticeFeedbackTargetCommandResponse": {
+        "type": "object",
+        "properties": {
+          "updatedApprenticeFeedbackTarget": {
+            "$ref": "#/components/schemas/ApprenticeFeedbackTarget"
+          }
+        }
+      },
+      "UpdateApprenticeFeedbackTargetDeferCommand": {
+        "type": "object",
+        "properties": {
+          "apprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "UpdateApprenticeFeedbackTargetDeferCommandResponse": {
+        "type": "object",
+        "properties": {
+          "updatedApprenticeFeedbackTarget": {
+            "$ref": "#/components/schemas/ApprenticeFeedbackTarget"
+          }
+        }
+      },
+      "GetApprenticeFeedbackTargetsForUpdateResult": {
+        "type": "object",
+        "properties": {
+          "apprenticeFeedbackTargets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApprenticeFeedbackTargetForUpdate"
+            }
+          }
+        }
+      },
+      "UpdateApprenticeFeedbackTargetStatusCommand": {
+        "type": "object",
+        "properties": {
+          "apprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/FeedbackTargetStatus"
+          },
+          "feedbackEligibilityStatus": {
+            "$ref": "#/components/schemas/FeedbackEligibilityStatus"
+          }
+        }
+      },
+      "ApprenticeFeedbackTargetForUpdate": {
+        "type": "object",
+        "properties": {
+          "apprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "apprenticeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "apprenticeshipId": {
+            "type": "integer"
+          }
+        }
+      },
+      "FeedbackTargetStatus": {
+        "type": "string",
+        "enum": [
+          "Unknown",
+          "NotYetActive",
+          "Active",
+          "Complete"
+        ]
+      },
+      "FeedbackEligibilityStatus": {
+        "type": "string",
+        "enum": [
+          "Unknown",
+          "Allow",
+          "Deny_TooSoon",
+          "Deny_TooLateAfterWithdrawing",
+          "Deny_TooLateAfterPausing",
+          "Deny_HasGivenFeedbackRecently",
+          "Deny_HasGivenFinalFeedback",
+          "Deny_Complete"
+        ]
+      },
+      "Learner": {
+        "type": "object",
+        "properties": {
+          "ukprn": {
+            "type": "integer"
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "learnStartDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "plannedEndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "standardCode": {
+            "type": "integer"
+          },
+          "standardUId": {
+            "type": "string"
+          },
+          "standardReference": {
+            "type": "string"
+          },
+          "standardName": {
+            "type": "string"
+          },
+          "completionStatus": {
+            "type": "integer"
+          },
+          "approvalsStopDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "approvalsPauseDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "learnActEndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "estimatedEndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isTransfer": {
+            "type": "boolean"
+          },
+          "dateTransferIdentified": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "MyApprenticeship": {
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "trainingProviderId": {
+            "type": "integer"
+          },
+          "trainingProviderName": {
+            "type": "string"
+          },
+          "trainingCode": {
+            "type": "string"
+          },
+          "standardUId": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

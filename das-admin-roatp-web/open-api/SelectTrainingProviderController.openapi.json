@@ -1,0 +1,94 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Select Training Provider API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers": {
+      "get": {
+        "summary": "Render Select Training Provider page",
+        "operationId": "getSelectTrainingProvider",
+        "responses": {
+          "200": {
+            "description": "Successful response with the SelectTrainingProviderViewModel data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelectTrainingProviderViewModel"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "summary": "Submit Select Training Provider data",
+        "operationId": "postSelectTrainingProvider",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "$ref": "#/components/schemas/SelectTrainingProviderViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to provider summary if validation passes"
+          },
+          "400": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SelectTrainingProviderViewModel": {
+        "type": "object",
+        "properties": {
+          "SearchTerm": {
+            "type": "string",
+            "nullable": true,
+            "description": "A derived property combining LegalName and Ukprn."
+          },
+          "LegalName": {
+            "type": "string",
+            "nullable": true,
+            "description": "The legal name of the training provider."
+          },
+          "Ukprn": {
+            "type": "string",
+            "nullable": true,
+            "description": "The unique provider reference number of the training provider."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "roles": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization based on user roles. Requires role 'RoatpAdminTeam'."
+      }
+    }
+  }
+}

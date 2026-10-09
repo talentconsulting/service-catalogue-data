@@ -1,0 +1,95 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Provide Feedback API",
+    "version": "1.0.0",
+    "description": "API for managing employer feedback for providers."
+  },
+  "paths": {
+    "/api/Feedback": {
+      "get": {
+        "summary": "Get all employer feedback",
+        "operationId": "getAllEmployerFeedback",
+        "responses": {
+          "200": {
+            "description": "Successful retrieval of feedback.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EmployerFeedbackDto"
+                  }
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No feedback records found."
+          },
+          "401": {
+            "description": "Unauthorized request."
+          },
+          "500": {
+            "description": "Internal server error."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "EmployerFeedbackDto": {
+        "type": "object",
+        "properties": {
+          "ukprn": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unique Provider Reference Number"
+          },
+          "dateTimeCompleted": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The date and time the feedback was completed."
+          },
+          "providerAttributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderAttributeDto"
+            },
+            "description": "List of provider attributes."
+          },
+          "providerRating": {
+            "type": "string",
+            "description": "The rating given to the provider."
+          }
+        },
+        "required": [
+          "ukprn",
+          "dateTimeCompleted",
+          "providerAttributes",
+          "providerRating"
+        ],
+        "description": "Feedback given by an employer, excluding sensitive information such as Account Id and UserRef."
+      },
+      "ProviderAttributeDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the provider attribute."
+          },
+          "value": {
+            "type": "integer",
+            "description": "Value associated with the provider attribute."
+          }
+        },
+        "required": [
+          "name",
+          "value"
+        ],
+        "description": "A positive or negative attribute of a provider."
+      }
+    }
+  }
+}

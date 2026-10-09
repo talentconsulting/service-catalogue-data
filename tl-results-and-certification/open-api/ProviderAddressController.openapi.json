@@ -1,31 +1,22 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Provider Address API",
-    "version": "1.0.0"
+    "title": "Provider Address Management API",
+    "version": "1.0.0",
+    "description": "API to manage provider postal addresses."
   },
   "paths": {
-    "/api/ProviderAddress/AddAddress": {
-      "post": {
-        "summary": "Add a new address for a provider",
-        "operationId": "AddAddress",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AddAddressRequest"
-              }
-            }
-          }
-        },
+    "/manage-postal-address": {
+      "get": {
+        "operationId": "managePostalAddressAsync",
+        "summary": "Get the provider's current postal address.",
         "responses": {
           "200": {
-            "description": "Address added successfully",
+            "description": "Returns the current postal address for the provider.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "boolean"
+                  "$ref": "#/components/schemas/ManagePostalAddressViewModel"
                 }
               }
             }
@@ -33,29 +24,207 @@
         }
       }
     },
-    "/api/ProviderAddress/GetAddress/{providerUkprn}": {
+    "/add-address": {
       "get": {
-        "summary": "Get the address details for a provider",
-        "operationId": "GetAddress",
+        "operationId": "addAddressAsync",
+        "summary": "Redirects to the postcode input interface for adding a new address.",
+        "responses": {
+          "302": {
+            "description": "Redirects to the 'Add address by postcode' interface."
+          }
+        }
+      }
+    },
+    "/add-postal-address-postcode": {
+      "post": {
+        "operationId": "submitAddAddressPostcodeAsync",
+        "summary": "Submit the postcode for a new address.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddAddressPostcodeViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirects to the 'Select address' interface."
+          }
+        }
+      }
+    },
+    "/add-postal-address-postcode/{showPostcode}/{isFromAddressMissing}": {
+      "get": {
+        "operationId": "addAddressPostcodeAsync",
+        "summary": "Displays the postcode input interface for adding a new address.",
         "parameters": [
           {
-            "name": "providerUkprn",
+            "name": "showPostcode",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
-            },
-            "description": "Unique identifier for the provider"
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "isFromAddressMissing",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Address details retrieved successfully",
+            "description": "Displays the postcode input interface.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Address"
+                  "$ref": "#/components/schemas/AddAddressPostcodeViewModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/add-postal-address-manual": {
+      "post": {
+        "operationId": "submitAddPostalAddressManualAsync",
+        "summary": "Submit a manually entered postal address.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddAddressManualViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirects to the 'Check and submit address' interface."
+          }
+        }
+      }
+    },
+    "/add-postal-address-manual/{isFromSelectAddress}/{isFromAddressMissing}": {
+      "get": {
+        "operationId": "addPostalAddressManualAsync",
+        "summary": "Displays interface for manually entering postal address.",
+        "parameters": [
+          {
+            "name": "isFromSelectAddress",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "isFromAddressMissing",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Displays interface for manual address input.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddAddressManualViewModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/add-postal-address-select": {
+      "get": {
+        "operationId": "addAddressSelectAsync",
+        "summary": "Displays list of addresses matching the entered postcode.",
+        "responses": {
+          "200": {
+            "description": "Displays list of matched addresses.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddAddressSelectViewModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/add-postal-address-check-and-submit": {
+      "get": {
+        "operationId": "addAddressCheckAndSubmitAsync",
+        "summary": "Displays the postal address for confirmation before submission",
+        "responses": {
+          "200": {
+            "description": "Displays final address details for review.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddAddressCheckAndSubmitViewModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/add-postal-address-cancel": {
+      "get": {
+        "operationId": "addAddressCancelAsync",
+        "summary": "Display cancellation prompt for address addition.",
+        "responses": {
+          "200": {
+            "description": "Displays cancellation confirmation interface.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddAddressCancelViewModel"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/add-postal-address-confirmation": {
+      "get": {
+        "operationId": "addAddressConfirmationAsync",
+        "summary": "Confirm successful address addition.",
+        "responses": {
+          "200": {
+            "description": "Displays confirmation page acknowledging address addition."
+          }
+        }
+      }
+    },
+    "/add-postal-address-no-addresses-found": {
+      "get": {
+        "operationId": "addAddressNotFoundAsync",
+        "summary": "Displays error message for unsuccessful address search.",
+        "responses": {
+          "200": {
+            "description": "Provides feedback and options for corrective action.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddAddressNotFoundViewModel"
                 }
               }
             }
@@ -66,79 +235,82 @@
   },
   "components": {
     "schemas": {
-      "AddAddressRequest": {
+      "ManagePostalAddressViewModel": {
         "type": "object",
         "properties": {
-          "Ukprn": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "DepartmentName": {
-            "type": "string"
-          },
-          "OrganisationName": {
-            "type": "string"
-          },
-          "AddressLine1": {
-            "type": "string"
-          },
-          "AddressLine2": {
-            "type": "string"
-          },
-          "Town": {
-            "type": "string"
-          },
-          "Postcode": {
-            "type": "string"
-          },
-          "PerformedBy": {
+          "address": {
             "type": "string"
           }
-        },
-        "required": [
-          "Ukprn",
-          "DepartmentName",
-          "OrganisationName",
-          "AddressLine1",
-          "Town",
-          "Postcode",
-          "PerformedBy"
-        ]
+        }
       },
-      "Address": {
+      "AddAddressPostcodeViewModel": {
         "type": "object",
         "properties": {
-          "AddressId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "DepartmentName": {
+          "postcode": {
             "type": "string"
           },
-          "OrganisationName": {
+          "isFromAddressMissing": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AddAddressManualViewModel": {
+        "type": "object",
+        "properties": {
+          "addressLine1": {
             "type": "string"
           },
-          "AddressLine1": {
+          "addressLine2": {
             "type": "string"
           },
-          "AddressLine2": {
+          "town": {
             "type": "string"
           },
-          "Town": {
-            "type": "string"
-          },
-          "Postcode": {
+          "postcode": {
             "type": "string"
           }
-        },
-        "required": [
-          "AddressId",
-          "DepartmentName",
-          "OrganisationName",
-          "AddressLine1",
-          "Town",
-          "Postcode"
-        ]
+        }
+      },
+      "AddAddressSelectViewModel": {
+        "type": "object",
+        "properties": {
+          "selectedAddressUprn": {
+            "type": "string"
+          },
+          "departmentName": {
+            "type": "string"
+          },
+          "addressSelectList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "AddAddressCheckAndSubmitViewModel": {
+        "type": "object",
+        "properties": {
+          "providerAddress": {
+            "$ref": "#/components/schemas/AddAddressSelectViewModel"
+          }
+        }
+      },
+      "AddAddressCancelViewModel": {
+        "type": "object",
+        "properties": {
+          "cancelAddAddress": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AddAddressNotFoundViewModel": {
+        "type": "object",
+        "properties": {
+          "postcode": {
+            "type": "string"
+          }
+        }
       }
     }
   }

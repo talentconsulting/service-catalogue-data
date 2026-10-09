@@ -5,113 +5,105 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/api/ProviderRegistrations/GetAvailableStartYears": {
+    "/download-registrations-data": {
       "get": {
-        "operationId": "GetAvailableStartYears",
-        "description": "Retrieves a list of available start years.",
+        "summary": "Get available start years for registrations data.",
+        "operationId": "DownloadRegistrationsDataAsync",
         "responses": {
           "200": {
-            "description": "A list of available start years.",
+            "description": "Successful retrieval of available start years.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "integer",
-                    "format": "int32"
+                  "type": "object",
+                  "properties": {
+                    "AvailableStartYearViewModels": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "description": "Component representing available start year data."
+                      }
+                    }
                   }
                 }
               }
             }
+          },
+          "302": {
+            "description": "Redirection to another URL when there is an issue.",
+            "content": {}
           }
         }
       }
     },
-    "/api/ProviderRegistrations/GetRegistrations": {
-      "post": {
-        "operationId": "GetRegistrations",
-        "description": "Fetches provider registration data based on the request.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/GetProviderRegistrationsRequest"
-              }
+    "/download-registrations-data-for": {
+      "get": {
+        "summary": "Download registrations data for a specific start year.",
+        "operationId": "DownloadRegistrationsDataForAsync",
+        "parameters": [
+          {
+            "name": "startYear",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 2023
             }
           }
-        },
+        ],
         "responses": {
           "200": {
-            "description": "Provider registration data response.",
+            "description": "Successful retrieval of registrations data.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DataExportResponse"
+                  "type": "object",
+                  "properties": {
+                    "DownloadRegistrationsDataForViewModel": {
+                      "type": "object",
+                      "description": "Component representing data for the specific start year."
+                    }
+                  }
                 }
               }
             }
+          },
+          "302": {
+            "description": "Redirection to another URL if requested data is unavailable or has issues.",
+            "content": {}
+          }
+        }
+      }
+    },
+    "/download-registrations-data-for/{id}": {
+      "get": {
+        "summary": "Download link for exported registrations data.",
+        "operationId": "DownloadRegistrationsDataForLinkAsync",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful download of exported data.",
+            "content": {}
+          },
+          "302": {
+            "description": "Redirection to an error page for invalid or unavailable data.",
+            "content": {}
           }
         }
       }
     }
   },
   "components": {
-    "schemas": {
-      "DataExportResponse": {
-        "type": "object",
-        "properties": {
-          "isDataFound": {
-            "type": "boolean"
-          },
-          "blobUniqueReference": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "fileSize": {
-            "type": "number",
-            "format": "double"
-          },
-          "componentType": {
-            "$ref": "#/components/schemas/ComponentType"
-          }
-        },
-        "required": [
-          "isDataFound",
-          "blobUniqueReference",
-          "fileSize",
-          "componentType"
-        ]
-      },
-      "GetProviderRegistrationsRequest": {
-        "type": "object",
-        "properties": {
-          "providerUkprn": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "startYear": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "requestedBy": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "providerUkprn",
-          "startYear",
-          "requestedBy"
-        ]
-      },
-      "ComponentType": {
-        "type": "string",
-        "enum": [
-          "NotSpecified",
-          "Core",
-          "Specialism"
-        ]
-      }
-    }
+    "schemas": {}
   }
 }

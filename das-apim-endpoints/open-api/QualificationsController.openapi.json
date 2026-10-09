@@ -2,13 +2,12 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Qualifications API",
-    "description": "API for managing qualifications and related data.",
     "version": "1.0.0"
   },
   "paths": {
     "/api/qualifications": {
       "get": {
-        "summary": "Get qualifications",
+        "summary": "Retrieve qualifications",
         "parameters": [
           {
             "name": "status",
@@ -23,7 +22,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "minimum": 0
             }
           },
           {
@@ -31,7 +31,8 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "minimum": 0
             }
           },
           {
@@ -77,7 +78,13 @@
             "schema": {
               "type": "array",
               "items": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "Pre16",
+                  "SixteenToEighteen",
+                  "EighteenPlus",
+                  "NineteenPlus"
+                ]
               }
             }
           }
@@ -88,23 +95,30 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BaseMediatrResponse_GetNewQualificationsQueryResponse"
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/BaseMediatrResponse_GetNewQualificationsQueryResponse"
+                    },
+                    {
+                      "$ref": "#/components/schemas/BaseMediatrResponse_GetChangedQualificationsQueryResponse"
+                    }
+                  ]
                 }
               }
             }
           },
           "400": {
-            "description": "Invalid request"
+            "description": "Bad Request"
           },
           "500": {
-            "description": "Server error"
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/api/qualifications/{qualificationReference}/detail": {
       "get": {
-        "summary": "Get qualification details",
+        "summary": "Retrieve qualification details",
         "parameters": [
           {
             "name": "qualificationReference",
@@ -127,20 +141,20 @@
             }
           },
           "400": {
-            "description": "Invalid request"
+            "description": "Bad Request"
           },
           "404": {
-            "description": "Not found"
+            "description": "Not Found"
           },
           "500": {
-            "description": "Server error"
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/api/qualifications/{qualificationReference}/detailwithversions": {
       "get": {
-        "summary": "Get qualification detail with versions",
+        "summary": "Retrieve qualification details with versions",
         "parameters": [
           {
             "name": "qualificationReference",
@@ -153,17 +167,17 @@
         ],
         "responses": {
           "400": {
-            "description": "Invalid request"
+            "description": "Bad Request"
           },
           "500": {
-            "description": "Server error"
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/api/qualifications/{qualificationReference}/qualificationversions/{version}": {
       "get": {
-        "summary": "Get qualification details for a specific version",
+        "summary": "Retrieve qualification version details",
         "parameters": [
           {
             "name": "qualificationReference",
@@ -194,13 +208,13 @@
             }
           },
           "400": {
-            "description": "Invalid request"
+            "description": "Bad Request"
           },
           "404": {
-            "description": "Not found"
+            "description": "Not Found"
           },
           "500": {
-            "description": "Server error"
+            "description": "Internal Server Error"
           }
         }
       }
@@ -220,17 +234,17 @@
         },
         "responses": {
           "404": {
-            "description": "Not found"
+            "description": "Not Found"
           },
           "500": {
-            "description": "Server error"
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/api/qualifications/processstatuses": {
       "get": {
-        "summary": "Get processing statuses",
+        "summary": "Retrieve processing statuses",
         "responses": {
           "200": {
             "description": "Successful response",
@@ -243,17 +257,17 @@
             }
           },
           "404": {
-            "description": "Not found"
+            "description": "Not Found"
           },
           "500": {
-            "description": "Server error"
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/api/qualifications/{qualificationReference}/qualificationdiscussionhistories": {
       "get": {
-        "summary": "Get discussion histories for qualification",
+        "summary": "Retrieve discussion histories for a qualification",
         "parameters": [
           {
             "name": "qualificationReference",
@@ -276,53 +290,7 @@
             }
           },
           "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
-    "/api/qualifications/bulk-status": {
-      "put": {
-        "summary": "Bulk status update",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkUpdateQualificationStatusCommand"
-              }
-            }
-          }
-        },
-        "responses": {
-          "404": {
-            "description": "Not found"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    },
-    "/api/qualifications/qualificationstatus": {
-      "post": {
-        "summary": "Update qualification status",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdateQualificationStatusCommand"
-              }
-            }
-          }
-        },
-        "responses": {
-          "404": {
-            "description": "Not found"
-          },
-          "500": {
-            "description": "Server error"
+            "description": "Internal Server Error"
           }
         }
       }
@@ -333,219 +301,245 @@
       "BaseMediatrResponse_GetNewQualificationsQueryResponse": {
         "type": "object",
         "properties": {
-          "Success": {
+          "success": {
             "type": "boolean"
           },
-          "ErrorMessage": {
+          "errorMessage": {
             "type": "string"
           },
-          "ErrorCode": {
+          "errorCode": {
             "type": "string"
           },
-          "Value": {
+          "value": {
             "$ref": "#/components/schemas/GetNewQualificationsQueryResponse"
           }
         }
       },
-      "GetNewQualificationsQueryResponse": {
+      "BaseMediatrResponse_GetChangedQualificationsQueryResponse": {
         "type": "object",
         "properties": {
-          "TotalRecords": {
-            "type": "integer"
-          },
-          "Skip": {
-            "type": "integer"
-          },
-          "Take": {
-            "type": "integer"
-          },
-          "Data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/NewQualification"
-            }
-          },
-          "Job": {
-            "$ref": "#/components/schemas/Job"
-          }
-        }
-      },
-      "NewQualification": {
-        "type": "object",
-        "properties": {
-          "QualificationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "Title": {
-            "type": "string"
-          },
-          "Reference": {
-            "type": "string"
-          },
-          "AwardingOrganisation": {
-            "type": "string"
-          },
-          "Status": {
-            "type": "string"
-          },
-          "AgeGroup": {
-            "type": "string"
-          },
-          "EligibleForFunding": {
+          "success": {
             "type": "boolean"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/GetChangedQualificationsQueryResponse"
           }
         }
       },
-      "Job": {
+      "BaseMediatrResponse_GetQualificationDetailsQueryResponse": {
         "type": "object",
         "properties": {
-          "Name": {
+          "success": {
+            "type": "boolean"
+          },
+          "errorMessage": {
             "type": "string"
           },
-          "Status": {
+          "errorCode": {
             "type": "string"
           },
-          "LastRunTime": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
-      "AddQualificationDiscussionHistoryCommand": {
-        "type": "object",
-        "properties": {
-          "QualificationReference": {
-            "type": "string"
-          },
-          "UserDisplayName": {
-            "type": "string"
-          },
-          "Notes": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "QualificationReference"
-        ]
-      },
-      "GetProcessStatusesQueryResponse": {
-        "type": "object",
-        "properties": {
-          "ProcessStatuses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProcessStatus"
-            }
-          }
-        }
-      },
-      "ProcessStatus": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "Name": {
-            "type": "string"
-          },
-          "IsOutcomeDecision": {
-            "type": "integer"
+          "value": {
+            "$ref": "#/components/schemas/GetQualificationDetailsQueryResponse"
           }
         }
       },
       "BaseMediatrResponse_GetDiscussionHistoriesForQualificationQueryResponse": {
         "type": "object",
         "properties": {
-          "QualificationDiscussionHistories": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QualificationDiscussionHistory"
-            }
+          "success": {
+            "type": "boolean"
+          },
+          "errorMessage": {
+            "type": "string"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "value": {
+            "$ref": "#/components/schemas/GetDiscussionHistoriesForQualificationQueryResponse"
           }
         }
       },
-      "QualificationDiscussionHistory": {
+      "AddQualificationDiscussionHistoryCommand": {
         "type": "object",
         "properties": {
-          "Id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "QualificationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "ActionTypeId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "UserDisplayName": {
+          "qualificationReference": {
             "type": "string"
           },
-          "Notes": {
+          "userDisplayName": {
             "type": "string"
           },
-          "Timestamp": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "Title": {
+          "notes": {
             "type": "string"
           }
         }
       },
-      "BulkUpdateQualificationStatusCommand": {
+      "GetProcessStatusesQueryResponse": {
         "type": "object",
         "properties": {
-          "QualificationIds": {
+          "processStatuses": {
             "type": "array",
             "items": {
-              "type": "string",
-              "format": "uuid"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "isOutcomeDecision": {
+                  "type": "integer"
+                }
+              }
             }
-          },
-          "ProcessStatusId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "Comment": {
-            "type": "string"
-          },
-          "UserDisplayName": {
-            "type": "string"
           }
-        },
-        "required": [
-          "QualificationIds",
-          "ProcessStatusId"
-        ]
+        }
       },
-      "UpdateQualificationStatusCommand": {
+      "GetChangedQualificationsQueryResponse": {
         "type": "object",
         "properties": {
-          "QualificationReference": {
-            "type": "string"
-          },
-          "ProcessStatusId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "UserDisplayName": {
-            "type": "string"
-          },
-          "Version": {
+          "totalRecords": {
             "type": "integer"
           },
-          "Notes": {
+          "skip": {
+            "type": "integer"
+          },
+          "take": {
+            "type": "integer"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "qualificationId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "qualificationReference": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "job": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "lastRunTime": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "GetNewQualificationsQueryResponse": {
+        "type": "object",
+        "properties": {
+          "totalRecords": {
+            "type": "integer"
+          },
+          "skip": {
+            "type": "integer"
+          },
+          "take": {
+            "type": "integer"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "qualificationId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "qualificationReference": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "job": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "status": {
+                "type": "string"
+              },
+              "lastRunTime": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "GetDiscussionHistoriesForQualificationQueryResponse": {
+        "type": "object",
+        "properties": {
+          "qualificationDiscussionHistories": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "qualificationId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "actionTypeId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "userDisplayName": {
+                  "type": "string"
+                },
+                "notes": {
+                  "type": "string"
+                },
+                "timestamp": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetQualificationDetailsQueryResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "qualificationReference": {
+            "type": "string"
+          },
+          "qualificationName": {
             "type": "string"
           }
-        },
-        "required": [
-          "QualificationReference",
-          "ProcessStatusId"
-        ]
+        }
       }
     }
   }
