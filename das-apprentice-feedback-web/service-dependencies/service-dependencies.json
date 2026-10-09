@@ -1,0 +1,104 @@
+{
+  "repository": "SkillsFundingAgency/das-apprentice-feedback-web",
+  "ref": "main",
+  "path": "src",
+  "systemName": "Apprentice Feedback",
+  "containers": [
+    {
+      "id": "apprentice-feedback-nservicebuslistener",
+      "name": "Apprentice Feedback NServiceBus Listener",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Web.NServiceBusListener/Program.cs",
+          "reason": "NServiceBus Listener entry point using Endpoint.Start."
+        }
+      ]
+    },
+    {
+      "id": "apprentice-feedback-web",
+      "name": "Apprentice Feedback",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Web/Program.cs",
+          "reason": "ASP.NET Core WebHost entry point with UseStartup."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "apprentice-feedback-web",
+      "name": "Redis",
+      "kind": "cache",
+      "classification": "unknown",
+      "direction": "outbound",
+      "client": null,
+      "technology": "StackExchange.Redis",
+      "configurationKeys": [
+        "DataProtectionConnectionStrings:RedisConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Web/Startup/DataProtectionStartup.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Web/Startup/DataProtectionStartup.cs",
+          "reason": "AddStackExchangeRedisCache registration with Redis connection string."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Web/Startup/DataProtectionStartup.cs",
+          "reason": "ConnectionMultiplexer.Connect used with Redis connection string."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "apprentice-feedback-nservicebuslistener",
+      "name": "Azure Service Bus",
+      "kind": "message-broker",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "NServiceBus",
+      "technology": "Azure Service Bus",
+      "configurationKeys": [
+        "NServiceBusConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "message-broker",
+          "name": null,
+          "direction": "outbound",
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Web.NServiceBusListener/Program.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ApprenticeFeedback.Web.NServiceBusListener/Program.cs",
+          "reason": "UseAzureServiceBusTransport registration for NServiceBus."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "message-broker-azure-service-bus",
+      "description": "Publishes messages to and consumes messages from"
+    }
+  ]
+}

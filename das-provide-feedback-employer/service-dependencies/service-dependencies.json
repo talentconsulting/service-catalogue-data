@@ -1,0 +1,271 @@
+{
+  "repository": "SkillsFundingAgency/das-provide-feedback-employer",
+  "ref": "master",
+  "path": "src",
+  "systemName": "Provide Feedback Employer",
+  "containers": [
+    {
+      "id": "provide-feedback-employer-api",
+      "name": "Provide Feedback Employer",
+      "type": "api",
+      "evidence": [
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.EmployerProvideFeedback.Api/Program.cs",
+          "reason": "ASP.NET Core API entry point class detected."
+        },
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.EmployerProvideFeedback.Api/ESFA.DAS.EmployerProvideFeedback.Api.csproj",
+          "reason": "Project SDK references ASP.NET Core Web, indicating an API container."
+        }
+      ]
+    },
+    {
+      "id": "provide-feedback-employer-functions-emailer",
+      "name": "Provide Feedback Employer Functions Emailer",
+      "type": "job",
+      "evidence": [
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.ProvideFeedback.Employer.Functions.Emailer/Program.cs",
+          "reason": "Azure Functions worker configuration detected."
+        },
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.ProvideFeedback.Employer.Functions.Emailer/ESFA.DAS.ProvideFeedback.Employer.Functions.Emailer.csproj",
+          "reason": "Project marked as Azure Functions job with OutputType=Exe."
+        }
+      ]
+    },
+    {
+      "id": "provide-feedback-employer-web",
+      "name": "Provide Feedback Employer Web",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.EmployerProvideFeedback/Program.cs",
+          "reason": "ASP.NET Core Web entry point class detected."
+        },
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.EmployerProvideFeedback/ESFA.DAS.EmployerProvideFeedback.csproj",
+          "reason": "Project SDK references ASP.NET Core Web, indicating a web container."
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "provide-feedback-employer-web",
+      "name": "Redis Cache",
+      "kind": "cache",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "StackExchange.Redis",
+      "technology": "Redis",
+      "configurationKeys": [
+        "RedisConnectionString"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "cache",
+          "name": "RedisConnectionString",
+          "direction": "outbound",
+          "sourceFile": "src/Employer/ESFA.DAS.EmployerProvideFeedback/StartupExtensions/AddCacheExtensions.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.EmployerProvideFeedback/StartupExtensions/AddCacheExtensions.cs",
+          "reason": "StackExchange.Redis cache configuration detected for distributed cache setup."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis-cache",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "provide-feedback-employer-web",
+      "name": "Azure Monitor",
+      "kind": "cloud-service",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Azure Monitor",
+      "configurationKeys": [
+        "APPLICATIONINSIGHTS_CONNECTION_STRING"
+      ],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.EmployerProvideFeedback/Startup.cs",
+          "reason": "OpenTelemetry Azure Monitor registration detected with ApplicationInsights connection string."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cloud-service-azure-monitor",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "provide-feedback-employer-functions-emailer",
+      "name": "Employer Email Store",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "SqlConnection",
+      "technology": "SQL Server",
+      "configurationKeys": [
+        "EmployerEmailStoreConnection"
+      ],
+      "authentication": {
+        "type": "azure-ad",
+        "configurationKeys": [
+          "EmployerEmailStoreConnection"
+        ]
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "Employer Email Store",
+          "direction": "outbound",
+          "sourceFile": "src/Employer/ESFA.DAS.ProvideFeedback.Employer.Functions.Emailer/Database/AddDatabaseExtension.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.ProvideFeedback.Employer.Functions.Emailer/Database/AddDatabaseExtension.cs",
+          "reason": "Azure AD token authentication detected for SQL Server."
+        },
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.ProvideFeedback.Employer.Functions.Emailer/Database/AddDatabaseExtension.cs",
+          "reason": "SqlConnection construction with configuration for EmployerEmailStoreConnection."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-employer-email-store",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "provide-feedback-employer-api",
+      "name": "Employer Email Store",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "SqlConnection",
+      "technology": "SQL Server",
+      "configurationKeys": [
+        "EmployerEmailStoreConnection"
+      ],
+      "authentication": {
+        "type": "Azure Managed Identity",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "EmployerEmailStoreConnection",
+          "direction": "outbound",
+          "sourceFile": "src/Employer/ESFA.DAS.EmployerProvideFeedback.Api/Configuration/StartupExtensions.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.EmployerProvideFeedback.Api/Configuration/StartupExtensions.cs",
+          "reason": "Transient IDbConnection with SqlConnection for database access registered."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-employer-email-store",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "provide-feedback-employer-web",
+      "name": "Employer Email Store",
+      "kind": "database",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "SqlConnection",
+      "technology": "SQL Server",
+      "configurationKeys": [
+        "EmployerFeedbackDatabaseConnectionString"
+      ],
+      "authentication": {
+        "type": "Azure Managed Identity",
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [
+        {
+          "type": "database",
+          "name": "EmployerFeedbackDatabaseConnectionString",
+          "direction": "outbound",
+          "sourceFile": "src/Employer/ESFA.DAS.EmployerProvideFeedback/Database/AddDatabaseExtension.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.EmployerProvideFeedback/Database/AddDatabaseExtension.cs",
+          "reason": "Transient IDbConnection with SqlConnection for database access registered."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "database-employer-email-store",
+      "description": "Reads from and writes to"
+    },
+    {
+      "sourceId": "provide-feedback-employer-functions-emailer",
+      "name": "Outer API",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "OuterApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "OuterApiConfiguration:BaseUrl"
+      ],
+      "authentication": {
+        "type": "api-key",
+        "configurationKeys": [
+          "OuterApiConfiguration:Key"
+        ]
+      },
+      "operations": [
+        {
+          "method": "GET",
+          "methodName": "Get",
+          "path": "{request.GetUrl}",
+          "sourceFile": "src/Employer/ESFA.DAS.ProvideFeedback.Employer.ApplicationServices/OuterApi/OuterApiClient.cs"
+        }
+      ],
+      "resources": [
+        {
+          "type": "endpoint",
+          "name": "Outer API BaseUrl",
+          "direction": "outbound",
+          "sourceFile": "src/Employer/ESFA.DAS.ProvideFeedback.Employer.ApplicationServices/OuterApi/OuterApiClient.cs"
+        }
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.ProvideFeedback.Employer.ApplicationServices/OuterApi/OuterApiClient.cs",
+          "reason": "API key authentication header detected."
+        },
+        {
+          "sourceFile": "src/Employer/ESFA.DAS.ProvideFeedback.Employer.ApplicationServices/OuterApi/OuterApiClient.cs",
+          "reason": "HttpClient construction with API BaseUrl detected."
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-outer-api",
+      "description": "Calls the API of"
+    }
+  ]
+}

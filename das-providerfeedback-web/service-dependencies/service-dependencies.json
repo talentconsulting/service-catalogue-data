@@ -1,0 +1,97 @@
+{
+  "repository": "SkillsFundingAgency/das-providerfeedback-web",
+  "ref": "main",
+  "path": "src",
+  "systemName": "Provider Feedback",
+  "containers": [
+    {
+      "id": "provider-feedback",
+      "name": "Provider Feedback",
+      "type": "web",
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ProviderFeedback.Web/Program.cs",
+          "reason": "ASP.NET Core entry point"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ProviderFeedback.Web/SFA.DAS.ProviderFeedback.Web.csproj",
+          "reason": "Project SDK is Microsoft.NET.Sdk.Web"
+        }
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "sourceId": "provider-feedback",
+      "name": "Redis Cache",
+      "kind": "cache",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": "StackExchangeRedis",
+      "technology": "Redis",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ProviderFeedback.Web/SFA.DAS.ProviderFeedback.Web.csproj",
+          "reason": "Uses Microsoft.Extensions.Caching.StackExchangeRedis and StackExchange.Redis packages"
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cache-redis-cache",
+      "description": "Caches data in"
+    },
+    {
+      "sourceId": "provider-feedback",
+      "name": "Provider Feedback Outer",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "IApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "ProviderFeedbackOuterApi:ApiBaseUrl",
+        "ProviderFeedbackOuterApi:SubscriptionKey"
+      ],
+      "authentication": {
+        "type": "header",
+        "configurationKeys": [
+          "ProviderFeedbackOuterApi:SubscriptionKey"
+        ]
+      },
+      "operations": [
+        {
+          "method": "GET",
+          "methodName": "Get",
+          "path": null,
+          "sourceFile": "src/SFA.DAS.ProviderFeedback.Infrastructure/Api/ApiClient.cs"
+        },
+        {
+          "method": "POST",
+          "methodName": "Post",
+          "path": null,
+          "sourceFile": "src/SFA.DAS.ProviderFeedback.Infrastructure/Api/ApiClient.cs"
+        }
+      ],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.ProviderFeedback.Infrastructure/Api/ApiClient.cs",
+          "reason": "HttpClient with BaseAddress and customized headers for API"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.ProviderFeedback.Web/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "Registered IApiClient with AddHttpClient"
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-provider-feedback-outer",
+      "description": "Calls the API of"
+    }
+  ]
+}

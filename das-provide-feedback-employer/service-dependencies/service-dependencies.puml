@@ -1,0 +1,23 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+System_Boundary(sys_SkillsFundingAgency_das_provide_feedback_employer, "Provide Feedback Employer") {
+  Container(c_provide_feedback_employer_api, "Provide Feedback Employer", "API")
+  Container(c_provide_feedback_employer_functions_emailer, "Provide Feedback Employer Functions Emailer", "Background Job")
+  Container(c_provide_feedback_employer_web, "Provide Feedback Employer Web", "Web Application")
+}
+
+SystemDb_Ext(d_cache_redis_cache, "Redis Cache", "Redis")
+System_Ext(d_cloud_service_azure_monitor, "Azure Monitor", "Azure Monitor")
+SystemDb_Ext(d_database_employer_email_store, "Employer Email Store", "SQL Server")
+System_Ext(d_http_api_outer_api, "Outer API", "HttpClient")
+
+Rel(c_provide_feedback_employer_web, d_cache_redis_cache, "Caches data in", "Redis")
+Rel(c_provide_feedback_employer_web, d_cloud_service_azure_monitor, "Uses", "Azure Monitor")
+Rel(c_provide_feedback_employer_functions_emailer, d_database_employer_email_store, "Reads from and writes to", "SQL Server")
+Rel(c_provide_feedback_employer_api, d_database_employer_email_store, "Reads from and writes to", "SQL Server")
+Rel(c_provide_feedback_employer_web, d_database_employer_email_store, "Reads from and writes to", "SQL Server")
+Rel(c_provide_feedback_employer_functions_emailer, d_http_api_outer_api, "Calls the API of", "HttpClient")
+
+@enduml
