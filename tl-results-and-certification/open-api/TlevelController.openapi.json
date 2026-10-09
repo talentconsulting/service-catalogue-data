@@ -1,0 +1,303 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Tlevel Internal API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/Tlevel/GetAllTlevels/{ukprn}": {
+      "get": {
+        "summary": "Get all T Levels by UKPRN",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of T Levels",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AwardingOrganisationPathwayStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Tlevel/{ukprn}/GetTlevelsByStatus/{statusId}": {
+      "get": {
+        "summary": "Get T Levels by status ID",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "statusId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of T Levels by status ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AwardingOrganisationPathwayStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Tlevel/{ukprn}/TlevelDetails/{pathwayId}": {
+      "get": {
+        "summary": "Get details of a T Level pathway by pathway ID",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "pathwayId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "T Level pathway details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TlevelPathwayDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Tlevel/VerifyTlevel": {
+      "put": {
+        "summary": "Verify a T Level",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyTlevelDetails"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verification result"
+          }
+        }
+      }
+    },
+    "/api/Tlevel/{aoUkprn}/GetPathwaySpecialisms/{pathwayLarId}": {
+      "get": {
+        "summary": "Get pathway specialisms by LAR ID",
+        "parameters": [
+          {
+            "name": "aoUkprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "pathwayLarId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pathway specialisms",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PathwaySpecialisms"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AwardingOrganisationPathwayStatus": {
+        "type": "object",
+        "properties": {
+          "PathwayId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "TlevelTitle": {
+            "type": "string"
+          },
+          "StatusId": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PathwaySpecialisms": {
+        "type": "object",
+        "properties": {
+          "PathwayName": {
+            "type": "string"
+          },
+          "PathwayCode": {
+            "type": "string"
+          },
+          "Specialisms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PathwaySpecialismCombination"
+            }
+          }
+        }
+      },
+      "PathwaySpecialismCombination": {
+        "type": "object",
+        "properties": {
+          "Code": {
+            "type": "string"
+          },
+          "SpecialismDetails": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpecialismDetails"
+            }
+          }
+        }
+      },
+      "SpecialismDetails": {
+        "type": "object",
+        "properties": {
+          "Code": {
+            "type": "string"
+          },
+          "Name": {
+            "type": "string"
+          }
+        }
+      },
+      "TlevelPathwayDetails": {
+        "type": "object",
+        "properties": {
+          "TqAwardingOrganisationId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "RouteId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "PathwayId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "TlevelTitle": {
+            "type": "string"
+          },
+          "RouteName": {
+            "type": "string"
+          },
+          "PathwayName": {
+            "type": "string"
+          },
+          "PathwayCode": {
+            "type": "string"
+          },
+          "PathwayStatusId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Specialisms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpecialismDetails"
+            }
+          },
+          "VerifiedBy": {
+            "type": "string"
+          },
+          "VerifiedOn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "VerifyTlevelDetails": {
+        "type": "object",
+        "properties": {
+          "TqAwardingOrganisationId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "PathwayStatusId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Query": {
+            "type": "string"
+          },
+          "QueriedUserEmail": {
+            "type": "string"
+          },
+          "ModifiedBy": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

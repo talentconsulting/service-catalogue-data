@@ -1,0 +1,142 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Remove Restricted Course Restriction API",
+    "version": "1.0.0",
+    "description": "API for managing the removal of restricted course restrictions for providers."
+  },
+  "paths": {
+    "/providers/{ukprn}/restricted-courses/{larsCode}/change-restriction/remove-restriction": {
+      "get": {
+        "tags": [
+          "RemoveRestrictedCourseRestriction"
+        ],
+        "summary": "Get removal of restricted course restriction page.",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "UKPRN of the provider."
+          },
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "LARS code of the course."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved removal page.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirected to ProviderRestrictedApprenticeships route if session data is missing."
+          },
+          "404": {
+            "description": "Not found if the session data is invalid."
+          }
+        },
+        "security": [
+          {
+            "Roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "RemoveRestrictedCourseRestriction"
+        ],
+        "summary": "Post removal of restricted course restriction.",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "UKPRN of the provider."
+          },
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "LARS code of the course."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveRestrictedApprenticeshipRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirected to ProviderRestrictedApprenticeships route after successful removal."
+          },
+          "404": {
+            "description": "Redirected to ProviderRestrictedApprenticeships route if session data is missing."
+          }
+        },
+        "security": [
+          {
+            "Roles": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RemoveRestrictedApprenticeshipRequest": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string",
+            "description": "ID of the user removing the restriction."
+          },
+          "UserDisplayName": {
+            "type": "string",
+            "description": "Display name of the user removing the restriction."
+          }
+        },
+        "required": [
+          "UserId",
+          "UserDisplayName"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "Roles": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+      }
+    }
+  }
+}

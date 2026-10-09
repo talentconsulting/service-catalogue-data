@@ -1,13 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Finance API",
+    "title": "Employer Finance Health Check API",
     "version": "1.0.0"
   },
   "paths": {
     "/healthcheck": {
       "get": {
-        "summary": "Get health check information",
+        "summary": "Get Health Check Status",
         "operationId": "getHealthCheck",
         "security": [
           {
@@ -17,11 +17,11 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Successful response with health check information",
+            "description": "Health check status retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetHealthCheckQueryResponse"
+                  "$ref": "#/components/schemas/HealthCheckViewModel"
                 }
               }
             }
@@ -29,7 +29,7 @@
         }
       },
       "post": {
-        "summary": "Run health check",
+        "summary": "Run Health Check",
         "operationId": "runHealthCheck",
         "security": [
           {
@@ -47,19 +47,19 @@
           }
         },
         "responses": {
-          "303": {
-            "description": "Health check initiated successfully"
+          "302": {
+            "description": "Redirected to health check status view."
           }
         }
       }
     },
     "/Content/lib/govuk-frontend/dist/assets/images/favicon.ico": {
       "get": {
-        "summary": "Check if favicon.ico is accessible",
-        "operationId": "checkFaviconFile",
+        "summary": "Health Check Static File",
+        "operationId": "fileCheck",
         "responses": {
           "200": {
-            "description": "Favicon is accessible"
+            "description": "The static file check passed."
           }
         }
       }
@@ -67,7 +67,7 @@
   },
   "components": {
     "schemas": {
-      "GetHealthCheckQueryResponse": {
+      "HealthCheckViewModel": {
         "type": "object",
         "properties": {
           "healthCheck": {
@@ -77,16 +77,16 @@
       },
       "RunHealthCheckCommand": {
         "type": "object",
-        "required": [
-          "userRef"
-        ],
         "properties": {
           "userRef": {
             "type": "string",
             "format": "uuid",
             "nullable": false
           }
-        }
+        },
+        "required": [
+          "userRef"
+        ]
       },
       "HealthCheckDto": {
         "type": "object",
@@ -113,13 +113,19 @@
             "format": "date-time",
             "nullable": true
           }
-        }
+        },
+        "required": [
+          "id",
+          "sentRequest",
+          "publishedEvent"
+        ]
       }
     },
     "securitySchemes": {
       "HasEmployerViewerTransactorOwnerAccount": {
-        "type": "http",
-        "scheme": "bearer"
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
       }
     }
   }

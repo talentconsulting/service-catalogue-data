@@ -8,17 +8,17 @@
     "/api/user-actions/{userActionId}/admin-actions": {
       "post": {
         "operationId": "CreateAdminAction",
-        "summary": "Create an admin action for a user action.",
+        "summary": "Create an admin action for a user action",
         "parameters": [
           {
             "name": "userActionId",
             "in": "path",
             "required": true,
+            "description": "The ID of the user action",
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "The id of the user action."
+            }
           }
         ],
         "requestBody": {
@@ -33,10 +33,10 @@
         },
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "No content"
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
@@ -54,7 +54,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error"
           }
         }
       }
@@ -62,21 +62,21 @@
     "/api/user-actions/{code}": {
       "get": {
         "operationId": "GetUserActionByCode",
-        "summary": "Retrieve a user action by its code.",
+        "summary": "Retrieve a user action by its unique code",
         "parameters": [
           {
             "name": "code",
             "in": "path",
             "required": true,
+            "description": "The unique code of the user action",
             "schema": {
               "type": "string"
-            },
-            "description": "The code of the user action."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "User action retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
@@ -86,10 +86,10 @@
             }
           },
           "404": {
-            "description": "Not Found"
+            "description": "Not found"
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad request",
             "content": {
               "application/json": {
                 "schema": {
@@ -107,7 +107,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Internal server error"
           }
         }
       }
@@ -117,39 +117,44 @@
     "schemas": {
       "CreateAdminActionRequest": {
         "type": "object",
+        "required": [
+          "Username",
+          "Action"
+        ],
         "properties": {
-          "username": {
-            "type": "string",
-            "description": "The username performing the admin action."
+          "Username": {
+            "type": "string"
           },
-          "action": {
+          "Action": {
             "type": "string",
             "enum": [
               "Viewed",
               "Unlocked"
-            ],
-            "description": "The type of admin action."
+            ]
           }
-        },
-        "required": [
-          "username",
-          "action"
-        ]
+        }
       },
       "GetUserActionByCodeResponse": {
         "type": "object",
+        "required": [
+          "Id",
+          "UserId",
+          "ActionType",
+          "ActionTime",
+          "ActionStatus",
+          "FamilyName",
+          "GivenNames"
+        ],
         "properties": {
-          "id": {
+          "Id": {
             "type": "integer",
-            "format": "int64",
-            "description": "The ID of the user action."
+            "format": "int64"
           },
-          "userId": {
+          "UserId": {
             "type": "string",
-            "format": "uuid",
-            "description": "The ID of the user."
+            "format": "uuid"
           },
-          "actionType": {
+          "ActionType": {
             "type": "string",
             "enum": [
               "Reprint",
@@ -157,97 +162,80 @@
               "Contact",
               "NotMatched",
               "NotFound"
-            ],
-            "description": "The type of the user action."
+            ]
           },
-          "actionTime": {
+          "ActionTime": {
             "type": "string",
-            "format": "date-time",
-            "description": "The time the action occurred."
+            "format": "date-time"
           },
-          "actionStatus": {
+          "ActionStatus": {
             "type": "string",
             "enum": [
               "New",
               "Viewed"
-            ],
-            "description": "The status of the user action."
+            ]
           },
-          "familyName": {
-            "type": "string",
-            "description": "The family name associated with the user action."
+          "FamilyName": {
+            "type": "string"
           },
-          "givenNames": {
-            "type": "string",
-            "description": "The given names associated with the user action."
+          "GivenNames": {
+            "type": "string"
           },
-          "certificateId": {
+          "CertificateId": {
             "type": "string",
             "format": "uuid",
-            "description": "The ID of the certificate related to the user action."
+            "nullable": true
           },
-          "certificateType": {
+          "CertificateType": {
             "type": "string",
             "enum": [
               "Unknown",
               "Standard",
               "Framework"
             ],
-            "description": "The type of certificate associated with the user action."
+            "nullable": true
           },
-          "courseName": {
+          "CourseName": {
             "type": "string",
-            "description": "The name of the course associated with the user action."
+            "nullable": true
           },
-          "adminActions": {
+          "Uln": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          },
+          "AdminActions": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AdminActionResponse"
             },
-            "description": "List of admin actions associated with the user action."
-          },
-          "uln": {
-            "type": "integer",
-            "format": "int64",
-            "description": "The unique learner number related to the user action."
+            "nullable": true
           }
-        },
-        "required": [
-          "id",
-          "userId",
-          "actionType",
-          "actionTime",
-          "actionStatus",
-          "familyName",
-          "givenNames"
-        ]
+        }
       },
       "AdminActionResponse": {
         "type": "object",
+        "required": [
+          "Username",
+          "ActionTime",
+          "Action"
+        ],
         "properties": {
-          "username": {
-            "type": "string",
-            "description": "The username associated with the admin action."
+          "Username": {
+            "type": "string"
           },
-          "actionTime": {
+          "ActionTime": {
             "type": "string",
-            "format": "date-time",
-            "description": "The time the admin action occurred."
+            "format": "date-time"
           },
-          "action": {
+          "Action": {
             "type": "string",
             "enum": [
               "Viewed",
               "Unlocked"
-            ],
-            "description": "The type of admin action."
+            ]
           }
-        },
-        "required": [
-          "username",
-          "actionTime",
-          "action"
-        ]
+        }
       }
     }
   }

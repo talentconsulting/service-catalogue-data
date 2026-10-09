@@ -7,24 +7,29 @@
   "paths": {
     "/api/accounts/{accountId}/payeschemes": {
       "get": {
-        "operationId": "GetPayeSchemes",
+        "operationId": "getPayeSchemes",
         "summary": "Get PAYE schemes for an account",
-        "description": "Retrieves a list of PAYE schemes associated with a specified employer account.",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
-            "description": "The ID of the employer account.",
             "schema": {
               "type": "integer",
               "format": "int64"
             }
           }
         ],
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadAllEmployerAccountBalances"
+            ]
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Successful response containing the list of PAYE schemes.",
+            "description": "Resource list of PAYE schemes",
             "content": {
               "application/json": {
                 "schema": {
@@ -34,29 +39,20 @@
             }
           },
           "404": {
-            "description": "No PAYE schemes found for the specified account."
+            "description": "Account not found"
           }
-        },
-        "security": [
-          {
-            "ApiRoles": [
-              "ReadAllEmployerAccountBalances"
-            ]
-          }
-        ]
+        }
       }
     },
     "/api/accounts/{accountId}/payeschemes/scheme": {
       "get": {
-        "operationId": "GetPayeScheme",
+        "operationId": "getPayeScheme",
         "summary": "Get a specific PAYE scheme for an account",
-        "description": "Retrieves details of a specific PAYE scheme associated with a specified employer account.",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
-            "description": "The ID of the employer account.",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -66,15 +62,21 @@
             "name": "payeSchemeRef",
             "in": "query",
             "required": true,
-            "description": "The reference identifier of the PAYE scheme.",
             "schema": {
               "type": "string"
             }
           }
         ],
+        "security": [
+          {
+            "ApiRoles": [
+              "ReadAllEmployerAccountBalances"
+            ]
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Successful response containing the PAYE scheme details.",
+            "description": "Specific PAYE scheme",
             "content": {
               "application/json": {
                 "schema": {
@@ -85,16 +87,9 @@
             }
           },
           "404": {
-            "description": "The PAYE scheme was not found for the specified account and reference."
+            "description": "PAYE scheme not found"
           }
-        },
-        "security": [
-          {
-            "ApiRoles": [
-              "ReadAllEmployerAccountBalances"
-            ]
-          }
-        ]
+        }
       }
     }
   },
@@ -104,12 +99,10 @@
         "type": "object",
         "properties": {
           "Id": {
-            "type": "string",
-            "description": "The identifier of the resource."
+            "type": "string"
           },
           "Href": {
-            "type": "string",
-            "description": "The URI of the resource."
+            "type": "string"
           }
         },
         "required": [
@@ -126,15 +119,9 @@
     },
     "securitySchemes": {
       "ApiRoles": {
-        "type": "oauth2",
-        "flows": {
-          "implicit": {
-            "authorizationUrl": "https://your-auth-server/authorize",
-            "scopes": {
-              "ReadAllEmployerAccountBalances": "Permission to read all employer account balances."
-            }
-          }
-        }
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
       }
     }
   }

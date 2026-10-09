@@ -1,40 +1,37 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts Invitations API",
-    "version": "1.0.0"
+    "title": "Invitation API",
+    "version": "1.0.0",
+    "description": "API for handling team member invitations for employer accounts."
   },
   "paths": {
     "/invitations/invite": {
       "get": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "View the invite page",
+        "operationId": "InviteUser",
+        "summary": "Invites a user.",
         "responses": {
           "200": {
-            "description": "Invite page displayed"
+            "description": "Invitation form view."
           },
           "302": {
-            "description": "Redirect to Home Index page"
+            "description": "Redirects to home if the user is authenticated."
           }
         }
       }
     },
     "/invitations": {
       "get": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "Get all invitations for a user",
         "security": [
           {
-            "authorization": []
+            "BearerAuth": []
           }
         ],
+        "operationId": "GetAllInvitations",
+        "summary": "Gets all invitations for the authenticated user.",
         "responses": {
           "200": {
-            "description": "List of invitations",
+            "description": "Successful retrieval of all invitations.",
             "content": {
               "application/json": {
                 "schema": {
@@ -44,22 +41,20 @@
             }
           },
           "302": {
-            "description": "Redirect to Home Index page"
+            "description": "Redirects to home if the user is not authenticated."
           }
         }
       }
     },
     "/invitations/view": {
       "get": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "View details of a specific invitation",
         "security": [
           {
-            "authorization": []
+            "BearerAuth": []
           }
         ],
+        "operationId": "GetInvitationDetails",
+        "summary": "Gets details of a specific invitation.",
         "parameters": [
           {
             "name": "invitationId",
@@ -72,7 +67,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Invitation details",
+            "description": "Successful retrieval of invitation details.",
             "content": {
               "application/json": {
                 "schema": {
@@ -82,74 +77,68 @@
             }
           },
           "302": {
-            "description": "Redirect to Home Index page"
+            "description": "Redirects to home if the user is not authenticated."
           }
         }
       }
     },
     "/invitations/accept": {
       "post": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "Accept an invitation",
         "security": [
           {
-            "authorization": []
+            "BearerAuth": []
           }
         ],
-        "parameters": [
-          {
-            "name": "invitation",
-            "in": "formData",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
+        "operationId": "AcceptInvitation",
+        "summary": "Accepts an invitation.",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UserInvitationsViewModel"
+                "type": "object",
+                "properties": {
+                  "invitation": {
+                    "type": "integer",
+                    "format": "int64"
+                  },
+                  "model": {
+                    "$ref": "#/components/schemas/UserInvitationsViewModel"
+                  }
+                },
+                "required": [
+                  "invitation",
+                  "model"
+                ]
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Invitation accepted"
-          },
           "302": {
-            "description": "Redirect to Home Index page"
+            "description": "Redirects to home after successfully accepting the invitation."
           }
         }
       },
       "get": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "Accept invitation for an existing user",
+        "operationId": "AcceptInvitationExistingUser",
+        "summary": "Handles invitation acceptance for an existing user.",
         "responses": {
           "302": {
-            "description": "Redirect to Home Index page"
+            "description": "Redirects to home."
           }
         }
       }
     },
     "/invitations/create": {
       "post": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "Create a new invitation",
         "security": [
           {
-            "authorization": []
+            "BearerAuth": []
           }
         ],
+        "operationId": "CreateInvitation",
+        "summary": "Creates an invitation for a team member.",
         "requestBody": {
           "required": true,
           "content": {
@@ -161,24 +150,19 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "Invitation created"
-          },
           "302": {
-            "description": "Redirect to Home Index page"
+            "description": "Redirects to home after successfully creating an invitation."
           }
         }
       }
     },
     "/invitations/register-and-accept": {
       "get": {
-        "tags": [
-          "Invitations"
-        ],
-        "summary": "Accept invitation for a new user",
+        "operationId": "AcceptInvitationNewUser",
+        "summary": "Handles invitation acceptance for a new user.",
         "responses": {
           "302": {
-            "description": "Redirect to Home Index page"
+            "description": "Redirects to home."
           }
         }
       }
@@ -196,12 +180,19 @@
             "type": "string"
           },
           "Email": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           },
           "Role": {
             "$ref": "#/components/schemas/Role"
           }
-        }
+        },
+        "required": [
+          "HashedAccountId",
+          "Name",
+          "Email",
+          "Role"
+        ]
       },
       "UserInvitationsViewModel": {
         "type": "object",
@@ -221,19 +212,22 @@
         "type": "object",
         "properties": {
           "Id": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "Name": {
             "type": "string"
           },
           "Email": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           },
           "Role": {
             "$ref": "#/components/schemas/Role"
           },
           "AccountId": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int64"
           },
           "AccountName": {
             "type": "string"
@@ -244,15 +238,18 @@
           },
           "Status": {
             "$ref": "#/components/schemas/InvitationStatus"
-          },
-          "InternalUserId": {
-            "type": "integer"
-          },
-          "ExternalUserId": {
-            "type": "string",
-            "format": "uuid"
           }
-        }
+        },
+        "required": [
+          "Id",
+          "Name",
+          "Email",
+          "Role",
+          "AccountId",
+          "AccountName",
+          "ExpiryDate",
+          "Status"
+        ]
       },
       "Role": {
         "type": "string",
@@ -261,7 +258,8 @@
           "Owner",
           "Transactor",
           "Viewer"
-        ]
+        ],
+        "description": "Role assigned to the user."
       },
       "InvitationStatus": {
         "type": "string",
@@ -270,7 +268,14 @@
           "Accepted",
           "Expired",
           "Deleted"
-        ]
+        ],
+        "description": "Status of the invitation."
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
       }
     }
   }

@@ -1,0 +1,122 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AddRestrictedCourseLastStartDate API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers/{ukprn}/restricted-courses/add/set-last-start-date": {
+      "get": {
+        "tags": [
+          "ManageUnrestrictedProvider"
+        ],
+        "summary": "Get the view for adding a restricted course last start date.",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "UKPRN of the provider."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML view rendering the form for setting the last start date for a restricted course."
+          },
+          "302": {
+            "description": "Redirects to the provider restricted apprenticeships route if session does not exist."
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ManageUnrestrictedProvider"
+        ],
+        "summary": "Submit the restricted course last start date.",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "UKPRN of the provider."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetLastDateStartsSubmitModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirects to the provider restricted apprenticeships route if session does not exist or submission succeeds."
+          },
+          "400": {
+            "description": "Validation errors occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "Validation error messages."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SetLastDateStartsSubmitModel": {
+        "type": "object",
+        "properties": {
+          "Day": {
+            "type": "string",
+            "nullable": true,
+            "description": "The day of the last start date."
+          },
+          "Month": {
+            "type": "string",
+            "nullable": true,
+            "description": "The month of the last start date."
+          },
+          "Year": {
+            "type": "string",
+            "nullable": true,
+            "description": "The year of the last start date."
+          },
+          "LarsCode": {
+            "type": "string",
+            "nullable": true,
+            "description": "LARS code for the course."
+          },
+          "CourseLastDateStarts": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Last date starts for the course."
+          }
+        }
+      }
+    }
+  }
+}

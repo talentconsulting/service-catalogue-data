@@ -1,19 +1,21 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "ApimDeveloper API",
+    "title": "Users API",
     "version": "1.0.0"
   },
   "paths": {
-    "/Users/{id}/": {
+    "/users/{userId}/unlock": {
       "post": {
-        "summary": "Creates a user",
-        "operationId": "CreateUser",
+        "operationId": "UnlockUser",
+        "summary": "Unlock a user",
+        "description": "Unlocks a user account.",
         "parameters": [
           {
-            "name": "id",
+            "name": "userId",
             "in": "path",
             "required": true,
+            "description": "Unique identifier for the user.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -25,203 +27,20 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateUserRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/Users/{id}/activate": {
-      "put": {
-        "summary": "Activates a user account",
-        "operationId": "ActivateAccount",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No Content"
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/Users/authenticate": {
-      "post": {
-        "summary": "Authenticates a user",
-        "operationId": "AuthenticateUser",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AuthenticateUserRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserAuthenticationApiResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/Users": {
-      "get": {
-        "summary": "Gets user details by email",
-        "operationId": "GetUser",
-        "parameters": [
-          {
-            "name": "email",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "email"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserApiResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/Users/{id}/send-change-password-email": {
-      "post": {
-        "summary": "Sends an email for password change",
-        "operationId": "SendChangePasswordEmail",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SendChangePasswordEmailRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "format": "uuid"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/Users/{id}/change-password": {
-      "put": {
-        "summary": "Changes user's password",
-        "operationId": "ChangePassword",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ChangePasswordRequest"
+                "$ref": "#/components/schemas/UnlockUserRequest"
               }
             }
           }
         },
         "responses": {
           "204": {
-            "description": "No Content"
+            "description": "User successfully unlocked."
           },
           "400": {
-            "description": "Bad Request"
+            "description": "Invalid request or user not unlocked due to bad input."
           },
           "500": {
-            "description": "Internal Server Error"
+            "description": "Unexpected server error."
           }
         }
       }
@@ -229,92 +48,23 @@
   },
   "components": {
     "schemas": {
-      "CreateUserRequest": {
+      "UnlockUserRequest": {
         "type": "object",
         "properties": {
-          "FirstName": {
-            "type": "string"
-          },
-          "LastName": {
-            "type": "string"
-          },
-          "Email": {
+          "Username": {
             "type": "string",
-            "format": "email"
+            "description": "The username of the user to unlock."
           },
-          "Password": {
-            "type": "string",
-            "format": "password"
-          },
-          "ConfirmationEmailLink": {
-            "type": "string",
-            "format": "uri"
-          }
-        }
-      },
-      "ActivateUserCommand": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "string",
-            "format": "uuid"
-          }
-        }
-      },
-      "AuthenticateUserRequest": {
-        "type": "object",
-        "properties": {
-          "Email": {
-            "type": "string",
-            "format": "email"
-          },
-          "Password": {
-            "type": "string",
-            "format": "password"
-          }
-        }
-      },
-      "UserAuthenticationApiResponse": {
-        "type": "object",
-        "properties": {}
-      },
-      "UserApiResponse": {
-        "type": "object",
-        "properties": {}
-      },
-      "SendChangePasswordEmailRequest": {
-        "type": "object",
-        "properties": {
-          "FirstName": {
-            "type": "string"
-          },
-          "LastName": {
-            "type": "string"
-          },
-          "Email": {
-            "type": "string",
-            "format": "email"
-          },
-          "ChangePasswordUrl": {
-            "type": "string",
-            "format": "uri"
+          "UserActionId": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Id of the user action triggering the unlock."
           }
         },
         "required": [
-          "FirstName",
-          "LastName",
-          "Email",
-          "ChangePasswordUrl"
+          "Username",
+          "UserActionId"
         ]
-      },
-      "ChangePasswordRequest": {
-        "type": "object",
-        "properties": {
-          "Password": {
-            "type": "string",
-            "format": "password"
-          }
-        }
       }
     }
   }

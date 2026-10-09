@@ -1,24 +1,17 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts Settings API",
+    "title": "SettingsController API",
     "version": "1.0.0"
   },
   "paths": {
     "/settings/notifications": {
       "get": {
-        "summary": "Retrieve notification settings",
         "operationId": "getNotificationSettings",
-        "security": [
-          {
-            "Policy": [
-              "HasEmployerViewerTransactorOwnerAccount"
-            ]
-          }
-        ],
+        "summary": "Get the user's notification settings.",
         "responses": {
           "200": {
-            "description": "Notification settings view model returned",
+            "description": "Successful response with notification settings.",
             "content": {
               "application/json": {
                 "schema": {
@@ -27,18 +20,16 @@
               }
             }
           }
-        }
-      },
-      "post": {
-        "summary": "Update notification settings",
-        "operationId": "updateNotificationSettings",
+        },
         "security": [
           {
-            "Policy": [
-              "HasEmployerViewerTransactorOwnerAccount"
-            ]
+            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
           }
-        ],
+        ]
+      },
+      "post": {
+        "operationId": "updateNotificationSettings",
+        "summary": "Update the user's notification settings.",
         "requestBody": {
           "required": true,
           "content": {
@@ -50,23 +41,21 @@
           }
         },
         "responses": {
-          "204": {
-            "description": "Notification settings updated successfully"
+          "302": {
+            "description": "Redirection to the notification settings page after an update."
           }
-        }
+        },
+        "security": [
+          {
+            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ]
       }
     },
     "/settings/notifications/unsubscribe/{hashedAccountId}": {
       "get": {
-        "summary": "Unsubscribe from notifications",
         "operationId": "unsubscribeNotifications",
-        "security": [
-          {
-            "Policy": [
-              "HasEmployerViewerTransactorOwnerAccount"
-            ]
-          }
-        ],
+        "summary": "Unsubscribe from notifications for a given account.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -75,19 +64,26 @@
             "schema": {
               "type": "string"
             },
-            "description": "The hashed account ID to unsubscribe from notifications"
+            "description": "The hashed account ID for which notifications should be unsubscribed."
           }
         ],
         "responses": {
           "200": {
-            "description": "Unsubscribe view model returned",
+            "description": "Successful response after unsubscribing.",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/ViewModelBase"
+                }
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "PolicyNames.HasEmployerViewerTransactorOwnerAccount": []
+          }
+        ]
       }
     }
   },
@@ -105,7 +101,11 @@
               "$ref": "#/components/schemas/UserNotificationSetting"
             }
           }
-        }
+        },
+        "required": [
+          "HashedId",
+          "NotificationSettings"
+        ]
       },
       "UserNotificationSetting": {
         "type": "object",
@@ -131,7 +131,43 @@
           "ReceiveNotifications": {
             "type": "boolean"
           }
+        },
+        "required": [
+          "Id",
+          "AccountId",
+          "HashedAccountId",
+          "UserId",
+          "Name",
+          "ReceiveNotifications"
+        ]
+      },
+      "ViewModelBase": {
+        "type": "object",
+        "properties": {
+          "PublicHashedAccountId": {
+            "type": "string"
+          },
+          "UserId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "Valid": {
+            "type": "boolean"
+          },
+          "ErrorDictionary": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
         }
+      }
+    },
+    "securitySchemes": {
+      "PolicyNames.HasEmployerViewerTransactorOwnerAccount": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Authorization policy for accessing settings features."
       }
     }
   }

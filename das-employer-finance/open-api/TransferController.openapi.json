@@ -8,30 +8,31 @@
     "/api/accounts/{accountId}/transfer/connections": {
       "get": {
         "summary": "Get transfers by period end",
+        "operationId": "GetTransfersByPeriodEnd",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
+            "description": "The account ID for which transfers are requested.",
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "The ID of the account."
+            }
           },
           {
             "name": "periodEnd",
             "in": "query",
             "required": true,
+            "description": "The period end identifier to filter transfers.",
             "schema": {
               "type": "string"
-            },
-            "description": "The period end to filter transfers."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with the account's transfers.",
+            "description": "Successful response containing transfer details.",
             "content": {
               "application/json": {
                 "schema": {
@@ -41,15 +42,29 @@
             }
           },
           "400": {
-            "description": "Bad request - 'periodEnd' query parameter is required."
+            "description": "Bad request. Missing or invalid query parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Not found - no transfers found for the specified account and period."
+            "description": "No transfers found for the specified account and period end.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "ApiRoles.ReadAllEmployerAccountBalances": []
+            "ApiKeyAuth": []
           }
         ]
       }
@@ -60,21 +75,29 @@
       "TransferResponse": {
         "type": "object",
         "properties": {
-          "AccountTransfers": {
+          "accountTransfers": {
             "type": "array",
             "items": {
-              "type": "object",
-              "description": "A minimal schema for transfer objects."
+              "type": "object"
             }
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
           }
         }
       }
     },
     "securitySchemes": {
-      "ApiRoles.ReadAllEmployerAccountBalances": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "Authorization based on the ReadAllEmployerAccountBalances policy."
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "API key to authorize requests using a Bearer token."
       }
     }
   }

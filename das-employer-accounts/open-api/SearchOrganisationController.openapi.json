@@ -1,16 +1,17 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Search Organisation API",
+    "title": "Employer Accounts Search Organisation API",
     "version": "1.0.0"
   },
   "paths": {
-    "/accounts/{hashedAccountId}/organisations/search": {
+    "/accounts/{HashedAccountId}/organisations/search": {
       "get": {
-        "summary": "Search for an organisation",
+        "operationId": "SearchForOrganisation_Get",
+        "summary": "Search for organisations",
         "parameters": [
           {
-            "name": "hashedAccountId",
+            "name": "HashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
@@ -20,43 +21,63 @@
         ],
         "responses": {
           "200": {
-            "description": "Search organisation page rendered"
+            "description": "Search organisation view rendered"
           }
         }
       },
       "post": {
-        "summary": "Search for an organisation using a search term",
+        "operationId": "SearchForOrganisation_Post",
+        "summary": "Search for organisations with a search term",
         "parameters": [
           {
-            "name": "hashedAccountId",
+            "name": "HashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "searchTerm",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "searchTerm": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "searchTerm"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "302": {
-            "description": "Redirects to results page"
+            "description": "Redirects to organisation search results"
           }
         }
       }
     },
-    "/accounts/{hashedAccountId}/organisations/search/results": {
+    "/accounts/organisations/search": {
       "get": {
-        "summary": "View results for organisation search",
+        "$ref": "#/paths/~1accounts~1{HashedAccountId}~1organisations~1search/get"
+      },
+      "post": {
+        "$ref": "#/paths/~1accounts~1{HashedAccountId}~1organisations~1search/post"
+      }
+    },
+    "/accounts/{HashedAccountId}/organisations/search/results": {
+      "get": {
+        "operationId": "SearchForOrganisationResults",
+        "summary": "View the organisation search results",
         "parameters": [
           {
-            "name": "hashedAccountId",
+            "name": "HashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
@@ -91,17 +112,23 @@
         ],
         "responses": {
           "200": {
-            "description": "Search results page rendered"
+            "description": "Search organisation results view rendered"
           }
         }
       }
     },
-    "/accounts/{hashedAccountId}/organisations/search/confirm": {
+    "/accounts/organisations/search/results": {
+      "get": {
+        "$ref": "#/paths/~1accounts~1{HashedAccountId}~1organisations~1search~1results/get"
+      }
+    },
+    "/accounts/{HashedAccountId}/organisations/search/confirm": {
       "post": {
-        "summary": "Confirm organisation details",
+        "operationId": "ConfirmOrganisationSelection",
+        "summary": "Confirm organisation details during search process",
         "parameters": [
           {
-            "name": "hashedAccountId",
+            "name": "HashedAccountId",
             "in": "path",
             "required": true,
             "schema": {
@@ -121,12 +148,17 @@
         },
         "responses": {
           "200": {
-            "description": "Confirmation page rendered"
+            "description": "Confirm organisation details view rendered"
           },
           "302": {
-            "description": "Redirects to summary or another page"
+            "description": "Redirect to Employer Account Summary page"
           }
         }
+      }
+    },
+    "/accounts/organisations/search/confirm": {
+      "post": {
+        "$ref": "#/paths/~1accounts~1{HashedAccountId}~1organisations~1search~1confirm/post"
       }
     }
   },
@@ -135,43 +167,43 @@
       "OrganisationDetailsViewModel": {
         "type": "object",
         "properties": {
-          "hashedId": {
+          "HashedId": {
             "type": "string"
           },
-          "type": {
+          "Type": {
             "$ref": "#/components/schemas/OrganisationType"
           },
-          "publicSectorDataSource": {
+          "PublicSectorDataSource": {
             "type": "integer",
             "nullable": true
           },
-          "name": {
+          "Name": {
             "type": "string"
           },
-          "address": {
+          "Address": {
             "type": "string"
           },
-          "dateOfInception": {
+          "DateOfInception": {
             "type": "string",
             "format": "date-time",
             "nullable": true
           },
-          "referenceNumber": {
+          "ReferenceNumber": {
             "type": "string"
           },
-          "status": {
+          "Status": {
             "type": "string"
           },
-          "sector": {
+          "AddedToAccount": {
+            "type": "boolean"
+          },
+          "Sector": {
             "type": "string"
           },
-          "newSearch": {
+          "NewSearch": {
             "type": "boolean"
           }
-        },
-        "required": [
-          "name"
-        ]
+        }
       },
       "OrganisationType": {
         "type": "string",

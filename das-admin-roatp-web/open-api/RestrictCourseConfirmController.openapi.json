@@ -2,12 +2,14 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Restrict Course Confirm API",
+    "description": "API for managing course restrictions.",
     "version": "1.0.0"
   },
   "paths": {
     "/restricted-courses/add/{larsCode}/confirm": {
       "get": {
-        "summary": "Get confirmation page for restricting a course",
+        "operationId": "GetRestrictCourseConfirm",
+        "summary": "Display confirmation view for restricting a course",
         "parameters": [
           {
             "name": "larsCode",
@@ -16,30 +18,29 @@
             "schema": {
               "type": "string"
             },
-            "description": "LARS code of the course being restricted"
+            "description": "The LARS code of the course."
           }
         ],
         "responses": {
           "302": {
-            "description": "Redirected to unrestricted course details if session is null"
+            "description": "Redirects to the unrestricted course details route if the session model is invalid."
           },
           "200": {
-            "description": "Success - Restrict confirmation page rendered",
-            "content": {
-              "text/html": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Returns the confirmation view for restricting the course."
           }
         },
-        "tags": [
-          "Restricted Courses"
+        "security": [
+          {
+            "roles": {
+              "type": "string",
+              "example": "RoatpAdminTeam"
+            }
+          }
         ]
       },
       "post": {
-        "summary": "Confirm restriction of a course",
+        "operationId": "PostRestrictCourseConfirm",
+        "summary": "Restrict a course",
         "parameters": [
           {
             "name": "larsCode",
@@ -48,24 +49,34 @@
             "schema": {
               "type": "string"
             },
-            "description": "LARS code of the course being restricted"
+            "description": "The LARS code of the course."
           }
         ],
-        "responses": {
-          "302": {
-            "description": "Redirected based on result of restriction process",
-            "headers": {
-              "Location": {
-                "description": "URL of the target redirect",
-                "schema": {
-                  "type": "string"
-                }
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddRestrictedCourseRequest"
               }
             }
           }
         },
-        "tags": [
-          "Restricted Courses"
+        "responses": {
+          "302": {
+            "description": "Redirects to the unrestricted course details route if the session model is invalid."
+          },
+          "201": {
+            "description": "Redirects to the restricted course details route after successfully restricting the course."
+          }
+        },
+        "security": [
+          {
+            "roles": {
+              "type": "string",
+              "example": "RoatpAdminTeam"
+            }
+          }
         ]
       }
     }
@@ -76,40 +87,23 @@
         "type": "object",
         "properties": {
           "UserId": {
-            "type": "string"
+            "type": "string",
+            "description": "The ID of the user performing the operation."
           },
           "UserDisplayName": {
-            "type": "string"
+            "type": "string",
+            "description": "The display name of the user performing the operation."
           },
           "LarsCode": {
-            "type": "string"
+            "type": "string",
+            "description": "The LARS code of the course being restricted."
           }
-        }
-      },
-      "AddRestrictedCourseSessionModel": {
-        "type": "object",
-        "properties": {
-          "LarsCode": {
-            "type": "string"
-          },
-          "DisplayName": {
-            "type": "string"
-          }
-        }
-      },
-      "RestrictCourseConfirmViewModel": {
-        "type": "object",
-        "properties": {
-          "LarsCode": {
-            "type": "string"
-          },
-          "DisplayName": {
-            "type": "string"
-          },
-          "CancelUrl": {
-            "type": "string"
-          }
-        }
+        },
+        "required": [
+          "UserId",
+          "UserDisplayName",
+          "LarsCode"
+        ]
       }
     }
   }

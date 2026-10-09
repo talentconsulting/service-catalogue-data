@@ -1,0 +1,425 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Post Results Service API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/PostResultsService/FindPrsLearnerRecord/{aoUkprn}/{uln}": {
+      "get": {
+        "summary": "Find PRS learner record by ULN and AOUKPRN",
+        "parameters": [
+          {
+            "name": "aoUkprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Awarding Organization UKPRN"
+          },
+          {
+            "name": "uln",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Unique Learner Number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with learner record details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindPrsLearnerRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/PostResultsService/FindPrsLearnerRecordByProfileId/{aoUkprn}/{profileId}": {
+      "get": {
+        "summary": "Find PRS learner record by Profile ID and AOUKPRN",
+        "parameters": [
+          {
+            "name": "aoUkprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "Awarding Organization UKPRN"
+          },
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Profile ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with learner record details by profile ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FindPrsLearnerRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/PostResultsService/PrsActivity": {
+      "post": {
+        "summary": "Create/Update PRS activity",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrsActivityRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Activity created or updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/PostResultsService/PrsGradeChangeRequest": {
+      "post": {
+        "summary": "Request PRS grade change",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrsGradeChangeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Grade change request processed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/PostResultsService/ProcessBulkRomms": {
+      "post": {
+        "summary": "Process bulk ROMMs",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkProcessRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk ROMMs processed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkProcessResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "FindPrsLearnerRecord": {
+        "type": "object",
+        "properties": {
+          "profileId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "uln": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "firstname": {
+            "type": "string"
+          },
+          "lastname": {
+            "type": "string"
+          },
+          "dateofBirth": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "providerUkprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "tlevelTitle": {
+            "type": "string"
+          },
+          "tlevelCode": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "pathwayAssessments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrsAssessment"
+            }
+          },
+          "specialismAssessments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PrsAssessment"
+            }
+          }
+        }
+      },
+      "PrsActivityRequest": {
+        "type": "object",
+        "properties": {
+          "aoUkprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "profileId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "assessentId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "resultId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "resultLookupId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "componentType": {
+            "$ref": "#/components/schemas/ComponentType"
+          },
+          "prsStatus": {
+            "$ref": "#/components/schemas/PrsStatus"
+          },
+          "performedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "ComponentType": {
+        "type": "string",
+        "enum": [
+          "NotSpecified",
+          "Core",
+          "Specialism"
+        ]
+      },
+      "PrsStatus": {
+        "type": "string",
+        "enum": [
+          "NotSpecified",
+          "UnderReview",
+          "Reviewed",
+          "BeingAppealed",
+          "Final",
+          "Withdraw"
+        ]
+      },
+      "PrsGradeChangeRequest": {
+        "type": "object",
+        "properties": {
+          "learnerName": {
+            "type": "string"
+          },
+          "uln": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "providerUkprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "componentType": {
+            "$ref": "#/components/schemas/ComponentType"
+          },
+          "componentName": {
+            "type": "string"
+          },
+          "examPeriod": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "string"
+          },
+          "requestedMessage": {
+            "type": "string"
+          },
+          "requestedUserEmailAddress": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "BulkProcessRequest": {
+        "type": "object",
+        "properties": {
+          "aoUkprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "blobFileName": {
+            "type": "string"
+          },
+          "blobUniqueReference": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fileType": {
+            "type": "string",
+            "enum": [
+              "Csv",
+              "Xlsx",
+              "Pdf"
+            ]
+          },
+          "documentType": {
+            "type": "string",
+            "enum": [
+              "Registrations",
+              "Assessments",
+              "Results",
+              "Documents",
+              "Ucas",
+              "DataExports",
+              "OverallResults",
+              "IndustryPlacements",
+              "AnalystOverallResults",
+              "AnalystCoreResults",
+              "CoreRomm",
+              "SpecialismRomm",
+              "ProviderAddressess",
+              "CertificateTracking",
+              "Withdrawals",
+              "ResultSlips",
+              "Romms",
+              "Aspose"
+            ]
+          },
+          "loginUserType": {
+            "type": "string",
+            "enum": [
+              "NotSpecified",
+              "AwardingOrganisation",
+              "TrainingProvider",
+              "Admin"
+            ]
+          },
+          "performedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "BulkProcessResponse": {
+        "type": "object",
+        "properties": {
+          "isSuccess": {
+            "type": "boolean"
+          },
+          "blobUniqueReference": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "errorFileSize": {
+            "type": "number",
+            "format": "double"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/BulkUploadStats"
+          }
+        }
+      },
+      "BulkUploadStats": {
+        "type": "object",
+        "properties": {
+          "totalRecordsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "newRecordsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "amendedRecordsCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unchangedRecordsCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "PrsAssessment": {
+        "type": "object",
+        "properties": {
+          "assessmentId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesName": {
+            "type": "string"
+          },
+          "hasResult": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

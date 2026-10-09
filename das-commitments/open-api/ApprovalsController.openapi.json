@@ -7,18 +7,18 @@
   "paths": {
     "/approvals/{learningKey}": {
       "put": {
-        "summary": "Create or update approvals",
-        "operationId": "putApprovals",
+        "summary": "Approves or creates a change-of-circumstance (Coc) request.",
+        "operationId": "PutApprovals",
         "parameters": [
           {
             "name": "learningKey",
             "in": "path",
             "required": true,
-            "description": "Unique identifier for learning",
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The unique identifier for the learning to be approved."
           }
         ],
         "requestBody": {
@@ -32,8 +32,8 @@
           }
         },
         "responses": {
-          "201": {
-            "description": "Approval has been created",
+          "200": {
+            "description": "The approval was completed successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -45,8 +45,8 @@
               }
             }
           },
-          "200": {
-            "description": "Approval has been updated",
+          "201": {
+            "description": "The approval request was created successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -59,9 +59,14 @@
             }
           },
           "400": {
-            "description": "Bad request - LearningKey in route does not match LearningKey in body"
+            "description": "Bad request. For example, learningKey in the route does not match learningKey in the body."
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
       }
     }
   },
@@ -72,27 +77,33 @@
         "properties": {
           "LearningKey": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "The unique identifier for the learning entity."
           },
           "ApprenticeshipId": {
             "type": "integer",
-            "format": "int64"
+            "format": "int64",
+            "description": "The ID of the apprenticeship."
           },
           "LearningType": {
-            "type": "string"
+            "type": "string",
+            "description": "The type of learning associated with the request."
           },
           "UKPRN": {
-            "type": "string"
+            "type": "string",
+            "description": "The UK Provider Reference Number."
           },
           "ULN": {
-            "type": "string"
+            "type": "string",
+            "description": "The Unique Learner Number."
           },
           "ApprovedUri": {
             "type": "string",
-            "format": "uri"
+            "description": "The URI pointing to the approval documentation."
           },
           "Changes": {
             "type": "array",
+            "description": "The list of field changes for the approval.",
             "items": {
               "$ref": "#/components/schemas/CocApprovalFieldChange"
             }
@@ -101,40 +112,36 @@
         "required": [
           "LearningKey",
           "ApprenticeshipId",
-          "LearningType",
-          "UKPRN",
-          "ULN",
-          "ApprovedUri",
-          "Changes"
+          "LearningType"
         ]
       },
       "CocApprovalFieldChange": {
         "type": "object",
         "properties": {
           "ChangeType": {
-            "type": "string"
+            "type": "string",
+            "description": "The type of the change being requested (e.g., title, duration)."
           },
           "Data": {
             "$ref": "#/components/schemas/CocData"
           }
-        },
-        "required": [
-          "ChangeType",
-          "Data"
-        ]
+        }
       },
       "CocData": {
         "type": "object",
         "properties": {
           "Old": {
-            "type": "string"
+            "type": "string",
+            "description": "The old value before the change."
           },
           "New": {
-            "type": "string"
+            "type": "string",
+            "description": "The new value to apply."
           },
           "EffectiveFromDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date",
+            "description": "The date from which the change is effective."
           }
         }
       },
@@ -142,20 +149,31 @@
         "type": "object",
         "properties": {
           "ChangeType": {
-            "type": "string"
+            "type": "string",
+            "description": "The type of the change being approved."
           },
           "ApprovalStatus": {
-            "type": "string"
+            "type": "string",
+            "description": "The approval status for the field change."
           },
           "Reason": {
             "type": "string",
-            "nullable": true
+            "description": "An optional reason for the approval decision."
           }
-        },
-        "required": [
-          "ChangeType",
-          "ApprovalStatus"
-        ]
+        }
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "scopes": {
+              "approvals:write": "Allows writing approvals."
+            }
+          }
+        }
       }
     }
   }

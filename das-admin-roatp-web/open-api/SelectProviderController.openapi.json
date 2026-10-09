@@ -1,24 +1,36 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Add Provider API",
-    "description": "API for managing adding providers.",
+    "title": "Select Provider API",
     "version": "1.0.0"
   },
   "paths": {
     "/providers/new/select": {
       "get": {
-        "operationId": "getAddProviderSelection",
-        "summary": "Render the provider selection view",
+        "operationId": "getSelectProviderPage",
+        "summary": "Select a new provider.",
+        "tags": [
+          "Providers"
+        ],
         "responses": {
           "200": {
-            "description": "The provider selection view was rendered successfully"
+            "description": "Renders the select provider page.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       },
       "post": {
-        "operationId": "submitAddProviderSelection",
-        "summary": "Handle provider selection form submission",
+        "operationId": "postSelectProvider",
+        "summary": "Submit provider selection.",
+        "tags": [
+          "Providers"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -31,21 +43,20 @@
         },
         "responses": {
           "200": {
-            "description": "Provider information successfully submitted but had validation errors, form redisplayed with errors"
-          },
-          "302": {
-            "description": "Redirects to various routes, depending on outcome",
-            "headers": {
-              "Location": {
-                "description": "The redirect URL",
+            "description": "Renders the select provider page with validation errors.",
+            "content": {
+              "text/html": {
                 "schema": {
                   "type": "string"
                 }
               }
             }
           },
+          "302": {
+            "description": "Redirects the user either to provider details or provider not found pages."
+          },
           "500": {
-            "description": "Unexpected error during submission"
+            "description": "Unexpected service responses handled by the system."
           }
         }
       }
@@ -53,14 +64,17 @@
     "/providers/new/not-found": {
       "get": {
         "operationId": "getProviderNotFound",
-        "summary": "Render provider not found view",
+        "summary": "Provider not found in UKRLP.",
+        "tags": [
+          "Providers"
+        ],
         "responses": {
           "200": {
-            "description": "The provider not found view was rendered successfully",
+            "description": "Renders the provider not found page.",
             "content": {
-              "application/json": {
+              "text/html": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProviderNotFoundInUkrlpViewModel"
+                  "type": "string"
                 }
               }
             }
@@ -77,21 +91,9 @@
           "Ukprn": {
             "type": "string",
             "nullable": true,
-            "description": "The UKPRN of the provider being added"
+            "description": "Unique Provider Reference Number."
           }
         }
-      },
-      "ProviderNotFoundInUkrlpViewModel": {
-        "type": "object",
-        "properties": {
-          "AddANewTrainingProviderUrl": {
-            "type": "string",
-            "description": "URL for adding a new training provider"
-          }
-        },
-        "required": [
-          "AddANewTrainingProviderUrl"
-        ]
       }
     }
   }

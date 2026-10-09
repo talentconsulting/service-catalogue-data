@@ -7,8 +7,8 @@
   "paths": {
     "/providers/{ukprn}/apprenticeship-units": {
       "get": {
-        "summary": "Retrieve apprenticeship units update view",
-        "operationId": "getApprenticeshipUnitsUpdateView",
+        "operationId": "GetApprenticeshipUnits",
+        "summary": "Retrieve the Apprenticeship Units information for a provider.",
         "parameters": [
           {
             "name": "ukprn",
@@ -18,29 +18,33 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "Unique Provider Reference Number"
+            "description": "The UKPRN (UK Provider Reference Number) of the provider."
           }
         ],
         "responses": {
           "200": {
-            "description": "View for updating apprenticeship units retrieved successfully",
+            "description": "Successful response with the Apprenticeship Units information.",
             "content": {
-              "text/html": {
+              "application/json": {
                 "schema": {
-                  "type": "string"
+                  "$ref": "#/components/schemas/ApprenticeshipUnitsUpdateViewModel"
                 }
               }
             }
           },
           "302": {
-            "description": "Redirect to home if the organisation cannot be retrieved",
-            "content": {}
+            "description": "Redirects to the home route if the organization is not found."
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
       },
       "post": {
-        "summary": "Update apprenticeship units for a provider",
-        "operationId": "updateApprenticeshipUnits",
+        "operationId": "UpdateApprenticeshipUnits",
+        "summary": "Update the Apprenticeship Units information for a provider.",
         "parameters": [
           {
             "name": "ukprn",
@@ -50,7 +54,7 @@
               "type": "integer",
               "format": "int32"
             },
-            "description": "Unique Provider Reference Number"
+            "description": "The UKPRN (UK Provider Reference Number) of the provider."
           }
         ],
         "requestBody": {
@@ -60,25 +64,24 @@
               "schema": {
                 "$ref": "#/components/schemas/ApprenticeshipUnitsUpdateViewModel"
               }
+            },
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApprenticeshipUnitsUpdateViewModel"
+              }
             }
           }
         },
         "responses": {
           "302": {
-            "description": "Redirect to the provider summary after successful update",
-            "content": {}
-          },
-          "400": {
-            "description": "Validation errors occurred",
-            "content": {
-              "text/html": {
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
+            "description": "Redirects to the home or provider summary route based on the operation result."
           }
-        }
+        },
+        "security": [
+          {
+            "OAuth2": []
+          }
+        ]
       }
     }
   },
@@ -87,42 +90,59 @@
       "ApprenticeshipUnitsUpdateViewModel": {
         "type": "object",
         "properties": {
-          "ApprenticeshipUnitsSelection": {
+          "apprenticeshipUnitsSelection": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ApprenticeshipUnitsSelectionModel"
-            }
+            },
+            "description": "A list of options for apprenticeship units selection."
           },
-          "OffersApprenticeships": {
-            "type": "boolean"
-          },
-          "ApprenticeshipUnitsSelectionId": {
+          "offersApprenticeships": {
             "type": "boolean",
-            "nullable": true
+            "description": "Indicates whether the provider offers apprenticeships."
+          },
+          "apprenticeshipUnitsSelectionId": {
+            "type": "boolean",
+            "nullable": true,
+            "description": "The selected apprenticeship units choice."
           }
         },
         "required": [
-          "ApprenticeshipUnitsSelection",
-          "OffersApprenticeships"
+          "offersApprenticeships"
         ]
       },
       "ApprenticeshipUnitsSelectionModel": {
         "type": "object",
         "properties": {
-          "Id": {
-            "type": "boolean"
+          "id": {
+            "type": "boolean",
+            "description": "The ID of the selection option."
           },
-          "Description": {
-            "type": "string"
+          "description": {
+            "type": "string",
+            "description": "Description of the selection option."
           },
-          "IsSelected": {
-            "type": "boolean"
+          "isSelected": {
+            "type": "boolean",
+            "description": "Indicates whether the option is selected."
           }
         },
         "required": [
-          "Id",
-          "Description"
+          "id",
+          "description"
         ]
+      }
+    },
+    "securitySchemes": {
+      "OAuth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "tokenUrl": "https://example.com/oauth/token",
+            "scopes": {}
+          }
+        }
       }
     }
   }

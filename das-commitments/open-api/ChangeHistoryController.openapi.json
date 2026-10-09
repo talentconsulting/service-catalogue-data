@@ -2,18 +2,24 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Change History API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing and retrieving change history for apprenticeships, providers, and employers."
   },
   "paths": {
-    "/api/change-history/{ApprenticeshipId}": {
+    "/api/change-history/{apprenticeshipId}": {
       "get": {
-        "summary": "Get change history for an apprenticeship",
-        "description": "Retrieves change history for a specific apprenticeship by ID.",
+        "tags": [
+          "ChangeHistory"
+        ],
+        "summary": "Get Change History",
+        "description": "Retrieves the change history for a specific apprenticeship.",
+        "operationId": "getChangeHistory",
         "parameters": [
           {
-            "name": "ApprenticeshipId",
+            "name": "apprenticeshipId",
             "in": "path",
             "required": true,
+            "description": "The ID of the apprenticeship to retrieve change history for.",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -22,7 +28,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of change history.",
+            "description": "Successfully retrieved change history.",
             "content": {
               "application/json": {
                 "schema": {
@@ -32,25 +38,37 @@
             }
           },
           "400": {
-            "description": "Invalid request."
+            "description": "Invalid request due to bad input parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "OAuth2": []
+            "BearerAuth": []
           }
         ]
       }
     },
     "/api/change-history/{providerId}/Get-all-change-history": {
       "get": {
-        "summary": "Get all change history for provider learners",
-        "description": "Retrieves change history for all learners associated with a specific provider by ID.",
+        "tags": [
+          "ChangeHistory"
+        ],
+        "summary": "Get Change History for Provider",
+        "description": "Retrieves the change history for all learners associated with a specific provider.",
+        "operationId": "getChangeHistoryForAllLearnersOfProvider",
         "parameters": [
           {
             "name": "providerId",
             "in": "path",
             "required": true,
+            "description": "The ID of the provider to retrieve change history for.",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -59,7 +77,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of all change history for provider learners.",
+            "description": "Successfully retrieved change history for provider.",
             "content": {
               "application/json": {
                 "schema": {
@@ -69,25 +87,37 @@
             }
           },
           "400": {
-            "description": "Invalid request."
+            "description": "Invalid request due to bad input parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "OAuth2": []
+            "BearerAuth": []
           }
         ]
       }
     },
     "/api/change-history/employer/{accountId}/change-history": {
       "get": {
-        "summary": "Get change history for employer learners",
-        "description": "Retrieves change history for all learners associated with a specific employer account by ID.",
+        "tags": [
+          "ChangeHistory"
+        ],
+        "summary": "Get Change History for Employer",
+        "description": "Retrieves the change history for all learners associated with a specific employer account.",
+        "operationId": "getChangeHistoryForEmployer",
         "parameters": [
           {
             "name": "accountId",
             "in": "path",
             "required": true,
+            "description": "The ID of the employer account to retrieve change history for.",
             "schema": {
               "type": "integer",
               "format": "int64"
@@ -96,7 +126,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of change history for employer learners.",
+            "description": "Successfully retrieved change history for employer account.",
             "content": {
               "application/json": {
                 "schema": {
@@ -106,12 +136,19 @@
             }
           },
           "400": {
-            "description": "Invalid request."
+            "description": "Invalid request due to bad input parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
           }
         },
         "security": [
           {
-            "OAuth2": []
+            "BearerAuth": []
           }
         ]
       }
@@ -119,42 +156,6 @@
   },
   "components": {
     "schemas": {
-      "ChangeHistory": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "ChangeType": {
-            "type": "integer"
-          },
-          "Description": {
-            "type": "string"
-          },
-          "ApprenticeshipId": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "LearnerName": {
-            "type": "string"
-          },
-          "AppliedDate": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "Created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "EmployerName": {
-            "type": "string"
-          },
-          "ProviderName": {
-            "type": "string"
-          }
-        }
-      },
       "GetChangeHistoryResponse": {
         "type": "object",
         "properties": {
@@ -187,18 +188,61 @@
             }
           }
         }
+      },
+      "ChangeHistory": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ChangeType": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Description": {
+            "type": "string"
+          },
+          "ApprenticeshipId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "LearnerName": {
+            "type": "string"
+          },
+          "AppliedDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "Created": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EmployerName": {
+            "type": "string"
+          },
+          "ProviderName": {
+            "type": "string"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "Errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
       }
     },
     "securitySchemes": {
-      "OAuth2": {
-        "type": "oauth2",
-        "flows": {
-          "authorizationCode": {
-            "authorizationUrl": "https://example.com/oauth/authorize",
-            "tokenUrl": "https://example.com/oauth/token",
-            "scopes": {}
-          }
-        }
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }

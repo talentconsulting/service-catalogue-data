@@ -1,0 +1,342 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Admin Notification API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/AdminNotification/SearchNotifications": {
+      "post": {
+        "summary": "Search Notifications",
+        "operationId": "SearchNotifications",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSearchNotificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paged response of notification search results",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponse_SearchNotificationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/AdminNotification/GetNotification/{notificationId}": {
+      "get": {
+        "summary": "Get Notification",
+        "operationId": "GetNotification",
+        "parameters": [
+          {
+            "name": "notificationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/AdminNotification/AddNotification": {
+      "post": {
+        "summary": "Add Notification",
+        "operationId": "AddNotification",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddNotificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification added result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/AdminNotification/UpdateNotification": {
+      "put": {
+        "summary": "Update Notification",
+        "operationId": "UpdateNotification",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateNotificationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Notification update success status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/AdminNotification/DeleteNotification/{notificationId}": {
+      "delete": {
+        "summary": "Delete Notification",
+        "operationId": "DeleteNotification",
+        "parameters": [
+          {
+            "name": "notificationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notification deletion result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteNotificationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdminSearchNotificationRequest": {
+        "type": "object",
+        "properties": {
+          "SelectedActive": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "PageNumber": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "PagedResponse_SearchNotificationDetail": {
+        "type": "object",
+        "properties": {
+          "TotalRecords": {
+            "type": "integer"
+          },
+          "Records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchNotificationDetail"
+            }
+          },
+          "PagerInfo": {
+            "$ref": "#/components/schemas/Pager"
+          }
+        }
+      },
+      "SearchNotificationDetail": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Target": {
+            "$ref": "#/components/schemas/NotificationTarget"
+          },
+          "End": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "IsActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Pager": {
+        "type": "object",
+        "properties": {
+          "TotalItems": {
+            "type": "integer"
+          },
+          "CurrentPage": {
+            "type": "integer"
+          },
+          "PageSize": {
+            "type": "integer"
+          },
+          "TotalPages": {
+            "type": "integer"
+          },
+          "StartPage": {
+            "type": "integer"
+          },
+          "RecordFrom": {
+            "type": "integer"
+          },
+          "RecordTo": {
+            "type": "integer"
+          }
+        }
+      },
+      "NotificationTarget": {
+        "type": "integer",
+        "enum": [
+          0,
+          1,
+          2,
+          3
+        ],
+        "description": "Enumeration of notification target values."
+      },
+      "GetNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Content": {
+            "type": "string"
+          },
+          "Target": {
+            "$ref": "#/components/schemas/NotificationTarget"
+          },
+          "Start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "End": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "IsActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AddNotificationRequest": {
+        "type": "object",
+        "properties": {
+          "Title": {
+            "type": "string"
+          },
+          "Content": {
+            "type": "string"
+          },
+          "Target": {
+            "$ref": "#/components/schemas/NotificationTarget"
+          },
+          "Start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "End": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "CreatedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "AddNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "NotificationId": {
+            "type": "integer"
+          },
+          "Success": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UpdateNotificationRequest": {
+        "type": "object",
+        "properties": {
+          "NotificationId": {
+            "type": "integer"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Content": {
+            "type": "string"
+          },
+          "Target": {
+            "$ref": "#/components/schemas/NotificationTarget"
+          },
+          "Start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "End": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ModifiedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "DeleteNotificationResponse": {
+        "type": "object",
+        "properties": {
+          "Success": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

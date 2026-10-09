@@ -1,0 +1,254 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Digital Certificates Web API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/start-page": {
+      "get": {
+        "operationId": "StartPageRouteGet",
+        "summary": "Start page",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "text/html": {}
+            }
+          },
+          "302": {
+            "description": "Redirects to an external start page when configured."
+          }
+        }
+      }
+    },
+    "/check": {
+      "get": {
+        "operationId": "CheckRouteGet",
+        "summary": "Check page",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "/"
+            }
+          }
+        ],
+        "security": [
+          {
+            "IsActiveAccount": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "CheckRoutePost",
+        "summary": "Continue from the check page",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [
+          {
+            "IsActiveAccount": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {}
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirects to the verify identity service."
+          }
+        }
+      }
+    },
+    "/verified": {
+      "get": {
+        "operationId": "VerifiedRouteGet",
+        "summary": "Verified page",
+        "security": [
+          {
+            "IsVerified": []
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirect to certificates list page."
+          }
+        }
+      }
+    },
+    "/cookies": {
+      "get": {
+        "operationId": "CookiesRouteGet",
+        "summary": "Cookies information page",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      }
+    },
+    "/help": {
+      "get": {
+        "operationId": "HelpRouteGet",
+        "summary": "Help page",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      }
+    },
+    "/cookie-details": {
+      "get": {
+        "operationId": "CookieDetailsRouteGet",
+        "summary": "Cookie details page",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      }
+    },
+    "/accessibility-statement": {
+      "get": {
+        "operationId": "AccessibilityStatementRouteGet",
+        "summary": "Accessibility statement page",
+        "parameters": [
+          {
+            "name": "returnUrl",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      }
+    },
+    "/error/403": {
+      "get": {
+        "summary": "Access denied page",
+        "responses": {
+          "200": {
+            "description": "Successful response.",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      }
+    },
+    "/error": {
+      "get": {
+        "operationId": "ErrorRouteGet",
+        "summary": "Error page",
+        "responses": {
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Name": {
+        "type": "object",
+        "properties": {
+          "ValidSince": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "ValidUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "FamilyName": {
+            "type": "string"
+          },
+          "GivenNames": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "FamilyName",
+          "GivenNames"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "IsActiveAccount": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "IsVerified": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

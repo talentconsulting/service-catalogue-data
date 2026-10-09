@@ -1,0 +1,226 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "TL Results and Certification API",
+    "version": "1.0.0",
+    "description": "API for managing T Level learner records, registrations, and certifications."
+  },
+  "paths": {
+    "/api/SearchRegistrationController/GetSearchRegistrationFilters": {
+      "get": {
+        "operationId": "GetSearchRegistrationFilters",
+        "summary": "Get available search filters for registrations.",
+        "tags": [
+          "SearchRegistration"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response containing search filters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchRegistrationFilters"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/SearchRegistrationController/SearchRegistrationDetails": {
+      "post": {
+        "operationId": "SearchRegistrationDetails",
+        "summary": "Search registration details.",
+        "tags": [
+          "SearchRegistration"
+        ],
+        "requestBody": {
+          "description": "Search parameters for registration details.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRegistrationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response containing paged registration details.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponseSearchRegistrationDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SearchRegistrationFilters": {
+        "type": "object",
+        "properties": {
+          "AcademicYears": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FilterLookupData"
+            }
+          }
+        }
+      },
+      "SearchRegistrationRequest": {
+        "type": "object",
+        "properties": {
+          "AoUkprn": {
+            "type": "integer",
+            "example": 12345678
+          },
+          "SearchKey": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "ProviderId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "SelectedAcademicYears": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "PageNumber": {
+            "type": "integer",
+            "nullable": true
+          }
+        }
+      },
+      "SearchRegistrationDetail": {
+        "type": "object",
+        "properties": {
+          "RegistrationProfileId": {
+            "type": "integer",
+            "example": 1
+          },
+          "Uln": {
+            "type": "integer",
+            "example": 1234567890
+          },
+          "Firstname": {
+            "type": "string",
+            "example": "John"
+          },
+          "Lastname": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "ProviderName": {
+            "type": "string",
+            "example": "Example College"
+          },
+          "ProviderUkprn": {
+            "type": "integer",
+            "example": 12345678
+          },
+          "PathwayName": {
+            "type": "string",
+            "example": "Digital Pathway"
+          },
+          "PathwayLarId": {
+            "type": "string",
+            "example": "DP1234"
+          },
+          "AcademicYear": {
+            "type": "integer",
+            "example": 2023
+          },
+          "IsWithdrawn": {
+            "type": "boolean",
+            "example": false
+          },
+          "HasResults": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "PagedResponseSearchRegistrationDetail": {
+        "type": "object",
+        "properties": {
+          "TotalRecords": {
+            "type": "integer",
+            "example": 100
+          },
+          "Records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchRegistrationDetail"
+            }
+          },
+          "PagerInfo": {
+            "$ref": "#/components/schemas/Pager"
+          }
+        }
+      },
+      "Pager": {
+        "type": "object",
+        "properties": {
+          "TotalItems": {
+            "type": "integer",
+            "example": 100
+          },
+          "CurrentPage": {
+            "type": "integer",
+            "example": 1
+          },
+          "PageSize": {
+            "type": "integer",
+            "example": 10
+          },
+          "TotalPages": {
+            "type": "integer",
+            "example": 10
+          },
+          "StartPage": {
+            "type": "integer",
+            "example": 1
+          },
+          "RecordFrom": {
+            "type": "integer",
+            "example": 1
+          },
+          "RecordTo": {
+            "type": "integer",
+            "example": 10
+          }
+        }
+      },
+      "FilterLookupData": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "example": 1
+          },
+          "Name": {
+            "type": "string",
+            "example": "2023/24"
+          },
+          "CoreCode": {
+            "type": "string",
+            "example": "CC1234"
+          },
+          "IsSelected": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,229 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Learner API",
+    "description": "API for managing learner records and registrations.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/Learner/GetLearnerRecord/{aoUkprn}/{profileId}/{status}": {
+      "get": {
+        "summary": "Get learner record",
+        "description": "Retrieves a learner record based on the provided awarding organisation UKPRN, profile ID, and optional registration pathway status.",
+        "operationId": "GetLearnerRecord",
+        "parameters": [
+          {
+            "name": "aoUkprn",
+            "in": "path",
+            "required": true,
+            "description": "The UKPRN of the awarding organisation.",
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "profileId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the learner profile.",
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "status",
+            "in": "path",
+            "required": false,
+            "description": "The status of the learner's registration pathway.",
+            "schema": {
+              "$ref": "#/components/schemas/RegistrationPathwayStatus"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Learner record retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LearnerRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "LearnerRecord": {
+        "type": "object",
+        "properties": {
+          "ProfileId": {
+            "type": "integer",
+            "description": "The unique identifier for the learner's profile."
+          },
+          "Uln": {
+            "type": "integer",
+            "description": "The unique learner number.",
+            "format": "int64"
+          },
+          "Firstname": {
+            "type": "string",
+            "description": "The first name of the learner."
+          },
+          "Lastname": {
+            "type": "string",
+            "description": "The last name of the learner."
+          },
+          "DateofBirth": {
+            "type": "string",
+            "format": "date",
+            "description": "The date of birth of the learner."
+          },
+          "Gender": {
+            "type": "string",
+            "description": "The gender of the learner."
+          },
+          "Pathway": {
+            "$ref": "#/components/schemas/Pathway"
+          }
+        },
+        "required": [
+          "ProfileId",
+          "Uln",
+          "Firstname",
+          "Lastname",
+          "DateofBirth"
+        ]
+      },
+      "Pathway": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "description": "The unique identifier of the pathway."
+          },
+          "LarId": {
+            "type": "string",
+            "description": "The Learning Aims Reference ID of the pathway."
+          },
+          "Title": {
+            "type": "string",
+            "description": "The title of the pathway."
+          },
+          "Name": {
+            "type": "string",
+            "description": "The name of the pathway."
+          },
+          "StartYear": {
+            "type": "integer",
+            "description": "The start year of the pathway."
+          },
+          "AcademicYear": {
+            "type": "integer",
+            "description": "The academic year the pathway is associated with."
+          },
+          "Status": {
+            "$ref": "#/components/schemas/RegistrationPathwayStatus"
+          },
+          "Provider": {
+            "$ref": "#/components/schemas/Provider"
+          },
+          "PathwayAssessments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Assessment"
+            }
+          },
+          "Specialisms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Specialism"
+            }
+          },
+          "IndustryPlacements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IndustryPlacement"
+            }
+          }
+        }
+      },
+      "RegistrationPathwayStatus": {
+        "type": "string",
+        "enum": [
+          "NotSpecified",
+          "Active",
+          "InActive",
+          "Transferred",
+          "Withdrawn"
+        ],
+        "description": "The status of a registration pathway."
+      },
+      "Provider": {
+        "type": "object",
+        "properties": {
+          "Ukprn": {
+            "type": "integer",
+            "description": "The UKPRN of the provider.",
+            "format": "int64"
+          },
+          "Name": {
+            "type": "string",
+            "description": "The name of the provider."
+          }
+        }
+      },
+      "Assessment": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "description": "The unique identifier for the assessment."
+          },
+          "Title": {
+            "type": "string",
+            "description": "The title of the assessment."
+          }
+        }
+      },
+      "Specialism": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "description": "The unique identifier for the specialism."
+          },
+          "Title": {
+            "type": "string",
+            "description": "The title of the specialism."
+          }
+        }
+      },
+      "IndustryPlacement": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "description": "The unique identifier for the industry placement."
+          },
+          "Status": {
+            "$ref": "#/components/schemas/IndustryPlacementStatus"
+          }
+        }
+      },
+      "IndustryPlacementStatus": {
+        "type": "string",
+        "enum": [
+          "Completed",
+          "NotCompleted",
+          "NotStarted"
+        ],
+        "description": "The status of the industry placement."
+      }
+    }
+  }
+}

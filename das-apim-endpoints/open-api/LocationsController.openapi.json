@@ -5,10 +5,9 @@
     "version": "1.0.0"
   },
   "paths": {
-    "/locations": {
+    "/Locations": {
       "get": {
-        "summary": "Retrieve addresses based on search query",
-        "operationId": "GetAddresses",
+        "summary": "Retrieve addresses by query",
         "parameters": [
           {
             "name": "query",
@@ -25,7 +24,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetAddressesResponse"
+                  "$ref": "#/components/schemas/GetAddressesQueryResponse"
                 }
               }
             }
@@ -33,41 +32,9 @@
         }
       }
     },
-    "/locations/{postcode}": {
+    "/Locations/search": {
       "get": {
-        "summary": "Retrieve coordinates for a postcode",
-        "operationId": "GetCoordinates",
-        "parameters": [
-          {
-            "name": "postcode",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Coordinates retrieved successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetPostcodeCoordinatesResponse"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Postcode not found"
-          }
-        }
-      }
-    },
-    "/locations/search": {
-      "get": {
-        "summary": "Retrieve locations based on search query",
-        "operationId": "GetLocationsBySearch",
+        "summary": "Retrieve locations by search query",
         "parameters": [
           {
             "name": "query",
@@ -84,7 +51,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetLocationsBySearchResponse"
+                  "$ref": "#/components/schemas/GetLocationsBySearchQueryResponse"
                 }
               }
             }
@@ -95,17 +62,74 @@
   },
   "components": {
     "schemas": {
-      "GetAddressesResponse": {
+      "GetAddressesQueryResponse": {
         "type": "object",
-        "properties": {}
+        "description": "Response containing a list of addresses",
+        "properties": {
+          "addresses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Address"
+            }
+          }
+        }
       },
-      "GetPostcodeCoordinatesResponse": {
+      "GetLocationsBySearchQueryResponse": {
         "type": "object",
-        "properties": {}
+        "description": "Response containing a list of locations",
+        "properties": {
+          "locations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Location"
+            }
+          }
+        }
       },
-      "GetLocationsBySearchResponse": {
+      "Address": {
         "type": "object",
-        "properties": {}
+        "description": "An address object",
+        "properties": {
+          "line1": {
+            "type": "string"
+          },
+          "line2": {
+            "type": "string"
+          },
+          "city": {
+            "type": "string"
+          },
+          "postcode": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "latitude": {
+            "type": "number",
+            "format": "double"
+          },
+          "longitude": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "Location": {
+        "type": "object",
+        "description": "A location object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "address": {
+            "$ref": "#/components/schemas/Address"
+          }
+        }
       }
     }
   }

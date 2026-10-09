@@ -1,0 +1,234 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AdminAwardingOrganisation API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/admin/select-awarding-organisation-clear": {
+      "get": {
+        "operationId": "AdminSelectAwardingOrganisationClear",
+        "summary": "Clears the awarding organisation selection cache.",
+        "responses": {
+          "302": {
+            "description": "Redirect to `/admin/select-awarding-organisation`."
+          }
+        }
+      }
+    },
+    "/admin/select-awarding-organisation": {
+      "get": {
+        "operationId": "GetAdminSelectAwardingOrganisation",
+        "summary": "Fetches awarding organisation selection view model.",
+        "responses": {
+          "200": {
+            "description": "Awarding organisation selection view.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminSelectAwardingOrganisationViewModel"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "PostAdminSelectAwardingOrganisation",
+        "summary": "Submits the selected awarding organisation.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSelectAwardingOrganisationViewModel"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to `/admin/download-results-romms-awarding-organisation/{awardingOrganisationUkprn}`."
+          },
+          "400": {
+            "description": "Invalid input."
+          }
+        }
+      }
+    },
+    "/admin/download-results-romms-awarding-organisation/{awardingOrganisationUkprn}": {
+      "get": {
+        "operationId": "AdminDownloadResultsRommsByAwardingOrganisation",
+        "summary": "Downloads results and ROMMs for an awarding organisation.",
+        "parameters": [
+          {
+            "name": "awardingOrganisationUkprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Results and ROMMs view model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminDownloadResultsRommsByAwardingOrganisationViewModel"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect due to an issue with the service."
+          }
+        }
+      }
+    },
+    "/admin/download-core-results/{awardingOrganisationUkprn}/{fileId}": {
+      "get": {
+        "operationId": "AdminDownloadCoreResultsDataLink",
+        "summary": "Downloads core results for an awarding organisation.",
+        "parameters": [
+          {
+            "name": "awardingOrganisationUkprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Download successful."
+          },
+          "302": {
+            "description": "Redirect due to an issue."
+          }
+        }
+      }
+    },
+    "/admin/download-specialism-results/{awardingOrganisationUkprn}/{fileId}": {
+      "get": {
+        "operationId": "AdminDownloadSpecialismResultsDataLink",
+        "summary": "Downloads specialism results for an awarding organisation.",
+        "parameters": [
+          {
+            "name": "awardingOrganisationUkprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Download successful."
+          },
+          "302": {
+            "description": "Redirect due to an issue."
+          }
+        }
+      }
+    },
+    "/admin/download-romms-data/{awardingOrganisationUkprn}/{fileId}": {
+      "get": {
+        "operationId": "AdminDownloadRommsDataLink",
+        "summary": "Downloads ROMMs data for an awarding organisation.",
+        "parameters": [
+          {
+            "name": "awardingOrganisationUkprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "fileId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Download successful."
+          },
+          "302": {
+            "description": "Redirect due to an issue."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdminSelectAwardingOrganisationViewModel": {
+        "type": "object",
+        "properties": {
+          "selectedAwardingOrganisationUkprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "awardingOrganisations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AwardingOrganisationMetadata"
+            }
+          }
+        }
+      },
+      "AwardingOrganisationMetadata": {
+        "type": "object",
+        "properties": {
+          "ukprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        }
+      },
+      "AdminDownloadResultsRommsByAwardingOrganisationViewModel": {
+        "type": "object",
+        "properties": {
+          "awardingOrganisationUkprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "awardingOrganisationDisplayName": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

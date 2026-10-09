@@ -1,17 +1,15 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "SetLastDateStarts API",
-    "version": "1.0.0"
+    "title": "Set Last Date Starts API",
+    "version": "1.0.0",
+    "description": "API for managing last start dates for restricted courses."
   },
   "paths": {
     "/restricted-courses/{larsCode}/providers/{ukprn}/set-last-start-date": {
       "get": {
-        "summary": "Get the last start date view for a restricted course provider",
-        "operationId": "getLastStartDateView",
-        "tags": [
-          "RestrictedCourses"
-        ],
+        "summary": "Display the form to set last start date",
+        "operationId": "setLastStartDateFormDisplay",
         "parameters": [
           {
             "name": "larsCode",
@@ -19,8 +17,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "The LARS code of the course"
+            }
           },
           {
             "name": "ukprn",
@@ -28,37 +25,28 @@
             "required": true,
             "schema": {
               "type": "integer"
-            },
-            "description": "The UKPRN of the provider"
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with view data",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SetLastDateStartsViewModel"
-                }
-              }
-            }
+            "description": "Form displayed successfully."
           },
           "404": {
-            "description": "Not found"
+            "description": "Course details or provider not found."
           }
         },
         "security": [
           {
-            "BearerAuth": []
+            "roles": [
+              "RoatpAdminTeam"
+            ]
           }
         ]
       },
       "post": {
-        "summary": "Set the last start date for a restricted course provider",
-        "operationId": "setLastStartDate",
-        "tags": [
-          "RestrictedCourses"
-        ],
+        "summary": "Update the last start date for a provider",
+        "operationId": "updateLastStartDate",
         "parameters": [
           {
             "name": "larsCode",
@@ -66,8 +54,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "The LARS code of the course"
+            }
           },
           {
             "name": "ukprn",
@@ -75,8 +62,7 @@
             "required": true,
             "schema": {
               "type": "integer"
-            },
-            "description": "The UKPRN of the provider"
+            }
           }
         ],
         "requestBody": {
@@ -91,15 +77,20 @@
         },
         "responses": {
           "302": {
-            "description": "Redirect to the restricted course details page"
+            "description": "Redirect to restricted course details page."
+          },
+          "400": {
+            "description": "Validation errors for the submitted data."
           },
           "404": {
-            "description": "Not found"
+            "description": "Session or course details not found."
           }
         },
         "security": [
           {
-            "BearerAuth": []
+            "roles": [
+              "RoatpAdminTeam"
+            ]
           }
         ]
       }
@@ -131,56 +122,21 @@
             "format": "date-time",
             "nullable": true
           }
-        },
-        "description": "Model containing the data for submitting a last start date for a course provider."
-      },
-      "SetLastDateStartsViewModel": {
-        "type": "object",
-        "properties": {
-          "LarsCode": {
-            "type": "string"
-          },
-          "Ukprn": {
-            "type": "integer"
-          },
-          "ProviderName": {
-            "type": "string"
-          },
-          "CourseDisplayTitle": {
-            "type": "string"
-          },
-          "Day": {
-            "type": "string",
-            "nullable": true
-          },
-          "Month": {
-            "type": "string",
-            "nullable": true
-          },
-          "Year": {
-            "type": "string",
-            "nullable": true
-          },
-          "CourseLastDateStarts": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "IsChangingExistingDate": {
-            "type": "boolean"
-          },
-          "CancelUrl": {
-            "type": "string"
-          }
-        },
-        "description": "View model containing course provider details and current last start date."
+        }
       }
     },
     "securitySchemes": {
-      "BearerAuth": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "JWT bearer authentication"
+      "roles": {
+        "type": "oauth2",
+        "description": "Role-based access control",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "scopes": {
+              "RoatpAdminTeam": "Access is restricted to Roatp Admin Team members."
+            }
+          }
+        }
       }
     }
   }

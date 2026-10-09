@@ -2,55 +2,111 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Provider Summary API",
+    "description": "API for managing and viewing provider summaries in the RoATP system.",
     "version": "1.0.0"
   },
   "paths": {
     "/providers/{ukprn}": {
       "get": {
-        "summary": "Get provider summary",
-        "description": "Retrieves the summary details of a provider specified by UKPRN.",
-        "operationId": "GetProviderSummary",
+        "summary": "Get Provider Summary",
+        "description": "Fetches the summary of a provider given their UKPRN.",
+        "operationId": "getProviderSummary",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
-            "description": "The UK Provider Reference Number (UKPRN) of the provider.",
+            "description": "UK Provider Reference Number of the provider",
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with the provider's summary details.",
+            "description": "Successful response with provider summary",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetOrganisationResponse"
+                  "$ref": "#/components/schemas/ProviderSummaryViewModel"
                 }
               }
             }
           },
           "302": {
-            "description": "Redirected to the homepage if the provider's details are not found."
+            "description": "Redirection to the home route."
           }
-        }
+        },
+        "security": [
+          {
+            "RoleBasedAuth": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
       }
     }
   },
   "components": {
     "schemas": {
-      "GetOrganisationResponse": {
+      "ProviderSummaryViewModel": {
         "type": "object",
         "properties": {
-          "LegalName": {
+          "SearchProviderUrl": {
             "type": "string",
-            "description": "The legal name of the provider."
+            "description": "URL for searching a provider."
+          },
+          "StatusChangeLink": {
+            "type": "string",
+            "description": "URL for changing the provider's status."
+          },
+          "ProviderTypeChangeLink": {
+            "type": "string",
+            "description": "URL for changing the provider's type."
+          },
+          "OrganisationTypeChangeLink": {
+            "type": "string",
+            "description": "URL for changing the provider's organisation type."
+          },
+          "OffersApprenticeshipUnitsChangeLink": {
+            "type": "string",
+            "description": "URL for changing whether the provider offers apprenticeship units."
+          },
+          "ManageRestrictedCoursesUrl": {
+            "type": "string",
+            "description": "URL for managing restricted apprenticeship courses."
+          },
+          "ManageApprovedCoursesUrl": {
+            "type": "string",
+            "description": "URL for managing approved courses for the provider."
+          },
+          "ChangeHowWeManageThisProviderUrl": {
+            "type": "string",
+            "description": "URL for changing how the provider is managed."
+          },
+          "ManageApprovedUnitsUrl": {
+            "type": "string",
+            "description": "URL for managing the provider's approved units."
           }
         },
-        "additionalProperties": true
+        "required": [
+          "SearchProviderUrl",
+          "StatusChangeLink",
+          "ProviderTypeChangeLink",
+          "OrganisationTypeChangeLink",
+          "OffersApprenticeshipUnitsChangeLink",
+          "ManageRestrictedCoursesUrl",
+          "ManageApprovedCoursesUrl",
+          "ChangeHowWeManageThisProviderUrl",
+          "ManageApprovedUnitsUrl"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "RoleBasedAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Role-based authorization using the 'RoatpAdminTeam' role."
       }
     }
   }

@@ -1,0 +1,673 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ApplicationsReview API",
+    "description": "API for managing application reviews, sharing, feedback, and related actions.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/application-reviews": {
+      "post": {
+        "summary": "Get application reviews.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetApplicationsForReviewQuery"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationsForReviewQueryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/application-reviews/{applicationReviewId}/share": {
+      "put": {
+        "summary": "Update application review sharing.",
+        "parameters": [
+          {
+            "name": "applicationReviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateApplicationReviewSharingCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/application-reviews/{applicationReviewId}": {
+      "get": {
+        "summary": "Get application review by ID.",
+        "parameters": [
+          {
+            "name": "applicationReviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationForReviewByIdQueryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/application-reviews/{applicationReviewId}/share-status": {
+      "get": {
+        "summary": "Get application review sharing status by ID.",
+        "parameters": [
+          {
+            "name": "applicationReviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationReviewSharingStatusByIdQueryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/application-reviews/{applicationReviewId}/feedback/{userType}": {
+      "get": {
+        "summary": "Get feedback for application review by ID and user type.",
+        "parameters": [
+          {
+            "name": "applicationReviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "userType",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFeedbackForApplicationReviewByIdQueryResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/application-reviews/{applicationReviewId}/form-answers": {
+      "get": {
+        "summary": "Get application form details by review ID.",
+        "parameters": [
+          {
+            "name": "applicationReviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationFormAnswersByReviewIdQueryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/application-reviews/{applicationReviewId}/export-data": {
+      "get": {
+        "summary": "Get application export data.",
+        "parameters": [
+          {
+            "name": "applicationReviewId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationExportDataQueryResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetApplicationsForReviewQuery": {
+        "type": "object",
+        "properties": {
+          "applicationSearch": {
+            "type": "string",
+            "nullable": true
+          },
+          "awardingOrganisationSearch": {
+            "type": "string",
+            "nullable": true
+          },
+          "reviewerSearch": {
+            "type": "string",
+            "nullable": true
+          },
+          "unassignedOnly": {
+            "type": "boolean"
+          },
+          "applicationStatuses": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reviewUser": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "nullable": true
+          },
+          "offset": {
+            "type": "integer",
+            "nullable": true
+          },
+          "applicationsWithNewMessages": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "reviewUser"
+        ]
+      },
+      "GetApplicationsForReviewQueryResponse": {
+        "type": "object",
+        "properties": {
+          "applications": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Application"
+            }
+          },
+          "availableReviewers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Reviewer"
+            }
+          },
+          "totalRecordsCount": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "applications",
+          "totalRecordsCount"
+        ]
+      },
+      "Application": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicationReviewId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "lastUpdated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reference": {
+            "type": "integer"
+          },
+          "qan": {
+            "type": "string",
+            "nullable": true
+          },
+          "awardingOrganisation": {
+            "type": "string",
+            "nullable": true
+          },
+          "owner": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "newMessage": {
+            "type": "boolean"
+          },
+          "reviewer1": {
+            "type": "string"
+          },
+          "reviewer2": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "applicationReviewId",
+          "name",
+          "lastUpdated",
+          "reference",
+          "status",
+          "reviewer1",
+          "reviewer2"
+        ]
+      },
+      "Reviewer": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "firstName",
+          "lastName"
+        ]
+      },
+      "UpdateApplicationReviewSharingCommand": {
+        "type": "object",
+        "properties": {
+          "applicationReviewUserType": {
+            "type": "string"
+          },
+          "shareApplication": {
+            "type": "boolean"
+          },
+          "applicationReviewId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userType": {
+            "type": "string"
+          },
+          "sentByName": {
+            "type": "string"
+          },
+          "sentByEmail": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": [
+          "applicationReviewUserType",
+          "shareApplication",
+          "applicationReviewId",
+          "userType",
+          "sentByName",
+          "sentByEmail"
+        ]
+      },
+      "EmptyResponse": {
+        "type": "object",
+        "description": "A response for no content."
+      },
+      "GetApplicationForReviewByIdQueryResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "applicationReviewId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "lastUpdated": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reference": {
+            "type": "integer"
+          },
+          "qan": {
+            "type": "string",
+            "nullable": true
+          },
+          "awardingOrganisation": {
+            "type": "string",
+            "nullable": true
+          },
+          "formTitle": {
+            "type": "string"
+          },
+          "applicationStatus": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "applicationReviewId",
+          "name",
+          "lastUpdated",
+          "reference",
+          "formTitle",
+          "applicationStatus"
+        ]
+      },
+      "GetApplicationReviewSharingStatusByIdQueryResponse": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "GetFeedbackForApplicationReviewByIdQueryResponse": {
+        "type": "object",
+        "properties": {
+          "owner": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "newMessage": {
+            "type": "boolean"
+          },
+          "userType": {
+            "type": "string"
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true
+          },
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fundedOffers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Funding"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "newMessage",
+          "userType",
+          "applicationId",
+          "fundedOffers"
+        ]
+      },
+      "Funding": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fundingOfferId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fundedOfferName": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "comments": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "fundingOfferId",
+          "fundedOfferName"
+        ]
+      },
+      "GetApplicationFormAnswersByReviewIdQueryResponse": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "questionsWithAnswers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Question"
+            }
+          }
+        },
+        "required": [
+          "applicationId",
+          "questionsWithAnswers"
+        ]
+      },
+      "Question": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "answer": {
+            "$ref": "#/components/schemas/Answer"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "Answer": {
+        "type": "object",
+        "properties": {
+          "textValue": {
+            "type": "string",
+            "nullable": true
+          },
+          "numberValue": {
+            "type": "number",
+            "nullable": true
+          },
+          "dateValue": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "multipleChoiceValue": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "nullable": true
+          },
+          "radioChoiceValue": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "GetApplicationExportDataQueryResponse": {
+        "type": "object",
+        "properties": {
+          "applicationFormStructure": {
+            "$ref": "#/components/schemas/GetApplicationFormAnswersByReviewIdQueryResponse"
+          },
+          "applicationFormResponse": {
+            "$ref": "#/components/schemas/GetApplicationFormAnswersByReviewIdQueryResponse"
+          },
+          "applicationMetadata": {
+            "$ref": "#/components/schemas/ApplicationMetadataResponse"
+          }
+        },
+        "required": [
+          "applicationFormStructure",
+          "applicationFormResponse",
+          "applicationMetadata"
+        ]
+      },
+      "ApplicationMetadataResponse": {
+        "type": "object",
+        "properties": {
+          "submissionId": {
+            "type": "integer"
+          },
+          "qualificationTitle": {
+            "type": "string"
+          },
+          "organisationName": {
+            "type": "string"
+          },
+          "formName": {
+            "type": "string"
+          },
+          "qan": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "submissionId",
+          "qualificationTitle",
+          "organisationName",
+          "formName"
+        ]
+      }
+    }
+  }
+}

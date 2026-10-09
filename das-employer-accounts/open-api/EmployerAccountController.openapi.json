@@ -1,14 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Accounts API",
+    "title": "EmployerAccounts API",
     "version": "1.0.0"
   },
   "paths": {
     "/accounts/create/tasklist": {
       "get": {
         "operationId": "CreateAccountTaskList",
-        "summary": "Get the task list for creating an employer account.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -21,32 +20,40 @@
         ],
         "responses": {
           "200": {
-            "description": "The task list for creating an employer account.",
+            "description": "Task list page",
             "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateAccountProgressSavedViewModel"
-                }
-              }
+              "text/html": {}
             }
-          },
-          "303": {
-            "description": "Redirect to the employer team index if the task list is complete."
           }
-        },
-        "security": [
+        }
+      }
+    },
+    "/accounts/{hashedAccountId}/tasklist": {
+      "get": {
+        "operationId": "ContinueCreateAccountTaskList",
+        "parameters": [
           {
-            "oauth2": [
-              "HasEmployerViewerTransactorOwnerAccount"
-            ]
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "Task list page",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
       }
     },
     "/accounts/create/progress-saved": {
       "get": {
         "operationId": "CreateAccountProgressSaved",
-        "summary": "Progress saved view when creating an employer account.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -59,22 +66,40 @@
         ],
         "responses": {
           "200": {
-            "description": "The progress saved view."
+            "description": "Progress saved page",
+            "content": {
+              "text/html": {}
+            }
           }
-        },
-        "security": [
+        }
+      }
+    },
+    "/accounts/{hashedAccountId}/progress-saved": {
+      "get": {
+        "operationId": "PartialAccountProgressSaved",
+        "parameters": [
           {
-            "oauth2": [
-              "HasEmployerViewerTransactorOwnerAccount"
-            ]
+            "name": "hashedAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "Progress saved page",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
       }
     },
     "/accounts/{hashedAccountId}/cannotAddPaye": {
       "get": {
         "operationId": "AddPayeShutter",
-        "summary": "View for users who cannot add PAYE.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -87,95 +112,57 @@
         ],
         "responses": {
           "200": {
-            "description": "The cannot add PAYE view."
+            "description": "Cannot add PAYE page",
+            "content": {
+              "text/html": {}
+            }
           }
-        },
-        "security": [
-          {
-            "oauth2": [
-              "HasEmployerViewerTransactorOwnerAccount"
-            ]
-          }
-        ]
+        }
       }
     },
     "/accounts/payBill": {
       "get": {
-        "operationId": "PayBillTriage",
-        "summary": "View for paying the bill triage.",
-        "parameters": [
-          {
-            "name": "hashedAccountId",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "operationId": "PayBillTriageGet",
         "responses": {
           "200": {
-            "description": "The pay bill triage view."
-          },
-          "303": {
-            "description": "Redirect to the Add PAYE Shutter view."
+            "description": "Pay bill triage page",
+            "content": {
+              "text/html": {}
+            }
           }
-        },
-        "security": [
-          {
-            "oauth2": [
-              "HasEmployerViewerTransactorOwnerAccount"
-            ]
-          }
-        ]
+        }
       },
       "post": {
         "operationId": "PayBillTriagePost",
-        "summary": "Post triage selection when paying the bill.",
         "requestBody": {
-          "description": "User's choice for paying the bill.",
           "required": true,
           "content": {
-            "application/json": {
+            "application/x-www-form-urlencoded": {
               "schema": {
-                "type": "integer"
-              }
-            }
-          }
-        },
-        "responses": {
-          "303": {
-            "description": "Redirect to appropriate action based on user's choice."
-          },
-          "400": {
-            "description": "Error in the user's selection data.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "InError": {
-                      "type": "boolean"
-                    }
+                "type": "object",
+                "properties": {
+                  "choice": {
+                    "type": "integer",
+                    "nullable": true
                   }
                 }
               }
             }
           }
         },
-        "security": [
-          {
-            "oauth2": [
-              "HasEmployerViewerTransactorOwnerAccount"
-            ]
+        "responses": {
+          "200": {
+            "description": "Redirect based on user's choice",
+            "content": {
+              "text/html": {}
+            }
           }
-        ]
+        }
       }
     },
     "/accounts/{hashedAccountId}/getApprenticeshipFunding": {
       "get": {
-        "operationId": "GetApprenticeshipFunding",
-        "summary": "View for getting apprenticeship funding.",
+        "operationId": "GetApprenticeshipFundingInAccount",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -188,20 +175,15 @@
         ],
         "responses": {
           "200": {
-            "description": "The apprenticeship funding view."
+            "description": "Get apprenticeship funding page",
+            "content": {
+              "text/html": {}
+            }
           }
-        },
-        "security": [
-          {
-            "oauth2": [
-              "HasEmployerViewerTransactorOwnerAccount"
-            ]
-          }
-        ]
+        }
       },
       "post": {
-        "operationId": "PostGetApprenticeshipFunding",
-        "summary": "Post user's funding choice.",
+        "operationId": "PostApprenticeshipFundingInAccount",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -213,43 +195,29 @@
           }
         ],
         "requestBody": {
-          "description": "User's funding choice.",
           "required": true,
           "content": {
-            "application/json": {
+            "application/x-www-form-urlencoded": {
               "schema": {
-                "type": "integer"
-              }
-            }
-          }
-        },
-        "responses": {
-          "303": {
-            "description": "Redirect to appropriate action based on the user's funding choice."
-          },
-          "400": {
-            "description": "Error in the user's funding choice.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "InError": {
-                      "type": "boolean"
-                    }
+                "type": "object",
+                "properties": {
+                  "choice": {
+                    "type": "integer",
+                    "nullable": true
                   }
                 }
               }
             }
           }
         },
-        "security": [
-          {
-            "oauth2": [
-              "HasEmployerViewerTransactorOwnerAccount"
-            ]
+        "responses": {
+          "200": {
+            "description": "Redirect based on user's choice",
+            "content": {
+              "text/html": {}
+            }
           }
-        ]
+        }
       }
     }
   },
@@ -278,9 +246,6 @@
           "ChangeAccountName": {
             "type": "boolean"
           },
-          "LegalEntityName": {
-            "type": "string"
-          },
           "NameConfirmed": {
             "type": "boolean"
           }
@@ -293,7 +258,8 @@
             "$ref": "#/components/schemas/OrganisationType"
           },
           "PublicSectorDataSource": {
-            "type": "integer"
+            "type": "integer",
+            "nullable": true
           },
           "OrganisationName": {
             "type": "string"
@@ -303,7 +269,8 @@
           },
           "OrganisationDateOfInception": {
             "type": "string",
-            "format": "date"
+            "format": "date-time",
+            "nullable": true
           },
           "RegisteredAddress": {
             "type": "array",
@@ -333,18 +300,19 @@
             "type": "string"
           },
           "IsOrganisationWithCorrectAddress": {
-            "type": "boolean"
+            "type": "boolean",
+            "nullable": true
           }
         }
       },
       "OrganisationType": {
-        "type": "integer",
+        "type": "string",
         "enum": [
-          1,
-          2,
-          3,
-          4,
-          5
+          "CompaniesHouse",
+          "Charities",
+          "PublicBodies",
+          "Other",
+          "PensionsRegulator"
         ]
       }
     }

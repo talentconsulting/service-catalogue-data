@@ -1,17 +1,18 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Admin ROATP API",
-    "version": "1.0.0"
+    "title": "Organisations API",
+    "version": "1.0.0",
+    "description": "API for managing organisation data."
   },
   "paths": {
     "/Organisations": {
       "get": {
-        "summary": "Get all organisations",
+        "summary": "Retrieve all organisations",
         "operationId": "GetOrganisations",
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Successful retrieval of organisations",
             "content": {
               "application/json": {
                 "schema": {
@@ -21,7 +22,7 @@
             }
           },
           "400": {
-            "description": "Bad request",
+            "description": "Invalid request",
             "content": {
               "application/json": {
                 "schema": {
@@ -36,10 +37,9 @@
         }
       },
       "post": {
-        "summary": "Add a new organisation",
+        "summary": "Create a new organisation",
         "operationId": "PostOrganisation",
         "requestBody": {
-          "description": "Details of the organisation to add",
           "required": true,
           "content": {
             "application/json": {
@@ -51,17 +51,17 @@
         },
         "responses": {
           "201": {
-            "description": "Organisation created"
+            "description": "Organisation successfully created"
           },
           "400": {
-            "description": "Bad request"
+            "description": "Invalid request"
           }
         }
       }
     },
     "/Organisations/{ukprn}": {
       "get": {
-        "summary": "Get details of a specific organisation",
+        "summary": "Retrieve organisation by UKPRN",
         "operationId": "GetOrganisation",
         "parameters": [
           {
@@ -69,14 +69,13 @@
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "example": 12345678
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Successful retrieval of organisation details",
             "content": {
               "application/json": {
                 "schema": {
@@ -89,7 +88,7 @@
             "description": "Organisation not found"
           },
           "400": {
-            "description": "Bad request",
+            "description": "Invalid request",
             "content": {
               "application/json": {
                 "schema": {
@@ -104,7 +103,7 @@
         }
       },
       "patch": {
-        "summary": "Update details of a specific organisation",
+        "summary": "Update organisation details",
         "operationId": "PatchOrganisation",
         "parameters": [
           {
@@ -114,60 +113,42 @@
             "schema": {
               "type": "integer"
             }
-          },
-          {
-            "name": "X-RequestingUserId",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "X-RequestingUserName",
-            "in": "header",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
           }
         ],
         "requestBody": {
-          "description": "Patch document to update organisation details",
           "required": true,
           "content": {
             "application/json-patch+json": {
               "schema": {
-                "type": "object"
+                "$ref": "#/components/schemas/JsonPatchDocument"
               }
             }
           }
         },
         "responses": {
           "204": {
-            "description": "Organisation updated successfully"
+            "description": "Organisation successfully updated"
           }
         }
       }
     },
     "/Organisations/{ukprn}/ukrlp-data": {
       "get": {
-        "summary": "Get UKRLP data for a specific organisation",
-        "operationId": "GetUkrlpData",
+        "summary": "Retrieve UKRLP data for an organisation",
+        "operationId": "GetUkrlp",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "example": 12345678
+              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Successful retrieval of UKRLP data",
             "content": {
               "application/json": {
                 "schema": {
@@ -200,12 +181,10 @@
         "type": "object",
         "properties": {
           "Ukprn": {
-            "type": "integer",
-            "example": 12345678
+            "type": "integer"
           },
           "LegalName": {
-            "type": "string",
-            "example": "Sample Organisation"
+            "type": "string"
           }
         }
       },
@@ -277,8 +256,7 @@
         "type": "object",
         "properties": {
           "CourseType": {
-            "type": "string",
-            "example": "Apprenticeship"
+            "$ref": "#/components/schemas/CourseType"
           },
           "IsRestricted": {
             "type": "boolean"
@@ -290,6 +268,13 @@
             "type": "integer"
           }
         }
+      },
+      "CourseType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "ShortCourse"
+        ]
       },
       "GetUkrlpQueryResult": {
         "type": "object",
@@ -345,6 +330,11 @@
             "type": "boolean"
           }
         }
+      },
+      "JsonPatchDocument": {
+        "type": "object",
+        "description": "JSON Patch document for update operations",
+        "additionalProperties": false
       }
     }
   }

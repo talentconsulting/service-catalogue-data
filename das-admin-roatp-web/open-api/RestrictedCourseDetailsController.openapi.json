@@ -7,56 +7,53 @@
   "paths": {
     "/restricted-courses/{larsCode}": {
       "get": {
-        "summary": "Get restricted course details",
-        "description": "Retrieve detailed information about a restricted course by its LARS code.",
-        "operationId": "getRestrictedCourseDetails",
+        "operationId": "GetRestrictedCourseDetails",
+        "summary": "Retrieve details for restricted courses.",
         "parameters": [
           {
             "name": "larsCode",
             "in": "path",
             "required": true,
+            "description": "The LARS code of the course.",
             "schema": {
               "type": "string"
-            },
-            "description": "The LARS code of the course."
+            }
           },
           {
             "name": "SearchTerm",
             "in": "query",
+            "required": false,
+            "description": "Optional search term to filter providers.",
             "schema": {
               "type": "string"
-            },
-            "description": "Filter providers by search term."
+            }
           },
           {
             "name": "DeliveryStatus",
             "in": "query",
+            "required": false,
+            "description": "Delivery statuses to filter providers.",
             "schema": {
               "type": "array",
               "items": {
-                "type": "string",
-                "enum": [
-                  "OpenToNewStarts",
-                  "LastStartDateAdded",
-                  "ClosedToNewStarts"
-                ]
+                "$ref": "#/components/schemas/DeliveryStatus"
               }
-            },
-            "description": "Filter providers by delivery status."
+            }
           },
           {
             "name": "PageNumber",
             "in": "query",
+            "required": false,
+            "description": "The page number for pagination.",
             "schema": {
               "type": "integer",
               "default": 1
-            },
-            "description": "Pagination - page number to retrieve."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Restricted course details retrieved successfully.",
+            "description": "Successfully retrieved course details.",
             "content": {
               "application/json": {
                 "schema": {
@@ -66,21 +63,22 @@
             }
           },
           "404": {
-            "description": "Course not found."
+            "description": "Course not found or not restricted."
           }
-        },
-        "security": [
-          {
-            "roles": [
-              "RoatpAdminTeam"
-            ]
-          }
-        ]
+        }
       }
     }
   },
   "components": {
     "schemas": {
+      "DeliveryStatus": {
+        "type": "string",
+        "enum": [
+          "OpenToNewStarts",
+          "LastStartDateAdded",
+          "ClosedToNewStarts"
+        ]
+      },
       "RestrictedCourseDetailsViewModel": {
         "type": "object",
         "properties": {
@@ -102,7 +100,7 @@
           },
           "Sector": {
             "type": "string",
-            "description": "The sector associated with the course."
+            "description": "The sector or route of the course."
           },
           "LearningType": {
             "type": "string",
@@ -114,62 +112,42 @@
           },
           "RestrictedCourseDetailsPageUrl": {
             "type": "string",
-            "description": "URL for the restricted course details page."
+            "description": "The URL for the restricted course details page."
           },
           "AddProviderUrl": {
             "type": "string",
-            "description": "URL to add a provider to the restricted course."
+            "description": "The URL to add a provider to the restricted course."
           },
           "HasActiveFilters": {
             "type": "boolean",
-            "description": "Indicates if active filters are applied."
+            "description": "Indicates if filters are active."
           },
           "Filters": {
             "type": "array",
             "items": {
-              "type": "object",
-              "description": "List of filters applied."
-            }
+              "type": "object"
+            },
+            "description": "Details about active filters applied."
           },
           "SuccessBannerMessage": {
             "type": "string",
-            "description": "Success message to display in the banner."
+            "nullable": true,
+            "description": "A success banner message."
           },
           "TotalProviderCount": {
             "type": "integer",
-            "description": "Total count of providers for the course."
+            "description": "The total count of filtered providers."
           },
           "AllowedProviders": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AllowedProviderViewModel"
+              "type": "object"
             },
-            "description": "List of allowed providers."
+            "description": "List of providers allowed for the course."
           },
           "Pagination": {
             "type": "object",
-            "description": "Pagination details."
-          }
-        }
-      },
-      "AllowedProviderViewModel": {
-        "type": "object",
-        "properties": {
-          "ProviderName": {
-            "type": "string",
-            "description": "Name of the provider."
-          },
-          "Ukprn": {
-            "type": "string",
-            "description": "UKPRN of the provider."
-          },
-          "HasLastDateStarts": {
-            "type": "boolean",
-            "description": "Indicates if the provider has a last date for starts."
-          },
-          "ChangeUrl": {
-            "type": "string",
-            "description": "URL to change the course restriction details for the provider."
+            "description": "Pagination details for the filtered results."
           }
         }
       }
