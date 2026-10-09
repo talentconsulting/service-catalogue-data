@@ -3,22 +3,26 @@
 LAYOUT_WITH_LEGEND()
 
 System_Boundary(sys_SkillsFundingAgency_das_providerapprenticeshipsservice, "Provider Apprenticeships Service") {
-  Container(c_provider_apprenticeships_service_api, "Provider Apprenticeships Service", "API")
-  Container(c_provider_apprenticeships_service_jobs, "Provider Apprenticeships Service Jobs", "Background Job")
+  Container(c_pas_account_api, "PAS Account", "API")
+  Container(c_pas_jobs, "PAS Jobs", "Background Job")
   Container(c_provider_apprenticeships_service_web, "Provider Apprenticeships Service", "Web Application")
 }
 
-System_Ext(d_cloud_service_azure_table_storage, "Azure Table Storage", "Azure Table Storage")
-System_Ext(d_cloud_service_opentelemetry_application_insights, "OpenTelemetry Application Insights", "Azure Application Insights")
-SystemDb_Ext(d_database_azure_sql_database, "Azure SQL Database", "Microsoft.Data.SqlClient")
-System_Ext(d_http_api_roatp_api, "RoATP API", "Refit")
-SystemQueue_Ext(d_message_broker_nservicebus, "NServiceBus", "NServiceBus")
+SystemDb_Ext(d_cache_redis_cache, "Redis Cache", "Redis")
+System_Ext(d_cloud_service_application_insights, "Application Insights", "Azure Application Insights")
+SystemDb_Ext(d_database_sql_database, "SQL Database", "Microsoft.Data.SqlClient")
+System_Ext(d_http_api_dfe_sign_in_auth, "DfE Sign In Auth", "HttpClient")
+System_Ext(d_http_api_notifications, "Notifications")
+System_Ext(d_http_api_roatp, "Roatp", "Refit")
+SystemQueue_Ext(d_message_broker_azure_service_bus, "Azure Service Bus", "Azure.Messaging.ServiceBus")
 
-Rel(c_provider_apprenticeships_service_jobs, d_cloud_service_azure_table_storage, "Uses", "Azure Table Storage")
-Rel(c_provider_apprenticeships_service_web, d_cloud_service_opentelemetry_application_insights, "Uses", "Azure Application Insights")
-Rel(c_provider_apprenticeships_service_web, d_database_azure_sql_database, "Reads from and writes to", "Microsoft.Data.SqlClient")
-Rel(c_provider_apprenticeships_service_api, d_database_azure_sql_database, "Reads from and writes to", "SQL Server")
-Rel(c_provider_apprenticeships_service_jobs, d_http_api_roatp_api, "Calls the API of", "Refit")
-Rel(c_provider_apprenticeships_service_web, d_message_broker_nservicebus, "Publishes messages to and consumes messages from", "NServiceBus")
+Rel(c_pas_jobs, d_cache_redis_cache, "Caches data in", "Redis")
+Rel(c_pas_account_api, d_cloud_service_application_insights, "Uses", "Azure Application Insights")
+Rel(c_provider_apprenticeships_service_web, d_database_sql_database, "Reads from and writes to", "Microsoft.Data.SqlClient")
+Rel(c_pas_account_api, d_database_sql_database, "Reads from and writes to", "SQL Server")
+Rel(c_pas_jobs, d_http_api_dfe_sign_in_auth, "Calls the API of", "HttpClient")
+Rel(c_pas_account_api, d_http_api_notifications, "Calls the API of")
+Rel(c_pas_jobs, d_http_api_roatp, "Calls the API of", "Refit")
+Rel(c_provider_apprenticeships_service_web, d_message_broker_azure_service_bus, "Publishes messages to and consumes messages from", "Azure.Messaging.ServiceBus")
 
 @enduml

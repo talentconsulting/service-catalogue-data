@@ -1,0 +1,39 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_WITH_LEGEND()
+
+System_Boundary(sys_SkillsFundingAgency_tl_results_and_certification, "Results and Certification") {
+  Container(c_results_and_certification, "Results and Certification", "Component")
+  Container(c_results_and_certification_functions, "Results And Certification Functions", "Background Job")
+  Container(c_results_and_certification_internalapi, "Results And Certification InternalApi", "API")
+  Container(c_results_and_certification_web, "Results And Certification Web", "Web Application")
+  Container(c_t_levels_results_and_certification, "T Levels Results and Certification", "API")
+  Container(c_tl_results_and_certification, "Tl Results And Certification", "API")
+}
+
+SystemDb_Ext(d_cache_redis, "Redis", "Redis")
+SystemDb_Ext(d_database_ef_core_bulk_extensions, "EF Core Bulk Extensions", "EF Core Bulk Extensions")
+System_Ext(d_grpc_service_learner, "Learner", "WCF")
+System_Ext(d_http_api_dfe_sign_in, "Dfe Sign In", "HttpClient")
+System_Ext(d_http_api_gov_uk_notify, "Gov UK Notify")
+System_Ext(d_http_api_printing, "Printing", "HttpClient")
+System_Ext(d_http_api_ucas, "Ucas", "HttpClient")
+SystemDb_Ext(d_object_storage_blob_storage_container, "Blob Storage Container", "Azure Blob Storage")
+
+Rel(c_results_and_certification_web, d_cache_redis, "Caches data in", "Redis")
+Rel(c_results_and_certification, d_database_ef_core_bulk_extensions, "Reads from and writes to", "EF Core Bulk Extensions")
+Rel(c_tl_results_and_certification, d_database_ef_core_bulk_extensions, "Reads from and writes to", "Entity Framework Core")
+Rel(c_results_and_certification_functions, d_database_ef_core_bulk_extensions, "Reads from and writes to", "SQL Server")
+Rel(c_results_and_certification_internalapi, d_database_ef_core_bulk_extensions, "Reads from and writes to", "SQL Server")
+Rel(c_results_and_certification_web, d_database_ef_core_bulk_extensions, "Reads from and writes to", "SQL Server")
+Rel(c_t_levels_results_and_certification, d_database_ef_core_bulk_extensions, "Reads from and writes to", "SQL Server")
+Rel(c_t_levels_results_and_certification, d_grpc_service_learner, "Calls the gRPC service of", "WCF")
+Rel(c_t_levels_results_and_certification, d_http_api_dfe_sign_in, "Calls the API of", "HttpClient")
+Rel(c_results_and_certification_web, d_http_api_gov_uk_notify, "Calls the API of")
+Rel(c_results_and_certification_internalapi, d_http_api_gov_uk_notify, "Calls the API of")
+Rel(c_results_and_certification_functions, d_http_api_gov_uk_notify, "Calls the API of")
+Rel(c_t_levels_results_and_certification, d_http_api_printing, "Calls the API of", "HttpClient")
+Rel(c_t_levels_results_and_certification, d_http_api_ucas, "Calls the API of", "HttpClient")
+Rel(c_t_levels_results_and_certification, d_object_storage_blob_storage_container, "Stores objects in", "Azure Blob Storage")
+
+@enduml

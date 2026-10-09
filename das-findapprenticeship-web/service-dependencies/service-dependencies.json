@@ -2,52 +2,56 @@
   "repository": "SkillsFundingAgency/das-findapprenticeship-web",
   "ref": "main",
   "path": "src",
-  "systemName": "Find An Apprenticeship",
+  "systemName": "FindAnApprenticeship",
   "containers": [
     {
-      "id": "find-an-apprenticeship",
-      "name": "Find An Apprenticeship",
+      "id": "findanapprenticeship",
+      "name": "FindAnApprenticeship",
       "type": "other",
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.FAA.Infrastructure/SFA.DAS.FAA.Infrastructure.csproj",
-          "reason": "Primary logic is implemented in the Infrastructure project without an API or web entry point. Assumed to be a component without clear deployment context."
+          "sourceFile": "src/SFA.DAS.FAA.Application/SFA.DAS.FAA.Application.csproj",
+          "reason": "No entry point files or app-specific hosting setup detected in the project files. Assuming this as a background or other non-web process."
         }
       ]
     },
     {
-      "id": "findanapprenticeship-mockserver",
+      "id": "sfa-das-faa-mockserver",
       "name": "FindAnApprenticeship MockServer",
       "type": "other",
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.FAA.MockServer/Program.cs",
-          "reason": "Mock server entry point detected."
+          "reason": "Console application entry point for mock server"
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.MockServer/SFA.DAS.FAA.MockServer.csproj",
+          "reason": "Console application project type"
         }
       ]
     },
     {
-      "id": "findanapprenticeship-web",
+      "id": "sfa-das-faa-web",
       "name": "FindAnApprenticeship",
       "type": "web",
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.FAA.Web/Program.cs",
-          "reason": "ASP.NET Core web application entry point found."
+          "sourceFile": "src/SFA.DAS.FAA.Web/SFA.DAS.FAA.Web.csproj",
+          "reason": "ASP.NET Core Web SDK project type"
         },
         {
-          "sourceFile": "src/SFA.DAS.FAA.Web/SFA.DAS.FAA.Web.csproj",
-          "reason": "Project file indicates a Web SDK target framework."
+          "sourceFile": "src/SFA.DAS.FAA.Web/Program.cs",
+          "reason": "ASP.NET Core web application entry point"
         }
       ]
     }
   ],
   "dependencies": [
     {
-      "sourceId": "findanapprenticeship-web",
-      "name": "Redis",
+      "sourceId": "sfa-das-faa-web",
+      "name": "Redis Cache",
       "kind": "cache",
-      "classification": "unknown",
+      "classification": "internal",
       "direction": "outbound",
       "client": null,
       "technology": "StackExchange.Redis",
@@ -62,26 +66,47 @@
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.FAA.Web/SFA.DAS.FAA.Web.csproj",
-          "reason": "Project file includes StackExchange.Redis package reference."
-        },
-        {
           "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AddServiceRegistrationExtensions.cs",
-          "reason": "Redis cache service registration using AddStackExchangeRedisCache."
+          "reason": "Distributed cache registration with AddStackExchangeRedisCache"
         }
       ],
       "confidence": "high",
-      "targetId": "cache-redis",
+      "targetId": "cache-redis-cache",
       "description": "Caches data in"
     },
     {
-      "sourceId": "find-an-apprenticeship",
+      "sourceId": "sfa-das-faa-web",
+      "name": "Application Insights",
+      "kind": "cloud-service",
+      "classification": "third-party",
+      "direction": "outbound",
+      "client": null,
+      "technology": "Application Insights SDK",
+      "configurationKeys": [],
+      "authentication": {
+        "type": null,
+        "configurationKeys": []
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/Program.cs",
+          "reason": "Application Insights Telemetry registration"
+        }
+      ],
+      "confidence": "high",
+      "targetId": "cloud-service-application-insights",
+      "description": "Uses"
+    },
+    {
+      "sourceId": "findanapprenticeship",
       "name": "Azure Key Vault",
       "kind": "cloud-service",
       "classification": "third-party",
       "direction": "outbound",
       "client": "Azure.Security.KeyVault.Secrets.SecretClient",
-      "technology": "Azure SDK",
+      "technology": "Azure Key Vault",
       "configurationKeys": [],
       "authentication": {
         "type": null,
@@ -92,7 +117,7 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.FAA.Infrastructure/SFA.DAS.FAA.Infrastructure.csproj",
-          "reason": "PackageReference for Azure.Security.KeyVault.Secrets indicating use of Azure Key Vault."
+          "reason": "Azure.Security.KeyVault.Secrets package is specified in the project file."
         }
       ],
       "confidence": "high",
@@ -100,19 +125,19 @@
       "description": "Uses"
     },
     {
-      "sourceId": "findanapprenticeship-web",
+      "sourceId": "sfa-das-faa-web",
       "name": "Azure Key Vault",
       "kind": "cloud-service",
       "classification": "third-party",
       "direction": "outbound",
-      "client": null,
-      "technology": "Azure SDK",
+      "client": "SecretClient",
+      "technology": "Azure.Security.KeyVault.Secrets",
       "configurationKeys": [
         "FindAnApprenticeshipOuterApi:SecretClientUrl",
         "FindAnApprenticeshipOuterApi:SecretName"
       ],
       "authentication": {
-        "type": "azure-active-directory",
+        "type": "managed-identity",
         "configurationKeys": []
       },
       "operations": [],
@@ -120,11 +145,11 @@
       "evidence": [
         {
           "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AddServiceRegistrationExtensions.cs",
-          "reason": "Azure SecretClient constructed for accessing Key Vault secrets."
+          "reason": "SecretClient registration for Azure Key Vault access"
         },
         {
           "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AzureKeyVaultSecretHealthCheck.cs",
-          "reason": "Health check configured for Azure Key Vault."
+          "reason": "SecretClient used in Azure Key Vault health check"
         }
       ],
       "confidence": "high",
@@ -132,48 +157,10 @@
       "description": "Uses"
     },
     {
-      "sourceId": "findanapprenticeship-web",
+      "sourceId": "findanapprenticeship",
       "name": "Find An Apprenticeship Outer",
       "kind": "http-api",
-      "classification": "unknown",
-      "direction": "outbound",
-      "client": "IApiClient",
-      "technology": "HttpClient",
-      "configurationKeys": [
-        "FindAnApprenticeshipOuterApi:BaseUrl",
-        "FindAnApprenticeshipOuterApi:BaseUrlSecure",
-        "FindAnApprenticeshipOuterApi:SecretClientUrl",
-        "FindAnApprenticeshipOuterApi:SecretName",
-        "FindAnApprenticeshipOuterApi:UseSecureGateway"
-      ],
-      "authentication": {
-        "type": "certificate",
-        "configurationKeys": [
-          "FindAnApprenticeshipOuterApi:SecretClientUrl",
-          "FindAnApprenticeshipOuterApi:SecretName"
-        ]
-      },
-      "operations": [],
-      "resources": [],
-      "evidence": [
-        {
-          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AzureKeyVaultSecretHealthCheck.cs",
-          "reason": "Health check for Azure Key Vault secret client using configurations."
-        },
-        {
-          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AddServiceRegistrationExtensions.cs",
-          "reason": "Service registration for IApiClient using HttpClient with specific configuration and certificate-based authentication."
-        }
-      ],
-      "confidence": "high",
-      "targetId": "http-api-find-an-apprenticeship-outer",
-      "description": "Calls the API of"
-    },
-    {
-      "sourceId": "find-an-apprenticeship",
-      "name": "Find An Apprenticeship Outer API",
-      "kind": "http-api",
-      "classification": "unknown",
+      "classification": "internal",
       "direction": "outbound",
       "client": "ApiClient",
       "technology": "HttpClient",
@@ -210,20 +197,52 @@
       "resources": [],
       "evidence": [
         {
-          "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingGetOnTheApiClient.cs",
-          "reason": "HttpClient configured with base URL and API key for FindAnApprenticeshipOuterApi"
-        },
-        {
           "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPostOnTheApiClient.cs",
-          "reason": "POST operation targeting FindAnApprenticeshipOuterApi"
+          "reason": "API client is configured and the /test-url/post operation is tested."
         },
         {
           "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingPutOnTheApiClient.cs",
-          "reason": "PUT operation targeting FindAnApprenticeshipOuterApi"
+          "reason": "HttpClient is configured for PUT operations with authentication and base URL for the FindAnApprenticeshipOuterApi."
+        },
+        {
+          "sourceFile": "src/SFA.DAS.FAA.InfrastructureUnitTests/Api/WhenCallingGetOnTheApiClient.cs",
+          "reason": "HttpClient is configured with base address and an API key for the FindAnApprenticeshipOuterApi client."
         }
       ],
       "confidence": "high",
-      "targetId": "http-api-find-an-apprenticeship-outer-api",
+      "targetId": "http-api-find-an-apprenticeship-outer",
+      "description": "Calls the API of"
+    },
+    {
+      "sourceId": "sfa-das-faa-web",
+      "name": "Find An Apprenticeship Outer",
+      "kind": "http-api",
+      "classification": "internal",
+      "direction": "outbound",
+      "client": "ApiClient",
+      "technology": "HttpClient",
+      "configurationKeys": [
+        "FindAnApprenticeshipOuterApi:BaseUrl",
+        "FindAnApprenticeshipOuterApi:BaseUrlSecure",
+        "FindAnApprenticeshipOuterApi:SecretClientUrl",
+        "FindAnApprenticeshipOuterApi:SecretName"
+      ],
+      "authentication": {
+        "type": "client-certificate",
+        "configurationKeys": [
+          "FindAnApprenticeshipOuterApi:SecretName"
+        ]
+      },
+      "operations": [],
+      "resources": [],
+      "evidence": [
+        {
+          "sourceFile": "src/SFA.DAS.FAA.Web/AppStart/AddServiceRegistrationExtensions.cs",
+          "reason": "HttpClient registration with named client 'ApiClient'"
+        }
+      ],
+      "confidence": "high",
+      "targetId": "http-api-find-an-apprenticeship-outer",
       "description": "Calls the API of"
     }
   ]

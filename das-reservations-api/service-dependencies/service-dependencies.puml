@@ -8,11 +8,16 @@ System_Boundary(sys_SkillsFundingAgency_das_reservations_api, "Reservations") {
   Container(c_reservations_nservicebuslistener, "Reservations NServiceBusListener", "Background Job")
 }
 
-SystemDb_Ext(d_database_sql_server, "SQL Server", "SQL Server")
-SystemQueue_Ext(d_message_broker_azure_service_bus, "Azure Service Bus", "Azure Service Bus")
+System_Ext(d_cloud_service_azure_active_directory, "Azure Active Directory", "Azure AD")
+System_Ext(d_cloud_service_azure_search, "Azure Search", "Azure Cognitive Search")
+SystemDb_Ext(d_database_sql_database, "SQL Database", "System.Data.SqlClient")
+SystemQueue_Ext(d_message_broker_azure_service_bus, "Azure Service Bus", "NServiceBus.Transport.AzureServiceBus")
 
-Rel(c_reservations_jobs, d_database_sql_server, "Reads from and writes to", "SQL Server")
-Rel(c_reservations, d_database_sql_server, "Reads from and writes to", "Microsoft.EntityFrameworkCore.SqlServer")
-Rel(c_reservations_jobs, d_message_broker_azure_service_bus, "Publishes messages to and consumes messages from", "Azure Service Bus")
+Rel(c_reservations, d_cloud_service_azure_active_directory, "Uses", "Azure AD")
+Rel(c_reservations, d_cloud_service_azure_search, "Uses", "Azure Cognitive Search")
+Rel(c_reservations_jobs, d_database_sql_database, "Reads from and writes to", "System.Data.SqlClient")
+Rel(c_reservations, d_database_sql_database, "Reads from and writes to", "SQL Server")
+Rel(c_reservations_jobs, d_message_broker_azure_service_bus, "Publishes messages to and consumes messages from", "NServiceBus.Transport.AzureServiceBus")
+Rel(c_reservations, d_message_broker_azure_service_bus, "Publishes messages to and consumes messages from", "Azure Service Bus")
 
 @enduml
