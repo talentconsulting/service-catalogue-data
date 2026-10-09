@@ -1,0 +1,870 @@
+{
+  "database": {
+    "name": null,
+    "engine": null
+  },
+  "tables": [
+    {
+      "name": "Account",
+      "schema": "dbo",
+      "entity": "Account",
+      "columns": [
+        {
+          "name": "Id",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "AccountName",
+          "type": "NVARCHAR(100)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "CheckedOn",
+          "type": "DATETIME2",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": [
+        {
+          "name": "IX_Account_CheckedOn",
+          "type": "btree",
+          "columns": [
+            "CheckedOn"
+          ],
+          "unique": false,
+          "filter": null
+        }
+      ],
+      "hasPii": false
+    },
+    {
+      "name": "Attributes",
+      "schema": "dbo",
+      "entity": "Attributes",
+      "columns": [
+        {
+          "name": "AttributeId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": true,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "AttributeName",
+          "type": "VARCHAR(250)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": [
+        {
+          "name": "IX_Attributes_AttributeId_AttributeName",
+          "type": "btree",
+          "columns": [
+            "AttributeId",
+            "AttributeName"
+          ],
+          "unique": false,
+          "filter": null
+        }
+      ],
+      "hasPii": false
+    },
+    {
+      "name": "EmployerFeedback",
+      "schema": "dbo",
+      "entity": "EmployerFeedback",
+      "columns": [
+        {
+          "name": "FeedbackId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": true,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "UserRef",
+          "type": "UNIQUEIDENTIFIER",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Ukprn",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "AccountId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": [
+        {
+          "name": "IXU_EmployerFeedback_UserRef_Ukprn_AccountId",
+          "type": "btree",
+          "columns": [
+            "UserRef",
+            "Ukprn",
+            "AccountId"
+          ],
+          "unique": true,
+          "filter": null
+        }
+      ],
+      "hasPii": true
+    },
+    {
+      "name": "EmployerFeedbackResult",
+      "schema": "dbo",
+      "entity": "EmployerFeedbackResult",
+      "columns": [
+        {
+          "name": "Id",
+          "type": "UNIQUEIDENTIFIER",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": true,
+          "default": "NEWSEQUENTIALID()",
+          "ordinal": null
+        },
+        {
+          "name": "FeedbackId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "DateTimeCompleted",
+          "type": "DATETIME2",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "ProviderRating",
+          "type": "VARCHAR(20)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "FeedbackSource",
+          "type": "INT",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": "1",
+          "ordinal": null
+        }
+      ],
+      "relationships": [
+        {
+          "name": "FK_EmployerFeedbackResult_EmployerFeedback_FeedbackId",
+          "type": "many-to-one",
+          "fromColumns": [
+            "FeedbackId"
+          ],
+          "targetTable": "EmployerFeedback",
+          "targetColumns": [
+            "FeedbackId"
+          ],
+          "onDelete": null
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IX_EmployerFeedbackResult",
+          "type": "btree",
+          "columns": [
+            "Id",
+            "FeedbackId"
+          ],
+          "unique": false,
+          "filter": null
+        },
+        {
+          "name": "IX_EmployerFeedbackResult_UniqueResult",
+          "type": "btree",
+          "columns": [
+            "FeedbackId",
+            "DateTimeCompleted"
+          ],
+          "unique": true,
+          "filter": null
+        }
+      ],
+      "hasPii": false
+    },
+    {
+      "name": "FeedbackTransaction",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "Id",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": true,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "AccountId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "TemplateName",
+          "type": "VARCHAR(255)",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "SendAfter",
+          "type": "DATETIME",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "TemplateId",
+          "type": "UNIQUEIDENTIFIER",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "SentCount",
+          "type": "INT",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "SentDate",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "CreatedOn",
+          "type": "DATETIME",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [
+        {
+          "name": "FK_FeedbackTransaction_Account",
+          "type": "many-to-one",
+          "fromColumns": [
+            "AccountId"
+          ],
+          "targetTable": "Account",
+          "targetColumns": [
+            "Id"
+          ],
+          "onDelete": null
+        }
+      ],
+      "indexes": [
+        {
+          "name": "IX_FeedbackTransaction_AccountId_Id",
+          "type": "btree",
+          "columns": [
+            "AccountId",
+            "Id"
+          ],
+          "unique": false,
+          "filter": null
+        }
+      ],
+      "hasPii": false
+    },
+    {
+      "name": "ProviderAttributeSummary",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "Ukprn",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "AttributeId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Strength",
+          "type": "INT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "0",
+          "ordinal": null
+        },
+        {
+          "name": "Weakness",
+          "type": "INT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": "0",
+          "ordinal": null
+        },
+        {
+          "name": "TimePeriod",
+          "type": "NVARCHAR(50)",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": "'All'",
+          "ordinal": null
+        },
+        {
+          "name": "UpdatedOn",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": [],
+      "hasPii": false
+    },
+    {
+      "name": "ProviderAttributes",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "EmployerFeedbackResultId",
+          "type": "UNIQUEIDENTIFIER",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "AttributeId",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "AttributeValue",
+          "type": "INT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [
+        {
+          "name": "FK_ProviderAttributes_EmployerFeedbackResult_EmployerFeedbackResultId",
+          "type": "many-to-one",
+          "fromColumns": [
+            "EmployerFeedbackResultId"
+          ],
+          "targetTable": "EmployerFeedbackResult",
+          "targetColumns": [
+            "Id"
+          ],
+          "onDelete": null
+        },
+        {
+          "name": "FK_ProviderAttributes_Attributes_AttributeId",
+          "type": "many-to-one",
+          "fromColumns": [
+            "AttributeId"
+          ],
+          "targetTable": "Attributes",
+          "targetColumns": [
+            "AttributeId"
+          ],
+          "onDelete": null
+        }
+      ],
+      "indexes": [],
+      "hasPii": false
+    },
+    {
+      "name": "ProviderRatingSummary",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "Ukprn",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Rating",
+          "type": "NVARCHAR(20)",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "RatingCount",
+          "type": "INT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "TimePeriod",
+          "type": "NVARCHAR(50)",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": "'All'",
+          "ordinal": null
+        },
+        {
+          "name": "UpdatedOn",
+          "type": "DATETIME",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": [],
+      "hasPii": false
+    },
+    {
+      "name": "ProviderStarsSummary",
+      "schema": "dbo",
+      "entity": null,
+      "columns": [
+        {
+          "name": "Ukprn",
+          "type": "BIGINT",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "ReviewCount",
+          "type": "INT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "Stars",
+          "type": "INT",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": false,
+          "default": null,
+          "ordinal": null
+        },
+        {
+          "name": "TimePeriod",
+          "type": "NVARCHAR(50)",
+          "nullable": false,
+          "primaryKey": true,
+          "generated": false,
+          "default": "'All'",
+          "ordinal": null
+        }
+      ],
+      "relationships": [],
+      "indexes": [],
+      "hasPii": false
+    },
+    {
+      "name": "Account",
+      "schema": null,
+      "entity": "SFA.DAS.EmployerFeedback.Domain.Entities.Account",
+      "columns": [
+        {
+          "name": "Id",
+          "type": "long",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "AccountName",
+          "type": "string",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 2
+        },
+        {
+          "name": "CheckedOn",
+          "type": "DateTime",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 3
+        }
+      ],
+      "relationships": [],
+      "indexes": [],
+      "hasPii": false
+    },
+    {
+      "name": "Attribute",
+      "schema": null,
+      "entity": "SFA.DAS.EmployerFeedback.Domain.Entities.Attribute",
+      "columns": [
+        {
+          "name": "AttributeId",
+          "type": "long",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "AttributeName",
+          "type": "string",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 2
+        }
+      ],
+      "relationships": [],
+      "indexes": [],
+      "hasPii": false
+    },
+    {
+      "name": "EmployerFeedback",
+      "schema": null,
+      "entity": "SFA.DAS.EmployerFeedback.Domain.Entities.EmployerFeedback",
+      "columns": [
+        {
+          "name": "FeedbackId",
+          "type": "long",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "UserRef",
+          "type": "Guid",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 2
+        },
+        {
+          "name": "Ukprn",
+          "type": "long",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 3
+        },
+        {
+          "name": "AccountId",
+          "type": "long",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 4
+        }
+      ],
+      "relationships": [
+        {
+          "name": "FK_EmployerFeedback_Account",
+          "type": "many-to-one",
+          "fromColumns": [
+            "AccountId"
+          ],
+          "targetTable": "Account",
+          "targetColumns": [
+            "Id"
+          ],
+          "onDelete": null
+        }
+      ],
+      "indexes": [],
+      "hasPii": true
+    },
+    {
+      "name": "EmployerFeedbackResult",
+      "schema": null,
+      "entity": "SFA.DAS.EmployerFeedback.Domain.Entities.EmployerFeedbackResult",
+      "columns": [
+        {
+          "name": "Id",
+          "type": "Guid",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "FeedbackId",
+          "type": "long",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 2
+        },
+        {
+          "name": "DateTimeCompleted",
+          "type": "DateTime",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 3
+        },
+        {
+          "name": "ProviderRating",
+          "type": "string",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 4
+        },
+        {
+          "name": "FeedbackSource",
+          "type": "int",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 5
+        }
+      ],
+      "relationships": [
+        {
+          "name": "FK_EmployerFeedbackResult_EmployerFeedback",
+          "type": "many-to-one",
+          "fromColumns": [
+            "FeedbackId"
+          ],
+          "targetTable": "EmployerFeedback",
+          "targetColumns": [
+            "FeedbackId"
+          ],
+          "onDelete": null
+        }
+      ],
+      "indexes": [],
+      "hasPii": false
+    },
+    {
+      "name": "FeedbackTransaction",
+      "schema": null,
+      "entity": "SFA.DAS.EmployerFeedback.Domain.Entities.FeedbackTransaction",
+      "columns": [
+        {
+          "name": "Id",
+          "type": "long",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 1
+        },
+        {
+          "name": "AccountId",
+          "type": "long",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 2
+        },
+        {
+          "name": "TemplateName",
+          "type": "string",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 3
+        },
+        {
+          "name": "SendAfter",
+          "type": "DateTime",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 4
+        },
+        {
+          "name": "TemplateId",
+          "type": "Guid",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 5
+        },
+        {
+          "name": "SentCount",
+          "type": "int",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 6
+        },
+        {
+          "name": "SentDate",
+          "type": "DateTime",
+          "nullable": true,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 7
+        },
+        {
+          "name": "CreatedOn",
+          "type": "DateTime",
+          "nullable": false,
+          "primaryKey": false,
+          "generated": null,
+          "default": null,
+          "ordinal": 8
+        }
+      ],
+      "relationships": [
+        {
+          "name": "FK_FeedbackTransaction_Account",
+          "type": "many-to-one",
+          "fromColumns": [
+            "AccountId"
+          ],
+          "targetTable": "Account",
+          "targetColumns": [
+            "Id"
+          ],
+          "onDelete": null
+        }
+      ],
+      "indexes": [],
+      "hasPii": false
+    }
+  ],
+  "types": [
+    {
+      "name": "SettingType",
+      "kind": "enum",
+      "values": [
+        "RefreshALELastRunDate"
+      ]
+    }
+  ]
+}
