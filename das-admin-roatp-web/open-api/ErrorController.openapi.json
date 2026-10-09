@@ -1,46 +1,47 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "ErrorController",
+    "title": "ErrorController API",
     "version": "1.0.0"
   },
   "paths": {
     "/Error/{status}": {
       "get": {
-        "summary": "Error handler",
-        "description": "Handles error pages based on status code.",
+        "operationId": "getErrorStatus",
         "parameters": [
           {
             "name": "status",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
-            },
-            "description": "HTTP status code to handle."
+              "type": "integer",
+              "description": "HTTP status code indicating the type of error."
+            }
           },
           {
             "name": "returnUrl",
             "in": "query",
+            "required": false,
             "schema": {
-              "type": "string"
-            },
-            "description": "Optional return URL."
+              "type": "string",
+              "format": "uri",
+              "description": "Optional URL to return to after error handling."
+            }
           }
         ],
         "responses": {
           "403": {
-            "description": "Access denied.",
+            "description": "Access Denied view returned.",
             "content": {
               "text/html": {
                 "schema": {
-                  "$ref": "#/components/schemas/AccessDeniedViewModel"
+                  "type": "string"
                 }
               }
             }
           },
           "404": {
-            "description": "Page not found.",
+            "description": "Page Not Found view returned.",
             "content": {
               "text/html": {
                 "schema": {
@@ -50,7 +51,7 @@
             }
           },
           "default": {
-            "description": "Service error.",
+            "description": "Service Error view returned for other status codes.",
             "content": {
               "text/html": {
                 "schema": {
@@ -68,13 +69,14 @@
       "AccessDeniedViewModel": {
         "type": "object",
         "properties": {
-          "helpUrl": {
+          "dfESignInServiceHelpUrl": {
             "type": "string",
-            "description": "URL for help related to DfE sign-in service."
+            "format": "uri",
+            "description": "URL for help with DfE Sign In service."
           }
         },
         "required": [
-          "helpUrl"
+          "dfESignInServiceHelpUrl"
         ]
       }
     }

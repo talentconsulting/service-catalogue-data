@@ -2,13 +2,14 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Restricted Courses API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing restricted courses."
   },
   "paths": {
     "/restricted-courses": {
       "get": {
         "operationId": "GetRestrictedCourses",
-        "summary": "Retrieve restricted courses",
+        "summary": "Retrieves a list of restricted courses.",
         "parameters": [
           {
             "name": "restricted",
@@ -17,12 +18,12 @@
             "schema": {
               "type": "boolean"
             },
-            "description": "Indicator to filter restricted courses"
+            "description": "Filter for restricted courses."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "List of restricted courses retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -35,7 +36,7 @@
       },
       "post": {
         "operationId": "AddRestrictedCourse",
-        "summary": "Add a new restricted course",
+        "summary": "Adds a new restricted course.",
         "requestBody": {
           "required": true,
           "content": {
@@ -48,7 +49,7 @@
         },
         "responses": {
           "201": {
-            "description": "Course successfully added"
+            "description": "Restricted course created successfully."
           }
         }
       }
@@ -56,6 +57,28 @@
   },
   "components": {
     "schemas": {
+      "AddRestrictedCourseCommand": {
+        "type": "object",
+        "properties": {
+          "UserId": {
+            "type": "string",
+            "description": "Identifier of the user creating the restricted course."
+          },
+          "UserDisplayName": {
+            "type": "string",
+            "description": "Name of the user creating the restricted course."
+          },
+          "LarsCode": {
+            "type": "string",
+            "description": "Unique identifier for the course."
+          }
+        },
+        "required": [
+          "UserId",
+          "UserDisplayName",
+          "LarsCode"
+        ]
+      },
       "GetAllRestrictedCoursesResponse": {
         "type": "object",
         "properties": {
@@ -63,27 +86,29 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RestrictedCourseModel"
-            }
+            },
+            "description": "List of restricted courses."
           }
-        },
-        "required": [
-          "Courses"
-        ]
+        }
       },
       "RestrictedCourseModel": {
         "type": "object",
         "properties": {
           "LarsCode": {
-            "type": "string"
+            "type": "string",
+            "description": "Unique identifier for the course."
           },
           "Title": {
-            "type": "string"
+            "type": "string",
+            "description": "Title of the course."
           },
           "Level": {
-            "type": "integer"
+            "type": "integer",
+            "description": "Level of the course."
           },
           "LearningType": {
-            "$ref": "#/components/schemas/LearningType"
+            "type": "string",
+            "description": "Type of learning for the course."
           }
         },
         "required": [
@@ -91,32 +116,6 @@
           "Title",
           "Level",
           "LearningType"
-        ]
-      },
-      "LearningType": {
-        "type": "string",
-        "enum": [
-          "Formal",
-          "NonFormal"
-        ]
-      },
-      "AddRestrictedCourseCommand": {
-        "type": "object",
-        "properties": {
-          "UserId": {
-            "type": "string"
-          },
-          "UserDisplayName": {
-            "type": "string"
-          },
-          "LarsCode": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "UserId",
-          "UserDisplayName",
-          "LarsCode"
         ]
       }
     }

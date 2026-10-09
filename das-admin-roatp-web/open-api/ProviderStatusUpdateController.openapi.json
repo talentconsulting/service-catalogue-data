@@ -8,12 +8,13 @@
     "/providers/{ukprn}/status": {
       "get": {
         "operationId": "getProviderStatus",
-        "summary": "Fetch the current status of a provider",
+        "summary": "Fetch the current status and status options for a provider.",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
+            "description": "The UKPRN of the provider.",
             "schema": {
               "type": "integer"
             }
@@ -21,7 +22,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider status fetched successfully",
+            "description": "Successfully fetched the provider status.",
             "content": {
               "application/json": {
                 "schema": {
@@ -31,12 +32,12 @@
             }
           },
           "302": {
-            "description": "Redirects to the home route if provider is not found."
+            "description": "Redirect to the home page if the provider is not found."
           }
         },
         "security": [
           {
-            "roles": [
+            "rolesAuth": [
               "RoatpAdminTeam"
             ]
           }
@@ -44,12 +45,13 @@
       },
       "post": {
         "operationId": "updateProviderStatus",
-        "summary": "Update the status of a provider",
+        "summary": "Update the current status of a provider.",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
+            "description": "The UKPRN of the provider.",
             "schema": {
               "type": "integer"
             }
@@ -67,20 +69,29 @@
         },
         "responses": {
           "302": {
-            "description": "Redirects to different routes based on update status."
+            "description": "Redirect to various routes based on the status update outcome.",
+            "headers": {
+              "Location": {
+                "description": "Redirect URL.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           }
         }
       }
     },
     "/providers/{ukprn}/status/confirmed": {
       "get": {
-        "operationId": "getProviderStatusConfirmed",
-        "summary": "View confirmed provider status",
+        "operationId": "getProviderStatusUpdateConfirmation",
+        "summary": "Confirm the updated status of a provider.",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
+            "description": "The UKPRN of the provider.",
             "schema": {
               "type": "integer"
             }
@@ -88,7 +99,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Confirmed provider status fetched successfully",
+            "description": "Successfully fetched the provider status confirmation.",
             "content": {
               "application/json": {
                 "schema": {
@@ -98,12 +109,12 @@
             }
           },
           "302": {
-            "description": "Redirects to the home route if provider is not found."
+            "description": "Redirect to the home page if the provider is not found."
           }
         },
         "security": [
           {
-            "roles": [
+            "rolesAuth": [
               "RoatpAdminTeam"
             ]
           }
@@ -135,13 +146,16 @@
         "type": "object",
         "properties": {
           "Id": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The ID of the organisation status option."
           },
           "Description": {
-            "type": "string"
+            "type": "string",
+            "description": "The description of the organisation status option."
           },
           "IsSelected": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Indicates if this status option is selected."
           }
         },
         "required": [
@@ -151,38 +165,43 @@
         ]
       },
       "OrganisationStatus": {
-        "type": "integer",
+        "type": "string",
         "enum": [
-          0,
-          1,
-          2,
-          3
-        ],
-        "description": "Enumeration for organisation status (Removed = 0, Active = 1, ActiveNoStarts = 2, OnBoarding = 3)"
+          "Removed",
+          "Active",
+          "ActiveNoStarts",
+          "OnBoarding"
+        ]
       },
       "ProviderStatusConfirmationViewModel": {
         "type": "object",
         "properties": {
           "LegalName": {
-            "type": "string"
+            "type": "string",
+            "description": "The legal name of the provider."
           },
           "OrganisationStatus": {
             "$ref": "#/components/schemas/OrganisationStatus"
           },
           "Ukprn": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The UKPRN of the provider."
           },
           "StatusText": {
-            "type": "string"
+            "type": "string",
+            "description": "Text representation of the provider's status."
           },
           "ProviderSummaryLink": {
-            "type": "string"
+            "type": "string",
+            "description": "Link to the provider summary page."
           },
           "SelectTrainingProviderLink": {
-            "type": "string"
+            "type": "string",
+            "description": "Link to the page for selecting a training provider."
           },
           "AddNewTrainingProviderLink": {
-            "type": "string"
+            "type": "string",
+            "description": "Link to the page for adding a new training provider."
           }
         },
         "required": [
@@ -194,6 +213,13 @@
           "SelectTrainingProviderLink",
           "AddNewTrainingProviderLink"
         ]
+      }
+    },
+    "securitySchemes": {
+      "rolesAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Roles-based authentication."
       }
     }
   }

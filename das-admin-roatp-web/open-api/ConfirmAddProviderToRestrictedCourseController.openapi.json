@@ -1,14 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Course Restrictions API",
+    "title": "Restricted Courses API",
     "version": "1.0.0"
   },
   "paths": {
     "/restricted-courses/{larsCode}/providers/confirm-add": {
       "get": {
-        "summary": "Get provider confirmation view for restricted course",
-        "operationId": "getConfirmAddProviderToRestrictedCourseView",
+        "operationId": "GetConfirmAddProviderToRestrictedCourse",
+        "summary": "Displays the confirmation page to add a provider to a restricted course",
         "parameters": [
           {
             "name": "larsCode",
@@ -17,28 +17,21 @@
             "schema": {
               "type": "string"
             },
-            "description": "The LARS code of the restricted course."
+            "description": "The LARS code of the course."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response"
+            "description": "The confirmation page was successfully displayed."
           },
           "302": {
-            "description": "Redirect to restricted course details if session is not found."
+            "description": "Redirected to the restricted course details page if the session model is not found."
           }
-        },
-        "security": [
-          {
-            "roles": [
-              "RoatpAdminTeam"
-            ]
-          }
-        ]
+        }
       },
       "post": {
-        "summary": "Confirm add provider to restricted course",
-        "operationId": "postConfirmAddProviderToRestrictedCourse",
+        "operationId": "PostConfirmAddProviderToRestrictedCourse",
+        "summary": "Confirms and adds a provider to a restricted course",
         "parameters": [
           {
             "name": "larsCode",
@@ -47,69 +40,25 @@
             "schema": {
               "type": "string"
             },
-            "description": "The LARS code of the restricted course."
+            "description": "The LARS code of the course."
           }
         ],
         "responses": {
-          "200": {
-            "description": "Successful response after provider is added."
-          },
           "302": {
-            "description": "Redirect to restricted course details if session is not found."
+            "description": "Redirected to the restricted course details page after successful submission, or redirected back if the session model is not found."
+          },
+          "400": {
+            "description": "Bad request if there were issues with the submission or other validation errors."
           }
         },
         "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpsertProviderAllowedCourseRequest"
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "roles": [
-              "RoatpAdminTeam"
-            ]
-          }
-        ]
+          "description": "This operation does not explicitly consume a body payload, but relies on route parameters and internal logic.",
+          "required": false
+        }
       }
     }
   },
   "components": {
-    "schemas": {
-      "UpsertProviderAllowedCourseRequest": {
-        "type": "object",
-        "properties": {
-          "UserId": {
-            "type": "string",
-            "description": "The ID of the user performing the operation."
-          },
-          "UserDisplayName": {
-            "type": "string",
-            "description": "The display name of the user performing the operation."
-          },
-          "LastDateStarts": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Optional last date starts for the course."
-          }
-        },
-        "required": [
-          "UserId",
-          "UserDisplayName"
-        ]
-      }
-    },
-    "securitySchemes": {
-      "roles": {
-        "type": "apiKey",
-        "in": "header",
-        "name": "Authorization",
-        "description": "Roles required to access this endpoint."
-      }
-    }
+    "schemas": {}
   }
 }

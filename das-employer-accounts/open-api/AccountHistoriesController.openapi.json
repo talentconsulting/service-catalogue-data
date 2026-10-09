@@ -7,13 +7,15 @@
   "paths": {
     "/api/accounthistories": {
       "get": {
-        "summary": "Get account history by PAYE reference",
         "operationId": "GetAccountHistoryByRef",
+        "summary": "Retrieve account history by PAYE reference.",
+        "description": "Returns the account history for a given PAYE reference.",
         "parameters": [
           {
             "name": "payeRef",
             "in": "query",
             "required": true,
+            "description": "The PAYE reference to retrieve account history for.",
             "schema": {
               "type": "string"
             }
@@ -21,7 +23,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with account history",
+            "description": "Successful response. Returns the account history object.",
             "content": {
               "application/json": {
                 "schema": {
@@ -31,16 +33,15 @@
             }
           },
           "404": {
-            "description": "PAYE reference not found"
+            "description": "Account history not found for the provided PAYE reference."
           }
         },
         "security": [
           {
-            "ReadAllEmployerAccountBalances": []
+            "ApiRoles": [
+              "ReadAllEmployerAccountBalances"
+            ]
           }
-        ],
-        "tags": [
-          "AccountHistories"
         ]
       }
     }
@@ -51,30 +52,31 @@
         "type": "object",
         "properties": {
           "AccountId": {
-            "type": "integer",
-            "format": "int32"
+            "type": "string",
+            "nullable": false,
+            "description": "The ID of the account associated with the PAYE reference."
           },
           "AddedDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date the PAYE reference was added."
           },
           "RemovedDate": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true,
+            "description": "The date the PAYE reference was removed."
           }
-        },
-        "required": [
-          "AccountId",
-          "AddedDate",
-          "RemovedDate"
-        ]
+        }
       }
     },
     "securitySchemes": {
-      "ReadAllEmployerAccountBalances": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "Authorization required with the 'ReadAllEmployerAccountBalances' role"
+      "ApiRoles": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "API roles required to authorize access."
       }
     }
   }

@@ -1,45 +1,49 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Employer Finance API - PAYE Schemes",
+    "title": "Employer Finance API",
     "version": "1.0.0"
   },
   "paths": {
     "/api/paye-schemes/last-submission-date": {
       "get": {
-        "summary": "Get Last Submission Date for PAYE Scheme",
-        "description": "Retrieve the last submission date for a given PAYE scheme using the empRef identifier.",
+        "summary": "Get Last Submission Date",
+        "description": "Retrieve the last submission date for a PAYE scheme.",
         "parameters": [
           {
             "name": "empRef",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string",
-              "description": "Encoded PAYE scheme reference"
-            }
+              "type": "string"
+            },
+            "description": "The employer reference number (empRef) of the PAYE scheme."
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Successful response with the last submission date.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "additionalProperties": true
                 }
               }
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad request due to validation error.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
-                  "additionalProperties": {
-                    "type": "string"
-                  }
+                  "properties": {
+                    "Validation": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": true
                 }
               }
             }
@@ -47,13 +51,22 @@
         },
         "security": [
           {
-            "ApiRoles.ReadAllEmployerAccountBalances": []
+            "ApiRoles": [
+              "ReadAllEmployerAccountBalances"
+            ]
           }
         ]
       }
     }
   },
   "components": {
-    "schemas": {}
+    "schemas": {},
+    "securitySchemes": {
+      "ApiRoles": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      }
+    }
   }
 }

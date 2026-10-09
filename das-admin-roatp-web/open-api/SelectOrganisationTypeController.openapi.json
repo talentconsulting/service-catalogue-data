@@ -1,35 +1,31 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Select Organisation Type API",
+    "title": "Add Provider API",
     "version": "1.0.0"
   },
   "paths": {
     "/providers/new/organisation-type": {
       "get": {
-        "summary": "Get the organisation type selection page",
-        "operationId": "GetOrganisationTypeSelectionPage",
-        "parameters": [],
+        "summary": "Get organisation types for selecting organisation type.",
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "Returns organisation type selection view.",
             "content": {
-              "text/html": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganisationTypeViewModel"
+                }
+              }
             }
           }
         }
       },
       "post": {
-        "summary": "Submit selected organisation type",
-        "operationId": "SubmitOrganisationTypeSelection",
+        "summary": "Submit organisation type selection.",
         "requestBody": {
           "required": true,
           "content": {
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "$ref": "#/components/schemas/OrganisationTypeSubmitModel"
-              }
-            },
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/OrganisationTypeSubmitModel"
@@ -37,15 +33,18 @@
             }
           }
         },
-        "parameters": [],
         "responses": {
           "302": {
-            "description": "Successful redirection to provider details summary"
+            "description": "Redirects to the Provider Details Summary route upon successful form submission."
           },
           "400": {
-            "description": "Validation errors occurred",
+            "description": "Validation errors occurred. Returns organisation type selection view with errors.",
             "content": {
-              "text/html": {}
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganisationTypeViewModel"
+                }
+              }
             }
           }
         }
@@ -54,30 +53,24 @@
   },
   "components": {
     "schemas": {
-      "OrganisationTypeSubmitModel": {
-        "type": "object",
-        "properties": {
-          "OrganisationTypeId": {
-            "type": "integer",
-            "nullable": true
-          }
-        }
-      },
       "OrganisationTypeViewModel": {
         "type": "object",
         "properties": {
           "LegalName": {
-            "type": "string"
+            "type": "string",
+            "description": "Legal name of the organisation."
           },
           "OrganisationTypes": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/OrganisationTypeModel"
-            }
+            },
+            "description": "List of organisation types."
           },
           "OrganisationTypeId": {
             "type": "integer",
-            "nullable": true
+            "nullable": true,
+            "description": "ID of the selected organisation type."
           }
         },
         "required": [
@@ -85,35 +78,37 @@
           "OrganisationTypes"
         ]
       },
+      "OrganisationTypeSubmitModel": {
+        "type": "object",
+        "properties": {
+          "OrganisationTypeId": {
+            "type": "integer",
+            "nullable": true,
+            "description": "ID of the submitted organisation type selection."
+          }
+        }
+      },
       "OrganisationTypeModel": {
         "type": "object",
         "properties": {
           "Id": {
-            "type": "integer"
+            "type": "integer",
+            "description": "ID of the organisation type."
           },
           "Description": {
-            "type": "string"
+            "type": "string",
+            "description": "Description of the organisation type."
           },
           "IsSelected": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Indicates whether this organisation type is selected."
           }
         },
         "required": [
           "Id",
-          "Description"
+          "Description",
+          "IsSelected"
         ]
-      },
-      "RadioButtonSelectionModel": {
-        "type": "object",
-        "properties": {
-          "IsSelected": {
-            "type": "boolean"
-          },
-          "Checked": {
-            "type": "string"
-          }
-        },
-        "required": []
       }
     }
   }

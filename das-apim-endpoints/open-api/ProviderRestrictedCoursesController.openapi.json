@@ -7,6 +7,7 @@
   "paths": {
     "/providers/{ukprn}/restricted-apprenticeships": {
       "get": {
+        "summary": "Get Provider Restricted Apprenticeships",
         "operationId": "GetProviderRestrictedApprenticeships",
         "parameters": [
           {
@@ -20,7 +21,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of provider restricted apprenticeships",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -34,6 +35,7 @@
     },
     "/providers/{ukprn}/not-restricted-apprenticeships": {
       "get": {
+        "summary": "Get Provider Not Restricted Apprenticeships",
         "operationId": "GetProviderNotRestrictedApprenticeships",
         "parameters": [
           {
@@ -47,7 +49,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of provider not restricted apprenticeships",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -61,6 +63,7 @@
     },
     "/providers/{ukprn}/restricted-apprenticeships/{larsCode}/change": {
       "post": {
+        "summary": "Update Provider Restricted Apprenticeship",
         "operationId": "UpdateProviderRestrictedApprenticeship",
         "parameters": [
           {
@@ -92,13 +95,14 @@
         },
         "responses": {
           "204": {
-            "description": "Provider restricted apprenticeship updated successfully"
+            "description": "No Content"
           }
         }
       }
     },
     "/providers/{ukprn}/restricted-apprenticeships/{larsCode}/remove": {
       "post": {
+        "summary": "Remove Provider Restricted Apprenticeship",
         "operationId": "RemoveProviderRestrictedApprenticeship",
         "parameters": [
           {
@@ -130,7 +134,46 @@
         },
         "responses": {
           "204": {
-            "description": "Provider restricted apprenticeship removed successfully"
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/providers/{ukprn}/restricted-apprenticeships/{larsCode}/add": {
+      "post": {
+        "summary": "Add Provider Restricted Apprenticeship",
+        "operationId": "AddProviderRestrictedApprenticeship",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddProviderRestrictedApprenticeshipModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
           }
         }
       }
@@ -138,16 +181,60 @@
   },
   "components": {
     "schemas": {
-      "GetProviderRestrictedApprenticeshipsResponse": {
+      "AddProviderRestrictedApprenticeshipModel": {
         "type": "object",
         "properties": {
-          "courses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RestrictedApprenticeshipModel"
-            }
+          "userId": {
+            "type": "string"
+          },
+          "userDisplayName": {
+            "type": "string"
+          },
+          "lastDateStarts": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
           }
-        }
+        },
+        "required": [
+          "userId",
+          "userDisplayName"
+        ]
+      },
+      "RemoveProviderRestrictedApprenticeshipModel": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "userDisplayName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "userId",
+          "userDisplayName"
+        ]
+      },
+      "UpdateProviderRestrictedApprenticeshipModel": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "userDisplayName": {
+            "type": "string"
+          },
+          "lastDateStarts": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "userId",
+          "userDisplayName"
+        ]
       },
       "GetProviderNotRestrictedApprenticeshipsResponse": {
         "type": "object",
@@ -159,6 +246,36 @@
             }
           }
         }
+      },
+      "GetProviderRestrictedApprenticeshipsResponse": {
+        "type": "object",
+        "properties": {
+          "courses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RestrictedApprenticeshipModel"
+            }
+          }
+        }
+      },
+      "NotRestrictedApprenticeshipModel": {
+        "type": "object",
+        "properties": {
+          "larsCode": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "larsCode",
+          "title",
+          "level"
+        ]
       },
       "RestrictedApprenticeshipModel": {
         "type": "object",
@@ -180,48 +297,13 @@
           "isClosedToNewStarts": {
             "type": "boolean"
           }
-        }
-      },
-      "NotRestrictedApprenticeshipModel": {
-        "type": "object",
-        "properties": {
-          "larsCode": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "level": {
-            "type": "integer"
-          }
-        }
-      },
-      "UpdateProviderRestrictedApprenticeshipModel": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string"
-          },
-          "userDisplayName": {
-            "type": "string"
-          },
-          "lastDateStarts": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        }
-      },
-      "RemoveProviderRestrictedApprenticeshipModel": {
-        "type": "object",
-        "properties": {
-          "userId": {
-            "type": "string"
-          },
-          "userDisplayName": {
-            "type": "string"
-          }
-        }
+        },
+        "required": [
+          "larsCode",
+          "title",
+          "level",
+          "isClosedToNewStarts"
+        ]
       }
     }
   }

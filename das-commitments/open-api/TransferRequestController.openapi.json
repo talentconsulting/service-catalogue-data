@@ -8,6 +8,7 @@
     "/api/accounts/{transferSenderId}/sender/transfers/{transferRequestId}": {
       "get": {
         "operationId": "GetTransferRequestForSender",
+        "summary": "Retrieve a transfer request for the sender",
         "parameters": [
           {
             "name": "transferSenderId",
@@ -30,7 +31,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successfully retrieved transfer request",
             "content": {
               "application/json": {
                 "schema": {
@@ -40,7 +41,7 @@
             }
           },
           "404": {
-            "description": "Not found"
+            "description": "Transfer request not found"
           }
         }
       }
@@ -48,6 +49,7 @@
     "/api/accounts/{transferSenderId}/transfers/{transferRequestId}/approval/{cohortId}": {
       "post": {
         "operationId": "UpdateTransferApprovalForSender",
+        "summary": "Update transfer approval for sender",
         "parameters": [
           {
             "name": "transferSenderId",
@@ -89,7 +91,7 @@
         },
         "responses": {
           "200": {
-            "description": "Successful operation"
+            "description": "Transfer approval successfully updated"
           }
         }
       }
@@ -97,6 +99,7 @@
     "/api/accounts/{transferReceiverId}/receiver/transfers/{transferRequestId}": {
       "get": {
         "operationId": "GetTransferRequestForReceiver",
+        "summary": "Retrieve a transfer request for the receiver",
         "parameters": [
           {
             "name": "transferReceiverId",
@@ -119,7 +122,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successfully retrieved transfer request",
             "content": {
               "application/json": {
                 "schema": {
@@ -129,7 +132,7 @@
             }
           },
           "404": {
-            "description": "Not found"
+            "description": "Transfer request not found"
           }
         }
       }
@@ -137,6 +140,7 @@
     "/api/accounts/{accountId}/transfers": {
       "get": {
         "operationId": "GetTransferRequests",
+        "summary": "Retrieve transfers for an account",
         "parameters": [
           {
             "name": "accountId",
@@ -152,17 +156,13 @@
             "in": "query",
             "required": false,
             "schema": {
-              "type": "string",
-              "enum": [
-                "AsSender",
-                "AsReceiver"
-              ]
+              "$ref": "#/components/schemas/TransferType"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successfully retrieved transfers for account",
             "content": {
               "application/json": {
                 "schema": {
@@ -172,7 +172,7 @@
             }
           },
           "404": {
-            "description": "Not found"
+            "description": "Transfers not found for account"
           }
         }
       }
@@ -180,9 +180,12 @@
   },
   "components": {
     "schemas": {
-      "GetTransferRequestResponse": {
-        "type": "object",
-        "additionalProperties": true
+      "TransferType": {
+        "type": "string",
+        "enum": [
+          "AsSender",
+          "AsReceiver"
+        ]
       },
       "UpdateTransferApprovalForSenderRequest": {
         "type": "object",
@@ -209,7 +212,15 @@
           "UserInfo": {
             "$ref": "#/components/schemas/UserInfo"
           }
-        }
+        },
+        "required": [
+          "TransferSenderId",
+          "TransferRequestId",
+          "CohortId",
+          "TransferReceiverId",
+          "TransferApprovalStatus",
+          "UserInfo"
+        ]
       },
       "TransferApprovalStatus": {
         "type": "string",
@@ -229,13 +240,23 @@
             "type": "string"
           },
           "UserEmail": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           }
-        }
+        },
+        "required": [
+          "UserId",
+          "UserDisplayName",
+          "UserEmail"
+        ]
+      },
+      "GetTransferRequestResponse": {
+        "type": "object",
+        "additionalProperties": false
       },
       "GetTransferRequestSummaryResponse": {
         "type": "object",
-        "additionalProperties": true
+        "additionalProperties": false
       }
     }
   }

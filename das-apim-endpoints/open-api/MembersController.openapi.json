@@ -1,76 +1,32 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Members API",
-    "version": "1.0.0",
-    "description": "API for managing members of Apprentice Aan."
+    "title": "Members Controller API",
+    "version": "1.0.0"
   },
   "paths": {
     "/Members": {
       "get": {
         "operationId": "GetMembers",
-        "summary": "Retrieve members",
+        "summary": "Retrieve a list of members.",
         "parameters": [
           {
-            "name": "Keyword",
+            "name": "queryString",
             "in": "query",
+            "required": false,
+            "description": "HTTP query string parameters for filtering or pagination.",
             "schema": {
               "type": "string"
-            }
-          },
-          {
-            "name": "RegionId",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "integer"
-              }
-            }
-          },
-          {
-            "name": "UserType",
-            "in": "query",
-            "schema": {
-              "type": "array",
-              "items": {
-                "type": "string",
-                "enum": [
-                  "Apprentice",
-                  "Employer"
-                ]
-              }
-            }
-          },
-          {
-            "name": "IsRegionalChair",
-            "in": "query",
-            "schema": {
-              "type": "boolean"
-            }
-          },
-          {
-            "name": "Page",
-            "in": "query",
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "name": "PageSize",
-            "in": "query",
-            "schema": {
-              "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved members",
+            "description": "A list of members.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/GetMembersQueryResult"
+                  "$ref": "#/components/schemas/GetMembersResponse"
                 }
               }
             }
@@ -78,15 +34,66 @@
         }
       }
     },
-    "/Members/{memberId}": {
-      "put": {
-        "operationId": "UpdateMemberProfileAndPreferences",
-        "summary": "Update member profile and preferences",
+    "/Members/{memberId}/profile": {
+      "get": {
+        "operationId": "GetMemberProfile",
+        "summary": "Retrieve details of a specific member's profile.",
         "parameters": [
           {
             "name": "memberId",
             "in": "path",
             "required": true,
+            "description": "The unique identifier of the member.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-RequestedByMemberId",
+            "in": "header",
+            "required": true,
+            "description": "The identifier of the member making the request.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the member's profile.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetMemberProfileQueryResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/Members/{memberId}/leaving": {
+      "post": {
+        "operationId": "PostMemberLeaving",
+        "summary": "Set the leaving status of a member.",
+        "parameters": [
+          {
+            "name": "memberId",
+            "in": "path",
+            "required": true,
+            "description": "The unique identifier of the member.",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-RequestedByMemberId",
+            "in": "header",
+            "required": true,
+            "description": "The identifier of the member making the request.",
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -98,80 +105,21 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateMemberProfileModel"
+                "$ref": "#/components/schemas/PostMemberStatusModel"
               }
             }
           }
         },
         "responses": {
-          "204": {
-            "description": "No content"
-          }
-        }
-      }
-    },
-    "/Members/{memberId}/Leaving": {
-      "post": {
-        "operationId": "PostMemberLeavingReasons",
-        "summary": "Submit reasons for member leaving",
-        "parameters": [
-          {
-            "name": "memberId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PostMemberLeavingModel"
+          "200": {
+            "description": "Confirmation that the member's leaving status has been updated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "string"
+                }
               }
             }
-          }
-        },
-        "responses": {
-          "204": {
-            "description": "No content"
-          },
-          "404": {
-            "description": "Member not found"
-          },
-          "400": {
-            "description": "Bad request"
-          }
-        }
-      }
-    },
-    "/Members/{memberId}/reinstate": {
-      "post": {
-        "operationId": "PostMemberReinstate",
-        "summary": "Reinstate a member",
-        "parameters": [
-          {
-            "name": "memberId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "No content"
-          },
-          "404": {
-            "description": "Member not found"
-          },
-          "400": {
-            "description": "Bad request"
           }
         }
       }
@@ -179,7 +127,7 @@
   },
   "components": {
     "schemas": {
-      "GetMembersQueryResult": {
+      "GetMembersResponse": {
         "type": "object",
         "properties": {
           "Page": {
@@ -197,12 +145,19 @@
           "Members": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/MembersSummary"
+              "$ref": "#/components/schemas/MemberSummary"
             }
           }
-        }
+        },
+        "required": [
+          "Page",
+          "PageSize",
+          "TotalPages",
+          "TotalCount",
+          "Members"
+        ]
       },
-      "MembersSummary": {
+      "MemberSummary": {
         "type": "object",
         "properties": {
           "MemberId": {
@@ -210,6 +165,34 @@
             "format": "uuid"
           },
           "FullName": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "MemberId",
+          "FullName",
+          "Email"
+        ]
+      },
+      "GetMemberProfileQueryResult": {
+        "type": "object",
+        "properties": {
+          "FullName": {
+            "type": "string"
+          },
+          "Email": {
+            "type": "string"
+          },
+          "FirstName": {
+            "type": "string"
+          },
+          "LastName": {
+            "type": "string"
+          },
+          "OrganisationName": {
             "type": "string",
             "nullable": true
           },
@@ -218,84 +201,211 @@
             "nullable": true
           },
           "RegionName": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "UserType": {
-            "type": "string",
-            "enum": [
-              "Apprentice",
-              "Employer"
-            ]
+            "$ref": "#/components/schemas/MemberUserType"
           },
           "IsRegionalChair": {
-            "type": "boolean",
-            "nullable": true
+            "type": "boolean"
           },
           "JoinedDate": {
             "type": "string",
             "format": "date-time"
-          }
-        }
-      },
-      "UpdateMemberProfileModel": {
-        "type": "object",
-        "properties": {
-          "patchMemberRequest": {
-            "$ref": "#/components/schemas/PatchMemberRequest"
           },
-          "updateMemberProfileRequest": {
-            "$ref": "#/components/schemas/UpdateMemberProfileRequest"
+          "Apprenticeship": {
+            "$ref": "#/components/schemas/Apprenticeship"
+          },
+          "Activities": {
+            "$ref": "#/components/schemas/GetMemberActivitiesResponse"
+          },
+          "Profiles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberProfile"
+            }
+          },
+          "Preferences": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MemberPreference"
+            }
           }
-        }
+        },
+        "required": [
+          "FullName",
+          "Email",
+          "FirstName",
+          "LastName",
+          "RegionName",
+          "UserType",
+          "IsRegionalChair",
+          "JoinedDate",
+          "Apprenticeship",
+          "Activities",
+          "Profiles",
+          "Preferences"
+        ]
       },
-      "PatchMemberRequest": {
+      "MemberProfile": {
         "type": "object",
         "properties": {
-          "RegionId": {
+          "ProfileId": {
             "type": "integer"
           },
-          "OrganisationName": {
+          "Value": {
+            "type": "string"
+          },
+          "PreferenceId": {
+            "type": "integer",
+            "nullable": true
+          }
+        },
+        "required": [
+          "ProfileId",
+          "Value"
+        ]
+      },
+      "MemberPreference": {
+        "type": "object",
+        "properties": {
+          "PreferenceId": {
+            "type": "integer"
+          },
+          "Value": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "PreferenceId",
+          "Value"
+        ]
+      },
+      "Apprenticeship": {
+        "type": "object",
+        "properties": {
+          "Sector": {
             "type": "string",
             "nullable": true
           },
-          "FirstName": {
+          "Programme": {
             "type": "string",
             "nullable": true
           },
-          "LastName": {
+          "Level": {
             "type": "string",
             "nullable": true
+          },
+          "ActiveApprenticesCount": {
+            "type": "integer"
+          },
+          "Sectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "ActiveApprenticesCount",
+          "Sectors"
+        ]
+      },
+      "GetMemberActivitiesResponse": {
+        "type": "object",
+        "properties": {
+          "LastSignedUpDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "EventsAttended": {
+            "$ref": "#/components/schemas/EventsModel"
+          },
+          "EventsPlanned": {
+            "$ref": "#/components/schemas/EventsModel"
           }
         }
       },
-      "UpdateMemberProfileRequest": {
+      "EventsModel": {
         "type": "object",
         "properties": {
-          "MemberProfiles": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
+          "EventsDateRange": {
+            "$ref": "#/components/schemas/DateRangeModel"
           },
-          "MemberPreferences": {
+          "Events": {
             "type": "array",
             "items": {
-              "type": "object"
+              "$ref": "#/components/schemas/EventAttendanceModel"
             }
           }
         }
       },
-      "PostMemberLeavingModel": {
+      "DateRangeModel": {
         "type": "object",
         "properties": {
-          "LeavingReasons": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
+          "FromDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "ToDate": {
+            "type": "string",
+            "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "FromDate",
+          "ToDate"
+        ]
+      },
+      "EventAttendanceModel": {
+        "type": "object",
+        "properties": {
+          "CalendarEventId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "EventDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "EventTitle": {
+            "type": "string"
+          },
+          "Urn": {
+            "type": "integer",
+            "nullable": true
+          }
+        },
+        "required": [
+          "CalendarEventId",
+          "EventDate",
+          "EventTitle"
+        ]
+      },
+      "MemberUserType": {
+        "type": "string",
+        "enum": [
+          "Apprentice",
+          "Employer",
+          "Admin"
+        ]
+      },
+      "PostMemberStatusModel": {
+        "type": "object",
+        "properties": {
+          "Reason": {
+            "type": "string"
+          },
+          "Date": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        },
+        "required": [
+          "Reason"
+        ]
       }
     }
   }

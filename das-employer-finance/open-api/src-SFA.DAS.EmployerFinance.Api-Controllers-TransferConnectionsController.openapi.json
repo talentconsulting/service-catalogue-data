@@ -7,7 +7,8 @@
   "paths": {
     "/api/accounts/{hashedAccountId}/transfers/connections": {
       "get": {
-        "summary": "Get transfer connections for a hashed account ID",
+        "operationId": "GetTransferConnections",
+        "summary": "Retrieve transfer connections for the given hashed account ID.",
         "parameters": [
           {
             "name": "hashedAccountId",
@@ -16,12 +17,12 @@
             "schema": {
               "type": "string"
             },
-            "description": "The hashed account ID of the employer account"
+            "description": "The hashed ID of the account."
           }
         ],
         "responses": {
           "200": {
-            "description": "A list of transfer connections",
+            "description": "Successful response with transfer connections.",
             "content": {
               "application/json": {
                 "schema": {
@@ -36,14 +37,15 @@
         },
         "security": [
           {
-            "ApiRoles_ReadUserAccounts": []
+            "ApiRolesAuthorization": []
           }
         ]
       }
     },
     "/api/accounts/internal/{accountId}/transfers/connections": {
       "get": {
-        "summary": "Get transfer connections for an account ID with a specified status",
+        "operationId": "InternalGetTransferConnections",
+        "summary": "Retrieve transfer connections for the given internal account ID with an optional status filter.",
         "parameters": [
           {
             "name": "accountId",
@@ -53,7 +55,7 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "The account ID of the employer account"
+            "description": "The internal account ID."
           },
           {
             "name": "status",
@@ -62,12 +64,12 @@
             "schema": {
               "$ref": "#/components/schemas/TransferConnectionInvitationStatus"
             },
-            "description": "The status of transfer connections to filter (default is Approved)"
+            "description": "The status of the transfer connections to filter by."
           }
         ],
         "responses": {
           "200": {
-            "description": "A list of transfer connections",
+            "description": "Successful response with transfer connections.",
             "content": {
               "application/json": {
                 "schema": {
@@ -82,7 +84,7 @@
         },
         "security": [
           {
-            "ApiRoles_ReadUserAccounts": []
+            "ApiRolesAuthorization": []
           }
         ]
       }
@@ -92,12 +94,10 @@
     "schemas": {
       "TransferConnection": {
         "type": "object",
-        "description": "A transfer connection",
-        "properties": {}
+        "additionalProperties": true
       },
       "TransferConnectionInvitationStatus": {
         "type": "string",
-        "description": "The status of a transfer connection invitation",
         "enum": [
           "Pending",
           "Approved",
@@ -106,10 +106,16 @@
       }
     },
     "securitySchemes": {
-      "ApiRoles_ReadUserAccounts": {
-        "type": "apiKey",
-        "name": "Authorization",
-        "in": "header"
+      "ApiRolesAuthorization": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "scopes": {
+              "read:userAccounts": "Read access to user accounts"
+            }
+          }
+        }
       }
     }
   }

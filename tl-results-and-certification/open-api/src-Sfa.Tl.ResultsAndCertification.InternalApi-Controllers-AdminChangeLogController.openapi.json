@@ -1,0 +1,461 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "AdminChangeLog API",
+    "version": "1.0.0",
+    "description": "API for managing Admin Change Logs."
+  },
+  "paths": {
+    "/api/AdminChangeLog/SearchChangeLogs": {
+      "post": {
+        "summary": "Searches admin change logs based on request criteria.",
+        "operationId": "SearchChangeLogs",
+        "requestBody": {
+          "description": "Request to search change logs.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSearchChangeLogRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Paged list of change logs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResponseOfAdminSearchChangeLog"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/AdminChangeLog/GetAdminChangeLogRecord/{changeLogId}": {
+      "get": {
+        "summary": "Retrieves a single admin change log record by its ID.",
+        "operationId": "GetAdminChangeLogRecord",
+        "parameters": [
+          {
+            "name": "changeLogId",
+            "in": "path",
+            "required": true,
+            "description": "The ID of the change log record.",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested admin change log record.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminChangeLogRecord"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdminSearchChangeLogRequest": {
+        "type": "object",
+        "properties": {
+          "searchKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "pageNumber": {
+            "type": "integer",
+            "nullable": true,
+            "example": 1,
+            "description": "The page number to fetch."
+          }
+        }
+      },
+      "AdminSearchChangeLog": {
+        "type": "object",
+        "properties": {
+          "changeLogId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "changeType": {
+            "$ref": "#/components/schemas/ChangeType"
+          },
+          "dateAndTimeOfChange": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "zendeskTicketID": {
+            "type": "string"
+          },
+          "learnerFirstname": {
+            "type": "string"
+          },
+          "learnerLastname": {
+            "type": "string"
+          },
+          "uln": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "providerName": {
+            "type": "string",
+            "nullable": true
+          },
+          "providerUkprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastUpdatedBy": {
+            "type": "string"
+          }
+        }
+      },
+      "AdminChangeLogRecord": {
+        "type": "object",
+        "properties": {
+          "changeLogId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "registrationPathwayId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pathwayName": {
+            "type": "string"
+          },
+          "coreExamPeriod": {
+            "type": "string"
+          },
+          "coreCode": {
+            "type": "string"
+          },
+          "coreGrade": {
+            "type": "string"
+          },
+          "specialismName": {
+            "type": "string",
+            "nullable": true
+          },
+          "specialismCode": {
+            "type": "string",
+            "nullable": true
+          },
+          "specialismExamPeriod": {
+            "type": "string",
+            "nullable": true
+          },
+          "specialismGrade": {
+            "type": "string",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "uln": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "changeType": {
+            "$ref": "#/components/schemas/ChangeType"
+          },
+          "changeDetails": {
+            "type": "string"
+          },
+          "changeRequestedBy": {
+            "type": "string"
+          },
+          "changeDateOfRequest": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reasonForChange": {
+            "type": "string",
+            "nullable": true
+          },
+          "zendeskTicketID": {
+            "type": "string",
+            "nullable": true
+          },
+          "dateAndTimeOfChange": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "pathway": {
+            "$ref": "#/components/schemas/AdminChangeLogPathway"
+          }
+        }
+      },
+      "AdminChangeLogPathway": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "larId": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "academicYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "status": {
+            "$ref": "#/components/schemas/RegistrationPathwayStatus"
+          },
+          "provider": {
+            "$ref": "#/components/schemas/Provider"
+          },
+          "pathwayAssessments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminChangeLogAssessment"
+            }
+          },
+          "specialisms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminChangeLogSpecialism"
+            }
+          }
+        }
+      },
+      "PagedResponseOfAdminSearchChangeLog": {
+        "type": "object",
+        "properties": {
+          "totalRecords": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "records": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminSearchChangeLog"
+            }
+          },
+          "pagerInfo": {
+            "$ref": "#/components/schemas/Pager"
+          }
+        }
+      },
+      "Pager": {
+        "type": "object",
+        "properties": {
+          "totalItems": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "currentPage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "startPage": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recordFrom": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recordTo": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AdminChangeLogAssessment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "seriesName": {
+            "type": "string"
+          },
+          "resultEndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rommEndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "appealEndDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastUpdatedOn": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastUpdatedBy": {
+            "type": "string"
+          },
+          "componentType": {
+            "$ref": "#/components/schemas/ComponentType"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminChangeLogResult"
+            }
+          }
+        }
+      },
+      "AdminChangeLogSpecialism": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "larId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "tlSpecialismCombinations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "key": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "value": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "assessments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminChangeLogAssessment"
+            }
+          }
+        }
+      },
+      "AdminChangeLogResult": {
+        "type": "object",
+        "properties": {
+          "grade": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "dateAwarded": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ChangeType": {
+        "type": "string",
+        "enum": [
+          "StartYear",
+          "IndustryPlacement",
+          "AddPathwayAssessment",
+          "AddSpecialismAssessment",
+          "RemovePathwayAssessment",
+          "RemoveSpecialismAssessment",
+          "AddPathwayResult",
+          "AddSpecialismResult",
+          "ChangePathwayResult",
+          "ChangeSpecialismResult",
+          "OpenPathwayRomm",
+          "OpenSpecialismRomm",
+          "PathwayRommOutcome",
+          "SpecialismRommOutcome",
+          "OpenPathwayAppeal",
+          "OpenSpecialismAppeal",
+          "PathwayAppealOutcome",
+          "SpecialismAppealOutcome",
+          "MathsStatus",
+          "EnglishStatus"
+        ]
+      },
+      "RegistrationPathwayStatus": {
+        "type": "string",
+        "enum": [
+          "NotSpecified",
+          "Active",
+          "Inactive",
+          "Transferred",
+          "Withdrawn"
+        ]
+      },
+      "Provider": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ukprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        }
+      },
+      "ComponentType": {
+        "type": "string",
+        "enum": [
+          "Core",
+          "Specialism"
+        ]
+      }
+    }
+  }
+}

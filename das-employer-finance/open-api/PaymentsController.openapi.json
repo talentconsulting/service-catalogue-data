@@ -8,8 +8,10 @@
     "/api/payments/staging": {
       "post": {
         "operationId": "BulkPaymentsIngest",
-        "summary": "Bulk Payments Ingest",
-        "description": "Ingest bulk payments into the staging system.",
+        "summary": "Ingest bulk payment records into the staging area.",
+        "tags": [
+          "Payments"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -21,23 +23,57 @@
           }
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
+          "201": {
+            "description": "Bulk payment records successfully ingested.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "message": {
-                      "type": "string"
+                    "insertedCount": {
+                      "type": "integer",
+                      "description": "The number of records inserted."
+                    },
+                    "paymentIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Unique identifiers of the staged payment records."
+                      }
                     }
                   }
                 }
               }
             }
           },
+          "400": {
+            "description": "Validation errors occurred.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "example": "Payments payload is required."
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "Validation error 1",
+                        "Validation error 2"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
           "409": {
-            "description": "Conflict",
+            "description": "Conflicting payment records detected.",
             "content": {
               "application/json": {
                 "schema": {
@@ -47,7 +83,8 @@
                       "type": "array",
                       "items": {
                         "type": "string",
-                        "format": "uuid"
+                        "format": "uuid",
+                        "description": "Identifiers of payment records causing conflicts."
                       }
                     }
                   }
@@ -56,38 +93,12 @@
             }
           },
           "500": {
-            "description": "Internal Server Error",
+            "description": "Unexpected server error during payment staging.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "message": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "201": {
-            "description": "Created",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "insertedCount": {
-                      "type": "integer"
-                    },
-                    "paymentIds": {
-                      "type": "array",
-                      "items": {
-                        "type": "string",
-                        "format": "uuid"
-                      }
-                    }
-                  }
+                  "type": "string",
+                  "example": "Unexpected error staging payments."
                 }
               }
             }
@@ -117,58 +128,70 @@
         "properties": {
           "PaymentId": {
             "type": "string",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Unique identifier for the payment record."
           },
           "AccountId": {
             "type": "integer",
-            "format": "int64"
+            "description": "The account identifier associated with the payment."
           },
           "Ukprn": {
             "type": "integer",
-            "format": "int64"
+            "description": "The unique provider reference number."
           },
           "Uln": {
             "type": "integer",
-            "format": "int64"
+            "description": "The unique learner number."
           },
           "ApprenticeshipId": {
             "type": "integer",
-            "format": "int64"
+            "description": "The apprenticeship identifier associated with the payment."
           },
           "CollectionPeriodId": {
-            "type": "string"
+            "type": "string",
+            "description": "The identifier for the collection period."
           },
           "DeliveryPeriodMonth": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The month of the delivery period."
           },
           "DeliveryPeriodYear": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The year of the delivery period."
           },
           "CollectionPeriodMonth": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The month of the collection period."
           },
           "CollectionPeriodYear": {
-            "type": "integer"
+            "type": "integer",
+            "description": "The year of the collection period."
           },
           "FundingSource": {
-            "type": "string"
+            "type": "string",
+            "description": "The funding source for the payment."
           },
           "TransactionType": {
-            "type": "string"
+            "type": "string",
+            "description": "The type of transaction being staged."
           },
           "Amount": {
             "type": "number",
-            "format": "decimal"
+            "format": "decimal",
+            "description": "The amount of the payment."
           },
           "EvidenceSubmittedOn": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "description": "The date and time evidence for the payment was submitted."
           },
           "EmployerAccountVersion": {
-            "type": "string"
+            "type": "string",
+            "description": "The version of the employer account."
           },
           "ApprenticeshipVersion": {
-            "type": "string"
+            "type": "string",
+            "description": "The version of the apprenticeship record."
           }
         },
         "required": [

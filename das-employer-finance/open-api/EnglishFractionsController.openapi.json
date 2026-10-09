@@ -7,12 +7,15 @@
   "paths": {
     "/api/english-fractions": {
       "post": {
-        "summary": "Persist English Fractions Data",
-        "description": "Persists English fractions data for an employer account.",
+        "summary": "Persist English Fractions",
+        "description": "Persists English fractions data provided in the request body.",
         "operationId": "PersistEnglishFractions",
+        "tags": [
+          "EnglishFractions"
+        ],
         "security": [
           {
-            "ApiRoles_ReadAllEmployerAccountBalances": []
+            "ReadAllEmployerAccountBalances": []
           }
         ],
         "requestBody": {
@@ -27,12 +30,11 @@
         },
         "responses": {
           "200": {
-            "description": "Successfully persisted English fractions data.",
+            "description": "English fractions persisted successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "description": "Generic response for successful operation."
+                  "type": "object"
                 }
               }
             }
@@ -48,61 +50,59 @@
     "schemas": {
       "EnglishFractionsRequest": {
         "type": "object",
-        "properties": {
-          "EmpRef": {
-            "type": "string",
-            "description": "Employer reference."
-          },
-          "UpdateRequired": {
-            "type": "boolean",
-            "description": "Indicates whether an update is required."
-          },
-          "DateCalculated": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Date when the fractions were calculated."
-          },
-          "Fractions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/EnglishFractionItem"
-            },
-            "description": "List of English fraction items."
-          }
-        },
         "required": [
           "EmpRef",
           "UpdateRequired",
           "DateCalculated",
           "Fractions"
-        ]
+        ],
+        "properties": {
+          "EmpRef": {
+            "type": "string",
+            "example": "123/AB45678"
+          },
+          "UpdateRequired": {
+            "type": "boolean",
+            "example": true
+          },
+          "DateCalculated": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2023-10-01T00:00:00Z"
+          },
+          "Fractions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/EnglishFractionItem"
+            }
+          }
+        }
       },
       "EnglishFractionItem": {
         "type": "object",
+        "required": [
+          "DateCalculated",
+          "Amount"
+        ],
         "properties": {
           "DateCalculated": {
             "type": "string",
             "format": "date-time",
-            "description": "Date when the fraction was calculated."
+            "example": "2023-10-01T00:00:00Z"
           },
           "Amount": {
             "type": "number",
             "format": "decimal",
-            "description": "The fraction amount."
+            "example": 123.45
           }
-        },
-        "required": [
-          "DateCalculated",
-          "Amount"
-        ]
+        }
       }
     },
     "securitySchemes": {
-      "ApiRoles_ReadAllEmployerAccountBalances": {
+      "ReadAllEmployerAccountBalances": {
         "type": "apiKey",
         "in": "header",
-        "name": "Authorization",
-        "description": "API key required for accessing functionality protected by the ReadAllEmployerAccountBalances role."
+        "name": "Authorization"
       }
     }
   }

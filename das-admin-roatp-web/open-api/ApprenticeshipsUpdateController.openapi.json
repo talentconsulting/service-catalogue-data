@@ -7,22 +7,22 @@
   "paths": {
     "/providers/{ukprn}/apprenticeships": {
       "get": {
-        "operationId": "GetApprenticeshipsUpdate",
-        "summary": "Retrieve the apprenticeships update view model.",
+        "summary": "Get apprenticeships for a provider",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int32"
             },
-            "description": "The UKPRN of the provider."
+            "description": "UK Provider Reference Number"
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response displaying the apprenticeships update view model.",
+            "description": "Success response displaying the apprenticeships offered by the provider",
             "content": {
               "application/json": {
                 "schema": {
@@ -32,22 +32,22 @@
             }
           },
           "302": {
-            "description": "Redirect to the home route when certain conditions are not met."
+            "description": "Redirect to home if the provider is invalid or session data is missing"
           }
         }
       },
       "post": {
-        "operationId": "PostApprenticeshipsUpdate",
-        "summary": "Submit the apprenticeships update form.",
+        "summary": "Update apprenticeships for a provider",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int32"
             },
-            "description": "The UKPRN of the provider."
+            "description": "UK Provider Reference Number"
           }
         ],
         "requestBody": {
@@ -62,7 +62,25 @@
         },
         "responses": {
           "302": {
-            "description": "Redirect to either the home route or the apprenticeship units update route based on the submission."
+            "description": "Redirect to the next appropriate page if the input is valid",
+            "headers": {
+              "Location": {
+                "schema": {
+                  "type": "string"
+                },
+                "description": "The URL for the next page"
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error, showing the invalid fields and resubmitting the form",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OfferApprenticeshipsViewModel"
+                }
+              }
+            }
           }
         }
       }
@@ -76,14 +94,14 @@
           "IsApprenticeshipsOffered": {
             "type": "boolean",
             "nullable": true,
-            "description": "Indicates whether apprenticeships are being offered."
+            "description": "Indicates if the provider offers apprenticeships"
           },
           "ApprenticeshipsSelection": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ApprenticeshipsSelectionModel"
             },
-            "description": "List of apprenticeship offering choices."
+            "description": "List of apprenticeship selection options"
           }
         }
       },
@@ -93,33 +111,30 @@
           "IsApprenticeshipsOffered": {
             "type": "boolean",
             "nullable": true,
-            "description": "Indicates whether apprenticeships are being offered."
+            "description": "Flag indicating if the provider offers apprenticeships"
           }
         },
-        "required": [
-          "IsApprenticeshipsOffered"
-        ]
+        "required": []
       },
       "ApprenticeshipsSelectionModel": {
         "type": "object",
         "properties": {
           "Id": {
             "type": "boolean",
-            "description": "Identifier indicating the selected choice."
+            "description": "The selection identifier (true for Yes, false for No)"
           },
           "Description": {
             "type": "string",
-            "description": "Text describing the choice."
+            "description": "Description of the selection option"
           },
           "IsSelected": {
             "type": "boolean",
-            "description": "Indicates if the choice is selected."
+            "description": "Indicates if this option is selected"
           }
         },
         "required": [
           "Id",
-          "Description",
-          "IsSelected"
+          "Description"
         ]
       }
     }

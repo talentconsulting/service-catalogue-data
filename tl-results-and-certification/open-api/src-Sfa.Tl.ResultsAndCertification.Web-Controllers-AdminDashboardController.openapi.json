@@ -1,0 +1,243 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Admin Dashboard API",
+    "description": "API for managing administrative actions in the TL Results and Certification system.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/admin/home": {
+      "get": {
+        "operationId": "GetAdminHome",
+        "summary": "Redirects to the Home route.",
+        "responses": {
+          "302": {
+            "description": "Redirect to the Home route."
+          }
+        }
+      }
+    },
+    "/admin/search-learner-records-clear": {
+      "get": {
+        "operationId": "AdminSearchLearnersRecordsClearAsync",
+        "summary": "Clears cached search data and redirects to learner record search.",
+        "responses": {
+          "302": {
+            "description": "Redirect to learner record search."
+          }
+        }
+      }
+    },
+    "/admin/search-learner-records/{pageNumber}": {
+      "get": {
+        "operationId": "AdminSearchLearnersAsync",
+        "summary": "Search for learner records.",
+        "parameters": [
+          {
+            "name": "pageNumber",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results for learners."
+          },
+          "404": {
+            "description": "Learner search results not found."
+          }
+        }
+      }
+    },
+    "/admin/search-learner-records-search-key": {
+      "post": {
+        "operationId": "AdminSearchLearnersRecordsApplySearchKeyAsync",
+        "summary": "Apply search key to filter learner records.",
+        "requestBody": {
+          "description": "Search key details.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSearchLearnerCriteriaViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to learner search results."
+          }
+        }
+      }
+    },
+    "/admin/search-learner-records-clear-key": {
+      "post": {
+        "operationId": "AdminSearchLearnerClearKeyAsync",
+        "summary": "Clears the search key used for filtering learner records.",
+        "responses": {
+          "302": {
+            "description": "Redirects to refreshed results."
+          }
+        }
+      }
+    },
+    "/admin/search-learner-records-filters": {
+      "post": {
+        "operationId": "AdminSearchLearnerRecordsApplyFiltersAsync",
+        "summary": "Apply filters to refine learner records search criteria.",
+        "requestBody": {
+          "description": "Filter criteria.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminSearchLearnerFiltersViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirects to search results with applied filters."
+          }
+        }
+      }
+    },
+    "/admin/search-learner-records-clear-filters": {
+      "post": {
+        "operationId": "AdminSearchLearnerClearFiltersAsync",
+        "summary": "Clears all applied filters from the search criteria.",
+        "responses": {
+          "302": {
+            "description": "Redirects to refreshed results."
+          }
+        }
+      }
+    },
+    "/admin/learner-record/{pathwayId}": {
+      "get": {
+        "operationId": "AdminLearnerRecordAsync",
+        "summary": "Retrieve learner record by pathway ID.",
+        "parameters": [
+          {
+            "name": "pathwayId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Learner record details retrieved successfully."
+          },
+          "404": {
+            "description": "Learner record not found."
+          }
+        }
+      }
+    },
+    "/admin/change-start-year-clear/{registrationPathwayId}": {
+      "get": {
+        "operationId": "ChangeStartYearClearAsync",
+        "summary": "Clears cached data for start year change.",
+        "parameters": [
+          {
+            "name": "registrationPathwayId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to start year change form."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AdminSearchLearnerCriteriaViewModel": {
+        "type": "object",
+        "properties": {
+          "SearchLearnerFilters": {
+            "$ref": "#/components/schemas/AdminSearchLearnerFiltersViewModel"
+          },
+          "SearchKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "PageNumber": {
+            "type": "integer",
+            "nullable": true
+          },
+          "IsSearchKeyApplied": {
+            "type": "boolean"
+          },
+          "AreFiltersApplied": {
+            "type": "boolean"
+          }
+        }
+      },
+      "AdminSearchLearnerFiltersViewModel": {
+        "type": "object",
+        "properties": {
+          "Search": {
+            "type": "string"
+          },
+          "SelectedProviderId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "AwardingOrganisations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Id": {
+                  "type": "integer"
+                },
+                "Name": {
+                  "type": "string"
+                },
+                "IsSelected": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "AcademicYears": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Id": {
+                  "type": "integer"
+                },
+                "Name": {
+                  "type": "string"
+                },
+                "IsSelected": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "IsApplyFiltersSelected": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

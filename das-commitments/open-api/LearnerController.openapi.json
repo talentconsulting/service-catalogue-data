@@ -1,14 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Learners API",
+    "title": "Learner API",
     "version": "1.0.0"
   },
   "paths": {
     "/api/learners": {
       "get": {
         "summary": "Get all learners",
-        "operationId": "GetAllLearners",
+        "operationId": "getAllLearners",
         "parameters": [
           {
             "name": "sinceTime",
@@ -18,7 +18,7 @@
               "type": "string",
               "format": "date-time"
             },
-            "description": "Filter learners since the specified time."
+            "description": "Filter learners created or updated since the provided timestamp."
           },
           {
             "name": "batch_number",
@@ -26,9 +26,10 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "format": "int32",
               "default": 1
             },
-            "description": "The specific batch number to retrieve."
+            "description": "The batch number to retrieve."
           },
           {
             "name": "batch_size",
@@ -36,14 +37,15 @@
             "required": false,
             "schema": {
               "type": "integer",
+              "format": "int32",
               "default": 1000
             },
-            "description": "The size of each batch to retrieve."
+            "description": "The size of the batch."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful operation",
+            "description": "A list of learners and their related information.",
             "content": {
               "application/json": {
                 "schema": {
@@ -67,13 +69,16 @@
         "type": "object",
         "properties": {
           "BatchNumber": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "BatchSize": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "TotalNumberOfBatches": {
-            "type": "integer"
+            "type": "integer",
+            "format": "int32"
           },
           "Learners": {
             "type": "array",
@@ -81,7 +86,13 @@
               "$ref": "#/components/schemas/Learner"
             }
           }
-        }
+        },
+        "required": [
+          "BatchNumber",
+          "BatchSize",
+          "TotalNumberOfBatches",
+          "Learners"
+        ]
       },
       "Learner": {
         "type": "object",
@@ -159,7 +170,20 @@
           "EmployerName": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "ApprenticeshipId",
+          "FirstName",
+          "LastName",
+          "ULN",
+          "TrainingCode",
+          "TrainingCourseVersion",
+          "TrainingCourseVersionConfirmed",
+          "UKPRN",
+          "CreatedOn",
+          "PaymentStatus",
+          "EmployerAccountId"
+        ]
       },
       "PaymentStatus": {
         "type": "string",

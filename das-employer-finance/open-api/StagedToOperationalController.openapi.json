@@ -8,10 +8,13 @@
     "/api/staging/staged-to-operational": {
       "post": {
         "summary": "Transfer staged to operational",
+        "description": "Transfers staged data to operational for a given account and period end.",
         "operationId": "stagedToOperational",
         "security": [
           {
-            "ReadAllEmployerAccountBalances": []
+            "ApiRoles": [
+              "ReadAllEmployerAccountBalances"
+            ]
           }
         ],
         "requestBody": {
@@ -26,7 +29,7 @@
         },
         "responses": {
           "201": {
-            "description": "Created",
+            "description": "Successfully transferred staged data to operational.",
             "content": {
               "application/json": {
                 "schema": {
@@ -39,7 +42,8 @@
                       "type": "string"
                     },
                     "processedCount": {
-                      "type": "integer"
+                      "type": "integer",
+                      "format": "int32"
                     }
                   },
                   "required": [
@@ -52,33 +56,45 @@
             }
           },
           "400": {
-            "description": "Bad Request",
+            "description": "Bad Request. The payload is missing or contains validation errors.",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                  "oneOf": [
+                    {
+                      "type": "string",
+                      "description": "Validation error message."
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    }
+                  ]
                 }
               }
             }
           },
           "500": {
-            "description": "Internal Server Error",
+            "description": "Internal Server Error. An error occurred during the operation.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
                     "isSuccess": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "enum": [
+                        false
+                      ]
                     },
                     "message": {
                       "type": "string"
                     },
                     "processedCount": {
-                      "type": "integer"
+                      "type": "integer",
+                      "format": "int32"
                     }
                   },
                   "required": [
@@ -118,10 +134,10 @@
       }
     },
     "securitySchemes": {
-      "ReadAllEmployerAccountBalances": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+      "ApiRoles": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
       }
     }
   }

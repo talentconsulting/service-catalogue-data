@@ -1,0 +1,117 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Provider Registrations API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/ProviderRegistrations/GetAvailableStartYears": {
+      "get": {
+        "operationId": "GetAvailableStartYears",
+        "description": "Retrieves a list of available start years.",
+        "responses": {
+          "200": {
+            "description": "A list of available start years.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "integer",
+                    "format": "int32"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ProviderRegistrations/GetRegistrations": {
+      "post": {
+        "operationId": "GetRegistrations",
+        "description": "Fetches provider registration data based on the request.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetProviderRegistrationsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Provider registration data response.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DataExportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DataExportResponse": {
+        "type": "object",
+        "properties": {
+          "isDataFound": {
+            "type": "boolean"
+          },
+          "blobUniqueReference": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fileSize": {
+            "type": "number",
+            "format": "double"
+          },
+          "componentType": {
+            "$ref": "#/components/schemas/ComponentType"
+          }
+        },
+        "required": [
+          "isDataFound",
+          "blobUniqueReference",
+          "fileSize",
+          "componentType"
+        ]
+      },
+      "GetProviderRegistrationsRequest": {
+        "type": "object",
+        "properties": {
+          "providerUkprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startYear": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "requestedBy": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "providerUkprn",
+          "startYear",
+          "requestedBy"
+        ]
+      },
+      "ComponentType": {
+        "type": "string",
+        "enum": [
+          "NotSpecified",
+          "Core",
+          "Specialism"
+        ]
+      }
+    }
+  }
+}

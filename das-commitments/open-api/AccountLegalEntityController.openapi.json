@@ -1,29 +1,30 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Account Legal Entity API",
+    "title": "CommitmentsV2 API",
     "version": "1.0.0"
   },
   "paths": {
     "/api/AccountLegalEntity/{AccountLegalEntityId}": {
       "get": {
+        "summary": "Fetch Account Legal Entity Details",
+        "description": "Retrieves details of the specified account legal entity by ID.",
         "operationId": "GetAccountLegalEntity",
-        "summary": "Retrieve details of a specific Account Legal Entity.",
         "parameters": [
           {
             "name": "AccountLegalEntityId",
             "in": "path",
             "required": true,
+            "description": "The ID of the account legal entity.",
             "schema": {
               "type": "integer",
               "format": "int64"
-            },
-            "description": "The ID of the Account Legal Entity."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response.",
+            "description": "Account Legal Entity Details",
             "content": {
               "application/json": {
                 "schema": {
@@ -33,16 +34,15 @@
             }
           },
           "400": {
-            "description": "Bad request. Validation errors occurred."
+            "description": "Bad Request"
           },
           "404": {
-            "description": "Account Legal Entity not found."
+            "description": "Not Found"
           }
         },
         "security": [
           {
-            "type": "http",
-            "scheme": "bearer"
+            "bearerAuth": []
           }
         ]
       }
@@ -56,24 +56,28 @@
           "AccountId": {
             "type": "integer",
             "format": "int64",
-            "description": "The Account ID associated with the legal entity."
+            "description": "The ID of the account."
           },
           "MaLegalEntityId": {
             "type": "integer",
             "format": "int64",
-            "description": "The MA Legal Entity ID."
+            "description": "The ID of the legal entity associated with the account."
           },
           "AccountName": {
             "type": "string",
-            "description": "The account's name."
+            "description": "The name of the account."
           },
           "LegalEntityName": {
             "type": "string",
             "description": "The name of the legal entity."
           },
           "LevyStatus": {
-            "$ref": "#/components/schemas/ApprenticeshipEmployerType",
-            "description": "The Levy status of the employer."
+            "type": "string",
+            "enum": [
+              "NonLevy",
+              "Levy"
+            ],
+            "description": "The levy status of the legal entity."
           }
         },
         "required": [
@@ -83,14 +87,13 @@
           "LegalEntityName",
           "LevyStatus"
         ]
-      },
-      "ApprenticeshipEmployerType": {
-        "type": "string",
-        "description": "The type of apprenticeship employer.",
-        "enum": [
-          "NonLevy",
-          "Levy"
-        ]
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
   }

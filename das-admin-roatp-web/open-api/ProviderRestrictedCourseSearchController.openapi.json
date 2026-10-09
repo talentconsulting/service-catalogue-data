@@ -2,13 +2,14 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Provider Restricted Course Search API",
-    "version": "1.0.0"
+    "version": "1.0.0",
+    "description": "API for managing restricted courses for providers."
   },
   "paths": {
     "/providers/{ukprn}/restricted-courses/add": {
       "get": {
-        "summary": "Get unrestricted courses for a provider.",
-        "operationId": "getProviderUnrestrictedCourses",
+        "summary": "Display the restricted course search page.",
+        "operationId": "getRestrictedCourseSearch",
         "parameters": [
           {
             "name": "ukprn",
@@ -16,22 +17,25 @@
             "required": true,
             "schema": {
               "type": "integer",
-              "format": "int32"
-            },
-            "description": "The UKPRN of the provider."
+              "description": "Unique identifier for the provider."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with unrestricted courses.",
+            "description": "Successful response displaying the restricted course search page.",
             "content": {
               "text/html": {
-                "example": "Rendered HTML view of courses."
+                "examples": {
+                  "example": {
+                    "description": "HTML view displayed."
+                  }
+                }
               }
             }
           },
           "404": {
-            "description": "Provider or courses not found."
+            "description": "Provider not found or no courses available."
           }
         },
         "security": [
@@ -43,8 +47,8 @@
         ]
       },
       "post": {
-        "summary": "Search and select unrestricted courses for a provider.",
-        "operationId": "postProviderUnrestrictedCourses",
+        "summary": "Submit selected course for restriction.",
+        "operationId": "postRestrictedCourseSearch",
         "parameters": [
           {
             "name": "ukprn",
@@ -52,42 +56,37 @@
             "required": true,
             "schema": {
               "type": "integer",
-              "format": "int32"
-            },
-            "description": "The UKPRN of the provider."
+              "description": "Unique identifier for the provider."
+            }
           }
         ],
         "requestBody": {
-          "required": true,
+          "description": "Submit model for restricted course search.",
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ProviderRestrictedCourseSearchSubmitModel"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "302": {
-            "description": "Redirects to the next step based on the course selection.",
-            "headers": {
-              "Location": {
-                "description": "The URL for the redirect.",
-                "schema": {
-                  "type": "string",
-                  "format": "uri"
-                }
-              }
-            }
+            "description": "Redirects based on whether the provider-course relationship exists."
           },
           "404": {
-            "description": "Course or provider not found."
+            "description": "Selected course or provider not found."
           },
           "400": {
-            "description": "Validation errors in the submitted data.",
+            "description": "Validation errors occurred.",
             "content": {
-              "text/html": {
-                "example": "Rendered HTML view with validation errors."
+              "application/json": {
+                "examples": {
+                  "example": {
+                    "description": "Validation failed for the given input."
+                  }
+                }
               }
             }
           }
@@ -110,17 +109,9 @@
           "SelectedLarsCode": {
             "type": "string",
             "nullable": true,
-            "description": "The LARS code of the selected course."
+            "description": "LARS code for the selected course."
           }
-        },
-        "additionalProperties": false
-      }
-    },
-    "securitySchemes": {
-      "roles": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "Role-based authorization for RoatpAdminTeam."
+        }
       }
     }
   }

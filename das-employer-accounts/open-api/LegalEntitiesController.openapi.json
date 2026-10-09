@@ -7,7 +7,7 @@
   "paths": {
     "/api/accounts/{accountId}/legalentities": {
       "get": {
-        "summary": "Get Legal Entities",
+        "summary": "Get legal entities for an account",
         "operationId": "GetLegalEntities",
         "parameters": [
           {
@@ -27,44 +27,44 @@
             "schema": {
               "type": "boolean"
             },
-            "description": "Flag to include detailed information."
+            "description": "Whether to include details of legal entities."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved legal entities.",
+            "description": "Successful response with legal entities",
             "content": {
               "application/json": {
                 "schema": {
-                  "oneOf": [
-                    {
-                      "$ref": "#/components/schemas/ResourceList"
-                    },
-                    {
-                      "type": "array",
-                      "items": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
                         "$ref": "#/components/schemas/LegalEntity"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ResourceList"
                       }
-                    }
-                  ]
+                    ]
+                  }
                 }
               }
             }
           },
           "404": {
-            "description": "Legal entities not found."
+            "description": "Legal entities not found"
           }
         },
         "security": [
           {
-            "ApiRoles_ReadAllEmployerAccountBalances": []
+            "ApiKeyAuth": []
           }
         ]
       }
     },
     "/api/accounts/{accountId}/legalentities/{legalEntityId}": {
       "get": {
-        "summary": "Get Legal Entity",
+        "summary": "Get a specific legal entity by ID",
         "operationId": "GetLegalEntity",
         "parameters": [
           {
@@ -85,7 +85,7 @@
               "type": "integer",
               "format": "int64"
             },
-            "description": "The unique identifier for the legal entity."
+            "description": "The legal entity ID."
           },
           {
             "name": "includeAllAgreements",
@@ -94,12 +94,12 @@
             "schema": {
               "type": "boolean"
             },
-            "description": "Flag to include all agreements."
+            "description": "Whether to include all agreements for the legal entity."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successfully retrieved the legal entity.",
+            "description": "Successful response with legal entity details",
             "content": {
               "application/json": {
                 "schema": {
@@ -109,12 +109,12 @@
             }
           },
           "404": {
-            "description": "The legal entity was not found."
+            "description": "Legal entity not found"
           }
         },
         "security": [
           {
-            "ApiRoles_ReadAllEmployerAccountBalances": []
+            "ApiKeyAuth": []
           }
         ]
       }
@@ -145,14 +145,14 @@
       },
       "LegalEntity": {
         "type": "object",
-        "properties": {}
+        "additionalProperties": false
       }
     },
     "securitySchemes": {
-      "ApiRoles_ReadAllEmployerAccountBalances": {
-        "type": "http",
-        "scheme": "bearer",
-        "bearerFormat": "JWT"
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
       }
     }
   }

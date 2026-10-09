@@ -7,10 +7,10 @@
   "paths": {
     "/api/applications/forms": {
       "get": {
-        "summary": "Retrieve all application forms",
+        "operationId": "GetAllForms",
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of Application Forms",
             "content": {
               "application/json": {
                 "schema": {
@@ -27,7 +27,7 @@
     },
     "/api/applications/forms/{formVersionId}/sections/{sectionId}/pages/{pageOrder}": {
       "get": {
-        "summary": "Retrieve application page by ID",
+        "operationId": "GetPageById",
         "parameters": [
           {
             "name": "formVersionId",
@@ -58,7 +58,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Page Details",
             "content": {
               "application/json": {
                 "schema": {
@@ -75,7 +75,7 @@
     },
     "/api/applications/{applicationId}/metadata": {
       "get": {
-        "summary": "Retrieve metadata for an application by ID",
+        "operationId": "GetApplicationMetadataById",
         "parameters": [
           {
             "name": "applicationId",
@@ -89,7 +89,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Application Metadata",
             "content": {
               "application/json": {
                 "schema": {
@@ -106,7 +106,7 @@
     },
     "/api/applications/forms/{formVersionId}": {
       "get": {
-        "summary": "Retrieve application form version by ID",
+        "operationId": "GetFormVersionById",
         "parameters": [
           {
             "name": "formVersionId",
@@ -120,7 +120,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "Form Details",
             "content": {
               "application/json": {
                 "schema": {
@@ -137,7 +137,7 @@
     },
     "/api/applications/organisations/{organisationId}": {
       "get": {
-        "summary": "Retrieve applications by organisation ID",
+        "operationId": "GetApplicationsByOrganisationId",
         "parameters": [
           {
             "name": "organisationId",
@@ -151,7 +151,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of Applications for Organisation",
             "content": {
               "application/json": {
                 "schema": {
@@ -168,7 +168,7 @@
     },
     "/api/applications/{applicationId}/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/answers": {
       "get": {
-        "summary": "Retrieve answers for an application page by ID",
+        "operationId": "GetPageAnswersById",
         "parameters": [
           {
             "name": "applicationId",
@@ -180,7 +180,7 @@
             }
           },
           {
-            "name": "pageId",
+            "name": "formVersionId",
             "in": "path",
             "required": true,
             "schema": {
@@ -198,7 +198,7 @@
             }
           },
           {
-            "name": "formVersionId",
+            "name": "pageId",
             "in": "path",
             "required": true,
             "schema": {
@@ -209,7 +209,7 @@
         ],
         "responses": {
           "200": {
-            "description": "OK",
+            "description": "List of answers for the page",
             "content": {
               "application/json": {
                 "schema": {
@@ -220,182 +220,6 @@
           },
           "500": {
             "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/applications/{applicationId}/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}": {
-      "put": {
-        "summary": "Update answers for an application page",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "formVersionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "sectionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "pageId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdatePageAnswersCommand"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmptyResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/applications": {
-      "post": {
-        "summary": "Create a new application",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateApplicationCommand"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CreateApplicationCommandResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/api/applications/{applicationId}": {
-      "get": {
-        "summary": "Retrieve an application by ID",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetApplicationByIdQueryResponse"
-                }
-              }
-            },
-            "404": {
-              "description": "Not Found"
-            },
-            "500": {
-              "description": "Internal Server Error"
-            }
-          }
-        }
-      }
-    },
-    "/api/applications/{applicationId}/submit": {
-      "put": {
-        "summary": "Submit an application by ID",
-        "parameters": [
-          {
-            "name": "applicationId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/SubmitApplicationCommand"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/EmptyResponse"
-                }
-              }
-            },
-            "404": {
-              "description": "Not Found"
-            },
-            "500": {
-              "description": "Internal Server Error"
-            }
           }
         }
       }
@@ -445,35 +269,31 @@
           "description": {
             "type": "string"
           },
-          "order": {
-            "type": "integer"
-          },
           "totalSectionPages": {
             "type": "integer"
           },
           "questions": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                "title": {
-                  "type": "string"
-                },
-                "type": {
-                  "type": "string"
-                },
-                "required": {
-                  "type": "boolean"
-                },
-                "order": {
-                  "type": "integer"
-                }
-              }
+              "$ref": "#/components/schemas/Question"
             }
+          }
+        }
+      },
+      "Question": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
           }
         }
       },
@@ -538,21 +358,7 @@
                 "name": {
                   "type": "string"
                 },
-                "createdDate": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "submittedDate": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "submitted": {
-                  "type": "boolean"
-                },
-                "owner": {
-                  "type": "string"
-                },
-                "reference": {
+                "status": {
                   "type": "string"
                 }
               }
@@ -584,15 +390,6 @@
                     "dateValue": {
                       "type": "string",
                       "format": "date"
-                    },
-                    "multipleChoiceValue": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "radioChoiceValue": {
-                      "type": "string"
                     }
                   }
                 }
@@ -600,160 +397,6 @@
             }
           }
         }
-      },
-      "UpdatePageAnswersCommand": {
-        "type": "object",
-        "properties": {
-          "pageId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "formVersionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "sectionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "applicationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "questions": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "questionId": {
-                  "type": "string",
-                  "format": "uuid"
-                },
-                "questionType": {
-                  "type": "string"
-                },
-                "answer": {
-                  "type": "object",
-                  "properties": {
-                    "textValue": {
-                      "type": "string"
-                    },
-                    "numberValue": {
-                      "type": "number"
-                    },
-                    "dateValue": {
-                      "type": "string",
-                      "format": "date"
-                    },
-                    "multipleChoiceValue": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "radioChoiceValue": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        }
-      },
-      "CreateApplicationCommand": {
-        "type": "object",
-        "properties": {
-          "title": {
-            "type": "string"
-          },
-          "owner": {
-            "type": "string"
-          },
-          "formVersionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "qualificationNumber": {
-            "type": "string"
-          },
-          "organisationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "organisationName": {
-            "type": "string"
-          },
-          "organisationUkprn": {
-            "type": "string"
-          }
-        }
-      },
-      "CreateApplicationCommandResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "isQanValid": {
-            "type": "boolean"
-          },
-          "qanValidationMessage": {
-            "type": "string"
-          }
-        }
-      },
-      "GetApplicationByIdQueryResponse": {
-        "type": "object",
-        "properties": {
-          "applicationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "formVersionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "organisationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "name": {
-            "type": "string"
-          },
-          "owner": {
-            "type": "string"
-          },
-          "reference": {
-            "type": "integer"
-          },
-          "qualificationNumber": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          }
-        }
-      },
-      "SubmitApplicationCommand": {
-        "type": "object",
-        "properties": {
-          "applicationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "submittedBy": {
-            "type": "string"
-          },
-          "submittedByEmail": {
-            "type": "string"
-          }
-        }
-      },
-      "EmptyResponse": {
-        "type": "object",
-        "additionalProperties": false
       }
     }
   }

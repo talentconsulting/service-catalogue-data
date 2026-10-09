@@ -1,0 +1,154 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Change Restricted Course Last Start Date API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers/{ukprn}/restricted-courses/{larsCode}/change-restriction/set-last-start-date": {
+      "get": {
+        "summary": "Get the form for changing the restricted course last start date.",
+        "operationId": "GetChangeRestrictedCourseLastStartDate",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The unique provider reference number (UKPRN)."
+          },
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The LARS code of the restricted course."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The form to change the restricted course last start date.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found if the course is not valid for last start date change."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "RestrictedCourseManagement"
+        ]
+      },
+      "post": {
+        "summary": "Set a new last start date for the restricted course.",
+        "operationId": "PostChangeRestrictedCourseLastStartDate",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The unique provider reference number (UKPRN)."
+          },
+          {
+            "name": "larsCode",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The LARS code of the restricted course."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetLastDateStartsSubmitModel"
+              }
+            }
+          },
+          "description": "The data required to set a new last start date for the restricted course."
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to the provider restricted apprenticeships page on success."
+          },
+          "404": {
+            "description": "Not found if the course is not valid for last start date change."
+          },
+          "400": {
+            "description": "Validation errors if the submitted data is invalid."
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "tags": [
+          "RestrictedCourseManagement"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SetLastDateStartsSubmitModel": {
+        "type": "object",
+        "properties": {
+          "Day": {
+            "type": "string",
+            "nullable": true,
+            "description": "Day component of the last start date."
+          },
+          "Month": {
+            "type": "string",
+            "nullable": true,
+            "description": "Month component of the last start date."
+          },
+          "Year": {
+            "type": "string",
+            "nullable": true,
+            "description": "Year component of the last start date."
+          },
+          "LarsCode": {
+            "type": "string",
+            "nullable": true,
+            "description": "The LARS code of the restricted course."
+          },
+          "CourseLastDateStarts": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "The existing last start date for the course."
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

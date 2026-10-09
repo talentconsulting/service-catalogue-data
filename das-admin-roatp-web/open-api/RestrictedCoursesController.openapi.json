@@ -7,13 +7,14 @@
   "paths": {
     "/restricted-courses": {
       "get": {
-        "operationId": "GetRestrictedCourses",
-        "summary": "Retrieve filtered list of restricted courses.",
+        "summary": "Get restricted courses",
+        "description": "Retrieves a list of restricted courses, optionally filtered by various criteria.",
+        "operationId": "getRestrictedCourses",
         "parameters": [
           {
             "name": "SearchTerm",
             "in": "query",
-            "description": "Search term for filtering courses.",
+            "description": "Search term to filter courses.",
             "required": false,
             "schema": {
               "type": "string"
@@ -22,7 +23,7 @@
           {
             "name": "LearningType",
             "in": "query",
-            "description": "Filter courses by learning type.",
+            "description": "Filter by learning type.",
             "required": false,
             "schema": {
               "type": "array",
@@ -44,7 +45,7 @@
         ],
         "responses": {
           "200": {
-            "description": "List of restricted courses with pagination.",
+            "description": "A list of restricted courses.",
             "content": {
               "application/json": {
                 "schema": {
@@ -52,61 +53,13 @@
                 }
               }
             }
-          },
-          "400": {
-            "description": "Invalid request parameters."
-          },
-          "500": {
-            "description": "Server error."
           }
-        },
-        "security": [
-          {
-            "roles": [
-              "RoatpAdminTeam"
-            ]
-          }
-        ]
+        }
       }
     }
   },
   "components": {
     "schemas": {
-      "RestrictedCoursesViewModel": {
-        "type": "object",
-        "properties": {
-          "HasActiveFilters": {
-            "type": "boolean"
-          },
-          "Filters": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CourseFilterViewModel"
-            }
-          },
-          "TotalCount": {
-            "type": "integer"
-          },
-          "Courses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RestrictedCourseItemViewModel"
-            }
-          },
-          "Pagination": {
-            "type": "object",
-            "properties": {}
-          }
-        }
-      },
-      "CourseFilterViewModel": {
-        "type": "object",
-        "properties": {}
-      },
-      "RestrictedCourseItemViewModel": {
-        "type": "object",
-        "properties": {}
-      },
       "LearningType": {
         "type": "string",
         "enum": [
@@ -114,6 +67,37 @@
           "ApprenticeshipUnit",
           "FoundationApprenticeship"
         ]
+      },
+      "RestrictedCoursesViewModel": {
+        "type": "object",
+        "properties": {
+          "HasActiveFilters": {
+            "type": "boolean"
+          },
+          "Filters": {
+            "type": "string",
+            "description": "Filters applied to the courses."
+          },
+          "TotalCount": {
+            "type": "integer",
+            "description": "Total number of restricted courses."
+          },
+          "Courses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RestrictedCourseItemViewModel"
+            },
+            "description": "List of paginated courses."
+          },
+          "Pagination": {
+            "type": "string",
+            "description": "Pagination details."
+          }
+        }
+      },
+      "RestrictedCourseItemViewModel": {
+        "type": "object",
+        "description": "A restricted course item."
       }
     }
   }

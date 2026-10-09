@@ -1,0 +1,169 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Provider Restricted Apprenticeships API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/providers/{ukprn}/restricted-courses": {
+      "get": {
+        "summary": "Get restricted courses for a provider",
+        "operationId": "getRestrictedCoursesForProvider",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The UKPRN of the provider"
+          },
+          {
+            "name": "SearchTerm",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Optional search term to filter courses"
+          },
+          {
+            "name": "DeliveryStatus",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/DeliveryStatus"
+              }
+            },
+            "description": "Optional filter for delivery status of courses"
+          },
+          {
+            "name": "PageNumber",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "The page number for pagination"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved the list of restricted courses",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ProviderName": {
+                      "type": "string"
+                    },
+                    "Courses": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/ProviderRestrictedApprenticeshipModel"
+                      }
+                    },
+                    "TotalCount": {
+                      "type": "integer"
+                    },
+                    "Pagination": {
+                      "$ref": "#/components/schemas/PaginationModel"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Provider not found or no courses available"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "GetProviderRestrictedApprenticeshipsRequestModel": {
+        "type": "object",
+        "properties": {
+          "SearchTerm": {
+            "type": "string",
+            "default": ""
+          },
+          "DeliveryStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeliveryStatus"
+            }
+          },
+          "PageNumber": {
+            "type": "integer",
+            "default": 1
+          },
+          "HasSearchTermFilter": {
+            "type": "boolean",
+            "description": "Indicates if a search term filter is applied"
+          },
+          "HasDeliveryStatusFilter": {
+            "type": "boolean",
+            "description": "Indicates if a delivery status filter is applied"
+          },
+          "HasFilters": {
+            "type": "boolean",
+            "description": "Indicates if any filters are applied"
+          }
+        }
+      },
+      "DeliveryStatus": {
+        "type": "string",
+        "enum": [
+          "OpenToNewStarts",
+          "LastStartDateAdded",
+          "ClosedToNewStarts"
+        ]
+      },
+      "ProviderRestrictedApprenticeshipModel": {
+        "type": "object",
+        "properties": {
+          "LarsCode": {
+            "type": "integer"
+          },
+          "Title": {
+            "type": "string"
+          },
+          "Level": {
+            "type": "integer"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/DeliveryStatus"
+          },
+          "ChangeUrl": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      },
+      "PaginationModel": {
+        "type": "object",
+        "properties": {
+          "CurrentPage": {
+            "type": "integer"
+          },
+          "TotalPages": {
+            "type": "integer"
+          },
+          "NextPageUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "PreviousPageUrl": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    }
+  }
+}

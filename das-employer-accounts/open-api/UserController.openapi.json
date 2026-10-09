@@ -1,13 +1,17 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "User Management API",
+    "title": "Employer Accounts API",
     "version": "1.0.0"
   },
   "paths": {
     "/api/user": {
       "get": {
+        "tags": [
+          "User"
+        ],
         "summary": "Get User by Email",
+        "operationId": "GetUserByEmail",
         "parameters": [
           {
             "name": "email",
@@ -21,11 +25,12 @@
         ],
         "responses": {
           "200": {
-            "description": "User found",
+            "description": "User retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
+                  "type": "object",
+                  "properties": {}
                 }
               }
             }
@@ -33,12 +38,21 @@
           "404": {
             "description": "User not found"
           }
-        }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadUserAccounts": []
+          }
+        ]
       }
     },
     "/api/user/by-ref/{userRef}": {
       "get": {
+        "tags": [
+          "User"
+        ],
         "summary": "Get User by Reference",
+        "operationId": "GetUserByRef",
         "parameters": [
           {
             "name": "userRef",
@@ -51,11 +65,12 @@
         ],
         "responses": {
           "200": {
-            "description": "User found",
+            "description": "User retrieved successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
+                  "type": "object",
+                  "properties": {}
                 }
               }
             }
@@ -63,12 +78,21 @@
           "404": {
             "description": "User not found"
           }
-        }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadUserAccounts": []
+          }
+        ]
       }
     },
     "/api/user/upsert": {
       "put": {
-        "summary": "Upsert Registered User",
+        "tags": [
+          "User"
+        ],
+        "summary": "Upsert a Registered User",
+        "operationId": "UpsertRegisteredUser",
         "requestBody": {
           "required": true,
           "content": {
@@ -86,63 +110,51 @@
           "500": {
             "description": "Internal server error"
           }
-        }
+        },
+        "security": [
+          {
+            "ApiRoles.ReadUserAccounts": []
+          }
+        ]
       }
     }
   },
   "components": {
     "schemas": {
-      "UserResponse": {
-        "type": "object",
-        "properties": {
-          "userRef": {
-            "type": "string"
-          },
-          "firstName": {
-            "type": "string"
-          },
-          "lastName": {
-            "type": "string"
-          },
-          "email": {
-            "type": "string",
-            "format": "email"
-          }
-        },
-        "required": [
-          "userRef",
-          "firstName",
-          "lastName",
-          "email"
-        ]
-      },
       "UpsertRegisteredUserCommand": {
         "type": "object",
         "properties": {
-          "userRef": {
+          "UserRef": {
             "type": "string"
           },
-          "firstName": {
+          "FirstName": {
             "type": "string"
           },
-          "lastName": {
+          "LastName": {
             "type": "string"
           },
-          "emailAddress": {
+          "EmailAddress": {
             "type": "string",
             "format": "email"
           },
-          "correlationId": {
+          "CorrelationId": {
             "type": "string"
           }
         },
         "required": [
-          "userRef",
-          "firstName",
-          "lastName",
-          "emailAddress",
-          "correlationId"
+          "UserRef",
+          "FirstName",
+          "LastName",
+          "EmailAddress",
+          "CorrelationId"
         ]
+      }
+    },
+    "securitySchemes": {
+      "ApiRoles.ReadUserAccounts": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
       }
     }
   }

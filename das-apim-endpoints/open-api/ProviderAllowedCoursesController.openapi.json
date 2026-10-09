@@ -2,17 +2,14 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Provider Allowed Courses API",
-    "version": "1.0.0",
-    "description": "API for managing provider allowed courses."
+    "description": "API for managing Provider Allowed Courses.",
+    "version": "1.0.0"
   },
   "paths": {
     "/providers/{ukprn}/allowed-courses/{larsCode}": {
       "get": {
-        "summary": "Get details of an allowed course",
-        "operationId": "getProviderAllowedCourseDetails",
-        "tags": [
-          "Provider Allowed Courses"
-        ],
+        "summary": "Get Details for a Specific Allowed Course",
+        "operationId": "GetProviderAllowedCourseDetails",
         "parameters": [
           {
             "name": "ukprn",
@@ -21,7 +18,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "UKPRN of the provider"
+            "description": "Unique identifier for the provider."
           },
           {
             "name": "larsCode",
@@ -30,12 +27,12 @@
             "schema": {
               "type": "string"
             },
-            "description": "LARS code of the course"
+            "description": "LARS code of the course."
           }
         ],
         "responses": {
           "200": {
-            "description": "Details of the allowed course",
+            "description": "Details for the requested course.",
             "content": {
               "application/json": {
                 "schema": {
@@ -45,18 +42,15 @@
             }
           },
           "204": {
-            "description": "No course found with specified details"
+            "description": "No content if the course does not exist."
           }
         }
       }
     },
     "/providers/{ukprn}/allowed-courses": {
       "get": {
-        "summary": "Get all allowed courses for provider",
-        "operationId": "getProviderAllowedCourses",
-        "tags": [
-          "Provider Allowed Courses"
-        ],
+        "summary": "Get All Allowed Courses for a Provider",
+        "operationId": "GetProviderAllowedCourses",
         "parameters": [
           {
             "name": "ukprn",
@@ -65,7 +59,7 @@
             "schema": {
               "type": "integer"
             },
-            "description": "UKPRN of the provider"
+            "description": "Unique identifier for the provider."
           },
           {
             "name": "courseType",
@@ -74,12 +68,12 @@
             "schema": {
               "$ref": "#/components/schemas/CourseType"
             },
-            "description": "Filter courses by type"
+            "description": "Filter courses by a specific type."
           }
         ],
         "responses": {
           "200": {
-            "description": "List of allowed courses",
+            "description": "List of allowed courses for the provider.",
             "content": {
               "application/json": {
                 "schema": {
@@ -105,7 +99,8 @@
           },
           "LastDateStarts": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "IsStartRestricted": {
             "type": "boolean"
@@ -113,7 +108,8 @@
         },
         "required": [
           "UserId",
-          "UserDisplayName"
+          "UserDisplayName",
+          "IsStartRestricted"
         ]
       },
       "PatchProviderAllowedCourseRequestModel": {
@@ -121,16 +117,21 @@
         "properties": {
           "LastDateStarts": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           }
         }
       },
-      "CourseType": {
-        "type": "string",
-        "enum": [
-          "Apprenticeship",
-          "ShortCourse"
-        ]
+      "GetProviderAllowedCoursesResponse": {
+        "type": "object",
+        "properties": {
+          "AllowedCourses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderAllowedCourseModel"
+            }
+          }
+        }
       },
       "ProviderAllowedCourseModel": {
         "type": "object",
@@ -146,30 +147,27 @@
           },
           "LastDateStarts": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "IsClosedToNewStarts": {
             "type": "boolean"
           }
-        }
-      },
-      "GetProviderAllowedCoursesResponse": {
-        "type": "object",
-        "properties": {
-          "AllowedCourses": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProviderAllowedCourseModel"
-            }
-          }
-        }
+        },
+        "required": [
+          "LarsCode",
+          "Title",
+          "Level",
+          "IsClosedToNewStarts"
+        ]
       },
       "GetProviderAllowedCourseDetailsResponse": {
         "type": "object",
         "properties": {
           "LastDateStarts": {
             "type": "string",
-            "format": "date-time"
+            "format": "date-time",
+            "nullable": true
           },
           "IsCourseRestricted": {
             "type": "boolean"
@@ -181,13 +179,13 @@
             "type": "boolean"
           }
         }
-      }
-    },
-    "securitySchemes": {
-      "headerAuth": {
-        "type": "apiKey",
-        "name": "X-RequestingUserId",
-        "in": "header"
+      },
+      "CourseType": {
+        "type": "string",
+        "enum": [
+          "Apprenticeship",
+          "ShortCourse"
+        ]
       }
     }
   }

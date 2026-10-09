@@ -7,68 +7,77 @@
   "paths": {
     "/providers/{ukprn}/restricted-courses/add/confirm": {
       "get": {
-        "summary": "View confirmation page for adding a restricted course to a provider",
-        "operationId": "getConfirmProviderRestrictedCourse",
+        "summary": "Get confirmation view for adding a restricted course to the provider.",
+        "operationId": "GetConfirmProviderRestrictedCourse",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
-            "description": "The UKPRN of the provider",
+            "description": "Unique Provider Reference Number (UKPRN) of the provider.",
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Confirmation page loaded successfully"
+            "description": "The confirmation view is returned.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
           },
           "302": {
-            "description": "Redirected to the provider restricted courses route"
+            "description": "Redirect to the Provider Restricted Apprenticeships page if session data is missing."
           }
         },
         "security": [
           {
-            "Roles": [
+            "RolesAuth": [
               "RoatpAdminTeam"
             ]
           }
         ]
       },
       "post": {
-        "summary": "Confirm and add a restricted course to the provider",
-        "operationId": "postConfirmProviderRestrictedCourse",
+        "summary": "Add a course to the provider's restricted apprenticeship list.",
+        "operationId": "PostConfirmProviderRestrictedCourse",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
-            "description": "The UKPRN of the provider",
+            "description": "Unique Provider Reference Number (UKPRN) of the provider.",
             "schema": {
-              "type": "integer"
+              "type": "integer",
+              "format": "int32"
             }
           }
         ],
+        "responses": {
+          "302": {
+            "description": "Redirect to the Provider Restricted Apprenticeships page after successfully adding the course."
+          }
+        },
         "requestBody": {
-          "description": "Optional body for upserting provider allowed course",
+          "required": true,
+          "description": "The request includes user details and a session-based LARS code.",
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/UpsertProviderAllowedCourseRequest"
               }
             }
-          },
-          "required": false
-        },
-        "responses": {
-          "302": {
-            "description": "Redirected to the provider restricted courses route"
           }
         },
         "security": [
           {
-            "Roles": [
+            "RolesAuth": [
               "RoatpAdminTeam"
             ]
           }
@@ -83,30 +92,30 @@
         "properties": {
           "UserId": {
             "type": "string",
-            "description": "The ID of the user making the request"
+            "description": "The ID of the user making the request."
           },
           "UserDisplayName": {
             "type": "string",
-            "description": "The display name of the user making the request"
+            "description": "The display name of the user making the request."
           },
           "LastDateStarts": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "format": "date-time",
-            "description": "The last date starts restriction, if applicable"
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "description": "The last date for course starts. Null implies no restrictions."
           },
           "IsStartRestricted": {
             "type": "boolean",
-            "description": "Indicates if course starts are restricted"
+            "description": "Indicates if the course starts are restricted."
           }
-        },
-        "required": [
-          "UserId",
-          "UserDisplayName",
-          "IsStartRestricted"
-        ]
+        }
+      }
+    },
+    "securitySchemes": {
+      "RolesAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Requires the user to be a member of the 'RoatpAdminTeam' role."
       }
     }
   }

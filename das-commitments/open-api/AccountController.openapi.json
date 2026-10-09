@@ -1,13 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "CommitmentsV2 Account API",
+    "title": "Account API",
     "version": "1.0.0"
   },
   "paths": {
     "/api/accounts/{accountId}": {
       "get": {
-        "summary": "Get account details",
+        "summary": "Get account summary",
         "parameters": [
           {
             "name": "accountId",
@@ -21,7 +21,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The account details",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -49,7 +49,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Transfer status details",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -101,7 +101,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Status details",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -115,7 +115,7 @@
     },
     "/api/accounts/{accountId}/providers/approved": {
       "get": {
-        "summary": "Get approved providers for account",
+        "summary": "Get approved providers for an account",
         "parameters": [
           {
             "name": "accountId",
@@ -129,7 +129,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Approved providers",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -157,7 +157,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Provider payments priority",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -185,7 +185,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Account summary",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -195,7 +195,7 @@
             }
           },
           "404": {
-            "description": "Account not found"
+            "description": "Not found"
           }
         }
       }
@@ -216,7 +216,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Pending apprentice changes",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -226,14 +226,14 @@
             }
           },
           "404": {
-            "description": "Changes not found"
+            "description": "Not found"
           }
         }
       }
     },
     "/api/accounts/{accountId}/pending-learner-change-counts": {
       "get": {
-        "summary": "Get pending learner change counts",
+        "summary": "Get pending learner change counts for employer",
         "parameters": [
           {
             "name": "accountId",
@@ -247,7 +247,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Pending learner change counts",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -257,7 +257,7 @@
             }
           },
           "404": {
-            "description": "Counts not found"
+            "description": "Not found"
           }
         }
       }
@@ -288,7 +288,7 @@
         },
         "responses": {
           "200": {
-            "description": "Provider payments priority updated"
+            "description": "Successful operation"
           }
         }
       }
@@ -306,13 +306,10 @@
           "LevyStatus": {
             "$ref": "#/components/schemas/ApprenticeshipEmployerType"
           }
-        }
-      },
-      "ApprenticeshipEmployerType": {
-        "type": "string",
-        "enum": [
-          "NonLevy",
-          "Levy"
+        },
+        "required": [
+          "AccountId",
+          "LevyStatus"
         ]
       },
       "AccountTransferStatusResponse": {
@@ -324,7 +321,11 @@
           "IsTransferReceiver": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "IsTransferSender",
+          "IsTransferReceiver"
+        ]
       },
       "AccountStatusResponse": {
         "type": "object",
@@ -347,7 +348,12 @@
               "$ref": "#/components/schemas/AccountStatusProviderCourse"
             }
           }
-        }
+        },
+        "required": [
+          "Active",
+          "Completed",
+          "NewStart"
+        ]
       },
       "AccountStatusProviderCourse": {
         "type": "object",
@@ -359,7 +365,11 @@
           "CourseCode": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "Ukprn",
+          "CourseCode"
+        ]
       },
       "GetApprovedProvidersResponse": {
         "type": "object",
@@ -371,23 +381,22 @@
               "format": "int64"
             }
           }
-        }
+        },
+        "required": [
+          "ProviderIds"
+        ]
       },
       "GetProviderPaymentsPriorityResponse": {
         "type": "object",
-        "properties": {
-          "$": {
-            "type": "string"
-          }
-        }
+        "description": "The response type for provider payments priority."
       },
       "GetApprenticeshipStatusSummaryResponse": {
         "type": "object",
-        "properties": {
-          "$": {
-            "type": "string"
-          }
-        }
+        "description": "The response type for apprenticeship status summary."
+      },
+      "GetApprenticeshipUpdatesResponse": {
+        "type": "object",
+        "description": "The response type for pending apprentice changes."
       },
       "GetPendingLearnerChangeCountsForEmployerQueryResponse": {
         "type": "object",
@@ -398,15 +407,11 @@
           "IlrPendingChangeCount": {
             "type": "integer"
           }
-        }
-      },
-      "GetApprenticeshipUpdatesResponse": {
-        "type": "object",
-        "properties": {
-          "$": {
-            "type": "string"
-          }
-        }
+        },
+        "required": [
+          "ManualPendingChangeCount",
+          "IlrPendingChangeCount"
+        ]
       },
       "UpdateProviderPaymentsPriorityRequest": {
         "type": "object",
@@ -420,7 +425,11 @@
           "UserInfo": {
             "$ref": "#/components/schemas/UserInfo"
           }
-        }
+        },
+        "required": [
+          "ProviderPriorities",
+          "UserInfo"
+        ]
       },
       "ProviderPaymentPriorityUpdateItem": {
         "type": "object",
@@ -432,7 +441,11 @@
           "PriorityOrder": {
             "type": "integer"
           }
-        }
+        },
+        "required": [
+          "ProviderId",
+          "PriorityOrder"
+        ]
       },
       "UserInfo": {
         "type": "object",
@@ -444,9 +457,22 @@
             "type": "string"
           },
           "UserEmail": {
-            "type": "string"
+            "type": "string",
+            "format": "email"
           }
-        }
+        },
+        "required": [
+          "UserId",
+          "UserDisplayName",
+          "UserEmail"
+        ]
+      },
+      "ApprenticeshipEmployerType": {
+        "type": "string",
+        "enum": [
+          "NonLevy",
+          "Levy"
+        ]
       }
     }
   }
