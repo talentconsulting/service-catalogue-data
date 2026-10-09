@@ -1,0 +1,697 @@
+{
+  "repository": "SkillsFundingAgency/tl-results-and-certification",
+  "ref": "master",
+  "path": "src",
+  "localServices": [
+    {
+      "name": "Redis",
+      "kind": "cache",
+      "technology": "redis",
+      "configurationKeys": [
+        "RedisSettings:CacheConnection",
+        "ResultsAndCertificationConfiguration:RedisSettings:CacheConnection"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/RedisSettings.cs",
+          "reason": "Class contains the property CacheConnection, indicating configuration for Redis."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/ResultsAndCertificationConfiguration.cs",
+          "reason": "RedisSettings property is included in the main configuration class."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Web/Startup.cs",
+          "reason": "Redis connection is set and used in the services and health checks."
+        }
+      ]
+    },
+    {
+      "name": "SQL Server",
+      "kind": "database",
+      "technology": "sqlserver",
+      "configurationKeys": [
+        "ConnectionStrings:DefaultConnection",
+        "ConnectionStrings:ResultsAndCertificationDatabase",
+        "ConnectionStrings:ResultsAndCertificationDb",
+        "ResultsAndCertificationConfiguration:SqlConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.InternalApi/appsettings.Development.json",
+          "reason": "The file specifies a connection string for 'DefaultConnection' targeting a local SQL Server instance (MSSQLLocalDB)."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Application/Services/AdminAssessmentSeriesDatesService.cs",
+          "reason": "The application uses Entity Framework Core to interact with a SQL Server database through ResultsAndCertificationDbContext."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/AdminNotificationRepository.cs",
+          "reason": "Usage of ResultsAndCertificationDbContext to interact with the database."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/AssessmentRepository.cs",
+          "reason": "Usage of ResultsAndCertificationDbContext to interact with the database."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/CertificateRepository.cs",
+          "reason": "Usage of ResultsAndCertificationDbContext to interact with the database."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/CommonRepository.cs",
+          "reason": "Usage of ResultsAndCertificationDbContext to interact with the database."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/DataExportRepository.cs",
+          "reason": "Usage of ResultsAndCertificationDbContext to interact with the database."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/GenericRepository.cs",
+          "reason": "The 'ResultsAndCertificationDbContext' is used, which suggests a dependency on a database connection."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/PrintingRepository.cs",
+          "reason": "Uses DbContext 'ResultsAndCertificationDbContext' which depends on a SQL Server connection."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/ProviderRegistrationsRepository.cs",
+          "reason": "Uses DbContext 'ResultsAndCertificationDbContext' which depends on a SQL Server connection."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/ProviderRepository.cs",
+          "reason": "Uses DbContext 'ResultsAndCertificationDbContext' which depends on a SQL Server connection."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/RegistrationRepository.cs",
+          "reason": "Uses DbContext 'ResultsAndCertificationDbContext' which depends on a SQL Server connection."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/ResultRepository.cs",
+          "reason": "Uses DbContext 'ResultsAndCertificationDbContext' which depends on a SQL Server connection."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/ResultsAndCertificationDbContext.cs",
+          "reason": "The application uses a DbContext with EF Core to connect to a SQL Server database."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Functions/Startup.cs",
+          "reason": "AddDbContext uses UseSqlServer with a configuration property."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.InternalApi/Startup.cs",
+          "reason": "AddDbContext uses UseSqlServer with a configuration property."
+        }
+      ]
+    },
+    {
+      "name": "Azure Blob Storage",
+      "kind": "object-storage",
+      "technology": null,
+      "configurationKeys": [
+        "BlobStorageConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Common.Services/BlobStorage/Service/BlobStorageService.cs",
+          "reason": "A BlobServiceClient is created using a configuration property for connecting to Azure Blob Storage."
+        }
+      ]
+    },
+    {
+      "name": "Azure Storage Emulator",
+      "kind": "object-storage",
+      "technology": "azurite",
+      "configurationKeys": [
+        "AzureWebJobsStorage",
+        "BlobStorageConnectionString",
+        "ConfigurationStorageConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.InternalApi/appsettings.json",
+          "reason": "The file contains a 'ConfigurationStorageConnectionString' key using 'UseDevelopmentStorage=true', indicating reliance on an Azurite emulator for local development."
+        },
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Functions/local.settings.json",
+          "reason": "The file contains development connection strings using 'UseDevelopmentStorage=true', indicating use of an Azurite emulator for local development."
+        }
+      ]
+    },
+    {
+      "name": "Azurite",
+      "kind": "object-storage",
+      "technology": "azurite",
+      "configurationKeys": [
+        "ConfigurationStorageConnectionString"
+      ],
+      "evidence": [
+        {
+          "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Web/appsettings.json",
+          "reason": "The key 'ConfigurationStorageConnectionString' contains 'UseDevelopmentStorage=true;', referring to local storage, typically Azurite."
+        }
+      ]
+    }
+  ],
+  "configurationKeys": [
+    {
+      "key": "AzureWebJobsStorage",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Functions/local.settings.json",
+      "reason": "The key is defined in the 'Values' section for local Azure Storage development."
+    },
+    {
+      "key": "BlobStorageConnectionString",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Common.Services/BlobStorage/Service/BlobStorageService.cs",
+      "reason": "The application connects to Azure Blob Storage using this connection string, as evidenced by BlobServiceClient creation."
+    },
+    {
+      "key": "BlobStorageConnectionString",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Functions/local.settings.json",
+      "reason": "The key is defined in the 'Values' section for local Azure Blob Storage development."
+    },
+    {
+      "key": "BlobStorageSettings:AccountKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/BlobStorageSettings.cs",
+      "reason": "Property declared on bound configuration class `BlobStorageSettings`."
+    },
+    {
+      "key": "BlobStorageSettings:AccountName",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/BlobStorageSettings.cs",
+      "reason": "Property declared on bound configuration class `BlobStorageSettings`."
+    },
+    {
+      "key": "CertificateTrackingExtractSettings:NumberOfDays",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/CertificateTrackingExtractSettings.cs",
+      "reason": "Evidence of configuration required for number of days setting in the certificate tracking extract."
+    },
+    {
+      "key": "ConfigurationStorageConnectionString",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Functions/local.settings.json",
+      "reason": "The key is defined in the 'Values' section for local Azure Configuration Storage development."
+    },
+    {
+      "key": "ConfigurationStorageConnectionString",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.InternalApi/appsettings.json",
+      "reason": "The key is defined in 'appsettings.json' for local Azure Configuration Storage development."
+    },
+    {
+      "key": "ConfigurationStorageConnectionString",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Web/appsettings.json",
+      "reason": "Referenced in appsettings.json as required for connecting to local development storage."
+    },
+    {
+      "key": "ConnectionStrings:DefaultConnection",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.InternalApi/appsettings.Development.json",
+      "reason": "The key specifies the connection string for a local SQL Server database (MSSQLLocalDB)."
+    },
+    {
+      "key": "ConnectionStrings:ResultsAndCertificationDatabase",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/GenericRepository.cs",
+      "reason": "Required to configure the database connection for 'ResultsAndCertificationDbContext'."
+    },
+    {
+      "key": "ConnectionStrings:ResultsAndCertificationDb",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Application/Services/AdminAssessmentSeriesDatesService.cs",
+      "reason": "The database connection string is needed for ResultsAndCertificationDbContext, which is an Entity Framework Core data context."
+    },
+    {
+      "key": "ConnectionStrings:ResultsAndCertificationDb",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/AdminNotificationRepository.cs",
+      "reason": "Accesses database through ResultsAndCertificationDbContext."
+    },
+    {
+      "key": "ConnectionStrings:ResultsAndCertificationDb",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/AssessmentRepository.cs",
+      "reason": "Accesses database through ResultsAndCertificationDbContext."
+    },
+    {
+      "key": "ConnectionStrings:ResultsAndCertificationDb",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/CertificateRepository.cs",
+      "reason": "Accesses database through ResultsAndCertificationDbContext."
+    },
+    {
+      "key": "ConnectionStrings:ResultsAndCertificationDb",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/CommonRepository.cs",
+      "reason": "Accesses database through ResultsAndCertificationDbContext."
+    },
+    {
+      "key": "ConnectionStrings:ResultsAndCertificationDb",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/DataExportRepository.cs",
+      "reason": "Accesses database through ResultsAndCertificationDbContext."
+    },
+    {
+      "key": "ConnectionStrings:ResultsAndCertificationDb",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/PrintingRepository.cs",
+      "reason": "DbContext 'ResultsAndCertificationDbContext' configuration is required for interaction with SQL Server."
+    },
+    {
+      "key": "ConnectionStrings:ResultsAndCertificationDb",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/ProviderRegistrationsRepository.cs",
+      "reason": "DbContext 'ResultsAndCertificationDbContext' configuration is required for interaction with SQL Server."
+    },
+    {
+      "key": "ConnectionStrings:ResultsAndCertificationDb",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/ProviderRepository.cs",
+      "reason": "DbContext 'ResultsAndCertificationDbContext' configuration is required for interaction with SQL Server."
+    },
+    {
+      "key": "ConnectionStrings:ResultsAndCertificationDb",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/RegistrationRepository.cs",
+      "reason": "DbContext 'ResultsAndCertificationDbContext' configuration is required for interaction with SQL Server."
+    },
+    {
+      "key": "ConnectionStrings:ResultsAndCertificationDb",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/Repositories/ResultRepository.cs",
+      "reason": "DbContext 'ResultsAndCertificationDbContext' configuration is required for interaction with SQL Server."
+    },
+    {
+      "key": "ConnectionStrings:ResultsAndCertificationDb",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Data/ResultsAndCertificationDbContext.cs",
+      "reason": "This key is required to configure the database connection for the DbContext."
+    },
+    {
+      "key": "Constants.ConfigurationStorageConnectionStringConfigKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Functions/Startup.cs",
+      "reason": "Retrieved from environment variables to load configuration."
+    },
+    {
+      "key": "Constants.ConfigurationStorageConnectionStringConfigKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.InternalApi/Startup.cs",
+      "reason": "Retrieved from configuration to load settings."
+    },
+    {
+      "key": "Constants.ConfigurationStorageConnectionStringConfigKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Web/Startup.cs",
+      "reason": "Used to load ResultsAndCertificationConfiguration during startup."
+    },
+    {
+      "key": "Constants.EnvironmentNameConfigKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Functions/Startup.cs",
+      "reason": "Retrieved from environment variables to load configuration."
+    },
+    {
+      "key": "Constants.EnvironmentNameConfigKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.InternalApi/Startup.cs",
+      "reason": "Retrieved from configuration to load settings."
+    },
+    {
+      "key": "Constants.EnvironmentNameConfigKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Web/Startup.cs",
+      "reason": "Used to load ResultsAndCertificationConfiguration during startup."
+    },
+    {
+      "key": "Constants.ServiceNameConfigKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Functions/Startup.cs",
+      "reason": "Retrieved from environment variables to load configuration."
+    },
+    {
+      "key": "Constants.ServiceNameConfigKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.InternalApi/Startup.cs",
+      "reason": "Retrieved from configuration to load settings."
+    },
+    {
+      "key": "Constants.ServiceNameConfigKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Web/Startup.cs",
+      "reason": "Used to load ResultsAndCertificationConfiguration during startup."
+    },
+    {
+      "key": "Constants.ServiceVersionConfigKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Functions/Startup.cs",
+      "reason": "Alternative key for versioning in .NET 6; loaded from environment variables."
+    },
+    {
+      "key": "Constants.VersionConfigKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Functions/Startup.cs",
+      "reason": "Retrieved from environment variables to load configuration."
+    },
+    {
+      "key": "Constants.VersionConfigKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.InternalApi/Startup.cs",
+      "reason": "Retrieved from configuration to load settings."
+    },
+    {
+      "key": "Constants.VersionConfigKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Web/Startup.cs",
+      "reason": "Used to load ResultsAndCertificationConfiguration during startup."
+    },
+    {
+      "key": "CoreRommExtractSettings:AssessmentSeriesYearsToProcess",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/CoreRommExtractSettings.cs",
+      "reason": "Evidence of configuration required for assessment series years."
+    },
+    {
+      "key": "CoreRommExtractSettings:CoreRommValidDateRanges",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/CoreRommExtractSettings.cs",
+      "reason": "Evidence of configuration required for valid date ranges."
+    },
+    {
+      "key": "CoreValidDateRanges",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/AnalystCoreResultExtractSettings.cs",
+      "reason": "Property declared on bound configuration class `AnalystCoreResultExtractSettings`."
+    },
+    {
+      "key": "DataProtectionSettings:BlobName",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DataProtectionSettings.cs",
+      "reason": "Evidence of configuration required for blob name in data protection."
+    },
+    {
+      "key": "DataProtectionSettings:ContainerName",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DataProtectionSettings.cs",
+      "reason": "Evidence of configuration required for container name in data protection."
+    },
+    {
+      "key": "DataProtectionSettings:KeyVaultKeyId",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DataProtectionSettings.cs",
+      "reason": "Evidence of configuration required for key vault key identifier in data protection."
+    },
+    {
+      "key": "DfeSignInSettings:ApiSecret",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for API secret setting."
+    },
+    {
+      "key": "DfeSignInSettings:ApiUri",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for API URI setting."
+    },
+    {
+      "key": "DfeSignInSettings:Audience",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for audience setting."
+    },
+    {
+      "key": "DfeSignInSettings:Authority",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for authority setting."
+    },
+    {
+      "key": "DfeSignInSettings:CallbackPath",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for DfE Sign-In callback path."
+    },
+    {
+      "key": "DfeSignInSettings:ClientId",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for DfE Sign-In client ID."
+    },
+    {
+      "key": "DfeSignInSettings:ClientSecret",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for DfE Sign-In client secret."
+    },
+    {
+      "key": "DfeSignInSettings:Issuer",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for issuer setting."
+    },
+    {
+      "key": "DfeSignInSettings:LogoutPath",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for logout path setting."
+    },
+    {
+      "key": "DfeSignInSettings:MetadataAddress",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for metadata address in DfE Sign-In settings."
+    },
+    {
+      "key": "DfeSignInSettings:ProfileUrl",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for DfE Sign-In profile URL."
+    },
+    {
+      "key": "DfeSignInSettings:SignedOutCallbackPath",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for DfE Sign-In signed out callback path."
+    },
+    {
+      "key": "DfeSignInSettings:SignOutEnabled",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for enabling sign-out."
+    },
+    {
+      "key": "DfeSignInSettings:SignOutRedirectUri",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for sign-out redirect URI."
+    },
+    {
+      "key": "DfeSignInSettings:SignOutRedirectUriEnabled",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for enabling sign-out redirect URI."
+    },
+    {
+      "key": "DfeSignInSettings:Timeout",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for timeout setting."
+    },
+    {
+      "key": "DfeSignInSettings:TimeoutRedirectUri",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for timeout redirect URI."
+    },
+    {
+      "key": "DfeSignInSettings:TokenEndpoint",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/DfeSignInSettings.cs",
+      "reason": "Evidence of configuration required for token endpoint."
+    },
+    {
+      "key": "EnvironmentName",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Web/appsettings.json",
+      "reason": "Defined in appsettings.json as 'LOCAL', indicating usage in a local environment."
+    },
+    {
+      "key": "IPChaseBigGapsReminderSettings:ValidDateRanges",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/IPChaseBigGapsReminderSettings.cs",
+      "reason": "Evidence of configuration required for valid date ranges."
+    },
+    {
+      "key": "LearningRecordServiceSettings:BaseUri",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/LearningRecordServiceSettings.cs",
+      "reason": "Evidenced as a configuration property for the LearningRecordServiceSettings class."
+    },
+    {
+      "key": "LearningRecordServiceSettings:CertificateName",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/LearningRecordServiceSettings.cs",
+      "reason": "Evidenced as a configuration property for the LearningRecordServiceSettings class."
+    },
+    {
+      "key": "LearningRecordServiceSettings:Password",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/LearningRecordServiceSettings.cs",
+      "reason": "Evidenced as a configuration property for the LearningRecordServiceSettings class."
+    },
+    {
+      "key": "LearningRecordServiceSettings:Ukprn",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/LearningRecordServiceSettings.cs",
+      "reason": "Evidenced as a configuration property for the LearningRecordServiceSettings class."
+    },
+    {
+      "key": "LearningRecordServiceSettings:Username",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/LearningRecordServiceSettings.cs",
+      "reason": "Evidenced as a configuration property for the LearningRecordServiceSettings class."
+    },
+    {
+      "key": "LearningRecordServiceSettings:VendorId",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/LearningRecordServiceSettings.cs",
+      "reason": "Evidenced as a configuration property for the LearningRecordServiceSettings class."
+    },
+    {
+      "key": "OrdnanceSurveyApiSettings:PlacesKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/OrdnanceSurveyApiSettings.cs",
+      "reason": "Evidenced as a configuration property for the OrdnanceSurveyApiSettings class."
+    },
+    {
+      "key": "OrdnanceSurveyApiSettings:PlacesUri",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/OrdnanceSurveyApiSettings.cs",
+      "reason": "Evidenced as a configuration property for the OrdnanceSurveyApiSettings class."
+    },
+    {
+      "key": "OverallResultBatchSettings:BatchSize",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/OverallResultBatchSettings.cs",
+      "reason": "Configuration key for overall result batch size detected in OverallResultBatchSettings class."
+    },
+    {
+      "key": "OverallResultBatchSettings:NoOfAcademicYearsToProcess",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/OverallResultBatchSettings.cs",
+      "reason": "Configuration key for number of academic years to process detected in OverallResultBatchSettings class."
+    },
+    {
+      "key": "PrintingApiSettings:Password",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/PrintingApiSettings.cs",
+      "reason": "Configuration key for printing API password detected in PrintingApiSettings class."
+    },
+    {
+      "key": "PrintingApiSettings:Uri",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/PrintingApiSettings.cs",
+      "reason": "Configuration key for printing API endpoint URI detected in PrintingApiSettings class."
+    },
+    {
+      "key": "PrintingApiSettings:Username",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/PrintingApiSettings.cs",
+      "reason": "Configuration key for printing API username detected in PrintingApiSettings class."
+    },
+    {
+      "key": "ProviderAddressExtractSettings:ProviderAddressAcademicYearsToProcess",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/ProvideAddressExtractSettings.cs",
+      "reason": "Configuration key for academic years to process detected in ProviderAddressExtractSettings class."
+    },
+    {
+      "key": "ProviderAddressExtractSettings:ProviderAddressValidDateRanges",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/ProvideAddressExtractSettings.cs",
+      "reason": "Configuration key for valid date ranges detected in ProviderAddressExtractSettings class."
+    },
+    {
+      "key": "ProvidersBatchSize",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/CertificatePrintingBatchSettings.cs",
+      "reason": "Property declared on bound configuration class `CertificatePrintingBatchSettings`."
+    },
+    {
+      "key": "RedisSettings:CacheConnection",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/RedisSettings.cs",
+      "reason": "Configuration key for Redis cache connection detected in RedisSettings class."
+    },
+    {
+      "key": "ResultsAndCertificationConfiguration:BlobStorageConnectionString",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/ResultsAndCertificationConfiguration.cs",
+      "reason": "Configuration key for Blob Storage connection string detected in the model."
+    },
+    {
+      "key": "ResultsAndCertificationConfiguration:GovUkNotifyApiKey",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/ResultsAndCertificationConfiguration.cs",
+      "reason": "Configuration key for Gov UK Notify API key detected in the model."
+    },
+    {
+      "key": "ResultsAndCertificationConfiguration:IntTestSqlConnectionString",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/ResultsAndCertificationConfiguration.cs",
+      "reason": "Configuration key for integration test SQL Server connection string detected in the model."
+    },
+    {
+      "key": "ResultsAndCertificationConfiguration:RedisSettings:CacheConnection",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Web/Startup.cs",
+      "reason": "Needed to set up Redis cache and health checks."
+    },
+    {
+      "key": "ResultsAndCertificationConfiguration:SqlConnectionString",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Functions/Startup.cs",
+      "reason": "Required by AddDbContext to configure SQL Server."
+    },
+    {
+      "key": "ResultsAndCertificationConfiguration:SqlConnectionString",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.InternalApi/Startup.cs",
+      "reason": "Required by AddDbContext to configure SQL Server."
+    },
+    {
+      "key": "ResultsAndCertificationConfiguration:SqlConnectionString",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/ResultsAndCertificationConfiguration.cs",
+      "reason": "Configuration key for SQL Server connection string detected in the model."
+    },
+    {
+      "key": "ResultsAndCertificationInternalApiSettings:ClientId",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/ResultsAndCertificationInternalApiSettings.cs",
+      "reason": "Configuration property in ResultsAndCertificationInternalApiSettings class."
+    },
+    {
+      "key": "ResultsAndCertificationInternalApiSettings:IdentifierUri",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/ResultsAndCertificationInternalApiSettings.cs",
+      "reason": "Configuration property in ResultsAndCertificationInternalApiSettings class."
+    },
+    {
+      "key": "ResultsAndCertificationInternalApiSettings:TenantId",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/ResultsAndCertificationInternalApiSettings.cs",
+      "reason": "Configuration property in ResultsAndCertificationInternalApiSettings class."
+    },
+    {
+      "key": "ResultsAndCertificationInternalApiSettings:Uri",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/ResultsAndCertificationInternalApiSettings.cs",
+      "reason": "Configuration property in ResultsAndCertificationInternalApiSettings class."
+    },
+    {
+      "key": "ServiceName",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Web/appsettings.json",
+      "reason": "Specified in appsettings.json as required metadata for the application."
+    },
+    {
+      "key": "SpecialismRommExtractSettings:SpecialismAssessmentSeriesYearsToProcess",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/SpecialismRommExtractSettings.cs",
+      "reason": "Configuration property in SpecialismRommExtractSettings class."
+    },
+    {
+      "key": "SpecialismRommExtractSettings:SpecialismRommValidDateRanges",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/SpecialismRommExtractSettings.cs",
+      "reason": "Configuration property in SpecialismRommExtractSettings class."
+    },
+    {
+      "key": "TechnicalInternalNotificationRecipientsSettings:TechnicalInternalNotificationRecipients",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/TechnicalInternalNotificationEmailAddressSettings.cs",
+      "reason": "Configuration property in TechnicalInternalNotificationRecipientsSettings class."
+    },
+    {
+      "key": "UcasApiSettings:FolderId",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/UcasApiSettings.cs",
+      "reason": "Configuration property in UcasApiSettings class."
+    },
+    {
+      "key": "UcasApiSettings:GrantType",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/UcasApiSettings.cs",
+      "reason": "Configuration property in UcasApiSettings class."
+    },
+    {
+      "key": "UcasApiSettings:Password",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/UcasApiSettings.cs",
+      "reason": "Configuration property in UcasApiSettings class."
+    },
+    {
+      "key": "UcasApiSettings:Uri",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/UcasApiSettings.cs",
+      "reason": "Configuration property in UcasApiSettings class."
+    },
+    {
+      "key": "UcasApiSettings:Username",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/UcasApiSettings.cs",
+      "reason": "Configuration property in UcasApiSettings class."
+    },
+    {
+      "key": "UcasApiSettings:Version",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/UcasApiSettings.cs",
+      "reason": "Configuration property in UcasApiSettings class."
+    },
+    {
+      "key": "UcasDataSettings:CentreNumber",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/UcasDataSettings.cs",
+      "reason": "Configuration property in UcasDataSettings class."
+    },
+    {
+      "key": "UcasDataSettings:ExamMonth",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/UcasDataSettings.cs",
+      "reason": "Configuration property in UcasDataSettings class."
+    },
+    {
+      "key": "UcasDataSettings:IndustryPlacementCode",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/UcasDataSettings.cs",
+      "reason": "Configuration property in UcasDataSettings class."
+    },
+    {
+      "key": "UcasDataSettings:OverallSubjectCode",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/UcasDataSettings.cs",
+      "reason": "Configuration property in UcasDataSettings class."
+    },
+    {
+      "key": "UcasDataSettings:ReceivingOrganisation",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/UcasDataSettings.cs",
+      "reason": "Configuration property in UcasDataSettings class."
+    },
+    {
+      "key": "UcasDataSettings:SendingOrganisation",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/UcasDataSettings.cs",
+      "reason": "Configuration property in UcasDataSettings class."
+    },
+    {
+      "key": "ValidDateRanges",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Models/Configuration/AnalystOverallResultExtractSettings.cs",
+      "reason": "Property declared on bound configuration class `AnalystOverallResultExtractSettings`."
+    },
+    {
+      "key": "Version",
+      "sourceFile": "src/Sfa.Tl.ResultsAndCertification.Web/appsettings.json",
+      "reason": "Defined in appsettings.json as part of the service configuration."
+    }
+  ]
+}
