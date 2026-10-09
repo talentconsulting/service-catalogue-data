@@ -1,0 +1,146 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Providers Removal Reason Update API",
+    "version": "1.0.0",
+    "description": "API for updating providers' removal reasons."
+  },
+  "paths": {
+    "/providers/{ukprn}/removal-reason": {
+      "get": {
+        "operationId": "GetRemovalReasonUpdate",
+        "summary": "Get removal reasons for a provider",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Unique provider reference number"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemovalReasonUpdateViewModel"
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to home route"
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "tags": [
+          "RemovalReasonUpdate"
+        ]
+      },
+      "post": {
+        "operationId": "UpdateRemovalReason",
+        "summary": "Update the removal reason for a provider",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "Unique provider reference number"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemovalReasonUpdateViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect to appropriate route depending on update result"
+          }
+        },
+        "security": [
+          {
+            "oauth2": []
+          }
+        ],
+        "tags": [
+          "RemovalReasonUpdate"
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RemovalReasonUpdateViewModel": {
+        "type": "object",
+        "properties": {
+          "RemovedReasons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RemovalReasonModel"
+            }
+          },
+          "RemovalReasonId": {
+            "type": "integer",
+            "nullable": true,
+            "example": 1
+          }
+        },
+        "required": [
+          "RemovedReasons"
+        ]
+      },
+      "RemovalReasonModel": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "example": 1
+          },
+          "Description": {
+            "type": "string",
+            "example": "Reason description"
+          },
+          "IsSelected": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "Id",
+          "Description",
+          "IsSelected"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "implicit": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "scopes": {}
+          }
+        }
+      }
+    }
+  }
+}

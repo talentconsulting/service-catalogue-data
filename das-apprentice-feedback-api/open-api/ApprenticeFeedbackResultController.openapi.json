@@ -1,0 +1,228 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Feedback API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/ApprenticeFeedbackResult/": {
+      "post": {
+        "summary": "Create Apprentice Feedback",
+        "operationId": "createApprenticeFeedback",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApprenticeFeedbackCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully created apprentice feedback",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateApprenticeFeedbackResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/api/ApprenticeFeedbackResult/{ukprn}": {
+      "get": {
+        "summary": "Get Apprentice Feedback Details",
+        "operationId": "getApprenticeFeedbackDetails",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved apprentice feedback details"
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/api/ApprenticeFeedbackResult/reviews": {
+      "get": {
+        "summary": "Get Apprentice Feedback Rating Summary",
+        "operationId": "getApprenticeFeedbackRatingSummary",
+        "parameters": [
+          {
+            "name": "timePeriod",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "pattern": "^(|All|AY\\d{4})$",
+              "description": "Time period should be empty, 'All', or in the format 'AYdddd'"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved apprentice feedback rating summaries"
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/api/ApprenticeFeedbackResult/{ukprn}/annual": {
+      "get": {
+        "summary": "Get Annual Apprentice Feedback Summary",
+        "operationId": "getApprenticeFeedbackSummaryAnnual",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved annual apprentice feedback summary"
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/api/ApprenticeFeedbackResult/{ukprn}/annual/{year}": {
+      "get": {
+        "summary": "Get Academic Year Apprentice Feedback Summary",
+        "operationId": "getApprenticeFeedbackSummaryAcademicYear",
+        "parameters": [
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "year",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^AY\\d{4}$",
+              "description": "Academic year should be in the format 'AYdddd'"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successfully retrieved apprentice feedback summary for the academic year"
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateApprenticeFeedbackCommand": {
+        "type": "object",
+        "properties": {
+          "ApprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "OverallRating": {
+            "$ref": "#/components/schemas/OverallRating"
+          },
+          "FeedbackAttributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackAttribute"
+            }
+          },
+          "AllowContact": {
+            "type": "boolean"
+          },
+          "Ukprn": {
+            "type": "integer",
+            "format": "int64",
+            "nullable": true
+          }
+        },
+        "required": [
+          "ApprenticeFeedbackTargetId",
+          "OverallRating",
+          "FeedbackAttributes",
+          "AllowContact"
+        ]
+      },
+      "CreateApprenticeFeedbackResponse": {
+        "type": "object",
+        "properties": {
+          "ApprenticeFeedbackResultId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "FeedbackAttribute": {
+        "type": "object",
+        "properties": {
+          "Id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Name": {
+            "type": "string"
+          },
+          "Status": {
+            "$ref": "#/components/schemas/FeedbackAttributeStatus"
+          }
+        }
+      },
+      "FeedbackAttributeStatus": {
+        "type": "integer",
+        "enum": [
+          0,
+          1
+        ],
+        "description": "0 for Agree, 1 for Disagree"
+      },
+      "OverallRating": {
+        "type": "integer",
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "description": "1=Very Poor, 2=Poor, 3=Good, 4=Excellent"
+      }
+    }
+  }
+}

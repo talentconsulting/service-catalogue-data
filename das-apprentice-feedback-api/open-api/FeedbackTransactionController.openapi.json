@@ -1,0 +1,270 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Feedback Transaction API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/feedbacktransaction/generate-email-transactions": {
+      "post": {
+        "summary": "Generate email transactions",
+        "responses": {
+          "202": {
+            "description": "Request accepted and queued."
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feedbacktransaction": {
+      "get": {
+        "summary": "Get feedback transactions to email",
+        "parameters": [
+          {
+            "name": "batchSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "example": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of feedback transactions available to email.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {}
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feedbacktransaction/{feedbackTransactionId}": {
+      "post": {
+        "summary": "Process email transaction",
+        "parameters": [
+          {
+            "name": "feedbackTransactionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProcessEmailTransactionCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transaction processed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProcessEmailTransactionResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Transaction not found."
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feedbacktransaction/{feedbackTransactionId}/track-click": {
+      "post": {
+        "summary": "Track email transaction click",
+        "parameters": [
+          {
+            "name": "feedbackTransactionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrackEmailTransactionClickCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Click tracking recorded successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrackEmailTransactionClickResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProcessEmailTransactionCommand": {
+        "type": "object",
+        "properties": {
+          "FeedbackTransactionId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ApprenticeName": {
+            "type": "string"
+          },
+          "ApprenticeEmailAddress": {
+            "type": "string",
+            "format": "email"
+          },
+          "IsFeedbackEmailContactAllowed": {
+            "type": "boolean"
+          },
+          "IsEngagementEmailContactAllowed": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "FeedbackTransactionId",
+          "ApprenticeName",
+          "ApprenticeEmailAddress",
+          "IsFeedbackEmailContactAllowed",
+          "IsEngagementEmailContactAllowed"
+        ]
+      },
+      "ProcessEmailTransactionResponse": {
+        "type": "object",
+        "properties": {
+          "FeedbackTransactionId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "EmailSentStatus": {
+            "type": "string",
+            "enum": [
+              "Successful",
+              "Failed",
+              "NotAllowed"
+            ]
+          }
+        },
+        "required": [
+          "FeedbackTransactionId",
+          "EmailSentStatus"
+        ]
+      },
+      "TrackEmailTransactionClickCommand": {
+        "type": "object",
+        "properties": {
+          "FeedbackTransactionId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ApprenticeFeedbackTargetId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "LinkName": {
+            "type": "string"
+          },
+          "LinkUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "ClickedOn": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "FeedbackTransactionId",
+          "ApprenticeFeedbackTargetId",
+          "LinkName",
+          "LinkUrl",
+          "ClickedOn"
+        ]
+      },
+      "TrackEmailTransactionClickResponse": {
+        "type": "object",
+        "properties": {
+          "FeedbackTransactionId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ClickStatus": {
+            "type": "string",
+            "enum": [
+              "Invalid",
+              "Valid"
+            ]
+          }
+        },
+        "required": [
+          "FeedbackTransactionId",
+          "ClickStatus"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,141 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Apprentice Feedback Providers API",
+    "description": "API for mapping apprentices to associated providers for feedback purposes.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/providers/{apprenticeId}": {
+      "get": {
+        "summary": "Get all providers for an apprentice",
+        "description": "Retrieve all providers associated with the feedback records of an apprentice.",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The unique identifier of the apprentice."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of providers for the apprentice.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Provider"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No providers found for the specified apprentice."
+          }
+        }
+      }
+    },
+    "/api/providers/{apprenticeId}/{ukprn}": {
+      "get": {
+        "summary": "Get provider details for an apprentice and UKPRN",
+        "description": "Retrieve details of a specific provider associated with an apprentice using a composite key of apprentice ID and UKPRN.",
+        "parameters": [
+          {
+            "name": "apprenticeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "The unique identifier of the apprentice."
+          },
+          {
+            "name": "ukprn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            },
+            "description": "The UKPRN (UK Provider Reference Number) of the provider."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Details of the provider for the specified apprentice and UKPRN.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProviderDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No provider found for the specified apprentice and UKPRN."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Provider": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ukprn": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "ukprn"
+        ]
+      },
+      "ProviderDetails": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ukprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "address": {
+            "type": "string"
+          },
+          "contactInformation": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "ukprn"
+        ]
+      }
+    }
+  }
+}

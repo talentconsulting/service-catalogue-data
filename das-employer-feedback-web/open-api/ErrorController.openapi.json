@@ -1,0 +1,65 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Error API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/error/{id}": {
+      "get": {
+        "operationId": "ErrorGet",
+        "summary": "Handles errors and renders appropriate views.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "nullable": true
+            },
+            "description": "Optional error code to render specific views (e.g., 404 for 'PageNotFound')."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success response containing the error view model.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorViewModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Page not found response when id=404."
+          },
+          "500": {
+            "description": "Internal server error when no id is provided."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ErrorViewModel": {
+        "type": "object",
+        "properties": {
+          "RequestId": {
+            "type": "string",
+            "nullable": true
+          },
+          "ShowRequestId": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "RequestId",
+          "ShowRequestId"
+        ]
+      }
+    }
+  }
+}

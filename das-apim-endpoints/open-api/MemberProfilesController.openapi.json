@@ -1,15 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Apprentice Aan Member Profiles API",
-    "version": "1.0.0",
-    "description": "API for managing member profiles in the Apprentice Aan system."
+    "title": "Member Profiles API",
+    "version": "1.0.0"
   },
   "paths": {
     "/members/{memberId}/profile": {
       "get": {
+        "summary": "Get Member Profile With Preferences",
         "operationId": "GetMemberProfileWithPreferences",
-        "summary": "Retrieve member profile and preferences",
         "parameters": [
           {
             "name": "memberId",
@@ -18,7 +17,8 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The unique identifier of the member."
           },
           {
             "name": "X-RequestedByMemberId",
@@ -27,21 +27,23 @@
             "schema": {
               "type": "string",
               "format": "uuid"
-            }
+            },
+            "description": "The unique identifier of the member making the request."
           },
           {
             "name": "public",
             "in": "query",
             "required": false,
             "schema": {
-              "type": "boolean"
+              "type": "boolean",
+              "default": true
             },
-            "description": "Whether to retrieve public-facing profile information."
+            "description": "Whether to include public details only."
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful retrieval of the member profile and preferences.",
+            "description": "The member profile with preferences was retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -56,52 +58,72 @@
   },
   "components": {
     "schemas": {
+      "Apprenticeship": {
+        "type": "object",
+        "properties": {
+          "Sector": {
+            "type": "string"
+          },
+          "Programme": {
+            "type": "string"
+          },
+          "Level": {
+            "type": "string"
+          },
+          "ActiveApprenticesCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "Sectors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "Sector",
+          "Programme",
+          "Level"
+        ]
+      },
       "GetMemberProfileWithPreferencesModel": {
         "type": "object",
         "properties": {
           "FullName": {
-            "type": "string",
-            "example": "John Doe"
+            "type": "string"
           },
           "Email": {
             "type": "string",
-            "format": "email",
-            "example": "john.doe@example.com"
+            "format": "email"
           },
           "FirstName": {
-            "type": "string",
-            "example": "John"
+            "type": "string"
           },
           "LastName": {
-            "type": "string",
-            "example": "Doe"
+            "type": "string"
           },
           "OrganisationName": {
             "type": "string",
-            "nullable": true,
-            "example": "Example Organization"
+            "nullable": true
           },
           "RegionId": {
             "type": "integer",
-            "nullable": true,
-            "example": 1
+            "format": "int32",
+            "nullable": true
           },
           "RegionName": {
-            "type": "string",
-            "example": "North West"
+            "type": "string"
           },
           "JoinedDate": {
             "type": "string",
-            "format": "date",
-            "example": "2023-01-01"
+            "format": "date-time"
           },
           "UserType": {
-            "type": "string",
-            "example": "Apprentice"
+            "type": "string"
           },
           "IsRegionalChair": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "Apprenticeship": {
             "$ref": "#/components/schemas/Apprenticeship"
@@ -118,64 +140,55 @@
               "$ref": "#/components/schemas/MemberPreference"
             }
           }
-        }
-      },
-      "Apprenticeship": {
-        "type": "object",
-        "properties": {
-          "Sector": {
-            "type": "string",
-            "example": "Technology"
-          },
-          "Programme": {
-            "type": "string",
-            "example": "Software Engineering"
-          },
-          "Level": {
-            "type": "string",
-            "example": "Level 3"
-          },
-          "ActiveApprenticesCount": {
-            "type": "integer",
-            "example": 5
-          },
-          "Sectors": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "example": [
-              "Healthcare",
-              "Education"
-            ]
-          }
-        }
+        },
+        "required": [
+          "FullName",
+          "Email",
+          "FirstName",
+          "LastName",
+          "RegionName",
+          "JoinedDate",
+          "UserType",
+          "IsRegionalChair",
+          "Profiles",
+          "Preferences"
+        ]
       },
       "MemberProfile": {
         "type": "object",
         "properties": {
-          "ProfileId": {
+          "PreferenceId": {
             "type": "integer",
-            "example": 1
+            "format": "int32"
           },
           "Name": {
-            "type": "string",
-            "example": "Example Profile"
+            "type": "string"
+          },
+          "Value": {
+            "type": "string"
           }
-        }
+        },
+        "required": [
+          "PreferenceId",
+          "Name",
+          "Value"
+        ]
       },
       "MemberPreference": {
         "type": "object",
         "properties": {
           "PreferenceId": {
             "type": "integer",
-            "example": 3
+            "format": "int32"
           },
           "Value": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "PreferenceId",
+          "Value"
+        ]
       }
     }
   }

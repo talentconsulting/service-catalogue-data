@@ -1,15 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Routes API",
-    "description": "API for FormBuilder Routes Management",
-    "version": "1.0.0"
+    "title": "FormBuilder Routes API",
+    "version": "1.0.0",
+    "description": "API for managing form builder routes and configurations."
   },
   "paths": {
     "/api/routes/forms/{formVersionId}/available-sections": {
       "get": {
-        "summary": "List available sections and pages for a Form version",
-        "operationId": "getAvailableSectionsAndPagesForRouting",
+        "summary": "Get available sections and pages for routing",
         "parameters": [
           {
             "name": "formVersionId",
@@ -23,7 +22,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -40,8 +39,7 @@
     },
     "/api/routes/forms/{formVersionId}": {
       "get": {
-        "summary": "Get routing information for a Form version",
-        "operationId": "getRoutesByFormVersionId",
+        "summary": "Get routing information for a form",
         "parameters": [
           {
             "name": "formVersionId",
@@ -55,7 +53,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -72,8 +70,7 @@
     },
     "/api/routes/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/available-questions": {
       "get": {
-        "summary": "List available questions for routing on a page",
-        "operationId": "getAvailableQuestionsForRouting",
+        "summary": "Get available questions for routing",
         "parameters": [
           {
             "name": "formVersionId",
@@ -105,7 +102,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -122,8 +119,7 @@
     },
     "/api/routes/forms/{formVersionId}/sections/{sectionId}/pages/{pageId}/questions/{questionId}": {
       "get": {
-        "summary": "Get routing information for a specific question",
-        "operationId": "getQuestionRoutingInformation",
+        "summary": "Get routing information for a question",
         "parameters": [
           {
             "name": "formVersionId",
@@ -164,7 +160,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -179,46 +175,7 @@
         }
       },
       "put": {
-        "summary": "Configure routing for a specific question",
-        "operationId": "configureRoutingForQuestion",
-        "parameters": [
-          {
-            "name": "formVersionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "sectionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "pageId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          },
-          {
-            "name": "questionId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            }
-          }
-        ],
+        "summary": "Configure routing for a question",
         "requestBody": {
           "required": true,
           "content": {
@@ -229,25 +186,6 @@
             }
           }
         },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/GetRoutingInformationForQuestionQueryResponse"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete routing for a specific question",
-        "operationId": "deleteRouteAsync",
         "parameters": [
           {
             "name": "formVersionId",
@@ -288,7 +226,56 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response",
+            "description": "Successful operation"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a route",
+        "parameters": [
+          {
+            "name": "formVersionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "pageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
@@ -306,27 +293,180 @@
   },
   "components": {
     "schemas": {
-      "Route": {
+      "GetAvailableSectionsAndPagesForRoutingQueryResponse": {
         "type": "object",
         "properties": {
-          "OptionId": {
+          "Sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "Title": {
+                  "type": "string"
+                },
+                "Order": {
+                  "type": "integer"
+                },
+                "Pages": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "Title": {
+                        "type": "string"
+                      },
+                      "Order": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetRoutingInformationForFormQueryResponse": {
+        "type": "object",
+        "properties": {
+          "Sections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "Title": {
+                  "type": "string"
+                },
+                "Order": {
+                  "type": "integer"
+                },
+                "Pages": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "Id": {
+                        "type": "string",
+                        "format": "uuid"
+                      },
+                      "Title": {
+                        "type": "string"
+                      },
+                      "Order": {
+                        "type": "integer"
+                      },
+                      "Question": {
+                        "type": "object",
+                        "properties": {
+                          "Id": {
+                            "type": "string",
+                            "format": "uuid"
+                          },
+                          "Title": {
+                            "type": "string"
+                          },
+                          "Order": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "Editable": {
+            "type": "boolean"
+          }
+        }
+      },
+      "GetAvailableQuestionsForRoutingQueryResponse": {
+        "type": "object",
+        "properties": {
+          "Questions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "Title": {
+                  "type": "string"
+                },
+                "Order": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "GetRoutingInformationForQuestionQueryResponse": {
+        "type": "object",
+        "properties": {
+          "QuestionId": {
             "type": "string",
             "format": "uuid"
           },
-          "NextSectionId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
+          "QuestionTitle": {
+            "type": "string"
           },
-          "NextPageId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
+          "SectionTitle": {
+            "type": "string"
           },
-          "EndForm": {
-            "type": "boolean"
+          "PageTitle": {
+            "type": "string"
           },
-          "EndSection": {
+          "Routes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "Id": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "SourceQuestionId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "NextPageId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "NextSectionId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "OptionId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "EndSection": {
+                  "type": "boolean"
+                },
+                "EndForm": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "Editable": {
             "type": "boolean"
           }
         }
@@ -353,193 +493,34 @@
           "Routes": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/Route"
+              "type": "object",
+              "properties": {
+                "OptionId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "NextSectionId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "NextPageId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "EndForm": {
+                  "type": "boolean"
+                },
+                "EndSection": {
+                  "type": "boolean"
+                }
+              }
             }
           }
         }
       },
       "EmptyResponse": {
-        "type": "object"
-      },
-      "GetAvailableSectionsAndPagesForRoutingQueryResponse": {
         "type": "object",
-        "properties": {
-          "Sections": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Section"
-            }
-          }
-        }
-      },
-      "Section": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "Title": {
-            "type": "string"
-          },
-          "Order": {
-            "type": "integer"
-          },
-          "Pages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Page"
-            }
-          }
-        }
-      },
-      "Page": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "Title": {
-            "type": "string"
-          },
-          "Order": {
-            "type": "integer"
-          }
-        }
-      },
-      "GetRoutingInformationForFormQueryResponse": {
-        "type": "object",
-        "properties": {
-          "Sections": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Section"
-            }
-          },
-          "Editable": {
-            "type": "boolean"
-          }
-        }
-      },
-      "GetAvailableQuestionsForRoutingQueryResponse": {
-        "type": "object",
-        "properties": {
-          "Questions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Question"
-            }
-          }
-        }
-      },
-      "Question": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "Title": {
-            "type": "string"
-          },
-          "Order": {
-            "type": "integer"
-          }
-        }
-      },
-      "GetRoutingInformationForQuestionQueryResponse": {
-        "type": "object",
-        "properties": {
-          "QuestionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "QuestionTitle": {
-            "type": "string"
-          },
-          "SectionTitle": {
-            "type": "string"
-          },
-          "PageTitle": {
-            "type": "string"
-          },
-          "Routes": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RouteInformation"
-            }
-          },
-          "RadioOptions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RadioOptionItem"
-            }
-          },
-          "NextPages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Page"
-            }
-          },
-          "NextSections": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Page"
-            }
-          },
-          "Editable": {
-            "type": "boolean"
-          }
-        }
-      },
-      "RouteInformation": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "SourceQuestionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "NextPageId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "NextSectionId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          },
-          "OptionId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "EndSection": {
-            "type": "boolean"
-          },
-          "EndForm": {
-            "type": "boolean"
-          }
-        }
-      },
-      "RadioOptionItem": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "Value": {
-            "type": "string"
-          },
-          "Order": {
-            "type": "integer"
-          }
-        }
+        "description": "Represents an empty response."
       }
     }
   }

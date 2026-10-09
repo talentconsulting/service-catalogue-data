@@ -1,15 +1,13 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "Subscriptions API",
-    "version": "1.0.0",
-    "description": "API for managing subscriptions and access keys for API products."
+    "title": "Apim Developer API",
+    "version": "1.0.0"
   },
   "paths": {
     "/subscriptions/{accountIdentifier}/products": {
       "get": {
-        "summary": "Get available products",
-        "operationId": "GetAvailableProducts",
+        "summary": "Get available API products",
         "parameters": [
           {
             "name": "accountIdentifier",
@@ -17,8 +15,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Identifier of the account."
+            }
           },
           {
             "name": "accountType",
@@ -26,13 +23,12 @@
             "required": false,
             "schema": {
               "type": "string"
-            },
-            "description": "Type of the account."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with available products.",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -42,15 +38,14 @@
             }
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/subscriptions/{id}/products/{productId}": {
       "get": {
-        "summary": "Get product subscription details",
-        "operationId": "GetProductSubscription",
+        "summary": "Retrieve subscription details for a specific product",
         "parameters": [
           {
             "name": "id",
@@ -58,8 +53,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Identifier of the account."
+            }
           },
           {
             "name": "productId",
@@ -67,8 +61,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Identifier of the product."
+            }
           },
           {
             "name": "accountType",
@@ -76,13 +69,12 @@
             "required": false,
             "schema": {
               "type": "string"
-            },
-            "description": "Type of the account."
+            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Successful response with product subscription details.",
+            "description": "Successful response",
             "content": {
               "application/json": {
                 "schema": {
@@ -92,16 +84,15 @@
             }
           },
           "404": {
-            "description": "Product subscription not found."
+            "description": "Not Found"
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
           }
         }
       },
       "post": {
-        "summary": "Create product subscription",
-        "operationId": "CreateProductSubscription",
+        "summary": "Create a subscription for a specific product",
         "parameters": [
           {
             "name": "id",
@@ -109,8 +100,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Identifier of the account."
+            }
           },
           {
             "name": "productId",
@@ -118,8 +108,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Identifier of the product."
+            }
           },
           {
             "name": "accountType",
@@ -127,27 +116,25 @@
             "required": false,
             "schema": {
               "type": "string"
-            },
-            "description": "Type of the account."
+            }
           }
         ],
         "responses": {
           "201": {
-            "description": "Product subscription created successfully."
+            "description": "Created"
           },
           "400": {
-            "description": "Bad request error."
+            "description": "Bad Request"
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/subscriptions/{id}/renew/{productId}": {
       "post": {
-        "summary": "Renew subscription key",
-        "operationId": "RenewSubscriptionKey",
+        "summary": "Renew subscription key for a product",
         "parameters": [
           {
             "name": "id",
@@ -155,8 +142,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Identifier of the account."
+            }
           },
           {
             "name": "productId",
@@ -164,27 +150,25 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Identifier of the product."
+            }
           }
         ],
         "responses": {
           "204": {
-            "description": "Subscription key renewed successfully."
+            "description": "No Content"
           },
           "400": {
-            "description": "Bad request error."
+            "description": "Bad Request"
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
           }
         }
       }
     },
     "/subscriptions/{id}/delete/{productId}": {
       "delete": {
-        "summary": "Delete product subscription",
-        "operationId": "DeleteSubscription",
+        "summary": "Delete a subscription for a product",
         "parameters": [
           {
             "name": "id",
@@ -192,8 +176,7 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Identifier of the account."
+            }
           },
           {
             "name": "productId",
@@ -201,19 +184,18 @@
             "required": true,
             "schema": {
               "type": "string"
-            },
-            "description": "Identifier of the product."
+            }
           }
         ],
         "responses": {
           "204": {
-            "description": "Product subscription deleted successfully."
+            "description": "No Content"
           },
           "400": {
-            "description": "Validation error."
+            "description": "Bad Request"
           },
           "500": {
-            "description": "Internal server error."
+            "description": "Internal Server Error"
           }
         }
       }
@@ -223,11 +205,36 @@
     "schemas": {
       "ProductSubscriptionsApiResponse": {
         "type": "object",
-        "additionalProperties": true
+        "properties": {
+          "products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductSubscriptionApiResponseItem"
+            }
+          }
+        }
       },
       "ProductSubscriptionApiResponseItem": {
         "type": "object",
-        "additionalProperties": true
+        "properties": {
+          "productName": {
+            "type": "string"
+          },
+          "subscriptions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

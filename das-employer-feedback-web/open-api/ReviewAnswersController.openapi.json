@@ -1,0 +1,201 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Feedback API",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/review-answers": {
+      "get": {
+        "operationId": "ReviewAnswersGet",
+        "summary": "Retrieve review answers page",
+        "responses": {
+          "200": {
+            "description": "The review answers page was successfully retrieved"
+          }
+        }
+      },
+      "post": {
+        "operationId": "ReviewAnswersPost",
+        "summary": "Submit review answers",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewAnswersViewModel"
+              }
+            }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirect response upon success or failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "location": {
+                      "type": "string",
+                      "description": "Redirect URL"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedback-confirmation": {
+      "get": {
+        "operationId": "FeedbackConfirmationGet",
+        "summary": "Display feedback confirmation page",
+        "parameters": [
+          {
+            "name": "encodedAccountId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The feedback confirmation page was successfully retrieved"
+          }
+        }
+      }
+    },
+    "/feedback-submitted": {
+      "get": {
+        "operationId": "FeedbackAlreadySubmittedGet",
+        "summary": "Display feedback already submitted page",
+        "parameters": [
+          {
+            "name": "encodedAccountId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The feedback already submitted page was successfully retrieved"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AccountModel": {
+        "type": "object",
+        "properties": {
+          "encodedAccountId": {
+            "type": "string"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReviewAnswersViewModel": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AccountModel"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "survey": {
+                "$ref": "#/components/schemas/SurveyModel"
+              },
+              "fatSiteUrl": {
+                "type": "string"
+              }
+            }
+          }
+        ]
+      },
+      "SurveyModel": {
+        "type": "object",
+        "properties": {
+          "userRef": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "ukprn": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accountId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "encodedAccountId": {
+            "type": "string"
+          },
+          "attributes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderAttributeModel"
+            }
+          },
+          "rating": {
+            "$ref": "#/components/schemas/ProviderRating"
+          },
+          "providerName": {
+            "type": "string"
+          },
+          "feedbackSource": {
+            "$ref": "#/components/schemas/FeedbackSource"
+          }
+        }
+      },
+      "ProviderAttributeModel": {
+        "type": "object",
+        "properties": {
+          "attributeId": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "good": {
+            "type": "boolean"
+          },
+          "bad": {
+            "type": "boolean"
+          },
+          "score": {
+            "type": "integer",
+            "description": "Derived score based on `good` or `bad` flags"
+          }
+        }
+      },
+      "ProviderRating": {
+        "type": "string",
+        "enum": [
+          "VeryPoor",
+          "Poor",
+          "Good",
+          "Excellent"
+        ]
+      },
+      "FeedbackSource": {
+        "type": "string",
+        "enum": [
+          "Email",
+          "AdHoc"
+        ]
+      }
+    }
+  }
+}

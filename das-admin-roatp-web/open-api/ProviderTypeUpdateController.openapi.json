@@ -7,14 +7,14 @@
   "paths": {
     "/providers/{ukprn}/route": {
       "get": {
-        "summary": "Get Provider Type Update View",
-        "description": "Retrieves the provider type and available options for updating it.",
-        "operationId": "getProviderTypeUpdateView",
+        "summary": "Get provider type update view",
+        "description": "Fetches the provider type update view model for a given UKPRN.",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
+            "description": "Unique Provider Reference Number",
             "schema": {
               "type": "integer"
             }
@@ -22,7 +22,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Successful response with the provider type update view details.",
+            "description": "The provider type update view model.",
             "content": {
               "application/json": {
                 "schema": {
@@ -32,25 +32,33 @@
             }
           },
           "302": {
-            "description": "Redirect to the home route if provider not found."
+            "description": "Redirect to the home page if the provider is not found."
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
       },
       "post": {
-        "summary": "Update Provider Type",
-        "description": "Updates the provider type and redirects to the appropriate route based on the type.",
-        "operationId": "updateProviderType",
+        "summary": "Update provider type",
+        "description": "Updates the provider type for a given UKPRN.",
         "parameters": [
           {
             "name": "ukprn",
             "in": "path",
             "required": true,
+            "description": "Unique Provider Reference Number",
             "schema": {
               "type": "integer"
             }
           }
         ],
         "requestBody": {
+          "description": "New provider type update view model.",
           "required": true,
           "content": {
             "application/json": {
@@ -62,9 +70,16 @@
         },
         "responses": {
           "302": {
-            "description": "Redirect to next step based on updated provider type."
+            "description": "Redirect to the appropriate route based on the updated provider type."
           }
-        }
+        },
+        "security": [
+          {
+            "oauth2": [
+              "RoatpAdminTeam"
+            ]
+          }
+        ]
       }
     }
   },
@@ -84,6 +99,7 @@
           }
         },
         "required": [
+          "ProviderTypes",
           "ProviderTypeId"
         ]
       },
@@ -102,8 +118,23 @@
         },
         "required": [
           "Id",
-          "Description"
+          "Description",
+          "IsSelected"
         ]
+      }
+    },
+    "securitySchemes": {
+      "oauth2": {
+        "type": "oauth2",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://example.com/oauth/authorize",
+            "tokenUrl": "https://example.com/oauth/token",
+            "scopes": {
+              "RoatpAdminTeam": "Access for RoATP Admin Team members"
+            }
+          }
+        }
       }
     }
   }

@@ -1,60 +1,139 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "TL Results and Certification API",
-    "version": "1.0.0",
-    "description": "API for managing T Level learner records, registrations, and certifications."
+    "title": "Search Registration API",
+    "version": "1.0.0"
   },
   "paths": {
-    "/api/SearchRegistrationController/GetSearchRegistrationFilters": {
+    "/search-learner-clear": {
       "get": {
-        "operationId": "GetSearchRegistrationFilters",
-        "summary": "Get available search filters for registrations.",
+        "summary": "Clear learner search data and redirect to the search registration endpoint.",
+        "operationId": "SearchRegistrationClearAsync",
         "tags": [
           "SearchRegistration"
         ],
-        "responses": {
-          "200": {
-            "description": "Successful response containing search filters.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SearchRegistrationFilters"
-                }
-              }
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SearchRegistrationType"
             }
+          }
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to search registration endpoint."
           }
         }
       }
     },
-    "/api/SearchRegistrationController/SearchRegistrationDetails": {
+    "/search-learner": {
+      "get": {
+        "summary": "Search for learners by search registration type.",
+        "operationId": "SearchRegistrationAsync",
+        "tags": [
+          "SearchRegistration"
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/SearchRegistrationType"
+            }
+          },
+          {
+            "name": "pageNumber",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Learners will be returned within the view model."
+          }
+        }
+      }
+    },
+    "/search-learner-search-key": {
       "post": {
-        "operationId": "SearchRegistrationDetails",
-        "summary": "Search registration details.",
+        "summary": "Set learner search key and update cache.",
+        "operationId": "SearchRegistrationSearchKeyAsync",
         "tags": [
           "SearchRegistration"
         ],
         "requestBody": {
-          "description": "Search parameters for registration details.",
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SearchRegistrationRequest"
+                "$ref": "#/components/schemas/SearchRegistrationCriteriaViewModel"
               }
             }
           }
         },
         "responses": {
-          "200": {
-            "description": "Successful response containing paged registration details.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PagedResponseSearchRegistrationDetail"
-                }
+          "302": {
+            "description": "Redirects to search registration endpoint."
+          }
+        }
+      }
+    },
+    "/search-learner-clear-key": {
+      "post": {
+        "summary": "Clear search key and update cache.",
+        "operationId": "SearchRegistrationClearKeyAsync",
+        "tags": [
+          "SearchRegistration"
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to search registration endpoint."
+          }
+        }
+      }
+    },
+    "/search-learner-filters": {
+      "post": {
+        "summary": "Set search filters and update the cache.",
+        "operationId": "SearchRegistrationFiltersAsync",
+        "tags": [
+          "SearchRegistration"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SearchRegistrationFiltersViewModel"
               }
             }
+          }
+        },
+        "responses": {
+          "302": {
+            "description": "Redirects to search registration endpoint."
+          }
+        }
+      }
+    },
+    "/search-learner-clear-filters": {
+      "post": {
+        "summary": "Clear search filters and update the cache.",
+        "operationId": "SearchRegistrationClearFiltersAsync",
+        "tags": [
+          "SearchRegistration"
+        ],
+        "responses": {
+          "302": {
+            "description": "Redirects to search registration endpoint."
           }
         }
       }
@@ -62,162 +141,63 @@
   },
   "components": {
     "schemas": {
-      "SearchRegistrationFilters": {
-        "type": "object",
-        "properties": {
-          "AcademicYears": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FilterLookupData"
-            }
-          }
-        }
+      "SearchRegistrationType": {
+        "type": "integer",
+        "description": "The type of search registration.",
+        "enum": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "example": 1
       },
-      "SearchRegistrationRequest": {
+      "SearchRegistrationCriteriaViewModel": {
         "type": "object",
         "properties": {
-          "AoUkprn": {
-            "type": "integer",
-            "example": 12345678
+          "filters": {
+            "$ref": "#/components/schemas/SearchRegistrationFiltersViewModel"
           },
-          "SearchKey": {
+          "searchKey": {
             "type": "string",
-            "example": "John Doe"
+            "example": "1234567890"
           },
-          "ProviderId": {
+          "pageNumber": {
             "type": "integer",
-            "nullable": true
-          },
-          "SelectedAcademicYears": {
-            "type": "array",
-            "items": {
-              "type": "integer"
-            }
-          },
-          "PageNumber": {
-            "type": "integer",
-            "nullable": true
-          }
-        }
-      },
-      "SearchRegistrationDetail": {
-        "type": "object",
-        "properties": {
-          "RegistrationProfileId": {
-            "type": "integer",
+            "nullable": true,
             "example": 1
-          },
-          "Uln": {
-            "type": "integer",
-            "example": 1234567890
-          },
-          "Firstname": {
-            "type": "string",
-            "example": "John"
-          },
-          "Lastname": {
-            "type": "string",
-            "example": "Doe"
-          },
-          "ProviderName": {
-            "type": "string",
-            "example": "Example College"
-          },
-          "ProviderUkprn": {
-            "type": "integer",
-            "example": 12345678
-          },
-          "PathwayName": {
-            "type": "string",
-            "example": "Digital Pathway"
-          },
-          "PathwayLarId": {
-            "type": "string",
-            "example": "DP1234"
-          },
-          "AcademicYear": {
-            "type": "integer",
-            "example": 2023
-          },
-          "IsWithdrawn": {
-            "type": "boolean",
-            "example": false
-          },
-          "HasResults": {
-            "type": "boolean",
-            "example": true
           }
         }
       },
-      "PagedResponseSearchRegistrationDetail": {
+      "SearchRegistrationFiltersViewModel": {
         "type": "object",
         "properties": {
-          "TotalRecords": {
+          "search": {
+            "type": "string",
+            "example": "Provider Name"
+          },
+          "selectedProviderId": {
             "type": "integer",
+            "nullable": true,
             "example": 100
           },
-          "Records": {
+          "academicYears": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/SearchRegistrationDetail"
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "isSelected": {
+                  "type": "boolean"
+                }
+              },
+              "example": {
+                "id": 1,
+                "isSelected": true
+              }
             }
-          },
-          "PagerInfo": {
-            "$ref": "#/components/schemas/Pager"
-          }
-        }
-      },
-      "Pager": {
-        "type": "object",
-        "properties": {
-          "TotalItems": {
-            "type": "integer",
-            "example": 100
-          },
-          "CurrentPage": {
-            "type": "integer",
-            "example": 1
-          },
-          "PageSize": {
-            "type": "integer",
-            "example": 10
-          },
-          "TotalPages": {
-            "type": "integer",
-            "example": 10
-          },
-          "StartPage": {
-            "type": "integer",
-            "example": 1
-          },
-          "RecordFrom": {
-            "type": "integer",
-            "example": 1
-          },
-          "RecordTo": {
-            "type": "integer",
-            "example": 10
-          }
-        }
-      },
-      "FilterLookupData": {
-        "type": "object",
-        "properties": {
-          "Id": {
-            "type": "integer",
-            "example": 1
-          },
-          "Name": {
-            "type": "string",
-            "example": "2023/24"
-          },
-          "CoreCode": {
-            "type": "string",
-            "example": "CC1234"
-          },
-          "IsSelected": {
-            "type": "boolean",
-            "example": true
           }
         }
       }

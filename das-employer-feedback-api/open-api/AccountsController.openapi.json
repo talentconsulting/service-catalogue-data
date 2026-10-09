@@ -1,0 +1,183 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Employer Feedback API",
+    "version": "1.0.0",
+    "description": "API for managing employer feedback accounts and transactions."
+  },
+  "paths": {
+    "/api/accounts": {
+      "get": {
+        "summary": "Retrieve accounts in batches for email nudge",
+        "operationId": "GetEmailNudgeAccountsBatch",
+        "parameters": [
+          {
+            "name": "batchsize",
+            "in": "query",
+            "required": true,
+            "description": "The size of the batch to retrieve.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batch of accounts successfully retrieved.",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Invalid batch size provided."
+          },
+          "500": {
+            "description": "An unexpected error occurred."
+          }
+        }
+      },
+      "post": {
+        "summary": "Upsert accounts",
+        "operationId": "UpsertAccounts",
+        "requestBody": {
+          "description": "List of accounts to upsert.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertAccountsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Accounts upserted successfully."
+          },
+          "400": {
+            "description": "Validation error occurred during upsert."
+          },
+          "500": {
+            "description": "An unexpected error occurred."
+          }
+        }
+      }
+    },
+    "/api/accounts/{id}/feedbacktransaction": {
+      "post": {
+        "summary": "Upsert feedback transaction for an account",
+        "operationId": "UpsertFeedbackTransaction",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "Account ID for which the feedback transaction is being upserted.",
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Feedback transaction details to upsert.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertFeedbackTransactionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Feedback transaction upserted successfully."
+          },
+          "400": {
+            "description": "Validation error occurred during upsert."
+          },
+          "500": {
+            "description": "An unexpected error occurred."
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UpsertAccountsRequest": {
+        "type": "object",
+        "properties": {
+          "Accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountUpsertDto"
+            }
+          }
+        },
+        "required": [
+          "Accounts"
+        ]
+      },
+      "AccountUpsertDto": {
+        "type": "object",
+        "properties": {
+          "AccountId": {
+            "type": "integer"
+          },
+          "AccountName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "AccountId",
+          "AccountName"
+        ]
+      },
+      "UpsertFeedbackTransactionRequest": {
+        "type": "object",
+        "properties": {
+          "Active": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderCourseDto"
+            }
+          },
+          "Completed": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderCourseDto"
+            }
+          },
+          "NewStart": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProviderCourseDto"
+            }
+          }
+        },
+        "required": [
+          "Active",
+          "Completed",
+          "NewStart"
+        ]
+      },
+      "ProviderCourseDto": {
+        "type": "object",
+        "properties": {
+          "Ukprn": {
+            "type": "integer"
+          },
+          "CourseCode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "Ukprn",
+          "CourseCode"
+        ]
+      }
+    }
+  }
+}
